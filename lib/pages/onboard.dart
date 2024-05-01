@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Onboard extends StatefulWidget {
-  const Onboard({super.key});
+  const Onboard({Key? key}) : super(key: key);
 
   @override
   State<Onboard> createState() => _OnboardState();
 }
 
 class _OnboardState extends State<Onboard> {
-  int currentIndex = 0;
   late PageController _controller;
 
   @override
@@ -27,24 +27,70 @@ class _OnboardState extends State<Onboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black87,
-      body: Row(
+      body: Stack(
         children: [
-          Expanded(
-            child: Image.asset('images/onboard_cover.png',
-                alignment: Alignment.center, fit: BoxFit.fitWidth),
-          )
+          // Background Image
+          Positioned(
+            child: Container(
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  spreadRadius: 5,
+                  blurRadius: 10,
+                  offset: Offset(0, 3), // changes position of shadow
+                )
+              ]),
+              child: Image.asset(
+                'images/onboard_cover.png',
+                fit: BoxFit.fitWidth,
+                width: double.infinity,
+              ),
+            ),
+          ),
+          // Loook Smile logo
+          Positioned(
+            bottom: 195, // Adjust the position as needed
+            left: 70, // Adjust the position as needed
+            child: SvgPicture.asset(
+              'images/smile-loook.svg',
+              width: 150, // Adjust the size as needed
+              height: 120, // Adjust the size as needed
+            ),
+          ),
+          // Gradient Container
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 150, // Adjust the height as needed
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black,
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Text under SVG
+          Positioned(
+            bottom: 145, // Adjust the position as needed
+            left: 160, // Adjust the position as needed
+            child: Text(
+              '      Order Now  \nNot Only Chicken',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Poppins'),
+            ),
+          ),
         ],
       ),
-    );
-  }
-
-  Container buildDot(int index, BuildContext context) {
-    return Container(
-      height: 10.0,
-      width: currentIndex == index ? 18 : 7,
-      margin: EdgeInsets.only(right: 5),
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6), color: Colors.black38),
     );
   }
 }
