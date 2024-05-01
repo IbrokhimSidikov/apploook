@@ -18,6 +18,6 @@ List<unboardingContent> contents = [
       title: 'Easy and Online Payment'),
   unboardingContent(
       description: 'Deliver your food\n  on your doorstep',
-      image: 'images/dostavshikCover.png',
+      image: 'images/onboard_cover.png',
       title: 'Quick delivery at your doorstep')
 ];
