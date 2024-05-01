@@ -77,7 +77,7 @@ class _OnboardState extends State<Onboard> {
             ),
           ),
           // Text under SVG
-          Positioned(
+          const Positioned(
             bottom: 145, // Adjust the position as needed
             left: 160, // Adjust the position as needed
             child: Text(
@@ -87,6 +87,43 @@ class _OnboardState extends State<Onboard> {
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Poppins'),
+            ),
+          ),
+          const SizedBox(
+            height: 10.0,
+          ),
+          Positioned(
+            bottom: 50, // Adjust the position as needed
+            left: 18, // Adjust the position as needed
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SvgPicture.asset('images/suitable-for-all-basket.svg'),
+                SizedBox(width: 8),
+                Text(
+                  'Suitable For\nEveryone',
+                  style: TextStyle(color: Colors.white, fontSize: 10),
+                ),
+                SizedBox(
+                  width: 50,
+                ),
+                // Add more icon and text pairs here if needed
+                SvgPicture.asset('images/solar--sale-linear.svg'),
+                SizedBox(width: 8),
+                Text(
+                  'Promos\nOffer & Deals',
+                  style: TextStyle(color: Colors.white, fontSize: 10),
+                ),
+                SizedBox(
+                  width: 50,
+                ),
+                SvgPicture.asset('images/heroicons--device-phone-mobile.svg'),
+                SizedBox(width: 8),
+                Text(
+                  'Easy\nOrdering',
+                  style: TextStyle(color: Colors.white, fontSize: 10),
+                ),
+              ],
             ),
           ),
         ],
