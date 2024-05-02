@@ -58,7 +58,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                     ),
                     child: Image.asset(
-                      'images/onboard_cover.png',
+                      'images/look-gradient.png',
                       fit: BoxFit.fitWidth,
                       width: double.infinity,
                     ),
@@ -116,37 +116,37 @@ class _OnboardState extends State<Onboard> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SvgPicture.asset('images/suitable-for-all-basket.svg'),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Text(
                         'Suitable For\nEveryone',
-                        style: TextStyle(color: Colors.white, fontSize: 10),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                       SizedBox(
-                        width: 50,
+                        width: 30,
                       ),
                       // Add more icon and text pairs here if needed
                       SvgPicture.asset('images/solar--sale-linear.svg'),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Text(
                         'Promos\nOffer & Deals',
-                        style: TextStyle(color: Colors.white, fontSize: 10),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                       SizedBox(
-                        width: 50,
+                        width: 40,
                       ),
                       SvgPicture.asset(
                           'images/heroicons--device-phone-mobile.svg'),
-                      SizedBox(width: 8),
+                      SizedBox(width: 4),
                       Text(
                         'Easy\nOrdering',
-                        style: TextStyle(color: Colors.white, fontSize: 10),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
                       // Positioned widget for "Choose Language" text
                     ],
                   ),
                 ),
                 Positioned(
-                  bottom: 230,
+                  bottom: 220,
                   left: 15,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -165,7 +165,7 @@ class _OnboardState extends State<Onboard> {
                 ),
                 //language text fields
                 Positioned(
-                  bottom: 150,
+                  bottom: 140,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -242,12 +242,11 @@ class _OnboardState extends State<Onboard> {
                 ),
                 Positioned(
                   bottom: 60,
-                  left: 10,
                   child: Row(
                     children: [
                       Container(
                         padding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 150),
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 160),
                         margin: EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 255, 210, 57),
@@ -259,6 +258,23 @@ class _OnboardState extends State<Onboard> {
                               color: Colors.black,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Positioned(
+                  bottom: 30,
+                  left: 145,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'PRIVACY POLICY',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 95, 94, 94),
+                          fontFamily: 'Poppins',
                         ),
                       ),
                     ],
