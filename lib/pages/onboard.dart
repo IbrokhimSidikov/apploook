@@ -1,3 +1,4 @@
+import 'package:apploook/pages/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -116,28 +117,28 @@ class _OnboardState extends State<Onboard> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       SvgPicture.asset('images/suitable-for-all-basket.svg'),
-                      SizedBox(width: 4),
-                      Text(
+                      const SizedBox(width: 4),
+                      const Text(
                         'Suitable For\nEveryone',
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 30,
                       ),
                       // Add more icon and text pairs here if needed
                       SvgPicture.asset('images/solar--sale-linear.svg'),
                       SizedBox(width: 4),
-                      Text(
+                      const Text(
                         'Promos\nOffer & Deals',
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 40,
                       ),
                       SvgPicture.asset(
                           'images/heroicons--device-phone-mobile.svg'),
                       SizedBox(width: 4),
-                      Text(
+                      const Text(
                         'Easy\nOrdering',
                         style: TextStyle(color: Colors.white, fontSize: 12),
                       ),
@@ -145,7 +146,7 @@ class _OnboardState extends State<Onboard> {
                     ],
                   ),
                 ),
-                Positioned(
+                const Positioned(
                   bottom: 220,
                   left: 15,
                   child: Column(
@@ -177,7 +178,7 @@ class _OnboardState extends State<Onboard> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15, horizontal: 65),
                           margin: EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -194,7 +195,7 @@ class _OnboardState extends State<Onboard> {
                               ),
                             ],
                           ),
-                          child: Text(
+                          child: const Text(
                             'English',
                             style: TextStyle(
                               color: Colors.black,
@@ -211,7 +212,7 @@ class _OnboardState extends State<Onboard> {
                           });
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               vertical: 15, horizontal: 65),
                           margin: EdgeInsets.all(10),
                           decoration: BoxDecoration(
@@ -228,7 +229,7 @@ class _OnboardState extends State<Onboard> {
                               ),
                             ],
                           ),
-                          child: Text(
+                          child: const Text(
                             'Turkish',
                             style: TextStyle(
                               color: Colors.black,
@@ -241,30 +242,41 @@ class _OnboardState extends State<Onboard> {
                   ),
                 ),
                 Positioned(
-                  bottom: 60,
+                  bottom: 50,
                   child: Row(
                     children: [
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 15, horizontal: 160),
-                        margin: EdgeInsets.all(10),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 7, horizontal: 151),
+                        margin: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 255, 210, 57),
                           borderRadius: BorderRadius.circular(25),
                         ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
+                        child: TextButton(
+                          // Use TextButton for click functionality
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Home()));
+                          },
+                          child: const Text(
+                            "Continue",
+                            style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
+
                 const Positioned(
-                  bottom: 30,
+                  bottom: 20,
                   left: 145,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
