@@ -1,6 +1,10 @@
+import 'package:apploook/pages/appetizerpage.dart';
+import 'package:apploook/pages/burgerpage.dart';
+import 'package:apploook/pages/chickenpage.dart';
+import 'package:apploook/pages/combopage.dart';
+import 'package:apploook/pages/pizzapage.dart';
+import 'package:apploook/pages/spinnerpage.dart';
 import 'package:flutter/material.dart';
-
-import 'data.dart';
 
 class HomeNew extends StatefulWidget {
   const HomeNew({super.key});
@@ -11,30 +15,23 @@ class HomeNew extends StatefulWidget {
 
 class _HomeNewState extends State<HomeNew> {
   int selectedTabIndex = 0;
-  // final List<String> tabTitles = [
-  //   'Combo',
-  //   'Chicken',
-  //   'Pizza',
-  //   'Burgers',
-  //   'Spinner',
-  //   'Appetizers',
-  // ];
-  // final List<List<String>> itemsList = [
-  //   // Add items for Tab 1 here
-  //   ['Item 1.1', 'Item 1.2', 'Item 1.3'],
-  //   // Add items for Tab 2 here
-  //   ['Item 2.1', 'Item 2.2'],
-  //   // Add items for Tab 3 here
-  //   ['Item 2.1', 'Item 2.2'],
-  //   ['Item 2.1', 'Item 2.2'],
-  //   ['Item 2.1', 'Item 2.2'],
-  //   ['Item 2.1', 'Item 2.2'], // Empty list for demonstration
-  // ];
-  final List<String> imagePaths = [
-    'images/sale50offburgers.png',
-    'images/sale50offburgers.png',
-    'images/sale50offburgers.png',
+  final List<String> tabTitles = [
+    'Combo',
+    'Chicken',
+    'Pizza',
+    'Burgers',
+    'Spinner',
+    'Appetizers',
   ];
+  final Map<int, Widget> contentPages = {
+    0: const ComboPage(),
+    1: const ChickenPage(),
+    2: const PizzaPage(),
+    3: const BurgerPage(),
+    4: const SpinnerPage(),
+    5: const AppetizerPage(),
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,14 +44,6 @@ class _HomeNewState extends State<HomeNew> {
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height / 2.5,
                 decoration: const BoxDecoration(
-                  // gradient: LinearGradient(
-                  //   begin: Alignment.topLeft,
-                  //   end: Alignment.bottomRight,
-                  //   colors: [
-                  //     Colors.white,
-                  //     Colors.yellow,
-                  //   ],
-                  // ),
                   color: Color.fromARGB(255, 226, 225, 225),
                 ),
               ),
@@ -72,7 +61,7 @@ class _HomeNewState extends State<HomeNew> {
                 top: 40,
                 left: 15,
                 child: Container(
-                  padding: EdgeInsets.all(5),
+                  padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.white,
@@ -81,7 +70,7 @@ class _HomeNewState extends State<HomeNew> {
                     Icons.person,
                     size: 40,
                     color: Colors.black,
-                  ), // Profile Icon
+                  ),
                 ),
               ),
               Positioned(
@@ -119,6 +108,7 @@ class _HomeNewState extends State<HomeNew> {
                   child: Row(
                     children: [
                       Image.asset('images/sale50offburgers.png'),
+                      SizedBox(width: 10.0),
                       Image.asset('images/sale50offburgers.png')
                     ],
                   ),
@@ -144,10 +134,10 @@ class _HomeNewState extends State<HomeNew> {
                 ),
               ),
               Positioned(
-                top: (MediaQuery.of(context).size.height / 3) +
-                    50.0, // Adjust offset
-                left: 0.0,
-                right: 0.0,
+                top: (MediaQuery.of(context).size.height / 2.5) +
+                    10, // Adjust offset
+                left: 10.0,
+                right: 10.0,
                 bottom: 0.0,
                 child: Container(
                   decoration: BoxDecoration(
@@ -156,18 +146,9 @@ class _HomeNewState extends State<HomeNew> {
                   ),
                   child: Column(
                     children: [
-                      // Display selected list items
-                      Visibility(
-                        visible: selectedTabIndex >= 0 &&
-                            selectedTabIndex < itemsList.length,
-                        child: Expanded(
-                          child: ListView.builder(
-                            itemCount: itemsList[selectedTabIndex].length,
-                            itemBuilder: (context, index) => ListTile(
-                              title: Text(itemsList[selectedTabIndex][index]),
-                            ),
-                          ),
-                        ),
+                      IndexedStack(
+                        index: selectedTabIndex,
+                        children: contentPages.values.toList(),
                       ),
                     ],
                   ),
