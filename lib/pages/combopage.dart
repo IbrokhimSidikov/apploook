@@ -11,18 +11,19 @@ class ComboPage extends StatefulWidget {
 class _ComboPageState extends State<ComboPage> {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-        child: Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           //fooditem1
-          margin: EdgeInsets.only(right: 5.0),
+          margin: EdgeInsets.only(
+            right: 5.0,
+          ),
           child: Material(
-            elevation: 5.0,
+            elevation: 0.0,
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(0),
               child: Row(
                 children: [
                   Image.asset(
@@ -31,7 +32,7 @@ class _ComboPageState extends State<ComboPage> {
                     width: 150,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 20.0),
+                  const SizedBox(width: 10.0),
                   Column(
                     children: [
                       Container(
@@ -41,9 +42,6 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.semiboldTextFieldStyle(),
                         ),
                       ),
-                      const SizedBox(
-                        width: 20.0,
-                      ),
                       Container(
                         width: MediaQuery.of(context).size.width / 2,
                         child: Text(
@@ -51,6 +49,19 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.LightTextFieldStyle(),
                         ),
                       ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Material(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color(0xFFF1F2F7),
+                        elevation: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: MediaQuery.sizeOf(context).width / 4,
+                          child: Text('46000 UZS'),
+                        ),
+                      )
                     ],
                   ),
                 ],
@@ -63,12 +74,14 @@ class _ComboPageState extends State<ComboPage> {
         ),
         Container(
           //fooditem1
-          margin: EdgeInsets.only(right: 5.0),
+          margin: EdgeInsets.only(
+            right: 5.0,
+          ),
           child: Material(
-            elevation: 5.0,
+            elevation: 0.0,
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(0),
               child: Row(
                 children: [
                   Image.asset(
@@ -77,7 +90,7 @@ class _ComboPageState extends State<ComboPage> {
                     width: 150,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 20.0),
+                  const SizedBox(width: 10.0),
                   Column(
                     children: [
                       Container(
@@ -87,9 +100,6 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.semiboldTextFieldStyle(),
                         ),
                       ),
-                      const SizedBox(
-                        width: 20.0,
-                      ),
                       Container(
                         width: MediaQuery.of(context).size.width / 2,
                         child: Text(
@@ -97,6 +107,19 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.LightTextFieldStyle(),
                         ),
                       ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Material(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color(0xFFF1F2F7),
+                        elevation: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: MediaQuery.sizeOf(context).width / 4,
+                          child: Text('46000 UZS'),
+                        ),
+                      )
                     ],
                   ),
                 ],
@@ -109,12 +132,14 @@ class _ComboPageState extends State<ComboPage> {
         ),
         Container(
           //fooditem1
-          margin: EdgeInsets.only(right: 5.0),
+          margin: EdgeInsets.only(
+            right: 5.0,
+          ),
           child: Material(
-            elevation: 5.0,
+            elevation: 0.0,
             borderRadius: BorderRadius.circular(20),
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(0),
               child: Row(
                 children: [
                   Image.asset(
@@ -123,7 +148,7 @@ class _ComboPageState extends State<ComboPage> {
                     width: 150,
                     fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 20.0),
+                  const SizedBox(width: 10.0),
                   Column(
                     children: [
                       Container(
@@ -133,8 +158,63 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.semiboldTextFieldStyle(),
                         ),
                       ),
-                      const SizedBox(
-                        width: 20.0,
+                      Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Text(
+                          "Chicken 3pcs, Coca-cCola 0.5L, Coleslaw",
+                          style: AppWidget.LightTextFieldStyle(),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Material(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color(0xFFF1F2F7),
+                        elevation: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: MediaQuery.sizeOf(context).width / 4,
+                          child: Text('46000 UZS'),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          //fooditem1
+          margin: EdgeInsets.only(
+            right: 5.0,
+          ),
+          child: Material(
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(0),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'images/IMG_3257.png',
+                    height: 150,
+                    width: 150,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 10.0),
+                  Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Text(
+                          "Dinner Meal Normal",
+                          style: AppWidget.semiboldTextFieldStyle(),
+                        ),
                       ),
                       Container(
                         width: MediaQuery.of(context).size.width / 2,
@@ -143,14 +223,88 @@ class _ComboPageState extends State<ComboPage> {
                           style: AppWidget.LightTextFieldStyle(),
                         ),
                       ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Material(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color(0xFFF1F2F7),
+                        elevation: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: MediaQuery.sizeOf(context).width / 4,
+                          child: Text('46000 UZS'),
+                        ),
+                      )
                     ],
                   ),
                 ],
               ),
             ),
           ),
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Container(
+          //fooditem1
+          margin: EdgeInsets.only(
+            right: 5.0,
+          ),
+          child: Material(
+            elevation: 0.0,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.all(0),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'images/IMG_3257.png',
+                    height: 150,
+                    width: 150,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 10.0),
+                  Column(
+                    children: [
+                      Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Text(
+                          "Dinner Meal Normal",
+                          style: AppWidget.semiboldTextFieldStyle(),
+                        ),
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        child: Text(
+                          "Chicken 3pcs, Coca-cCola 0.5L, Coleslaw",
+                          style: AppWidget.LightTextFieldStyle(),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Material(
+                        borderRadius: BorderRadius.circular(15),
+                        color: const Color(0xFFF1F2F7),
+                        elevation: 1.0,
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          width: MediaQuery.sizeOf(context).width / 4,
+                          child: Text('46000 UZS'),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 10,
         ),
       ],
-    ));
+    );
   }
 }

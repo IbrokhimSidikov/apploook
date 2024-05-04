@@ -41,6 +41,7 @@ class _HomeNewState extends State<HomeNew> {
         child: Stack(
           children: [
             Container(
+              //tabs container
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height / 2.5,
               decoration: const BoxDecoration(
@@ -115,16 +116,16 @@ class _HomeNewState extends State<HomeNew> {
             ),
             Positioned(
               top: 300.0,
-              left: 0.0,
-              right: 10.0,
+              left: -40.0,
+              right: 0.0,
               child: DefaultTabController(
                 length: tabTitles.length,
                 child: Material(
                   color: Colors.transparent,
                   child: TabBar(
                     isScrollable: true, // Enable horizontal scrolling
-                    labelPadding: const EdgeInsets.symmetric(
-                        horizontal: 10.0), // Adjust spacing
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    indicatorPadding: EdgeInsets.zero, // Adjust spacing
                     tabs: tabTitles.map((title) => Tab(text: title)).toList(),
                     onTap: (index) => setState(() => selectedTabIndex = index),
                   ),
@@ -137,17 +138,20 @@ class _HomeNewState extends State<HomeNew> {
               left: 10.0,
               right: 10.0,
               bottom: 0.0,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                ),
-                child: Column(
-                  children: [
-                    IndexedStack(
-                      index: selectedTabIndex,
-                      children: contentPages.values.toList(),
-                    ),
-                  ],
+              child: SingleChildScrollView(
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: const BoxDecoration(
+                    color: Color.fromARGB(255, 255, 255, 255),
+                  ),
+                  child: Column(
+                    children: [
+                      IndexedStack(
+                        index: selectedTabIndex,
+                        children: contentPages.values.toList(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
