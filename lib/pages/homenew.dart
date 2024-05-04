@@ -143,19 +143,23 @@ class _HomeNewState extends State<HomeNew> {
               left: 10.0,
               right: 10.0,
               bottom: 0.0,
-              child: SingleChildScrollView(
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  decoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                  ),
-                  child: Column(
-                    children: [
-                      IndexedStack(
-                        index: selectedTabIndex,
-                        children: contentPages.values.toList(),
-                      ),
-                    ],
+              child: Container(
+                height: MediaQuery.of(context).size.height -
+                    (MediaQuery.of(context).size.height / 2.5) -
+                    10,
+                child: SingleChildScrollView(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      children: [
+                        IndexedStack(
+                          index: selectedTabIndex,
+                          children: contentPages.values.toList(),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
