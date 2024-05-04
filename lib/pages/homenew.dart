@@ -35,7 +35,7 @@ class _HomeNewState extends State<HomeNew> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
       body: Container(
         margin: const EdgeInsets.only(top: 10.0),
         child: Stack(
@@ -43,7 +43,7 @@ class _HomeNewState extends State<HomeNew> {
             Container(
               //tabs container
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 2.5,
+              height: MediaQuery.of(context).size.height,
               decoration: const BoxDecoration(
                 color: Color.fromARGB(255, 226, 225, 225),
               ),
@@ -52,10 +52,15 @@ class _HomeNewState extends State<HomeNew> {
             Container(
               margin:
                   EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
-              height: MediaQuery.of(context).size.height / 2,
+              height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20.0),
+                  topRight: Radius.circular(20.0),
+                ),
+              ),
             ),
             Positioned(
               top: 40,
