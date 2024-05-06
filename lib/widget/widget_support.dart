@@ -32,4 +32,22 @@ class AppWidget {
         fontWeight: FontWeight.bold,
         fontFamily: 'Poppins');
   }
+
+  static TextStyle titleTextFieldStyle() {
+    return const TextStyle(
+      color: Colors.black,
+      fontSize: 24.0,
+      fontWeight: FontWeight.bold,
+      fontFamily: 'Poppins',
+      shadows: [
+        Shadow(
+          // Add a single shadow here
+          offset: Offset(2.0, 2.0), // Offset the shadow slightly
+          blurRadius: 3.0, // Blur the shadow for a smoother effect
+          color: Color.fromARGB(
+              128, 0, 0, 0), // Set the shadow color (semi-transparent black)
+        ),
+      ],
+    );
+  }
 }

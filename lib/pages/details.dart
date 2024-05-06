@@ -19,82 +19,114 @@ class _DetailsState extends State<Details> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Icon(Icons.arrow_back_outlined, color: Colors.black)),
-            Image.asset(
-              "images/IMG_3238.png",
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 2.5,
-              fit: BoxFit.cover,
-            ),
-            Row(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Chicky",
-                      style: AppWidget.semiboldTextFieldStyle(),
-                    ),
-                    Text(
-                      "Burger",
-                      style: AppWidget.HeadlineTextFieldStyle(),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                GestureDetector(
-                  onTap: () {
-                    if (a > 1) {
-                      --a;
-                    }
-                    setState(() {});
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8)),
-                    child: Icon(Icons.remove, color: Colors.white),
-                  ),
-                ),
-                const SizedBox(
-                  width: 20.0,
-                ),
-                Text(
-                  a.toString(),
-                  style: AppWidget.semiboldTextFieldStyle(),
-                ),
-                const SizedBox(
-                  width: 20.0,
-                ),
-                GestureDetector(
-                  onTap: () {
-                    ++a;
-                    setState(() {});
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(8)),
-                    child: Icon(Icons.add, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 20.0,
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Icon(Icons.arrow_back_outlined, color: Colors.black),
             ),
             Container(
-              height: 200,
+              height: 650,
               child: Expanded(
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
-                  child: Text(
-                    //description for burger
-                    "Погрузитесь в великолепное наслаждение с нашим аппетитным фастфудом - Куриный бургер. Погрузите зубы в хрустящий, золотисто-коричневый куриный котлет, искусно пряно приправленный и обжаренный до идеального состояния. Первый укус сопровождается приятным хрустом, сменяясь нежным, сочным курицей, обволакивающейся мягкой, поджаренной булочкой.",
-                    style: AppWidget.LightTextFieldStyle(),
+                  child: Column(
+                    children: [
+                      Container(
+                        child: Image.asset(
+                          "images/IMG_3256.png",
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height / 2.5,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "CHICKY BURGER",
+                                style: AppWidget.titleTextFieldStyle(),
+                              ),
+                              Text(
+                                "Spinners",
+                                style: AppWidget.HeadlineTextFieldStyle(),
+                              ),
+                            ],
+                          ),
+                          Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              if (a > 1) {
+                                --a;
+                              }
+                              setState(() {});
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Icon(Icons.remove, color: Colors.white),
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          Text(
+                            a.toString(),
+                            style: AppWidget.semiboldTextFieldStyle(),
+                          ),
+                          const SizedBox(
+                            width: 20.0,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              ++a;
+                              setState(() {});
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.black,
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Icon(Icons.add, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 20.0,
+                      ),
+                      Container(
+                        height: 100,
+                        child: Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.vertical,
+                            child: Text(
+                              //description for burger
+                              "1 each: 495 calories, 23g fat (10g saturated fat), 63mg cholesterol, 1443mg sodium, 48g carbohydrate (10g sugars, 2g fiber), 23g protein.",
+                              style: AppWidget.LightTextFieldStyle(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10.0,
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Change drinks',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          // Other widgets here
+                        ],
+                      ),
+                      // Change Drinks container goes here
+                    ],
                   ),
                 ),
               ),
@@ -102,28 +134,28 @@ class _DetailsState extends State<Details> {
             const SizedBox(
               height: 20.0,
             ),
-            Row(
-              children: [
-                Text(
-                  "Delivery Time",
-                  style: AppWidget.LightTextFieldStyle(),
-                ),
-                const SizedBox(
-                  width: 25.0,
-                ),
-                Icon(
-                  Icons.alarm,
-                  color: Colors.black54,
-                ),
-                const SizedBox(
-                  width: 5.0,
-                ),
-                Text(
-                  "30 min",
-                  style: AppWidget.semiboldTextFieldStyle(),
-                )
-              ],
-            ),
+            // Row(
+            //   children: [
+            //     Text(
+            //       "Delivery Time",
+            //       style: AppWidget.LightTextFieldStyle(),
+            //     ),
+            //     const SizedBox(
+            //       width: 25.0,
+            //     ),
+            //     Icon(
+            //       Icons.alarm,
+            //       color: Colors.black54,
+            //     ),
+            //     const SizedBox(
+            //       width: 5.0,
+            //     ),
+            //     Text(
+            //       "30 min",
+            //       style: AppWidget.semiboldTextFieldStyle(),
+            //     )
+            //   ],
+            // ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 20),

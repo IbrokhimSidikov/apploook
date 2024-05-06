@@ -1,5 +1,6 @@
 import 'package:apploook/pages/appetizerpage.dart';
 import 'package:apploook/pages/burgerpage.dart';
+import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/chickenpage.dart';
 import 'package:apploook/pages/combopage.dart';
 import 'package:apploook/pages/pizzapage.dart';
@@ -110,12 +111,48 @@ class _HomeNewState extends State<HomeNew> {
               top: 140,
               left: 15,
               child: Container(
-                child: Row(
-                  children: [
-                    Image.asset('images/sale50offburgers.png'),
-                    SizedBox(width: 10.0),
-                    Image.asset('images/sale50offburgers.png')
-                  ],
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 250, // Adjust the width as needed
+                        child: Image.asset(
+                          'images/sale50offburgers.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(width: 10.0),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 250, // Adjust the width as needed
+                        child: Image.asset(
+                          'images/sale50offburgers.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(width: 10.0),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 250, // Adjust the width as needed
+                        child: Image.asset(
+                          'images/sale50offburgers.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(width: 10.0),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        width: 250, // Adjust the width as needed
+                        child: Image.asset(
+                          'images/sale50offburgers.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      // Add more images here if needed
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -162,6 +199,18 @@ class _HomeNewState extends State<HomeNew> {
                     ),
                   ),
                 ),
+              ),
+            ),
+            Positioned(
+              bottom: 35.0,
+              left: 25.0,
+              child: FloatingActionButton(
+                child: const Icon(Icons.shopping_bag_outlined),
+                backgroundColor: const Color.fromARGB(255, 255, 215, 71),
+                onPressed: () {
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => Cart()));
+                },
               ),
             ),
           ],
