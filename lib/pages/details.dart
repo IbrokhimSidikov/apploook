@@ -1,3 +1,4 @@
+import 'package:apploook/models/category-model.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -10,8 +11,20 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> {
   int a = 1;
+  List<CategoryModel> categories = [];
+
+  void _getCategories() {
+    categories = CategoryModel.getCategories();
+  }
+
+  @override
+  void initState() {
+    _getCategories();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _getCategories();
     return Scaffold(
       body: Container(
         margin: EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
@@ -30,6 +43,7 @@ class _DetailsState extends State<Details> {
                 child: SingleChildScrollView(
                   scrollDirection: Axis.vertical,
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         child: Image.asset(
@@ -110,22 +124,61 @@ class _DetailsState extends State<Details> {
                         ),
                       ),
                       const SizedBox(
-                        height: 10.0,
+                        height: 5.0,
                       ),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                      // const Row(
+                      //   mainAxisAlignment: MainAxisAlignment.start,
+                      //   children: [
+                      //     Text(
+                      //       'Change drinks',
+                      //       style: TextStyle(
+                      //         fontSize: 20,
+                      //         fontWeight: FontWeight.w500,
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // Change Drinks container goes here
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Change drinks',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
+                          Padding(
+                            padding: EdgeInsets.only(left: 5.0),
+                            child: Text(
+                              'Change drinks',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
-                          // Other widgets here
+                          SizedBox(
+                            height: 5.0,
+                          ),
+                          Container(
+                            height: 180,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            child: ListView.separated(
+                                itemCount: categories.length,
+                                scrollDirection: Axis.horizontal,
+                                padding: EdgeInsets.only(left: 20, right: 20),
+                                separatorBuilder: (context, index) => SizedBox(
+                                      width: 25,
+                                    ),
+                                itemBuilder: (context, index) {
+                                  return Container(
+                                    width: 120,
+                                    decoration: BoxDecoration(
+                                        color: categories[index]
+                                            .boxColor
+                                            .withOpacity(0.3),
+                                        borderRadius:
+                                            BorderRadius.circular(16)),
+                                  );
+                                }),
+                          ),
                         ],
-                      ),
-                      // Change Drinks container goes here
+                      )
                     ],
                   ),
                 ),
@@ -197,8 +250,9 @@ class _DetailsState extends State<Details> {
                         Container(
                           padding: EdgeInsets.all(3),
                           decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(8)),
+                            color: Colors.grey,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: const Icon(
                             Icons.shopping_cart_outlined,
                             color: Colors.white,
