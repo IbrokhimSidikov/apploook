@@ -169,11 +169,15 @@ class _DetailsState extends State<Details> {
                                   return Container(
                                     width: 120,
                                     decoration: BoxDecoration(
-                                        color: categories[index]
-                                            .boxColor
-                                            .withOpacity(0.3),
-                                        borderRadius:
-                                            BorderRadius.circular(16)),
+                                      color: categories[index]
+                                          .boxColor
+                                          .withOpacity(0.3),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Image.asset(
+                                      categories[index].imagePath,
+                                      fit: BoxFit.cover,
+                                    ),
                                   );
                                 }),
                           ),
@@ -230,9 +234,9 @@ class _DetailsState extends State<Details> {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width / 2,
-                    padding: EdgeInsets.all(5),
+                    padding: EdgeInsets.only(top: 10, bottom: 10),
                     decoration: BoxDecoration(
-                        color: Colors.yellow,
+                        color: Color.fromARGB(255, 255, 215, 31),
                         borderRadius: BorderRadius.circular(10)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,

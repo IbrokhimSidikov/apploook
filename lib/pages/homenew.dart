@@ -4,6 +4,7 @@ import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/chickenpage.dart';
 import 'package:apploook/pages/combopage.dart';
 import 'package:apploook/pages/pizzapage.dart';
+import 'package:apploook/pages/signup.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:flutter/material.dart';
 
@@ -66,16 +67,22 @@ class _HomeNewState extends State<HomeNew> {
             Positioned(
               top: 40,
               left: 15,
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: 40,
-                  color: Colors.black,
+              child: GestureDetector(
+                onDoubleTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SignUp()));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
