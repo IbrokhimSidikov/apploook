@@ -6,6 +6,7 @@ import 'package:apploook/pages/combopage.dart';
 import 'package:apploook/pages/pizzapage.dart';
 import 'package:apploook/pages/signup.dart';
 import 'package:apploook/pages/spinnerpage.dart';
+import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter/material.dart';
 
 class HomeNew extends StatefulWidget {
@@ -17,6 +18,17 @@ class HomeNew extends StatefulWidget {
 
 class _HomeNewState extends State<HomeNew> {
   int selectedTabIndex = 0;
+  List<BannerItem> banners = [];
+
+  void _getBanners() {
+    banners = BannerItem.getBanners();
+  }
+
+  @override
+  void initState() {
+    _getBanners();
+  }
+
   final List<String> tabTitles = [
     'Combo',
     'Chicken',
@@ -36,6 +48,7 @@ class _HomeNewState extends State<HomeNew> {
 
   @override
   Widget build(BuildContext context) {
+    _getBanners();
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 0, 0, 0),
       body: Container(
@@ -114,55 +127,35 @@ class _HomeNewState extends State<HomeNew> {
                 ),
               ),
             ),
+
             Positioned(
               top: 140,
               left: 15,
               child: Container(
-                child: SingleChildScrollView(
+                height: 135,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.transparent,
+                child: ListView.separated(
+                  itemCount: banners.length,
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        width: 250, // Adjust the width as needed
-                        child: Image.asset(
-                          'images/sale50offburgers.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      SizedBox(width: 10.0),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        width: 250, // Adjust the width as needed
-                        child: Image.asset(
-                          'images/sale50offburgers.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      SizedBox(width: 10.0),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        width: 250, // Adjust the width as needed
-                        child: Image.asset(
-                          'images/sale50offburgers.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      SizedBox(width: 10.0),
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        width: 250, // Adjust the width as needed
-                        child: Image.asset(
-                          'images/sale50offburgers.png',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      // Add more images here if needed
-                    ],
-                  ),
+                  padding: EdgeInsets.only(right: 20.0),
+                  separatorBuilder: ((context, index) => SizedBox(
+                        width: 25,
+                      )),
+                  itemBuilder: (context, index) {
+                    return Container(
+                      width: 250,
+                      decoration: BoxDecoration(
+                          color: banners[index].boxColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(16)),
+                      child: Image.asset(banners[index].imagePath,
+                          fit: BoxFit.cover),
+                    );
+                  },
                 ),
               ),
             ),
+
             Positioned(
               top: 300.0,
               left: -40.0,
