@@ -1,4 +1,4 @@
-import 'package:apploook/pages/signup.dart';
+import 'package:apploook/pages/authorization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -16,7 +16,7 @@ class _SignInState extends State<SignIn> {
       appBar: appBar(),
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 70.0,
           ),
           Center(
@@ -38,14 +38,14 @@ class _SignInState extends State<SignIn> {
               style: TextStyle(fontWeight: FontWeight.w200),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 25,
           ),
           Center(
             child: GestureDetector(
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const SignUp()));
+                    MaterialPageRoute(builder: (context) => Authorization()));
               },
               child: Container(
                 padding:
