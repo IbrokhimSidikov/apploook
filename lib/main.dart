@@ -1,4 +1,4 @@
-import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/signin.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
-        home: const HomeNew());
+        home: const SignIn());
   }
 }
 

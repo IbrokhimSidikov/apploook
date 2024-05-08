@@ -127,7 +127,55 @@ class _HomeNewState extends State<HomeNew> {
                 ),
               ),
             ),
-
+            // Positioned(
+            //   top: 140,
+            //   left: 15,
+            //   child: Container(
+            //     child: SingleChildScrollView(
+            //       scrollDirection: Axis.horizontal,
+            //       child: Row(
+            //         children: [
+            //           Container(
+            //             margin: EdgeInsets.symmetric(horizontal: 5),
+            //             width: 250, // Adjust the width as needed
+            //             child: Image.asset(
+            //               'images/sale50offburgers.png',
+            //               fit: BoxFit.cover,
+            //             ),
+            //           ),
+            //           SizedBox(width: 10.0),
+            //           Container(
+            //             margin: EdgeInsets.symmetric(horizontal: 5),
+            //             width: 250, // Adjust the width as needed
+            //             child: Image.asset(
+            //               'images/sale50offburgers.png',
+            //               fit: BoxFit.cover,
+            //             ),
+            //           ),
+            //           SizedBox(width: 10.0),
+            //           Container(
+            //             margin: EdgeInsets.symmetric(horizontal: 5),
+            //             width: 250, // Adjust the width as needed
+            //             child: Image.asset(
+            //               'images/sale50offburgers.png',
+            //               fit: BoxFit.cover,
+            //             ),
+            //           ),
+            //           SizedBox(width: 10.0),
+            //           Container(
+            //             margin: EdgeInsets.symmetric(horizontal: 5),
+            //             width: 250, // Adjust the width as needed
+            //             child: Image.asset(
+            //               'images/sale50offburgers.png',
+            //               fit: BoxFit.cover,
+            //             ),
+            //           ),
+            //           // Add more images here if needed
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
             Positioned(
               top: 140,
               left: 15,

@@ -11,6 +11,10 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> {
   int a = 1;
+  int quantity = 1;
+  double unitPrice = 28000;
+  double totalPrice = 28000;
+
   List<CategoryModel> categories = [];
 
   void _getCategories() {
@@ -71,10 +75,12 @@ class _DetailsState extends State<Details> {
                           Spacer(),
                           GestureDetector(
                             onTap: () {
-                              if (a > 1) {
-                                --a;
+                              if (quantity > 1) {
+                                setState(() {
+                                  quantity--;
+                                  totalPrice = unitPrice * quantity;
+                                });
                               }
-                              setState(() {});
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -87,7 +93,7 @@ class _DetailsState extends State<Details> {
                             width: 20.0,
                           ),
                           Text(
-                            a.toString(),
+                            quantity.toString(),
                             style: AppWidget.semiboldTextFieldStyle(),
                           ),
                           const SizedBox(
@@ -95,8 +101,10 @@ class _DetailsState extends State<Details> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              ++a;
-                              setState(() {});
+                              setState(() {
+                                quantity++;
+                                totalPrice = unitPrice * quantity;
+                              });
                             },
                             child: Container(
                               decoration: BoxDecoration(
@@ -159,27 +167,56 @@ class _DetailsState extends State<Details> {
                             height: 180,
                             color: Color.fromARGB(255, 255, 255, 255),
                             child: ListView.separated(
-                                itemCount: categories.length,
-                                scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.only(left: 20, right: 20),
-                                separatorBuilder: (context, index) => SizedBox(
-                                      width: 25,
+                              itemCount: categories.length,
+                              scrollDirection: Axis.horizontal,
+                              padding: EdgeInsets.only(left: 20, right: 20),
+                              separatorBuilder: (context, index) => SizedBox(
+                                width: 25,
+                              ),
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      width: 120,
+                                      height: 150,
+                                      decoration: BoxDecoration(
+                                        color: categories[index]
+                                            .boxColor
+                                            .withOpacity(0.3),
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Image.asset(
+                                        categories[index].imagePath,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    width: 120,
-                                    decoration: BoxDecoration(
-                                      color: categories[index]
-                                          .boxColor
-                                          .withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(16),
+                                    Positioned(
+                                      bottom:
+                                          10, // Adjust the position as needed
+                                      left: 10, // Adjust the position as needed
+                                      child: Container(
+                                        width:
+                                            100, // Adjust the width as needed
+                                        height:
+                                            30, // Adjust the height as needed
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                              255, 255, 215, 57),
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            'change',
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    child: Image.asset(
-                                      categories[index].imagePath,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  );
-                                }),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       )
@@ -227,7 +264,7 @@ class _DetailsState extends State<Details> {
                         style: AppWidget.semiboldTextFieldStyle(),
                       ),
                       Text(
-                        "28 000 UZS",
+                        "$totalPrice UZS",
                         style: AppWidget.boldTextFieldStyle(),
                       ),
                     ],
