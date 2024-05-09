@@ -4,7 +4,7 @@ import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/chickenpage.dart';
 import 'package:apploook/pages/combopage.dart';
 import 'package:apploook/pages/pizzapage.dart';
-import 'package:apploook/pages/signup.dart';
+import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter/material.dart';
@@ -48,9 +48,11 @@ class _HomeNewState extends State<HomeNew> {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     _getBanners();
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+      key: _scaffoldKey,
+      backgroundColor: Color.fromARGB(255, 226, 225, 225),
       body: Container(
         margin: const EdgeInsets.only(top: 10.0),
         child: Stack(
@@ -81,9 +83,14 @@ class _HomeNewState extends State<HomeNew> {
               top: 40,
               left: 15,
               child: GestureDetector(
-                onDoubleTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SignUp()));
+                onTap: () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => Profile(),
+                  //   ),
+                  // );
+                  _scaffoldKey.currentState!.openDrawer();
                 },
                 child: Container(
                   padding: const EdgeInsets.all(5),
@@ -215,6 +222,10 @@ class _HomeNewState extends State<HomeNew> {
             ),
           ],
         ),
+      ),
+      drawer: Drawer(
+        width: MediaQuery.of(context).size.width * 0.85,
+        child: Profile(),
       ),
     );
   }

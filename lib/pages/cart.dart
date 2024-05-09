@@ -1,5 +1,5 @@
 import 'package:apploook/models/category-model.dart';
-import 'package:apploook/pages/profile.dart';
+import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -38,7 +38,7 @@ class _CartState extends State<Cart> {
         leading: GestureDetector(
           onTap: () {
             Navigator.push(
-                context, MaterialPageRoute(builder: (context) => Profile()));
+                context, MaterialPageRoute(builder: (context) => HomeNew()));
           },
           child: Container(
             margin: EdgeInsets.only(left: 10.0),
