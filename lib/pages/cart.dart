@@ -52,10 +52,11 @@ class _CartState extends State<Cart> {
           Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(color: Colors.white),
+            decoration:
+                BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
             child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
                     height: 15.0,
@@ -65,7 +66,7 @@ class _CartState extends State<Cart> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Container(
-                    height: 285,
+                    height: 250,
                   ),
                   SizedBox(
                     height: 10.0,
@@ -146,53 +147,58 @@ class _CartState extends State<Cart> {
                       },
                     ),
                   ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  Positioned(
+                    // Position bottom buttons
+                    bottom: 25.0, // Adjust spacing from bottom as needed
+                    left: 15.0, // Align buttons to left
+                    right: 0.0, // Stretch buttons to full width
+                    child: Column(
+                      // Arrange buttons horizontally
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceEvenly, // Distribute evenly
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Color(0xffF1F2F7)),
+                            foregroundColor:
+                                MaterialStateProperty.all(Colors.black),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              'Apply promo code',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 25.0,
+                        ),
+                        ElevatedButton(
+                          onPressed: () {},
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                Color.fromARGB(255, 255, 215, 56)),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Text(
+                              'Proceed to checkout $price UZS',
+                              style:
+                                  TextStyle(color: Colors.black, fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ),
-          Positioned(
-            // Position bottom buttons
-            bottom: 25.0, // Adjust spacing from bottom as needed
-            left: 0.0, // Align buttons to left
-            right: 0.0, // Stretch buttons to full width
-            child: Column(
-              // Arrange buttons horizontally
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly, // Distribute evenly
-              children: [
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffF1F2F7)),
-                    foregroundColor: MaterialStateProperty.all(Colors.black),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      'Apply promo code',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 25.0,
-                ),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                        Color.fromARGB(255, 255, 215, 56)),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Text(
-                      'Proceed to checkout $price UZS',
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ], //stack children
