@@ -1,4 +1,4 @@
-import 'package:apploook/pages/profile.dart';
+import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 
@@ -72,7 +72,7 @@ class _AuthorizationState extends State<Authorization> {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Profile()));
+                    MaterialPageRoute(builder: (context) => HomeNew()));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 255, 215, 56),

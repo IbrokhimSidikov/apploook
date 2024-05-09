@@ -1,4 +1,5 @@
 import 'package:apploook/models/category-model.dart';
+import 'package:apploook/pages/cart.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
@@ -147,79 +148,7 @@ class _DetailsState extends State<Details> {
                       //   ],
                       // ),
                       // Change Drinks container goes here
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 5.0),
-                            child: Text(
-                              'Change drinks',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 5.0,
-                          ),
-                          Container(
-                            height: 180,
-                            color: Color.fromARGB(255, 255, 255, 255),
-                            child: ListView.separated(
-                              itemCount: categories.length,
-                              scrollDirection: Axis.horizontal,
-                              padding: EdgeInsets.only(left: 20, right: 20),
-                              separatorBuilder: (context, index) => SizedBox(
-                                width: 25,
-                              ),
-                              itemBuilder: (context, index) {
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      width: 120,
-                                      height: 150,
-                                      decoration: BoxDecoration(
-                                        color: categories[index]
-                                            .boxColor
-                                            .withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: Image.asset(
-                                        categories[index].imagePath,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom:
-                                          10, // Adjust the position as needed
-                                      left: 10, // Adjust the position as needed
-                                      child: Container(
-                                        width:
-                                            100, // Adjust the width as needed
-                                        height:
-                                            30, // Adjust the height as needed
-                                        decoration: BoxDecoration(
-                                          color: const Color.fromARGB(
-                                              255, 255, 215, 57),
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'change',
-                                            style: TextStyle(fontSize: 12),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      )
+                      ChangeDrinks(categories: categories)
                     ],
                   ),
                 ),
@@ -278,12 +207,20 @@ class _DetailsState extends State<Details> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        const Text(
-                          "Add to cart",
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16.0,
-                              fontFamily: 'Poppins'),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Cart()));
+                          },
+                          child: const Text(
+                            "Add to cart",
+                            style: TextStyle(
+                                color: Colors.black,
+                                fontSize: 16.0,
+                                fontFamily: 'Poppins'),
+                          ),
                         ),
                         const SizedBox(
                           width: 30.0,
@@ -311,6 +248,83 @@ class _DetailsState extends State<Details> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ChangeDrinks extends StatelessWidget {
+  const ChangeDrinks({
+    super.key,
+    required this.categories,
+  });
+
+  final List<CategoryModel> categories;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 5.0),
+          child: Text(
+            'Change drinks',
+            style: TextStyle(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
+        SizedBox(
+          height: 5.0,
+        ),
+        Container(
+          height: 180,
+          color: Color.fromARGB(255, 255, 255, 255),
+          child: ListView.separated(
+            itemCount: categories.length,
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.only(left: 20, right: 20),
+            separatorBuilder: (context, index) => SizedBox(
+              width: 25,
+            ),
+            itemBuilder: (context, index) {
+              return Stack(
+                children: [
+                  Container(
+                    width: 120,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: categories[index].boxColor.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Image.asset(
+                      categories[index].imagePath,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 10, // Adjust the position as needed
+                    left: 10, // Adjust the position as needed
+                    child: Container(
+                      width: 100, // Adjust the width as needed
+                      height: 30, // Adjust the height as needed
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 255, 215, 57),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'change',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
