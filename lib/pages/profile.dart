@@ -122,10 +122,20 @@ class _ProfileState extends State<Profile> {
                   'Privacy Policy',
                   style: TextStyle(fontSize: 18),
                 ),
+                SizedBox(
+                  height: 150,
+                ),
+                SvgPicture.asset('images/lookSupport.svg'),
               ],
             ),
           )
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [Text('Version 1.0.0, build 10001')],
+        ),
       ),
     );
   }
