@@ -77,8 +77,8 @@ class _AuthorizationState extends State<Authorization> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 255, 215, 56),
               ),
-              child: Padding(
-                padding: const EdgeInsets.only(
+              child: const Padding(
+                padding: EdgeInsets.only(
                     left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
                 child: Text(
                   'Continue',
