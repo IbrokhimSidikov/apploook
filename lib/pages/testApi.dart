@@ -3,18 +3,23 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Category {
+  final int id;
   final String name;
-  final List<Product> products;
 
-  Category({required this.name, required this.products});
+  Category({required this.id, required this.name});
 }
 
 class Product {
   final String name;
   final int id;
-  final String? imageUrl; // Added imageUrl property
+  final int categoryId;
+  final String? imagePath; // Added imagePath field
 
-  Product({required this.name, required this.id, this.imageUrl});
+  Product(
+      {required this.name,
+      required this.id,
+      required this.categoryId,
+      this.imagePath});
 }
 
 class MyDataFetcher extends StatefulWidget {
@@ -22,22 +27,24 @@ class MyDataFetcher extends StatefulWidget {
   _MyDataFetcherState createState() => _MyDataFetcherState();
 }
 
-class _MyDataFetcherState extends State<MyDataFetcher> {
+class _MyDataFetcherState extends State<MyDataFetcher>
+    with TickerProviderStateMixin {
   List<Category> categories = [];
-  late ScrollController? _scrollController;
-  Category? selectedCategory;
+  late TabController _tabController;
+  List<Product> allProducts = [];
+  Map<int, ScrollController> _categoryScrollControllers = {};
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController!.addListener(_onScroll);
     fetchData();
   }
 
   @override
   void dispose() {
-    _scrollController?.dispose();
+    _tabController.dispose();
+    _categoryScrollControllers.values
+        .forEach((controller) => controller.dispose());
     super.dispose();
   }
 
@@ -47,152 +54,142 @@ class _MyDataFetcherState extends State<MyDataFetcher> {
 
     if (response.statusCode == 200) {
       List<dynamic> categoryData = json.decode(response.body);
-      List<Category> mergedCategories = [];
+      List<Product> mergedProducts = [];
       for (var category in categoryData) {
         List<dynamic> productData = category['products'];
+        int categoryId = category['id'];
         List<Product> products = productData.map((product) {
+          var photo = product['photo'];
+          String? imagePath = photo != null
+              ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
+              : null;
           return Product(
-              name: product['name'],
-              id: product['id'],
-              imageUrl: product['photo'] != null &&
-                      product['photo']['path'] != null &&
-                      product['photo']['name'] != null &&
-                      product['photo']['format'] != null
-                  ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${product['photo']['path']}/${product['photo']['name']}.${product['photo']['format']}'
-                  : null);
+            name: product['name'],
+            id: product['id'],
+            categoryId: categoryId,
+            imagePath: imagePath,
+          );
         }).toList();
-        mergedCategories
-            .add(Category(name: category['name'], products: products));
+        mergedProducts.addAll(products);
+        categories.add(Category(id: categoryId, name: category['name']));
+        _categoryScrollControllers[categoryId] = ScrollController();
       }
       setState(() {
-        categories = mergedCategories;
+        allProducts = mergedProducts;
       });
     } else {
       throw Exception('Failed to load data');
     }
   }
 
-  void _scrollToCategory(Category category) {
-    int index = categories.indexOf(category);
-    double offset = 0;
-    for (int i = 0; i < index; i++) {
-      offset += (2 + categories[i].products.length) *
-          56; // 2 for ListTile and SizedBox, 56 is the height of ListTile
-    }
-    _scrollController?.animateTo(offset,
-        duration: Duration(milliseconds: 500), curve: Curves.ease);
-  }
-
-  void _onScroll() {
-    double offset = _scrollController!.offset;
-    int currentIndex = 0;
-    for (int i = 0; i < categories.length; i++) {
-      offset -= (2 + categories[i].products.length) *
-          56; // 2 for ListTile and SizedBox, 56 is the height of ListTile
-      if (offset <= 0) {
-        currentIndex = i;
-        break;
-      }
-    }
-    setState(() {
-      selectedCategory = categories[currentIndex];
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return categories.isEmpty
+    return allProducts.isEmpty
         ? Center(child: CircularProgressIndicator())
         : Scaffold(
             appBar: AppBar(
               title: Text('Categories'),
             ),
             body: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: categories.map((category) {
-                      return ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            selectedCategory = category;
-                          });
-                          _scrollToCategory(category);
-                        },
-                        child: Text(category.name),
-                        style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.resolveWith<Color>(
-                            (Set<MaterialState> states) {
-                              if (states.contains(MaterialState.pressed)) {
-                                return Colors
-                                    .green; // Change to your desired color
-                              }
-                              return selectedCategory == category
-                                  ? Colors.blue // Change to your desired color
-                                  : Colors.grey; // Change to your desired color
-                            },
+                // Row of buttons with category names
+                Container(
+                  color: Colors.blue,
+                  height: 50, // Set the height of the row
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal, // Horizontal scroll
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      Category category = categories[index];
+                      return Padding(
+                        padding: const EdgeInsets.all(0.0),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            print('Category ID: ${category.id}');
+                            _scrollToCategory(category.id);
+                          },
+                          style: ButtonStyle(
+                            foregroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
+                                    (states) {
+                              return Colors.black;
+                            }),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.transparent),
+                            elevation: MaterialStateProperty.all<double>(
+                                0), // No elevation
                           ),
+                          child: Text(category.name),
                         ),
                       );
-                    }).toList(),
+                    },
                   ),
                 ),
+                // List of products for each category
                 Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: categories.length,
-                    itemBuilder: (context, categoryIndex) {
-                      Category category = categories[categoryIndex];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          ListTile(
-                            title: Text(category.name),
-                            // Add whatever styling you want for categories
-                          ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: ClampingScrollPhysics(),
-                            itemCount: category.products.length,
-                            itemBuilder: (context, productIndex) {
-                              Product product = category.products[productIndex];
-                              return Column(
-                                children: [
-                                  product.imageUrl != null
-                                      ? Container(
-                                          height: 150.0,
-                                          width: 150.0,
-                                          decoration: BoxDecoration(
-                                            image: DecorationImage(
-                                              image: NetworkImage(
-                                                  product.imageUrl!),
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: categories.map((category) {
+                        List<Product> productsInCategory = allProducts
+                            .where(
+                                (product) => product.categoryId == category.id)
+                            .toList();
+                        return Column(
+                          key: ValueKey<int>(category.id),
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                category.name,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            ListView.builder(
+                              controller:
+                                  _categoryScrollControllers[category.id],
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: productsInCategory.length,
+                              itemBuilder: (context, productIndex) {
+                                Product product =
+                                    productsInCategory[productIndex];
+                                return ListTile(
+                                  leading: product.imagePath != null
+                                      ? CircleAvatar(
+                                          backgroundImage:
+                                              NetworkImage(product.imagePath!),
                                         )
-                                      : SizedBox.shrink(),
-                                  ListTile(
-                                    title: Text(product.name),
-                                    subtitle: Text('id: ${product.id}'),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                          SizedBox(
-                              height:
-                                  10), // Add some spacing between categories
-                        ],
-                      );
-                    },
+                                      : Icon(Icons.photo),
+                                  title: Text(product.name),
+                                  subtitle: Text('id: ${product.id}'),
+                                );
+                              },
+                            ),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
               ],
             ),
           );
+  }
+
+  void _scrollToCategory(int categoryId) {
+    ScrollController? controller = _categoryScrollControllers[categoryId];
+    print(controller);
+    if (controller != null && controller.hasClients) {
+      Scrollable.ensureVisible(
+        controller.position.context.storageContext,
+        alignment: 0.0,
+        duration: Duration(milliseconds: 300),
+      );
+    }
   }
 }
 
