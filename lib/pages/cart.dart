@@ -1,4 +1,5 @@
 import 'package:apploook/models/category-model.dart';
+import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -187,10 +188,18 @@ class _CartState extends State<Cart> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
-                            child: Text(
-                              'Proceed to checkout $price UZS',
-                              style:
-                                  TextStyle(color: Colors.black, fontSize: 18),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Checkout()));
+                              },
+                              child: Text(
+                                'Proceed to checkout $price UZS',
+                                style: TextStyle(
+                                    color: Colors.black, fontSize: 18),
+                              ),
                             ),
                           ),
                         ),

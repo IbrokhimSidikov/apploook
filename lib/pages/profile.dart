@@ -9,6 +9,8 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  final String phoneNumber = '71-207-207-0';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,7 +127,41 @@ class _ProfileState extends State<Profile> {
                 SizedBox(
                   height: 150,
                 ),
-                SvgPicture.asset('images/lookSupport.svg'),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text("Call-Center"),
+                          content: Text(
+                              "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: Text(
+                                "Call",
+                                style: TextStyle(
+                                    color: const Color.fromARGB(
+                                        255, 255, 215, 72)),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  child: SvgPicture.asset('images/lookSupport.svg'),
+                ),
               ],
             ),
           )
