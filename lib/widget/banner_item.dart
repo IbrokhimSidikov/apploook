@@ -17,31 +17,37 @@ class BannerItem {
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/sale50offburgers.png',
+          imagePath: 'images/banner2.png',
           boxColor: Colors.yellow),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/sale50offburgers.png',
+          imagePath: 'images/banner3.png',
           boxColor: Colors.yellow),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/sale50offburgers.png',
+          imagePath: 'images/banner4.png',
           boxColor: Colors.yellow),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/sale50offburgers.png',
+          imagePath: 'images/banner2.png',
           boxColor: Colors.yellow),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/sale50offburgers.png',
+          imagePath: 'images/banner3.png',
+          boxColor: Colors.yellow),
+    );
+    banners.add(
+      BannerItem(
+          name: 'banner1',
+          imagePath: 'images/banner4.png',
           boxColor: Colors.yellow),
     );
 
