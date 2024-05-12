@@ -9,6 +9,7 @@ class Checkout extends StatefulWidget {
 }
 
 class _CheckoutState extends State<Checkout> {
+  int _selectedIndex = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +21,7 @@ class _CheckoutState extends State<Checkout> {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
+                const SizedBox(
                   width: 15.0,
                 ),
                 Text(
@@ -38,39 +39,95 @@ class _CheckoutState extends State<Checkout> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => setState(() => _selectedIndex = 0),
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffF1F2F7)),
+                    backgroundColor: MaterialStateProperty.all(
+                      _selectedIndex == 0
+                          ? Color(0xffFEC700)
+                          : Color(0xffF1F2F7),
+                    ),
                   ),
                   child: Text(
                     'DELIVERY',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => setState(() => _selectedIndex = 1),
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffF1F2F7)),
+                    backgroundColor: MaterialStateProperty.all(
+                      _selectedIndex == 1
+                          ? Color(0xffFEC700)
+                          : Color(0xffF1F2F7),
+                    ),
                   ),
                   child: Text(
                     'SELF-PICKUP',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => setState(() => _selectedIndex = 2),
                   style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Color(0xffF1F2F7)),
+                    backgroundColor: MaterialStateProperty.all(
+                      _selectedIndex == 2
+                          ? Color(0xffFEC700)
+                          : Color(0xffF1F2F7),
+                    ),
                   ),
                   child: Text(
                     'CARHOP',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(color: Colors.white),
                   ),
                 )
               ],
+            ),
+            SizedBox(
+              height: 15.0,
+            ),
+            Material(
+              elevation: 8.0,
+              borderRadius: BorderRadius.circular(15.0),
+              child: Expanded(
+                child: IndexedStack(
+                  index: _selectedIndex,
+                  children: [
+                    Container(
+                      height: 140,
+                      width: 360,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.amberAccent),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text('data1'),
+                      ),
+                    ),
+                    Container(
+                      height: 140,
+                      width: 360,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.amberAccent),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text('data2'),
+                      ),
+                    ),
+                    Container(
+                      height: 140,
+                      width: 360,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.amberAccent),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Text('data3'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             SizedBox(
               height: 25.0,
@@ -89,6 +146,7 @@ class _CheckoutState extends State<Checkout> {
                     Padding(
                       padding: EdgeInsets.all(15.0),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Order Price :',
@@ -101,6 +159,7 @@ class _CheckoutState extends State<Checkout> {
                     Padding(
                       padding: EdgeInsets.all(15.0),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Delivery Price :',
@@ -116,6 +175,7 @@ class _CheckoutState extends State<Checkout> {
                     Padding(
                       padding: EdgeInsets.all(15.0),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Total Price :',
@@ -216,21 +276,25 @@ class _CheckoutState extends State<Checkout> {
               height: 50.0,
             ),
             ElevatedButton(
-                onPressed: () {},
-                style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStatePropertyAll(const Color(0xffFEC700))),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      top: 15.0, bottom: 15.0, left: 125.0, right: 125.0),
-                  child: Text(
-                    'Order',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16,
-                        color: Colors.black),
-                  ),
-                ))
+              onPressed: () {},
+              style: ButtonStyle(
+                  backgroundColor:
+                      MaterialStatePropertyAll(const Color(0xffFEC700))),
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 15.0, bottom: 15.0, left: 125.0, right: 125.0),
+                child: Text(
+                  'Order',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 16,
+                      color: Colors.black),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 25.0,
+            )
           ],
         ),
       ),
