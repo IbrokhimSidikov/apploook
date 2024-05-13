@@ -3,8 +3,12 @@ import 'package:apploook/pages/cart.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:flutter/material.dart';
 
+import 'dart:convert';
+
 class Details extends StatefulWidget {
-  const Details({super.key});
+  final dynamic product;
+
+  const Details({Key? key, this.product}) : super(key: key);
 
   @override
   State<Details> createState() => _DetailsState();
@@ -13,8 +17,8 @@ class Details extends StatefulWidget {
 class _DetailsState extends State<Details> {
   int a = 1;
   int quantity = 1;
-  double unitPrice = 28000;
-  double totalPrice = 28000;
+  double unitPrice = 0;
+  double totalPrice = 0;
 
   List<CategoryModel> categories = [];
 
@@ -22,15 +26,28 @@ class _DetailsState extends State<Details> {
     categories = CategoryModel.getCategories();
   }
 
+  String? getDescriptionInLanguage(String languageCode) {
+    if (widget.product.description != null &&
+        widget.product.description is String) {
+      Map<String, dynamic> descriptionMap =
+          json.decode(widget.product.description);
+      return descriptionMap[languageCode];
+    }
+    return null;
+  }
+
   @override
   void initState() {
     _getCategories();
+    unitPrice = widget.product.price; // Initialize unitPrice here
+    totalPrice = widget.product.price;
   }
 
   @override
   Widget build(BuildContext context) {
     _getCategories();
     return Scaffold(
+      backgroundColor: Colors.white, // Set the background color here
       body: Container(
         margin: EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
         child: Column(
@@ -51,8 +68,9 @@ class _DetailsState extends State<Details> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        child: Image.asset(
-                          "images/IMG_3256.png",
+                        child: Image.network(
+                          widget.product
+                              .imagePath, // Assuming widget.product.imagePath contains the URL
                           width: MediaQuery.of(context).size.width,
                           height: MediaQuery.of(context).size.height / 2.5,
                           fit: BoxFit.cover,
@@ -60,20 +78,26 @@ class _DetailsState extends State<Details> {
                       ),
                       Row(
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "CHICKY BURGER",
-                                style: AppWidget.titleTextFieldStyle(),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: Container(
+                              width: 250,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.product.name,
+                                    style: AppWidget.titleTextFieldStyle(),
+                                  ),
+                                  Text(
+                                    widget.product.categoryTitle,
+                                    style: AppWidget.HeadlineTextFieldStyle(),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                "Spinners",
-                                style: AppWidget.HeadlineTextFieldStyle(),
-                              ),
-                            ],
+                            ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           GestureDetector(
                             onTap: () {
                               if (quantity > 1) {
@@ -125,8 +149,8 @@ class _DetailsState extends State<Details> {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.vertical,
                             child: Text(
-                              //description for burger
-                              "1 each: 495 calories, 23g fat (10g saturated fat), 63mg cholesterol, 1443mg sodium, 48g carbohydrate (10g sugars, 2g fiber), 23g protein.",
+                              getDescriptionInLanguage('uz') ??
+                                  '', // Change 'en' to the desired language code
                               style: AppWidget.LightTextFieldStyle(),
                             ),
                           ),
@@ -148,7 +172,7 @@ class _DetailsState extends State<Details> {
                       //   ],
                       // ),
                       // Change Drinks container goes here
-                      ChangeDrinks(categories: categories)
+                      // ChangeDrinks(categories: categories)
                     ],
                   ),
                 ),

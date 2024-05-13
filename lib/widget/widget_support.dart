@@ -11,8 +11,8 @@ class AppWidget {
 
   static TextStyle HeadlineTextFieldStyle() {
     return const TextStyle(
-        color: Color.fromARGB(255, 205, 205, 0),
-        fontSize: 24.0,
+        color: Color(0xFFB0B0B0),
+        fontSize: 14.0,
         fontWeight: FontWeight.bold,
         fontFamily: 'Poppins');
   }
@@ -44,8 +44,8 @@ class AppWidget {
           // Add a single shadow here
           offset: Offset(2.0, 2.0), // Offset the shadow slightly
           blurRadius: 3.0, // Blur the shadow for a smoother effect
-          color: Color.fromARGB(
-              128, 0, 0, 0), // Set the shadow color (semi-transparent black)
+          color: Color.fromARGB(128, 158, 158,
+              158), // Set the shadow color (semi-transparent black)
         ),
       ],
     );
