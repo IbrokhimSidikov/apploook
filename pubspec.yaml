@@ -103,4 +103,8 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
+<<<<<<< HEAD
   image_path: "images/apploooklogo2.png"
+=======
+  image_path: "images/launchericon.png"
+>>>>>>> ea8f54063a57c868b0d90966bbcd62a9776e488a
