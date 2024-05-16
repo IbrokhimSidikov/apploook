@@ -1,6 +1,8 @@
+import 'package:apploook/cart_provider.dart';
 import 'package:apploook/models/category-model.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/widget/widget_support.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:convert';
@@ -46,10 +48,13 @@ class _DetailsState extends State<Details> {
   @override
   Widget build(BuildContext context) {
     _getCategories();
+
+    var cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.white, // Set the background color here
       body: Container(
-        margin: EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
+        margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -57,7 +62,7 @@ class _DetailsState extends State<Details> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Icon(Icons.arrow_back_outlined, color: Colors.black),
+              child: const Icon(Icons.arrow_back_outlined, color: Colors.black),
             ),
             Container(
               height: 650,
@@ -111,7 +116,8 @@ class _DetailsState extends State<Details> {
                               decoration: BoxDecoration(
                                   color: Colors.black,
                                   borderRadius: BorderRadius.circular(8)),
-                              child: Icon(Icons.remove, color: Colors.white),
+                              child:
+                                  const Icon(Icons.remove, color: Colors.white),
                             ),
                           ),
                           const SizedBox(
@@ -135,7 +141,7 @@ class _DetailsState extends State<Details> {
                               decoration: BoxDecoration(
                                   color: Colors.black,
                                   borderRadius: BorderRadius.circular(8)),
-                              child: Icon(Icons.add, color: Colors.white),
+                              child: const Icon(Icons.add, color: Colors.white),
                             ),
                           ),
                         ],
@@ -224,15 +230,18 @@ class _DetailsState extends State<Details> {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width / 2,
-                    padding: EdgeInsets.only(top: 10, bottom: 10),
+                    padding: const EdgeInsets.only(top: 10, bottom: 10),
                     decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 215, 31),
+                        color: const Color.fromARGB(255, 255, 215, 31),
                         borderRadius: BorderRadius.circular(10)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         GestureDetector(
                           onTap: () {
+                            cartProvider.addToCart(widget.product, quantity);
+                            cartProvider.logItems();
+
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -289,7 +298,7 @@ class ChangeDrinks extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.only(left: 5.0),
           child: Text(
             'Change drinks',
@@ -297,17 +306,17 @@ class ChangeDrinks extends StatelessWidget {
                 color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 5.0,
         ),
         Container(
           height: 180,
-          color: Color.fromARGB(255, 255, 255, 255),
+          color: const Color.fromARGB(255, 255, 255, 255),
           child: ListView.separated(
             itemCount: categories.length,
             scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(left: 20, right: 20),
-            separatorBuilder: (context, index) => SizedBox(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            separatorBuilder: (context, index) => const SizedBox(
               width: 25,
             ),
             itemBuilder: (context, index) {
@@ -335,7 +344,7 @@ class ChangeDrinks extends StatelessWidget {
                         color: const Color.fromARGB(255, 255, 215, 57),
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'change',
                           style: TextStyle(fontSize: 12),
