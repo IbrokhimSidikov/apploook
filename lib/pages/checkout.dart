@@ -1,4 +1,6 @@
+import 'package:apploook/models/view/map_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class Checkout extends StatefulWidget {
@@ -92,15 +94,20 @@ class _CheckoutState extends State<Checkout> {
                 child: IndexedStack(
                   index: _selectedIndex,
                   children: [
-                    Container(
-                      height: 140,
-                      width: 360,
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.amberAccent),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Text('data1'),
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>MapScreen()));
+                      },
+                      child: Container(
+                        height: 140,
+                        width: 360,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.amberAccent),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Text('Pick Your Location'),
+                        ),
                       ),
                     ),
                     Container(
@@ -240,7 +247,7 @@ class _CheckoutState extends State<Checkout> {
                     ],
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 25.0,
                 ),
                 Text(
@@ -250,7 +257,7 @@ class _CheckoutState extends State<Checkout> {
                       color: Colors.black,
                       fontWeight: FontWeight.w500),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 15.0,
                 ),
                 Container(

@@ -1,3 +1,4 @@
+import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:apploook/models/view/map_screen.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: MapScreen(),
+      home: HomeNew(),
     );
   }
 }
