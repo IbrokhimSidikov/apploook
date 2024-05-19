@@ -1,5 +1,9 @@
 import 'dart:async';
 
+import 'package:apploook/models/address_detail_model.dart';
+import 'package:apploook/models/app_lat_long.dart';
+import 'package:apploook/models/repository/address_detail_repository.dart';
+import 'package:apploook/services/app_location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -13,81 +17,141 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final mapControllerCompleter = Completer<YandexMapController>();
-  YandexMapController? mapController;
-  Point? tappedLocation;
+  final AddressDetailRepository repository = AddressDetailRepository();
+  String addressDetail = "Map Page";
 
-  final bool nightModeEnabled = true;
+  @override
+  void initState() {
+    super.initState();
+    _initPermission().ignore();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-            'Pick Your Location',
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
-          centerTitle: true),
-      body: Stack( // Use Stack to overlay marker on the map
+        title: Text(addressDetail),
+        centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await _fetchCurrentLocation();
+        },
+        backgroundColor: Colors.white,
+        child: Icon(Icons.data_saver_on),
+      ),
+      body: Stack(
         children: [
-          Expanded(
-            child: YandexMap(
-              mapType: MapType.vector,
-              nightModeEnabled: nightModeEnabled,
-              cameraBounds: const CameraBounds(
-                minZoom: 1,
-                maxZoom: 20,
-                latLngBounds: BoundingBox(
-                  northEast: Point(
-                    latitude: 41.4245,
-                    longitude: 69.3567,
+          YandexMap(
+            onMapCreated: (controller) {
+              mapControllerCompleter.complete(controller);
+            },
+            onCameraPositionChanged: (cameraPosition, reason, finished) {
+              if (finished) {
+                updateAddressDetail(
+                  AppLatLong(
+                    lat: cameraPosition.target.latitude,
+                    long: cameraPosition.target.longitude,
                   ),
-                  southWest: Point(
-                    latitude: 41.2,
-                    longitude: 69.1,
-                  ),
-                ),
-              ),
-              onMapLongTap: (Point argument) {
-                setState(() {
-                  tappedLocation = argument;
-                });
-              },
+                );
+              }
+            },
+          ),
+          const Positioned(
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Icon(
+              Icons.location_on,
+              color: Colors.red,
+              size: 45,
             ),
           ),
-          if (tappedLocation != null) // Conditionally display marker
-            Positioned(
-              top: screenHeight(context) / 2 - 20, // Adjust marker position
-              left: screenWidth(context) / 2 - 10, // Adjust marker position
-              child: Icon(
-                Icons.location_on,
-                color: Colors.red,
-                size: 30.0,
-              ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            child: FloatingActionButton(
+              onPressed: () async {
+                final controller = await mapControllerCompleter.future;
+                final cameraPosition = await controller.getCameraPosition();
+                final latLong = AppLatLong(
+                  lat: cameraPosition.target.latitude,
+                  long: cameraPosition.target.longitude,
+                );
+
+                // Handle the latLong as needed
+                print('Lat: ${latLong.lat}, Long: ${latLong.long}');
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      content: Text('Lat: ${latLong.lat}, Long: ${latLong.long}'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Icon(Icons.check),
             ),
+          ),
         ],
       ),
-      bottomNavigationBar: tappedLocation != null
-          ? Container(
-              padding: EdgeInsets.all(16.0),
-              color: Colors.grey[200],
-              child: Row(
-                children: [
-                  Text(
-                    'Latitude: ${tappedLocation!.latitude.toStringAsFixed(6)}',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                  Spacer(),
-                  Text(
-                    'Longitude: ${tappedLocation!.longitude.toStringAsFixed(6)}',
-                    style: TextStyle(fontSize: 16.0),
-                  ),
-                ],
-              ),
-            )
-          : null,
     );
   }
 
-  double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
-  double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
+  Future<void> _initPermission() async {
+    if (!await LocationService().checkPermission()) {
+      await LocationService().requestPermission();
+    }
+    await _fetchCurrentLocation();
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    AppLatLong location;
+    const defLocation = TashkentLocation();
+    try {
+      location = await LocationService().getCurrentLocation();
+    } catch (_) {
+      location = defLocation;
+    }
+    location = defLocation;
+    updateAddressDetail(location);
+    _moveToCurrentLocation(location);
+  }
+
+  Future<void> _moveToCurrentLocation(AppLatLong appLatLong) async {
+    (await mapControllerCompleter.future).moveCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: Point(
+            latitude: appLatLong.lat,
+            longitude: appLatLong.long,
+          ),
+          zoom: 15,
+        ),
+      ),
+      animation: const MapAnimation(type: MapAnimationType.linear, duration: 1),
+    );
+  }
+
+  Future<void> updateAddressDetail(AppLatLong latLong) async {
+    setState(() {
+      addressDetail = "...loading";
+    });
+    AddressDetailModel? data = await repository.getAddressDetail(latLong);
+    addressDetail = data!.responset!.geoObjectCollection!.featureMember!.isEmpty
+        ? "unknown_place"
+        : data.responset!.geoObjectCollection!.featureMember![0].geoObject!
+            .metaDataProperty!.geocoderMetaData!.address!.formatted!;
+    setState(() {});
+    print(addressDetail);
+  }
 }

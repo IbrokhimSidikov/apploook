@@ -8,9 +8,10 @@ const AppLatLong({
  });
 }
 
-class MoscowLocation extends AppLatLong {
- const MoscowLocation({
-   super.lat = 55.7522200,
-   super.long = 37.6155600,
+class TashkentLocation extends AppLatLong {
+ const TashkentLocation({
+  
+   super.long = 69.242771,
+   super.lat = 41.3137916,
  });
 }

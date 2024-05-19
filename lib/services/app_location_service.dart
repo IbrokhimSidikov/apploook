@@ -10,7 +10,7 @@ abstract class AppLocation {
 }
 
 class LocationService implements AppLocation {
-  final defLocation = const MoscowLocation();
+  final defLocation = const TashkentLocation();
   @override
   Future<AppLatLong> getCurrentLocation() async {
     return Geolocator.getCurrentPosition().then((value) {
