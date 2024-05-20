@@ -47,4 +47,12 @@ class CartProvider extends ChangeNotifier {
   void logItems() {
     print(_cartItems);
   }
+
+  int showQuantity() {
+    int totalQuantity = 0;
+    for (var item in _cartItems) {
+      totalQuantity += item.quantity;
+    }
+    return totalQuantity;
+  }
 }

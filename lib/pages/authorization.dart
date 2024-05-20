@@ -1,6 +1,7 @@
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Authorization extends StatefulWidget {
   const Authorization({super.key});
@@ -10,13 +11,46 @@ class Authorization extends StatefulWidget {
 }
 
 class _AuthorizationState extends State<Authorization> {
-  // TextEditingController _phoneNumberController =
-  // TextEditingController(text: '+998 ');
+  PhoneNumber? _phoneNumber;
+  final _phoneFormKey = GlobalKey<FormState>();
+  final TextEditingController _firstNameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPhoneNumber();
+  }
+
+  Future<void> _loadPhoneNumber() async {
+    final prefs = await SharedPreferences.getInstance();
+    final phoneNumber = prefs.getString('phoneNumber') ?? '+998';
+    final firstName = prefs.getString('firstName') ?? '';
+    setState(() {
+      _phoneNumber = PhoneNumber.parse(phoneNumber);
+      _firstNameController.text = firstName;
+    });
+  }
+
+  Future<void> _savePhoneNumber(String phoneNumber, String firstName) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('phoneNumber', phoneNumber);
+    await prefs.setString('firstName', firstName);
+  }
+
+  void _continue() {
+    if (_phoneFormKey.currentState?.validate() ?? false) {
+      _savePhoneNumber(
+          _phoneNumber?.international ?? '+998', _firstNameController.text);
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => const HomeNew()));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Authorization',
           style: TextStyle(
               fontSize: 18.0, fontWeight: FontWeight.w500, color: Colors.grey),
@@ -26,24 +60,41 @@ class _AuthorizationState extends State<Authorization> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          SizedBox(
-            height: 75,
-          ),
-          Center(
+          const SizedBox(height: 75),
+          const Center(
             child: Text(
-              'Please enter your number\nto log in the application',
+              'Please enter your details\nto log in the application',
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(
-            height: 50.0,
+          const SizedBox(height: 20.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 70, right: 70),
+            child: TextFormField(
+              controller: _firstNameController,
+              decoration: InputDecoration(
+                hintText: 'Enter your first name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your first name';
+                }
+                return null;
+              },
+            ),
           ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 70, right: 70),
+          const SizedBox(height: 20.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 70, right: 70),
+            child: Form(
+              key: _phoneFormKey,
               child: PhoneFormField(
-                initialValue: PhoneNumber.parse('+998'),
+                initialValue:
+                    _phoneNumber ?? PhoneNumber(isoCode: IsoCode.UZ, nsn: ''),
                 validator: PhoneValidator.compose([
                   PhoneValidator.required(context),
                   PhoneValidator.validMobile(context),
@@ -56,7 +107,9 @@ class _AuthorizationState extends State<Authorization> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                // Disable country selection
+                onChanged: (phoneNumber) {
+                  _phoneNumber = phoneNumber;
+                },
                 countryButtonStyle: const CountryButtonStyle(
                   showDialCode: true, // Display +998
                   showIsoCode: false, // Hide ISO code (optional)
@@ -66,14 +119,11 @@ class _AuthorizationState extends State<Authorization> {
               ),
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.only(bottom: 30.0),
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomeNew()));
-              },
+              onPressed: _continue,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 255, 215, 56),
               ),

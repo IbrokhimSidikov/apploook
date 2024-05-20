@@ -1,3 +1,4 @@
+import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/appetizerpage.dart';
 import 'package:apploook/pages/burgerpage.dart';
 import 'package:apploook/pages/cart.dart';
@@ -9,6 +10,7 @@ import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -165,6 +167,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     _getBanners();
+
+    var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color.fromARGB(255, 226, 225, 225),
@@ -511,13 +515,35 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             Positioned(
               bottom: 35.0,
               left: 25.0,
-              child: FloatingActionButton(
-                child: const Icon(Icons.shopping_bag_outlined),
-                backgroundColor: const Color.fromARGB(255, 255, 215, 71),
-                onPressed: () {
+              child: GestureDetector(
+                onTap: () {
                   Navigator.push(
                       context, MaterialPageRoute(builder: (context) => Cart()));
                 },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 255, 215, 71),
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 12.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.shopping_bag_outlined,
+                          color: Colors.black),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '${cartProvider.showQuantity()}',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],
