@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({Key? key}) : super(key: key);
+  const MapScreen({super.key});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -32,6 +32,12 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: Text(addressDetail),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -72,6 +78,7 @@ class _MapScreenState extends State<MapScreen> {
             bottom: 16,
             left: 16,
             child: FloatingActionButton(
+              //to confirm the location
               onPressed: () async {
                 final controller = await mapControllerCompleter.future;
                 final cameraPosition = await controller.getCameraPosition();
@@ -79,26 +86,33 @@ class _MapScreenState extends State<MapScreen> {
                   lat: cameraPosition.target.latitude,
                   long: cameraPosition.target.longitude,
                 );
-
                 // Handle the latLong as needed
                 print('Lat: ${latLong.lat}, Long: ${latLong.long}');
                 showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      content: Text('Lat: ${latLong.lat}, Long: ${latLong.long}'),
+                      content:
+                          Text('$addressDetail\nDo you Confirm your Address'),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
                           },
-                          child: Text('OK'),
+                          child: Text('Cancel'),
                         ),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              Navigator.pop(context, addressDetail);
+                            },
+                            child: Text('Confirm')),
                       ],
                     );
                   },
                 );
               },
+              backgroundColor: const Color.fromARGB(255, 255, 215, 62),
               child: Icon(Icons.check),
             ),
           ),
@@ -143,15 +157,48 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> updateAddressDetail(AppLatLong latLong) async {
-    setState(() {
-      addressDetail = "...loading";
-    });
+  setState(() {
+    addressDetail = "...loading";
+  });
+
+  try {
     AddressDetailModel? data = await repository.getAddressDetail(latLong);
-    addressDetail = data!.responset!.geoObjectCollection!.featureMember!.isEmpty
-        ? "unknown_place"
-        : data.responset!.geoObjectCollection!.featureMember![0].geoObject!
-            .metaDataProperty!.geocoderMetaData!.address!.formatted!;
-    setState(() {});
+    print(data);
+
+
+    if (data != null && data.responset != null) {
+      var geoObjectCollection = data.responset!.geoObjectCollection;
+      if (geoObjectCollection != null && geoObjectCollection.featureMember != null && geoObjectCollection.featureMember!.isNotEmpty) {
+        var geoObject = geoObjectCollection.featureMember![0].geoObject;
+        if (geoObject != null) {
+          var geocoderMetaData = geoObject.metaDataProperty?.geocoderMetaData;
+          if (geocoderMetaData != null) {
+            var address = geocoderMetaData.address;
+            if (address != null) {
+              addressDetail = address.formatted;
+            } else {
+              addressDetail = "No address found in GeocoderMetaData";
+            }
+          } else {
+            addressDetail = "No GeocoderMetaData found";
+          }
+        } else {
+          addressDetail = "No GeoObject found";
+        }
+      } else {
+        addressDetail = "No featureMember found";
+      }
+    } else {
+      addressDetail = "No response data found";
     print(addressDetail);
+    print(data);
+    }
+  } catch (e) {
+    addressDetail = "Error fetching address details: $e";
   }
+
+  setState(() {});
+  print(addressDetail);
+}
+
 }

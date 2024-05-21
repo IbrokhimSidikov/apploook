@@ -1,5 +1,3 @@
-
-
 class AddressDetailModel {
   Responset? responset;
 
@@ -13,7 +11,7 @@ class AddressDetailModel {
       );
 }
 
-class Responset{
+class Responset {
   GeoObjectCollection? geoObjectCollection;
 
   Responset({
@@ -21,13 +19,13 @@ class Responset{
   });
 
   factory Responset.fromJson(Map<String, dynamic> json) => Responset(
-    geoObjectCollection: json["GeoObjectCollection"] == null
-        ? null
-        : GeoObjectCollection.fromJson(json["GeoObjectCollection"]),
-        ); 
+        geoObjectCollection: json["GeoObjectCollection"] == null
+            ? null
+            : GeoObjectCollection.fromJson(json["GeoObjectCollection"]),
+      );
 }
 
-class GeoObjectCollection{
+class GeoObjectCollection {
   GeoObjectCollectionMetaDataProperty? metaDataProperty;
   List<FeatureMember>? featureMember;
 
@@ -36,18 +34,18 @@ class GeoObjectCollection{
     required this.featureMember,
   });
 
-  factory GeoObjectCollection.fromJson(Map<String,dynamic> json) => 
+  factory GeoObjectCollection.fromJson(Map<String, dynamic> json) =>
       GeoObjectCollection(
         metaDataProperty: json["metaDataProperty"] == null
             ? null
-            :GeoObjectCollectionMetaDataProperty.fromJson(
-              json["metaDataProperty"]),
+            : GeoObjectCollectionMetaDataProperty.fromJson(
+                json["metaDataProperty"]),
         featureMember: List<FeatureMember>.from(
-              json["featureMember"].map((x) => FeatureMember.fromJson(x))),
+            json["featureMember"].map((x) => FeatureMember.fromJson(x))),
       );
 }
 
-class FeatureMember{
+class FeatureMember {
   GeoObject? geoObject;
 
   FeatureMember({
@@ -55,13 +53,13 @@ class FeatureMember{
   });
 
   factory FeatureMember.fromJson(Map<String, dynamic> json) => FeatureMember(
-        geoObject: json["GeoObject"]==null
+        geoObject: json["GeoObject"] == null
             ? null
             : GeoObject.fromJson(json["GeoObject"]),
-  );
+      );
 }
 
-class GeoObject{
+class GeoObject {
   GeoObjectMetaDataProperty? metaDataProperty;
   String name;
   String description;
@@ -82,19 +80,19 @@ class GeoObject{
         metaDataProperty: json["metaDataProperty"] == null
             ? null
             : GeoObjectMetaDataProperty.fromJson(json["metaDataProperty"]),
-          name: json["name"] ?? "",
-          description: json["description"] ?? "",
-          boundedBy: json["boundedBy"] == null
-              ? BoundedBy(envelope: null)
-              : BoundedBy.fromJson(json["boundedBy"]),
-          uri: json["uri"] ?? "",
-          point: json["Point"] == null
-              ? PointModel(pos:"")
-              : PointModel.fromJson(json["Point"]),    
-        );
+        name: json["name"] ?? "",
+        description: json["description"] ?? "",
+        boundedBy: json["boundedBy"] == null
+            ? BoundedBy(envelope: null)
+            : BoundedBy.fromJson(json["boundedBy"]),
+        uri: json["uri"] ?? "",
+        point: json["Point"] == null
+            ? PointModel(pos: "")
+            : PointModel.fromJson(json["Point"]),
+      );
 }
 
-class BoundedBy{
+class BoundedBy {
   Envelope? envelope;
 
   BoundedBy({
@@ -104,11 +102,11 @@ class BoundedBy{
   factory BoundedBy.fromJson(Map<String, dynamic> json) => BoundedBy(
         envelope: json["Envelope"] == null
             ? Envelope(lowerCorner: '', upperCorner: '')
-            : Envelope.fromJson(json["Envelope"]), 
-        );
+            : Envelope.fromJson(json["Envelope"]),
+      );
 }
 
-class Envelope{
+class Envelope {
   String lowerCorner;
   String upperCorner;
 
@@ -117,14 +115,13 @@ class Envelope{
     required this.upperCorner,
   });
 
-  factory Envelope.fromJson(Map<String, dynamic> json)=> Envelope(
-        lowerCorner: json["lowerCorner"] ?? "", 
+  factory Envelope.fromJson(Map<String, dynamic> json) => Envelope(
+        lowerCorner: json["lowerCorner"] ?? "",
         upperCorner: json["upperCorner"] ?? "",
       );
-
 }
 
-class GeoObjectMetaDataProperty{
+class GeoObjectMetaDataProperty {
   GeocoderMetaData? geocoderMetaData;
 
   GeoObjectMetaDataProperty({
@@ -133,19 +130,18 @@ class GeoObjectMetaDataProperty{
 
   factory GeoObjectMetaDataProperty.fromJson(Map<String, dynamic> json) =>
       GeoObjectMetaDataProperty(
-        geocoderMetaData: json["GeocoderMetaData"]==null
-          ? GeocoderMetaData(
-            precision: '',
-            text: '',
-            addressDetails: null,
-            kind: '',
-            address: null
-          )
-          : GeocoderMetaData.fromJson(json["GeocoderMetaData"]),
-        );
+        geocoderMetaData: json["GeocoderMetaData"] == null
+            ? GeocoderMetaData(
+                precision: '',
+                text: '',
+                addressDetails: null,
+                kind: '',
+                address: null)
+            : GeocoderMetaData.fromJson(json["GeocoderMetaData"]),
+      );
 }
 
-class GeocoderMetaData{
+class GeocoderMetaData {
   String precision;
   String text;
   String kind;
@@ -162,22 +158,22 @@ class GeocoderMetaData{
 
   factory GeocoderMetaData.fromJson(Map<String, dynamic> json) =>
       GeocoderMetaData(
-        precision: json["precision"] ?? "", 
-        text: json["text"] ?? "", 
-        kind: json["kind"] ?? "", 
+        precision: json["precision"] ?? "",
+        text: json["text"] ?? "",
+        kind: json["kind"] ?? "",
         address: json["Address"] == null
             ? Address(countryCode: '', formatted: '', components: [])
-            :Address.fromJson(json["Address"]),    
+            : Address.fromJson(json["Address"]),
         addressDetails: json["AddressDetails"] == null
-            ?AddressDetails(country: null)
-            :AddressDetails.fromJson(json["AddressDetails"]),
+            ? AddressDetails(country: null)
+            : AddressDetails.fromJson(json["AddressDetails"]),
       );
 }
 
-class Address{
+class Address {
   String countryCode;
   String formatted;
-  List<Component> ? components;
+  List<Component>? components;
 
   Address({
     required this.components,
@@ -186,17 +182,16 @@ class Address{
   });
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
-      countryCode: json["country_code"]??"", 
-      formatted: json["formatted"]??"",
-      components: json["Components"]==null
-          ?[]
-          :List<Component>.from(
-            json["Components"].map((x) => Component.fromJson(x))
-          ),
-          );
+        countryCode: json["country_code"] ?? "",
+        formatted: json["formatted"] ?? "",
+        components: json["Components"] == null
+            ? []
+            : List<Component>.from(
+                json["Components"].map((x) => Component.fromJson(x))),
+      );
 }
 
-class Component{
+class Component {
   String kind;
   String name;
 
@@ -206,12 +201,12 @@ class Component{
   });
 
   factory Component.fromJson(Map<String, dynamic> json) => Component(
-        kind: json["kind"] ?? "", 
+        kind: json["kind"] ?? "",
         name: json["name"] ?? "",
-        );
+      );
 }
 
-class AddressDetails{
+class AddressDetails {
   Country? country;
 
   AddressDetails({
@@ -219,11 +214,12 @@ class AddressDetails{
   });
 
   factory AddressDetails.fromJson(Map<String, dynamic> json) => AddressDetails(
-        country: json["Country"] == null ? null : Country.fromJson(json["Country"]),
-        );
+        country:
+            json["Country"] == null ? null : Country.fromJson(json["Country"]),
+      );
 }
 
-class Country{
+class Country {
   String addressLine;
   String countryNameCode;
   String countryName;
@@ -236,25 +232,23 @@ class Country{
     required this.administrativeArea,
   });
 
-  factory Country.fromJson(Map<String, dynamic> json)=>Country(
-    addressLine: json["AddressLine"]??"", 
-    countryNameCode: json["CountryNameCode"]??"", 
-    countryName: json["CountyName"]??"", 
-    administrativeArea: json["AdministrativeArea"]==null
-        ? AdministrativeArea(
-          administrativeAreaName: "",
-          locality: Locality(
-            localityName: "",
-            thoroughfare: Thoroughfare(
-              thoroughfareName: "",
-              premise: Premise(premiseNumber: "")
-            ) 
-          )
-        ):AdministrativeArea.fromJson(json["AdministrativeArea"]),
-    );
+  factory Country.fromJson(Map<String, dynamic> json) => Country(
+        addressLine: json["AddressLine"] ?? "",
+        countryNameCode: json["CountryNameCode"] ?? "",
+        countryName: json["CountyName"] ?? "",
+        administrativeArea: json["AdministrativeArea"] == null
+            ? AdministrativeArea(
+                administrativeAreaName: "",
+                locality: Locality(
+                    localityName: "",
+                    thoroughfare: Thoroughfare(
+                        thoroughfareName: "",
+                        premise: Premise(premiseNumber: ""))))
+            : AdministrativeArea.fromJson(json["AdministrativeArea"]),
+      );
 }
 
-class AdministrativeArea{
+class AdministrativeArea {
   String administrativeAreaName;
   Locality? locality;
 
@@ -264,14 +258,15 @@ class AdministrativeArea{
   });
 
   factory AdministrativeArea.fromJson(Map<String, dynamic> json) =>
-   AdministrativeArea(
-      administrativeAreaName: json["AdministrativeAreaName"]??"",
-      locality: json["Locality"] ==null
-        ? Locality(localityName: '', thoroughfare: null)
-        : Locality.fromJson(json["Locality"]), ); 
+      AdministrativeArea(
+        administrativeAreaName: json["AdministrativeAreaName"] ?? "",
+        locality: json["Locality"] == null
+            ? Locality(localityName: '', thoroughfare: null)
+            : Locality.fromJson(json["Locality"]),
+      );
 }
 
-class Locality{
+class Locality {
   String localityName;
   Thoroughfare? thoroughfare;
 
@@ -280,15 +275,16 @@ class Locality{
     required this.thoroughfare,
   });
 
-  factory Locality.fromJson(Map<String, dynamic> json)=>Locality(
-    localityName: json["LocalityName"]??"",
-    thoroughfare: json["Thoroughfare"]==null
-        ?Thoroughfare(premise: Premise(premiseNumber: ""), thoroughfareName: "")
-        : Thoroughfare.fromJson(json["Thoroughfare"]),
-  );
+  factory Locality.fromJson(Map<String, dynamic> json) => Locality(
+        localityName: json["LocalityName"] ?? "",
+        thoroughfare: json["Thoroughfare"] == null
+            ? Thoroughfare(
+                premise: Premise(premiseNumber: ""), thoroughfareName: "")
+            : Thoroughfare.fromJson(json["Thoroughfare"]),
+      );
 }
 
-class Thoroughfare{
+class Thoroughfare {
   String thoroughfareName;
   Premise? premise;
 
@@ -298,35 +294,37 @@ class Thoroughfare{
   });
 
   factory Thoroughfare.fromJson(Map<String, dynamic> json) => Thoroughfare(
-     
-    thoroughfareName: json["ThoroughfareName"] ?? "",
-    premise: json["Premise"]==null
-        ?Premise(premiseNumber: '')
-        :Premise.fromJson(json["Premise"]),
-        );
+        thoroughfareName: json["ThoroughfareName"] ?? "",
+        premise: json["Premise"] == null
+            ? Premise(premiseNumber: '')
+            : Premise.fromJson(json["Premise"]),
+      );
 }
 
-class Premise{
+class Premise {
   String premiseNumber;
 
   Premise({
     required this.premiseNumber,
   });
 
-  factory Premise.fromJson(Map<String, dynamic> json) => Premise(premiseNumber: json["PremiseNumber"]??"",);
+  factory Premise.fromJson(Map<String, dynamic> json) => Premise(
+        premiseNumber: json["PremiseNumber"] ?? "",
+      );
 }
 
-class PointModel{
+class PointModel {
   String pos;
 
   PointModel({
     required this.pos,
   });
 
-  factory PointModel.fromJson(Map<String, dynamic> json)=>PointModel(pos: json["pos"]??"");
+  factory PointModel.fromJson(Map<String, dynamic> json) =>
+      PointModel(pos: json["pos"] ?? "");
 }
 
-class GeoObjectCollectionMetaDataProperty{
+class GeoObjectCollectionMetaDataProperty {
   GeocoderResponseMetaData? geocoderResponseMeraData;
 
   GeoObjectCollectionMetaDataProperty({
@@ -334,14 +332,17 @@ class GeoObjectCollectionMetaDataProperty{
   });
 
   factory GeoObjectCollectionMetaDataProperty.fromJson(
-    Map<String, dynamic> json) =>
-    GeoObjectCollectionMetaDataProperty(geocoderResponseMeraData: json["GeocoderResponseMetaData"]==null
-        ?GeocoderResponseMetaData(point: null, request: '', results: '', found: '')
-        :GeocoderResponseMetaData.fromJson(json["GeocoderResponseMetaData"]),
-        );
+          Map<String, dynamic> json) =>
+      GeoObjectCollectionMetaDataProperty(
+        geocoderResponseMeraData: json["GeocoderResponseMetaData"] == null
+            ? GeocoderResponseMetaData(
+                point: null, request: '', results: '', found: '')
+            : GeocoderResponseMetaData.fromJson(
+                json["GeocoderResponseMetaData"]),
+      );
 }
 
-class GeocoderResponseMetaData{
+class GeocoderResponseMetaData {
   PointModel? point;
   String request;
   String results;
@@ -354,9 +355,12 @@ class GeocoderResponseMetaData{
     required this.found,
   });
 
-  factory GeocoderResponseMetaData.fromJson(Map<String, dynamic> json)=>
-      GeocoderResponseMetaData(point: json["Point"]==null?null : PointModel.fromJson(json["Point"]), 
-                               request: json["request"]??"", 
-                               results: json["results"]??"", 
-                               found: json["found"]??"",);
+  factory GeocoderResponseMetaData.fromJson(Map<String, dynamic> json) =>
+      GeocoderResponseMetaData(
+        point:
+            json["Point"] == null ? null : PointModel.fromJson(json["Point"]),
+        request: json["request"] ?? "",
+        results: json["results"] ?? "",
+        found: json["found"] ?? "",
+      );
 }
