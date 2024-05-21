@@ -1,9 +1,16 @@
+// import 'package:apploook/pages/checkout.dart';
+import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
-import 'package:apploook/models/view/map_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -16,5 +23,9 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       home: HomeNew(),
     );
+    return const MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        home: HomeNew());
   }
 }
