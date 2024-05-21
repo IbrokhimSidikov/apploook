@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -10,6 +11,29 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final String phoneNumber = '71-207-207-0';
+  String clientFirstName = '';
+  String clientPhoneNumber = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPhoneNumber();
+    _loadCustomerName();
+  }
+
+  Future<void> _loadPhoneNumber() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      clientPhoneNumber = prefs.getString('phoneNumber') ?? 'No number';
+    });
+  }
+
+  Future<void> _loadCustomerName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      clientFirstName = prefs.getString('firstName') ?? 'Anonymous';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,32 +46,32 @@ class _ProfileState extends State<Profile> {
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.all(5),
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color.fromARGB(255, 255, 215, 59),
+                    color: Color.fromARGB(255, 255, 215, 59),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.person,
                     size: 40,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   width: 20,
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ibrokhim Sidikov',
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                      clientFirstName,
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.w500),
                     ),
                     Text(
-                      '+998 99 919 29 39',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
+                      clientPhoneNumber,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                   ],
                 )
@@ -67,7 +91,7 @@ class _ProfileState extends State<Profile> {
                     const SizedBox(
                       width: 25.0,
                     ),
-                    Text(
+                    const Text(
                       'My Order History',
                       style: TextStyle(fontSize: 18),
                     ),
@@ -82,7 +106,7 @@ class _ProfileState extends State<Profile> {
                     const SizedBox(
                       width: 25.0,
                     ),
-                    Text(
+                    const Text(
                       'My Payment Card',
                       style: TextStyle(fontSize: 18),
                     ),
@@ -94,10 +118,10 @@ class _ProfileState extends State<Profile> {
                 Row(
                   children: [
                     SvgPicture.asset('images/settings.svg'),
-                    SizedBox(
+                    const SizedBox(
                       width: 25.0,
                     ),
-                    Text(
+                    const Text(
                       'Settings',
                       style: TextStyle(fontSize: 18),
                     ),
@@ -106,25 +130,25 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(
                   height: 40.0,
                 ),
-                Text(
+                const Text(
                   'Feedback',
                   style: TextStyle(fontSize: 18),
                 ),
                 const SizedBox(
                   height: 40.0,
                 ),
-                Text(
+                const Text(
                   'About',
                   style: TextStyle(fontSize: 18),
                 ),
                 const SizedBox(
                   height: 40.0,
                 ),
-                Text(
+                const Text(
                   'Privacy Policy',
                   style: TextStyle(fontSize: 18),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 150,
                 ),
                 GestureDetector(
@@ -133,7 +157,7 @@ class _ProfileState extends State<Profile> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text("Call-Center"),
+                          title: const Text("Call-Center"),
                           content: Text(
                               "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
                           actions: [
@@ -141,18 +165,17 @@ class _ProfileState extends State<Profile> {
                               onPressed: () {
                                 Navigator.of(context).pop(); // Close the dialog
                               },
-                              child: Text(
+                              child: const Text(
                                 "Cancel",
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
                             TextButton(
                               onPressed: () {},
-                              child: Text(
+                              child: const Text(
                                 "Call",
                                 style: TextStyle(
-                                    color: const Color.fromARGB(
-                                        255, 255, 215, 72)),
+                                    color: Color.fromARGB(255, 255, 215, 72)),
                               ),
                             ),
                           ],
@@ -167,7 +190,7 @@ class _ProfileState extends State<Profile> {
           )
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: const BottomAppBar(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [Text('Version 1.0.0, build 10001')],

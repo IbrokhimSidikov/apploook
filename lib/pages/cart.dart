@@ -312,7 +312,8 @@ class _CartState extends State<Cart> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => Checkout()));
+                                        builder: (context) =>
+                                            Checkout(price: price)));
                               },
                               child: Text(
                                 'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',

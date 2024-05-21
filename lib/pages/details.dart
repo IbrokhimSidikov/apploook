@@ -40,6 +40,7 @@ class _DetailsState extends State<Details> {
 
   @override
   void initState() {
+    super.initState();
     _getCategories();
     unitPrice = widget.product.price; // Initialize unitPrice here
     totalPrice = widget.product.price;
