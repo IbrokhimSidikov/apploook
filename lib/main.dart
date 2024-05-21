@@ -1,5 +1,6 @@
 // import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: HomeNew(),
+      home: Checkout(),
     );
     return const MaterialApp(
         debugShowCheckedModeBanner: false,
