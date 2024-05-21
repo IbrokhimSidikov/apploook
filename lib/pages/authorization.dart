@@ -20,6 +20,7 @@ class _AuthorizationState extends State<Authorization> {
     super.initState();
     _loadPhoneNumber();
   }
+  // aaaa
 
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
