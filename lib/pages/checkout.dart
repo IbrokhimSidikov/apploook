@@ -109,7 +109,7 @@ class _CheckoutState extends State<Checkout> {
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 0),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 0
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
@@ -123,7 +123,7 @@ class _CheckoutState extends State<Checkout> {
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 1),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor:MaterialStateProperty.all(
                       _selectedIndex == 1
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
@@ -137,7 +137,7 @@ class _CheckoutState extends State<Checkout> {
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 2),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 2
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
