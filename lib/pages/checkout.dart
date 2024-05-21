@@ -1,5 +1,7 @@
 import 'package:apploook/pages/cart.dart';
+import 'package:apploook/models/view/map_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -56,6 +58,16 @@ class _CheckoutState extends State<Checkout> {
               : '');
     });
   }
+
+  String? selectedAddress;
+  String? selectedBranch;
+
+  List<String> branches = [
+    'Loook Chilanzar',
+    'Loook Yunusobod',
+    'Loook Maksim Gorkiy',
+    'Loook Boulevard',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -148,29 +160,91 @@ class _CheckoutState extends State<Checkout> {
                 child: IndexedStack(
                   index: _selectedIndex,
                   children: [
-                    SizedBox(
-                      height: 140,
-                      width: 360,
+                    GestureDetector(
+                      onTap: () async {
+                        final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MapScreen()));
+                        if (result != null) {
+                          setState(() {
+                            selectedAddress = result;
+                          });
+                        }
+                      },
                       child: Container(
+                        height: 140,
+                        width: 360,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.amberAccent),
-                        child: const Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: Text('data1'),
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white,
+                        ),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Text(
+                                  'Your Delivery Location!',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 15.0,
+                                    right: 15.0,
+                                    bottom: 15.0,
+                                    top: 10),
+                                child: Text(
+                                  selectedAddress ??
+                                      'Manzilingizni Tanlang -->',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                    SizedBox(
+                    Container(
                       height: 140,
                       width: 360,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.amberAccent),
-                        child: const Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: Text('data2'),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white),
+                      child: Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Choose branch to pick up',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w500, fontSize: 20),
+                            ),
+                            SizedBox(height: 10),
+                            DropdownButton<String>(
+                              value: selectedBranch,
+                              hint: Text('Select Branch'),
+                              isExpanded: true,
+                              items: branches.map((String branch) {
+                                return DropdownMenuItem<String>(
+                                  value: branch,
+                                  child: Text(branch),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedBranch = newValue;
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -347,7 +421,7 @@ class _CheckoutState extends State<Checkout> {
             ElevatedButton(
               onPressed: () {
                 sendOrderToTelegram(
-                  "Test", // address
+                  selectedAddress, // address
                   "Неизвестно", // branchName
                   firstName, // name
                   phoneNumber, // phone
@@ -407,7 +481,7 @@ class _CheckoutState extends State<Checkout> {
   }
 
   Future<void> sendOrderToTelegram(
-    String address,
+    String? address,
     String branchName,
     String name,
     String phone,

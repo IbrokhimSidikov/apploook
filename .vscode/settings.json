@@ -1,3 +1,6 @@
 {
-  "cSpell.words": ["iconify"]
+  "cSpell.words": [
+    "iconify"
+  ],
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
