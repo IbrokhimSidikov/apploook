@@ -66,7 +66,7 @@ class _ProfileState extends State<Profile> {
                     Text(
                       clientFirstName,
                       style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w500),
+                          fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                     Text(
                       clientPhoneNumber,

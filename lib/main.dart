@@ -1,6 +1,7 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/onboard.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,10 +19,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return  MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      home: HomeNew(),
+      theme: ThemeData(
+        // Define the default font family for the entire app
+        fontFamily: 'Poppins',
+
+        // Optionally, you can customize specific text styles
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(fontFamily: 'Poppins'),
+          bodyMedium: TextStyle(fontFamily: 'Poppins'),
+          displayLarge: TextStyle(fontFamily: 'Poppins'),
+          displayMedium: TextStyle(fontFamily: 'Poppins'),
+          // Add other text styles as needed
+        ),
+      ),
+      home: Onboard(),
     );
   }
 }

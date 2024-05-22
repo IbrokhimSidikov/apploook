@@ -305,13 +305,13 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           },
                           style: ButtonStyle(
                             foregroundColor:
-                                MaterialStateProperty.resolveWith<Color>(
+                                WidgetStateProperty.resolveWith<Color>(
                                     (states) {
                               return Colors.black;
                             }),
-                            backgroundColor: MaterialStateProperty.all<Color>(
+                            backgroundColor: WidgetStateProperty.all<Color>(
                                 Colors.transparent),
-                            elevation: MaterialStateProperty.all<double>(0),
+                            elevation: WidgetStateProperty.all<double>(0),
                             // No elevation
                           ),
                           child: Text(category.name),
