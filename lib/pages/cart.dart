@@ -101,7 +101,9 @@ class _CartState extends State<Cart> {
                   Text(
                     '$item items ${NumberFormat('#,##0').format(price)} UZS',
                     style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w600),
+                        fontSize: 20, 
+                        fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(
                     height: 5.0,
@@ -283,16 +285,16 @@ class _CartState extends State<Cart> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
+                            backgroundColor: WidgetStateProperty.all(
                                 const Color(0xffF1F2F7)),
                             foregroundColor:
-                                MaterialStateProperty.all(Colors.black),
+                                WidgetStateProperty.all(Colors.black),
                           ),
                           child: const Padding(
                             padding: EdgeInsets.all(12.0),
                             child: Text(
                               'Apply promo code',
-                              style: TextStyle(fontSize: 18),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                             ),
                           ),
                         ),
@@ -302,8 +304,8 @@ class _CartState extends State<Cart> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 215, 56)),
+                            backgroundColor: WidgetStateProperty.all(
+                                const Color(0xFFFEC700)),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
@@ -318,7 +320,7 @@ class _CartState extends State<Cart> {
                               child: Text(
                                 'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
                                 style: const TextStyle(
-                                    color: Colors.black, fontSize: 18),
+                                    color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
                               ),
                             ),
                           ),

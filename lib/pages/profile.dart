@@ -41,20 +41,21 @@ class _ProfileState extends State<Profile> {
       body: Stack(
         children: [
           Positioned(
-            top: 70,
+            top: 85,
             left: 25,
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(5),
+                  padding: const EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Color.fromARGB(255, 255, 215, 59),
+                    //color: Color.fromARGB(255, 255, 215, 59),
                   ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.white,
+                  child: Image.asset(
+                    'images/profile_icon.png', // Path to your SVG file
+                    width: 50,
+                    height: 50,
+                   // Optional: apply color if needed
                   ),
                 ),
                 const SizedBox(

@@ -30,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(addressDetail),
+        title: Text(addressDetail, style: TextStyle(fontSize: 18),),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -39,81 +39,99 @@ class _MapScreenState extends State<MapScreen> {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await _fetchCurrentLocation();
-        },
-        backgroundColor: Colors.white,
-        child: Icon(Icons.data_saver_on),
-      ),
-      body: Stack(
+      body: Column(
         children: [
-          YandexMap(
-            onMapCreated: (controller) {
-              mapControllerCompleter.complete(controller);
-            },
-            onCameraPositionChanged: (cameraPosition, reason, finished) {
-              if (finished) {
-                updateAddressDetail(
-                  AppLatLong(
-                    lat: cameraPosition.target.latitude,
-                    long: cameraPosition.target.longitude,
+          Expanded(
+            child: Stack(
+              children: [
+                YandexMap(
+                  onMapCreated: (controller) {
+                    mapControllerCompleter.complete(controller);
+                  },
+                  onCameraPositionChanged: (cameraPosition, reason, finished) {
+                    if (finished) {
+                      updateAddressDetail(
+                        AppLatLong(
+                          lat: cameraPosition.target.latitude,
+                          long: cameraPosition.target.longitude,
+                        ),
+                      );
+                    }
+                  },
+                ),
+                Center(
+                  child: Icon(
+                    Icons.location_on,
+                    color: Colors.red,
+                    size: 45,
                   ),
-                );
-              }
-            },
-          ),
-          const Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Icon(
-              Icons.location_on,
-              color: Colors.red,
-              size: 45,
+                ),
+              ],
             ),
           ),
-          Positioned(
-            bottom: 16,
-            left: 16,
-            child: FloatingActionButton(
-              //to confirm the location
-              onPressed: () async {
-                final controller = await mapControllerCompleter.future;
-                final cameraPosition = await controller.getCameraPosition();
-                final latLong = AppLatLong(
-                  lat: cameraPosition.target.latitude,
-                  long: cameraPosition.target.longitude,
-                );
-                // Handle the latLong as needed
-                print('Lat: ${latLong.lat}, Long: ${latLong.long}');
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      content:
-                          Text('$addressDetail\nDo you Confirm your Address'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text('Cancel'),
-                        ),
-                        TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context, addressDetail);
-                            },
-                            child: Text('Confirm')),
-                      ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                FloatingActionButton(
+                  onPressed: () async {
+                    await _fetchCurrentLocation();
+                  },
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.data_saver_on),
+                ),
+                FloatingActionButton(
+                  // to confirm the location
+                  onPressed: () async {
+                    final controller = await mapControllerCompleter.future;
+                    final cameraPosition = await controller.getCameraPosition();
+                    final latLong = AppLatLong(
+                      lat: cameraPosition.target.latitude,
+                      long: cameraPosition.target.longitude,
+                    );
+                    // Handle the latLong as needed
+                    print('Lat: ${latLong.lat}, Long: ${latLong.long}');
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Text(
+                            'Вы подтверждаете свой адрес?\n\n$addressDetail',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pop(context, addressDetail);
+                              },
+                              child: Text(
+                                'Confirm',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     );
                   },
-                );
-              },
-              backgroundColor: const Color.fromARGB(255, 255, 215, 62),
-              child: Icon(Icons.check),
+                  backgroundColor: const Color.fromARGB(255, 255, 215, 62),
+                  child: Icon(Icons.check),
+                ),
+              ],
             ),
           ),
         ],
@@ -157,48 +175,48 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> updateAddressDetail(AppLatLong latLong) async {
-  setState(() {
-    addressDetail = "...loading";
-  });
+    setState(() {
+      addressDetail = "...loading";
+    });
 
-  try {
-    AddressDetailModel? data = await repository.getAddressDetail(latLong);
-    print(data);
+    try {
+      AddressDetailModel? data = await repository.getAddressDetail(latLong);
+      print(data);
 
-
-    if (data != null && data.responset != null) {
-      var geoObjectCollection = data.responset!.geoObjectCollection;
-      if (geoObjectCollection != null && geoObjectCollection.featureMember != null && geoObjectCollection.featureMember!.isNotEmpty) {
-        var geoObject = geoObjectCollection.featureMember![0].geoObject;
-        if (geoObject != null) {
-          var geocoderMetaData = geoObject.metaDataProperty?.geocoderMetaData;
-          if (geocoderMetaData != null) {
-            var address = geocoderMetaData.address;
-            if (address != null) {
-              addressDetail = address.formatted;
+      if (data != null && data.responset != null) {
+        var geoObjectCollection = data.responset!.geoObjectCollection;
+        if (geoObjectCollection != null &&
+            geoObjectCollection.featureMember != null &&
+            geoObjectCollection.featureMember!.isNotEmpty) {
+          var geoObject = geoObjectCollection.featureMember![0].geoObject;
+          if (geoObject != null) {
+            var geocoderMetaData = geoObject.metaDataProperty?.geocoderMetaData;
+            if (geocoderMetaData != null) {
+              var address = geocoderMetaData.address;
+              if (address != null) {
+                addressDetail = address.formatted;
+              } else {
+                addressDetail = "No address found in GeocoderMetaData";
+              }
             } else {
-              addressDetail = "No address found in GeocoderMetaData";
+              addressDetail = "No GeocoderMetaData found";
             }
           } else {
-            addressDetail = "No GeocoderMetaData found";
+            addressDetail = "No GeoObject found";
           }
         } else {
-          addressDetail = "No GeoObject found";
+          addressDetail = "No featureMember found";
         }
       } else {
-        addressDetail = "No featureMember found";
+        addressDetail = "No response data found";
+        print(addressDetail);
+        print(data);
       }
-    } else {
-      addressDetail = "No response data found";
-    print(addressDetail);
-    print(data);
+    } catch (e) {
+      addressDetail = "Error fetching address details: $e";
     }
-  } catch (e) {
-    addressDetail = "Error fetching address details: $e";
+
+    setState(() {});
+    print(addressDetail);
   }
-
-  setState(() {});
-  print(addressDetail);
-}
-
 }

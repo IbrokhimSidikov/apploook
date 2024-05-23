@@ -238,7 +238,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   children: [
                     Icon(Icons.location_on, size: 30),
                     SizedBox(width: 5.0), // Add some horizontal spacing
-                    Text("Istanbul"),
+                    Text("Tashkent"),
                   ],
                 ),
               ),
@@ -283,7 +283,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               children: [
                 // Row of buttons with category names
                 Container(
-                  margin: EdgeInsets.only(top: 297.0), // Add top margin
+                  margin: EdgeInsets.only(top: 307.0), // Add top margin
                   height: 50, // Set the height of the row
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(

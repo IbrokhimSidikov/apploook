@@ -231,10 +231,10 @@ class _DetailsState extends State<Details> {
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width / 2,
-                    padding: const EdgeInsets.only(top: 10, bottom: 10),
+                    padding: const EdgeInsets.only(top: 15, bottom: 15, right: 60),
                     decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 215, 31),
-                        borderRadius: BorderRadius.circular(10)),
+                        color: Color(0xFFFEC700),
+                        borderRadius: BorderRadius.circular(50)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -253,26 +253,27 @@ class _DetailsState extends State<Details> {
                             style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16.0,
-                                fontFamily: 'Poppins'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600),
                           ),
                         ),
-                        const SizedBox(
-                          width: 30.0,
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 10.0,
-                        )
+                        // const SizedBox(
+                        //   width: 30.0,
+                        // ),
+                        // Container(
+                        //   padding: EdgeInsets.all(3),
+                        //   decoration: BoxDecoration(
+                        //     color: Colors.grey,
+                        //     borderRadius: BorderRadius.circular(8),
+                        //   ),
+                        //   child: const Icon(
+                        //     Icons.shopping_cart_outlined,
+                        //     color: Colors.white,
+                        //   ),
+                        // ),
+                        // const SizedBox(
+                        //   width: 10.0,
+                        // )
                       ],
                     ),
                   )

@@ -61,7 +61,7 @@ class _CheckoutState extends State<Checkout> {
 
   String? selectedAddress;
   String? selectedBranch;
-
+  String? selectedOption;
   List<String> branches = [
     'Loook Chilanzar',
     'Loook Yunusobod',
@@ -86,7 +86,7 @@ class _CheckoutState extends State<Checkout> {
         child: Column(
           children: [
             const SizedBox(height: 20.0),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
@@ -99,12 +99,12 @@ class _CheckoutState extends State<Checkout> {
                 SizedBox(
                   width: 170,
                 ),
-                // SvgPicture.asset('images/error_outline.svg')
+                // SvgPicture.asset('images/error_outline.svg'),
               ],
             ),
             const SizedBox(height: 20.0),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 0),
@@ -114,10 +114,15 @@ class _CheckoutState extends State<Checkout> {
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                   child: const Text(
                     'DELIVERY',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
                 ElevatedButton(
@@ -128,24 +133,35 @@ class _CheckoutState extends State<Checkout> {
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                   child: const Text(
                     'SELF-PICKUP',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                 ),
                 ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 2),
+                  onPressed: () {},
+                  // onPressed: () => setState(() => _selectedIndex = 2),
                   style: ButtonStyle(
                     backgroundColor: WidgetStateProperty.all(
                       _selectedIndex == 2
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                   ),
                   child: const Text(
                     'CARHOP',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.black),
                   ),
                 )
               ],
@@ -154,7 +170,7 @@ class _CheckoutState extends State<Checkout> {
               height: 15.0,
             ),
             Material(
-              elevation: 8.0,
+              elevation: 0.5,
               borderRadius: BorderRadius.circular(15.0),
               child: Expanded(
                 child: IndexedStack(
@@ -174,10 +190,10 @@ class _CheckoutState extends State<Checkout> {
                       },
                       child: Container(
                         height: 140,
-                        width: 360,
+                        width: 390,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
-                          color: Colors.white,
+                          color: Color(0xFFF1F2F7),
                         ),
                         child: SingleChildScrollView(
                           child: Column(
@@ -185,11 +201,18 @@ class _CheckoutState extends State<Checkout> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(15.0),
-                                child: Text(
-                                  'Your Delivery Location!',
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 20),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Your Delivery Location!',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 20),
+                                    ),
+                                    SvgPicture.asset('images/close_black.svg'),
+                                  ],
                                 ),
                               ),
                               Padding(
@@ -213,10 +236,10 @@ class _CheckoutState extends State<Checkout> {
                     ),
                     Container(
                       height: 140,
-                      width: 360,
+                      width: 390,
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),
-                          color: Colors.white),
+                          color: Color(0xFFF1F2F7)),
                       child: Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: Column(
@@ -250,7 +273,7 @@ class _CheckoutState extends State<Checkout> {
                     ),
                     SizedBox(
                       height: 140,
-                      width: 360,
+                      width: 390,
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
@@ -269,13 +292,14 @@ class _CheckoutState extends State<Checkout> {
               height: 25.0,
             ),
             Material(
-              elevation: 8.0,
+              elevation: 0.5,
               borderRadius: BorderRadius.circular(15.0),
               child: Container(
-                width: 360,
+                width: 390,
                 height: 180,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
+                  color: Colors.white,
                 ),
                 child: Column(
                   children: [
@@ -330,6 +354,44 @@ class _CheckoutState extends State<Checkout> {
             const SizedBox(
               height: 20,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Payment Method',
+                  labelStyle: TextStyle(color: Colors.black),
+                ),
+                value: selectedOption,
+                items: [
+                  DropdownMenuItem<String>(
+                    value: 'Cash',
+                    child: Row(
+                      children: [
+                        Icon(Icons.money, color: Colors.green),
+                        SizedBox(width: 10),
+                        Text('Cash'),
+                      ],
+                    ),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'Card',
+                    child: Row(
+                      children: [
+                        Icon(Icons.credit_card, color: Colors.blue),
+                        SizedBox(width: 10),
+                        Text('Card'),
+                      ],
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedOption = value;
+                  });
+                },
+              ),
+            ),
             const SizedBox(
               height: 20,
             ),
@@ -348,7 +410,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 Container(
                   height: 48,
-                  width: 363,
+                  width: 390,
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.black26),
                     borderRadius: BorderRadius.circular(10),
@@ -395,7 +457,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 Container(
                   height: 100,
-                  width: 363,
+                  width: 390,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.black26),
@@ -419,8 +481,9 @@ class _CheckoutState extends State<Checkout> {
               height: 50.0,
             ),
             ElevatedButton(
-              onPressed: () {
-                sendOrderToTelegram(
+              onPressed: () async {
+                // Send order to Telegram
+                await sendOrderToTelegram(
                   selectedAddress, // address
                   "Неизвестно", // branchName
                   firstName, // name
@@ -431,11 +494,33 @@ class _CheckoutState extends State<Checkout> {
                   orderPrice, // total
                   41.313678, // latitude
                   69.242824, // longitude
+                  cartProvider
+                );
+
+                // Show success message
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text('Order Success'),
+                    content: Text('Your order has been placed successfully!'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Close the dialog
+                          Navigator.pop(
+                              context); // Go back to the previous screen (Checkout screen)
+                          Navigator.pop(
+                              context); // Go back to the screen before the Checkout screen
+                        },
+                        child: Text('OK'),
+                      ),
+                    ],
+                  ),
                 );
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all<Color>(const Color(0xffFEC700)),
+                    WidgetStateProperty.all<Color>(const Color(0xffFEC700)),
               ),
               child: const Padding(
                 padding:
@@ -491,6 +576,7 @@ class _CheckoutState extends State<Checkout> {
     int total,
     double latitude,
     double longitude,
+    CartProvider cartProvider
   ) async {
     try {
       // Format order details
@@ -522,7 +608,13 @@ class _CheckoutState extends State<Checkout> {
         print('Response status code: ${response.statusCode}');
         print('Response body: ${response.body}');
         throw Exception('Failed to send order');
+      } else {
+        cartProvider.clearCart();
       }
+
+    // if(response.statusCode == 200) {
+
+    // }
     } catch (e) {
       print('Error: $e');
     }
