@@ -29,6 +29,9 @@
         <meta-data
             android:name="com.yandex.mapkit.ApiKey"
             android:value="7829b061-64f7-4387-89f8-dab711940e2f"/>
+         <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default_channel_id" />
     </application>
     
     <queries>
