@@ -220,10 +220,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => HomeNew()),
-                          );
+                          Navigator.pushReplacementNamed(context, '/signin');
                         },
                         child: const Text(
                           "Continue",

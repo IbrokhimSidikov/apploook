@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 
 class Checkout extends StatefulWidget {
-  final int price;
-  const Checkout({Key? key, required this.price}) : super(key: key);
+   
+  Checkout({Key? key,}) : super(key: key);
 
   @override
   State<Checkout> createState() => _CheckoutState();
@@ -19,7 +19,7 @@ class Checkout extends StatefulWidget {
 
 class _CheckoutState extends State<Checkout> {
   int _selectedIndex = 0;
-  late int orderPrice = 0;
+  late double orderPrice = 0;
   String firstName = '';
   String phoneNumber = '';
   String clientComment = '';
@@ -31,7 +31,7 @@ class _CheckoutState extends State<Checkout> {
     super.initState();
     _loadPhoneNumber();
     _loadCustomerName();
-    orderPrice = widget.price; // Initialize orderPrice in initState
+    
   }
 
   Future<void> _loadPhoneNumber() async {
@@ -72,6 +72,8 @@ class _CheckoutState extends State<Checkout> {
   @override
   Widget build(BuildContext context) {
     var cartProvider = Provider.of<CartProvider>(context);
+
+    orderPrice = cartProvider.getTotalPrice();
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
       var itemTotal = item.quantity * item.product.price;
@@ -484,18 +486,17 @@ class _CheckoutState extends State<Checkout> {
               onPressed: () async {
                 // Send order to Telegram
                 await sendOrderToTelegram(
-                  selectedAddress, // address
-                  "Неизвестно", // branchName
-                  firstName, // name
-                  phoneNumber, // phone
-                  "Cash", // paymentType
-                  commented,
-                  orderItems, // orderItems
-                  orderPrice, // total
-                  41.313678, // latitude
-                  69.242824, // longitude
-                  cartProvider
-                );
+                    selectedAddress, // address
+                    "Неизвестно", // branchName
+                    firstName, // name
+                    phoneNumber, // phone
+                    "Cash", // paymentType
+                    commented,
+                    orderItems, // orderItems
+                    orderPrice, // total
+                    cartProvider.showLat(), // latitude
+                    cartProvider.showLong(), // longitude
+                    cartProvider);
 
                 // Show success message
                 showDialog(
@@ -507,10 +508,11 @@ class _CheckoutState extends State<Checkout> {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // Close the dialog
-                          Navigator.pop(
-                              context); // Go back to the previous screen (Checkout screen)
-                          Navigator.pop(
-                              context); // Go back to the screen before the Checkout screen
+                          // Navigator.pop(
+                          //     context); // Go back to the previous screen (Checkout screen)
+                          // Navigator.pop(
+                          //     context); // Go back to the screen before the Checkout screen
+                          Navigator.pushReplacementNamed(context, '/homeNew');
                         },
                         child: Text('OK'),
                       ),
@@ -566,18 +568,17 @@ class _CheckoutState extends State<Checkout> {
   }
 
   Future<void> sendOrderToTelegram(
-    String? address,
-    String branchName,
-    String name,
-    String phone,
-    String paymentType,
-    String comment,
-    List orderItems,
-    int total,
-    double latitude,
-    double longitude,
-    CartProvider cartProvider
-  ) async {
+      String? address,
+      String branchName,
+      String name,
+      String phone,
+      String paymentType,
+      String comment,
+      List orderItems,
+      double total,
+      double latitude,
+      double longitude,
+      CartProvider cartProvider) async {
     try {
       // Format order details
       final orderDetails = "Адрес: $address\n" +
@@ -612,9 +613,9 @@ class _CheckoutState extends State<Checkout> {
         cartProvider.clearCart();
       }
 
-    // if(response.statusCode == 200) {
+      // if(response.statusCode == 200) {
 
-    // }
+      // }
     } catch (e) {
       print('Error: $e');
     }

@@ -42,8 +42,8 @@ class _AuthorizationState extends State<Authorization> {
     if (_phoneFormKey.currentState?.validate() ?? false) {
       _savePhoneNumber(
           _phoneNumber?.international ?? '+998', _firstNameController.text);
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomeNew()));
+      
+      Navigator.pushReplacementNamed(context, '/homeNew');;
     }
   }
 

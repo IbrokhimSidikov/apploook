@@ -1,7 +1,11 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/login.dart';
 import 'package:apploook/pages/onboard.dart';
+import 'package:apploook/pages/signin.dart';
+import 'package:apploook/pages/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +39,17 @@ class MyApp extends StatelessWidget {
           // Add other text styles as needed
         ),
       ),
-      home: Onboard(),
+      // home: Onboard(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => Onboard(),
+        '/homeNew': (context) => HomeNew(),
+        '/signin':(context)=>SignIn(),
+        '/cart':(context)=>Cart(),
+        '/checkout':(context)=>Checkout(),
+        
+      },
+    
     );
   }
 }

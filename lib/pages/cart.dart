@@ -311,11 +311,7 @@ class _CartState extends State<Cart> {
                             padding: const EdgeInsets.all(12.0),
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            Checkout(price: price)));
+                                Navigator.pushReplacementNamed(context, '/checkout');
                               },
                               child: Text(
                                 'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',

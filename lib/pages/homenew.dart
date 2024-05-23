@@ -517,8 +517,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               left: 25.0,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                      context, MaterialPageRoute(builder: (context) => Cart()));
+                  Navigator.pushReplacementNamed(context, '/cart');
                 },
                 child: Container(
                   decoration: BoxDecoration(

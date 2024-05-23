@@ -7,6 +7,9 @@ import 'package:apploook/services/app_location_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:apploook/cart_provider.dart';
+import 'package:provider/provider.dart';
+
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -28,9 +31,14 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var cartProvider = Provider.of<CartProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(addressDetail, style: TextStyle(fontSize: 18),),
+        title: Text(
+          addressDetail,
+          style: TextStyle(fontSize: 18),
+        ),
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
@@ -107,7 +115,7 @@ class _MapScreenState extends State<MapScreen> {
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                'Cancel',
+                                'Отмена',
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
@@ -115,9 +123,10 @@ class _MapScreenState extends State<MapScreen> {
                               onPressed: () {
                                 Navigator.pop(context);
                                 Navigator.pop(context, addressDetail);
+                                cartProvider.addLatLong(latLong.lat, latLong.long);
                               },
                               child: Text(
-                                'Confirm',
+                                'Да', //Confirm the Location
                                 style: TextStyle(
                                   color: Colors.black,
                                 ),

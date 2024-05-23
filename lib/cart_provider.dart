@@ -1,11 +1,14 @@
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/models/app_lat_long.dart';
 
 class CartProvider extends ChangeNotifier {
   List<CartItem> _cartItems = [];
 
   List<CartItem> get cartItems => _cartItems;
+  double latitude = 0.0;
+  double longitude = 0.0;
 
   void addToCart(Product product, int quantity) {
     // Check if the product is already in the cart
@@ -28,6 +31,19 @@ class CartProvider extends ChangeNotifier {
   void removeFromCart(CartItem item) {
     _cartItems.remove(item);
     notifyListeners();
+  }
+
+  void addLatLong(lat, long) {
+    latitude = lat;
+    longitude = long;
+  }
+
+  showLat() {
+    return latitude;
+  }
+
+  showLong() {
+    return longitude;
   }
 
   void updateQuantity(CartItem cartItem, int newQuantity) {
@@ -55,4 +71,13 @@ class CartProvider extends ChangeNotifier {
     }
     return totalQuantity;
   }
+
+  getTotalPrice() {
+      double totalPrice = 0;
+      for (var cartItem in _cartItems) {
+        totalPrice += cartItem.quantity * cartItem.product.price;
+      }
+      return totalPrice;
+    }
+  
 }
