@@ -169,7 +169,7 @@ class _MapScreenState extends State<MapScreen> {
                       builder: (context) {
                         return AlertDialog(
                           content: Text(
-                            'Вы подтверждаете свой адрес?\n\n$addressDetail',
+                            'Do you confirm your address?\n\n$addressDetail',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,

@@ -70,16 +70,19 @@ class _CartState extends State<Cart> {
           },
           child: Container(
             margin: const EdgeInsets.only(left: 10.0),
-            child: SvgPicture.asset('images/close.svg'),
+            child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              cartProvider.clearCart();
-            },
-            icon: Icon(Icons.delete),
-            tooltip: 'Clear Cart',
+          Container(
+            margin:  const EdgeInsets.only(right: 10.0),
+            child: IconButton(
+              onPressed: () {
+                cartProvider.clearCart();
+              },
+              icon: Icon(Icons.delete),
+              tooltip: 'Clear Cart',
+            ),
           ),
         ],
       ),
