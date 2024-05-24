@@ -490,7 +490,7 @@ class _CheckoutState extends State<Checkout> {
                     "Неизвестно", // branchName
                     firstName, // name
                     phoneNumber, // phone
-                    "Cash", // paymentType
+                    selectedOption!, // paymentType
                     commented,
                     orderItems, // orderItems
                     orderPrice, // total

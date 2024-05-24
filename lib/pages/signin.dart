@@ -10,6 +10,7 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  final String phoneNumber = '71-207-207-0';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,7 +109,37 @@ class _SignInState extends State<SignIn> {
       ),
       actions: [
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Call-Center"),
+                          content: Text(
+                              "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text(
+                                "Call",
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 255, 215, 72)),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
           child: Container(
             margin: EdgeInsets.all(10),
             width: 37,

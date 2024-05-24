@@ -294,7 +294,7 @@ class _CartState extends State<Cart> {
                             padding: EdgeInsets.all(12.0),
                             child: Text(
                               'Apply promo code',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black26),
                             ),
                           ),
                         ),
@@ -316,7 +316,7 @@ class _CartState extends State<Cart> {
                               child: Text(
                                 'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
                                 style: const TextStyle(
-                                    color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+                                    color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ),
