@@ -109,9 +109,9 @@ class _DetailsState extends State<Details> {
                             width: 140,
                             decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Color(0xFFD9D9D9)),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 10.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   GestureDetector(
                                     onTap: () {

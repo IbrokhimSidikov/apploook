@@ -10,6 +10,7 @@ import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import 'package:http/http.dart' as http;
@@ -211,18 +212,22 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   // );
                   _scaffoldKey.currentState!.openDrawer();
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(5),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: const Icon(
-                    Icons.person,
-                    size: 40,
-                    color: Colors.black,
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: SvgPicture.asset('images/profileIconHome.svg'),
                 ),
+                // Container(
+                //   padding: const EdgeInsets.all(5),
+                //   decoration: const BoxDecoration(
+                //     shape: BoxShape.circle,
+                //     color: Colors.white,
+                //   ),
+                //   child: const Icon(
+                //     Icons.person,
+                //     size: 40,
+                //     color: Colors.black,
+                //   ),
+                // ),
               ),
             ),
             Positioned(
@@ -232,7 +237,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20)),
+                    borderRadius: BorderRadius.circular(50)),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min, // Avoid unnecessary space
                   children: [
