@@ -172,7 +172,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color.fromARGB(255, 226, 225, 225),
+      backgroundColor: Color(0xFFF1F2F7),
       body: Container(
         margin: const EdgeInsets.only(top: 10.0),
         child: Stack(
@@ -182,7 +182,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 226, 225, 225),
+                color: Colors.transparent,
               ),
             ),
             // Body Container

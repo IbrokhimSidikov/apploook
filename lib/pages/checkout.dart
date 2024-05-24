@@ -71,6 +71,13 @@ class _CheckoutState extends State<Checkout> {
     'Loook Boulevard',
   ];
 
+  String? _validatePayment(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please select a payment method';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     var cartProvider = Provider.of<CartProvider>(context);
@@ -91,6 +98,7 @@ class _CheckoutState extends State<Checkout> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: appBar(),
       body: SingleChildScrollView(
         child: Column(
@@ -373,6 +381,7 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
+                  
                   labelText: 'Payment Method',
                   labelStyle: TextStyle(color: Colors.black),
                 ),
@@ -567,6 +576,7 @@ class _CheckoutState extends State<Checkout> {
 
   AppBar appBar() {
     return AppBar(
+      backgroundColor: Colors.white,
       title: const Text(
         'Checkout',
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),

@@ -38,6 +38,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Positioned(
@@ -46,7 +47,8 @@ class _ProfileState extends State<Profile> {
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
+                  padding:
+                      const EdgeInsets.only(left: 5.0, top: 5.0, bottom: 5.0),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     //color: Color.fromARGB(255, 255, 215, 59),
@@ -55,7 +57,7 @@ class _ProfileState extends State<Profile> {
                     'images/profile_icon.png', // Path to your SVG file
                     width: 50,
                     height: 50,
-                   // Optional: apply color if needed
+                    // Optional: apply color if needed
                   ),
                 ),
                 const SizedBox(
@@ -192,6 +194,7 @@ class _ProfileState extends State<Profile> {
         ],
       ),
       bottomNavigationBar: const BottomAppBar(
+        color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [Text('Version 1.0.0, build 10001')],

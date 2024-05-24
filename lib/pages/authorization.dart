@@ -113,8 +113,8 @@ class _AuthorizationState extends State<Authorization> {
                 },
                 countryButtonStyle: const CountryButtonStyle(
                   showDialCode: true, // Display +998
-                  showIsoCode: false, // Hide ISO code (optional)
-                  showFlag: true, // Display Uzbekistan flag (optional)
+                  showIsoCode: false, // Hide ISO code 
+                  showFlag: true, // Display Uzbekistan flag 
                   flagSize: 16,
                 ),
               ),
