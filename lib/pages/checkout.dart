@@ -8,10 +8,12 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:flutter/services.dart';
 
 class Checkout extends StatefulWidget {
-   
-  Checkout({Key? key,}) : super(key: key);
+  Checkout({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<Checkout> createState() => _CheckoutState();
@@ -24,14 +26,14 @@ class _CheckoutState extends State<Checkout> {
   String phoneNumber = '';
   String clientComment = '';
   String clientCommentPhone = '';
-  late String commented;
+  String commented = '';
+  String orderType = '';
 
   @override
   void initState() {
     super.initState();
     _loadPhoneNumber();
     _loadCustomerName();
-    
   }
 
   Future<void> _loadPhoneNumber() async {
@@ -82,6 +84,12 @@ class _CheckoutState extends State<Checkout> {
       return '${item.product.name}\n ${item.quantity} x ${NumberFormat('#,##0').format(item.product.price)} = ${NumberFormat('#,##0').format(item.quantity * item.product.price)} сум\n';
     }).toList();
 
+    if (_selectedIndex == 0) {
+      orderType = 'Delivery';
+    } else {
+      orderType = 'Self-Pickup';
+    }
+
     return Scaffold(
       appBar: appBar(),
       body: SingleChildScrollView(
@@ -96,7 +104,7 @@ class _CheckoutState extends State<Checkout> {
                 ),
                 Text(
                   'Choose your order type',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(
                   width: 170,
@@ -124,7 +132,8 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   child: const Text(
                     'DELIVERY',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
                 ElevatedButton(
@@ -143,7 +152,8 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   child: const Text(
                     'SELF-PICKUP',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
                 ElevatedButton(
@@ -163,13 +173,14 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   child: const Text(
                     'CARHOP',
-                    style: TextStyle(color: Colors.black),
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 )
               ],
             ),
             const SizedBox(
-              height: 15.0,
+              height: 40.0,
             ),
             Material(
               elevation: 0.5,
@@ -291,76 +302,77 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             const SizedBox(
-              height: 25.0,
+              height: 40.0,
             ),
-            Material(
-              elevation: 0.5,
-              borderRadius: BorderRadius.circular(15.0),
-              child: Container(
-                width: 390,
-                height: 180,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.0),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Order Price :',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
-                        ],
-                      ),
+            Container(
+              width: 390,
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15.0),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xFFD9D9D9), // Shadow color
+                    offset: Offset(0, 7), // Offset in x and y direction
+                    blurRadius: 10.0, // Spread radius
+                    spreadRadius: 2.0, // Blur radius
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Order Price :',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                      ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Delivery Price :',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text('Неизвестно'),
-                        ],
-                      ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.all(15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Delivery Price :',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        Text('Неизвестно'),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 10.0,
+                  ),
+                  const SizedBox(
+                    height: 10.0,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Price :',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                      ],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total Price :',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ), //price
+                  ),
+                ],
+              ),
             ),
             const SizedBox(
-              height: 20,
+              height: 40,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  border: OutlineInputBorder(),
                   labelText: 'Payment Method',
                   labelStyle: TextStyle(color: Colors.black),
                 ),
@@ -395,7 +407,7 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             const SizedBox(
-              height: 20,
+              height: 40,
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,7 +416,7 @@ class _CheckoutState extends State<Checkout> {
                   'Additional number',
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(
@@ -435,6 +447,12 @@ class _CheckoutState extends State<Checkout> {
                             border: InputBorder.none,
                           ),
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter
+                                .digitsOnly, // Allows only digits
+                            LengthLimitingTextInputFormatter(
+                                9), // Limits the input to 9 digits
+                          ],
                           onChanged: (value) {
                             clientCommentPhone = value;
                             _updateCommented();
@@ -445,14 +463,14 @@ class _CheckoutState extends State<Checkout> {
                   ),
                 ),
                 const SizedBox(
-                  height: 25.0,
+                  height: 40.0,
                 ),
                 const Text(
                   'Comments',
                   style: TextStyle(
                       fontSize: 16,
                       color: Colors.black,
-                      fontWeight: FontWeight.w500),
+                      fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(
                   height: 15.0,
@@ -496,6 +514,7 @@ class _CheckoutState extends State<Checkout> {
                     orderPrice, // total
                     cartProvider.showLat(), // latitude
                     cartProvider.showLong(), // longitude
+                    orderType,
                     cartProvider);
 
                 // Show success message
@@ -530,7 +549,7 @@ class _CheckoutState extends State<Checkout> {
                 child: Text(
                   'Order',
                   style: TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     fontSize: 16,
                     color: Colors.black,
                   ),
@@ -538,7 +557,7 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             const SizedBox(
-              height: 25.0,
+              height: 50.0,
             )
           ],
         ),
@@ -578,6 +597,7 @@ class _CheckoutState extends State<Checkout> {
       double total,
       double latitude,
       double longitude,
+      String orderType,
       CartProvider cartProvider) async {
     try {
       // Format order details
@@ -586,12 +606,13 @@ class _CheckoutState extends State<Checkout> {
           "Имя: $name\n" +
           "Тел: $phone\n" +
           "Тип платежа: $paymentType\n\n" +
+          "Тип zakaza: $orderType\n\n" +
           "Заметка: ${comment.isEmpty ? 'Нет заметки' : comment}\n\n" +
           "🛒 <b>Корзина:</b>\n${orderItems.join("\n")}\n\n" +
           "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
           "-----------------------\n" +
           "Источник: Mobile App\n";
-
+      
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
 
       final telegramDebUrl =

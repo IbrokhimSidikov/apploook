@@ -212,7 +212,7 @@ class _DetailsState extends State<Details> {
             // ),
             const Spacer(),
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -257,23 +257,7 @@ class _DetailsState extends State<Details> {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
-                        // const SizedBox(
-                        //   width: 30.0,
-                        // ),
-                        // Container(
-                        //   padding: EdgeInsets.all(3),
-                        //   decoration: BoxDecoration(
-                        //     color: Colors.grey,
-                        //     borderRadius: BorderRadius.circular(8),
-                        //   ),
-                        //   child: const Icon(
-                        //     Icons.shopping_cart_outlined,
-                        //     color: Colors.white,
-                        //   ),
-                        // ),
-                        // const SizedBox(
-                        //   width: 10.0,
-                        // )
+                        
                       ],
                     ),
                   )

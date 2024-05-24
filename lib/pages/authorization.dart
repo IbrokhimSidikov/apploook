@@ -122,7 +122,7 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.only(bottom: 30.0),
+            padding: const EdgeInsets.only(bottom: 50.0),
             child: ElevatedButton(
               onPressed: _continue,
               style: ElevatedButton.styleFrom(

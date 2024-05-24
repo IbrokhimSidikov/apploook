@@ -513,7 +513,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             //   ),
             // ),
             Positioned(
-              bottom: 35.0,
+              bottom: 50.0,
               left: 25.0,
               child: GestureDetector(
                 onTap: () {
