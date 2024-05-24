@@ -104,45 +104,61 @@ class _DetailsState extends State<Details> {
                             ),
                           ),
                           const Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              if (quantity > 1) {
-                                setState(() {
-                                  quantity--;
-                                  totalPrice = unitPrice * quantity;
-                                });
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child:
-                                  const Icon(Icons.remove, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          Text(
-                            quantity.toString(),
-                            style: AppWidget.semiboldTextFieldStyle(),
-                          ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                quantity++;
-                                totalPrice = unitPrice * quantity;
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: const Icon(Icons.add, color: Colors.white),
+                          Container(
+                            height: 48,
+                            width: 140,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Color(0xFFD9D9D9)),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (quantity > 1) {
+                                        setState(() {
+                                          quantity--;
+                                          totalPrice = unitPrice * quantity;
+                                        });
+                                      }
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(50)),
+                                      child:
+                                          const Icon(Icons.remove, color: Colors.black),
+                                    ),
+                                  ),
+                                   SizedBox(
+                                    width: 20.0,
+                                  ),
+                                  Container(
+                                    
+                                    child: Text(
+                                      quantity.toString(),
+                                      style: AppWidget.semiboldTextFieldStyle(),
+                                    ),
+                                  ),
+                                   SizedBox(
+                                    width: 20.0,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        quantity++;
+                                        totalPrice = unitPrice * quantity;
+                                      });
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(50)),
+                                      child: const Icon(Icons.add, color: Colors.black),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -188,28 +204,6 @@ class _DetailsState extends State<Details> {
             const SizedBox(
               height: 20.0,
             ),
-            // Row(
-            //   children: [
-            //     Text(
-            //       "Delivery Time",
-            //       style: AppWidget.LightTextFieldStyle(),
-            //     ),
-            //     const SizedBox(
-            //       width: 25.0,
-            //     ),
-            //     Icon(
-            //       Icons.alarm,
-            //       color: Colors.black54,
-            //     ),
-            //     const SizedBox(
-            //       width: 5.0,
-            //     ),
-            //     Text(
-            //       "30 min",
-            //       style: AppWidget.semiboldTextFieldStyle(),
-            //     )
-            //   ],
-            // ),
             const Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 50),
@@ -230,8 +224,10 @@ class _DetailsState extends State<Details> {
                     ],
                   ),
                   Container(
+                    //addtoCard Button
                     width: MediaQuery.of(context).size.width / 2,
-                    padding: const EdgeInsets.only(top: 15, bottom: 15, right: 60),
+                    padding:
+                        const EdgeInsets.only(top: 15, bottom: 15, right: 60),
                     decoration: BoxDecoration(
                         color: Color(0xFFFEC700),
                         borderRadius: BorderRadius.circular(50)),
@@ -257,7 +253,6 @@ class _DetailsState extends State<Details> {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
-                        
                       ],
                     ),
                   )
