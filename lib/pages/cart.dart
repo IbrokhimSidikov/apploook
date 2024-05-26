@@ -289,10 +289,10 @@ class _CartState extends State<Cart> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
+                            backgroundColor: MaterialStateProperty.all(
                                 const Color(0xffF1F2F7)),
                             foregroundColor:
-                                WidgetStateProperty.all(Colors.black),
+                                MaterialStateProperty.all(Colors.black),
                           ),
                           child: const Padding(
                             padding: EdgeInsets.all(12.0),
@@ -308,7 +308,7 @@ class _CartState extends State<Cart> {
                         ElevatedButton(
                           onPressed: () {},
                           style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
+                            backgroundColor: MaterialStateProperty.all(
                                 const Color(0xFFFEC700)),
                           ),
                           child: Padding(

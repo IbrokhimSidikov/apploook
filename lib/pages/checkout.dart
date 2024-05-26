@@ -127,12 +127,12 @@ class _CheckoutState extends State<Checkout> {
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 0),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 0
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
-                    shape: WidgetStateProperty.all(
+                    shape: MaterialStateProperty.all(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -147,12 +147,12 @@ class _CheckoutState extends State<Checkout> {
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 1),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 1
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
-                    shape: WidgetStateProperty.all(
+                    shape: MaterialStateProperty.all(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -168,12 +168,12 @@ class _CheckoutState extends State<Checkout> {
                   onPressed: () {},
                   // onPressed: () => setState(() => _selectedIndex = 2),
                   style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 2
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
                     ),
-                    shape: WidgetStateProperty.all(
+                    shape: MaterialStateProperty.all(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -550,7 +550,7 @@ class _CheckoutState extends State<Checkout> {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    WidgetStateProperty.all<Color>(const Color(0xffFEC700)),
+                    MaterialStateProperty.all<Color>(const Color(0xffFEC700)),
               ),
               child: const Padding(
                 padding:

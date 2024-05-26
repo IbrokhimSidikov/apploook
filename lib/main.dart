@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
         '/signin':(context)=>SignIn(),
         '/cart':(context)=>Cart(),
         '/checkout':(context)=>Checkout(),
-        
       },
     
     );

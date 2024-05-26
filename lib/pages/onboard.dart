@@ -137,7 +137,7 @@ class _OnboardState extends State<Onboard> {
                     ),
                     Spacer(flex: 2), // Adjust flex to control spacing
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         GestureDetector(
                           onTap: () {
@@ -199,7 +199,7 @@ class _OnboardState extends State<Onboard> {
                               ],
                             ),
                             child: const Text(
-                              'Turkish',
+                              'Russian',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 15,
