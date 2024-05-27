@@ -19,8 +19,9 @@ import 'dart:convert';
 class Category {
   final int id;
   final String name;
+  bool isSelected;
 
-  Category({required this.id, required this.name});
+  Category({required this.id, required this.name, this.isSelected = false});
 }
 
 class Product {
@@ -288,7 +289,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               children: [
                 // Row of buttons with category names
                 Container(
-                  margin: EdgeInsets.only(top: 307.0), // Add top margin
+                  margin: EdgeInsets.only(top: 283.0), // Add top margin
                   height: 50, // Set the height of the row
                   decoration: const BoxDecoration(
                     borderRadius: BorderRadius.only(
@@ -310,14 +311,24 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           },
                           style: ButtonStyle(
                             foregroundColor:
-                                WidgetStateProperty.resolveWith<Color>(
+                                MaterialStateProperty.resolveWith<Color>(
                                     (states) {
                               return Colors.black;
                             }),
-                            backgroundColor: WidgetStateProperty.all<Color>(
-                                Colors.transparent),
-                            elevation: WidgetStateProperty.all<double>(0),
-                            // No elevation
+                            backgroundColor:
+                                MaterialStateProperty.resolveWith<Color>(
+                                    (states) {
+                              // Check if the button is selected
+                              if (category.isSelected) {
+                                // Change the background color when selected
+                                return Colors
+                                    .yellow; // Change this to your desired color
+                              }
+                              return Colors
+                                  .transparent; // Set default background color
+                            }),
+                            elevation: MaterialStateProperty.all<double>(
+                                0), // No elevation
                           ),
                           child: Text(category.name),
                         ),
@@ -328,145 +339,142 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                 // List of products for each category
                 Expanded(
                   child: SingleChildScrollView(
-                    child: Column(
-                      children: categories.map((category) {
-                        List<Product> productsInCategory = allProducts
-                            .where(
-                                (product) => product.categoryId == category.id)
-                            .toList();
-                        return Column(
-                          key: ValueKey<int>(category.id),
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(top: 0),
-                              // child: Text(
-                              //   category.name,
-                              //   style: const TextStyle(
-                              //     fontSize: 20,
-                              //     fontWeight: FontWeight.bold,
-                              //   ),
-                              // ),
+                    child: allProducts.isEmpty
+                        ? SizedBox(
+                          height: 450,
+                          child: Center(
+                              child: Container(
+                                
+                                child: CircularProgressIndicator()),
                             ),
-                            ListView.builder(
-                              controller:
-                                  _categoryScrollControllers[category.id],
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: productsInCategory.length,
-                              itemBuilder: (context, productIndex) {
-                                Product product =
-                                    productsInCategory[productIndex];
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) {
-                                          if (productsInCategory.isNotEmpty &&
-                                              productIndex <
-                                                  productsInCategory.length) {
-                                            Product product =
-                                                productsInCategory[
-                                                    productIndex];
-                                            return Details(product: product);
-                                          }
-                                          // Handle the case where the product list is empty or the index is out of bounds
-                                          return Container(); // Or any other fallback widget
-                                        },
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10.0),
-                                    child: Container(
-                                      alignment: Alignment
-                                          .center, // Align children vertically
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 10.0),
-                                            child: Container(
-                                              width: 140.0,
-                                              height: 140.0,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      product.imagePath!),
-                                                  fit: BoxFit.contain,
+                        )
+                        : Column(
+                            children: categories.map((category) {
+                              List<Product> productsInCategory = allProducts
+                                  .where((product) =>
+                                      product.categoryId == category.id)
+                                  .toList();
+                              return Container(
+                                key: ValueKey<int>(category.id),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.only(bottom: 0.0),
+                                  controller:
+                                      _categoryScrollControllers[category.id],
+                                  shrinkWrap: true,
+                                  itemCount: productsInCategory.length,
+                                  itemBuilder: (context, productIndex) {
+                                    Product product =
+                                        productsInCategory[productIndex];
+                                    return GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              if (productsInCategory
+                                                      .isNotEmpty &&
+                                                  productIndex <
+                                                      productsInCategory
+                                                          .length) {
+                                                Product product =
+                                                    productsInCategory[
+                                                        productIndex];
+                                                return Details(
+                                                    product: product);
+                                              }
+                                              // Handle the case where the product list is empty or the index is out of bounds
+                                              return Container(); // Or any other fallback widget
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 10.0),
+                                              child: Container(
+                                                width: 140.0,
+                                                height: 140.0,
+                                                decoration: BoxDecoration(
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(
+                                                        product.imagePath!),
+                                                    fit: BoxFit.contain,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  product.name,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16.0,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 5.0),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(3.0),
-                                                  child: Text(
-                                                    product.getDescriptionInLanguage(
-                                                            'uz') ??
-                                                        'No Description',
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    product.name,
                                                     style: const TextStyle(
-                                                      color: Colors.grey,
                                                       fontWeight:
                                                           FontWeight.bold,
+                                                      fontSize: 16.0,
                                                     ),
                                                   ),
-                                                ),
-                                                const SizedBox(height: 5.0),
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 15.0,
-                                                    vertical: 5.0,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0),
-                                                    color:
-                                                        const Color(0xFFF1F2F7),
-                                                  ),
-                                                  child: Text(
-                                                    '${product.price.toStringAsFixed(0)} UZS',
-                                                    style: const TextStyle(
-                                                      fontSize: 14.0,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.grey,
+                                                  const SizedBox(height: 5.0),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            3.0),
+                                                    child: Text(
+                                                      product.getDescriptionInLanguage(
+                                                              'uz') ??
+                                                          'No Description',
+                                                      style: const TextStyle(
+                                                        color: Colors.grey,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
+                                                  const SizedBox(height: 5.0),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 15.0,
+                                                      vertical: 5.0,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20.0),
+                                                      color: const Color(
+                                                          0xFFF1F2F7),
+                                                    ),
+                                                    child: Text(
+                                                      '${product.price.toStringAsFixed(0)} UZS',
+                                                      style: const TextStyle(
+                                                        fontSize: 14.0,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      }).toList(),
-                    ),
+                                    );
+                                  },
+                                ),
+                              );
+                            }).toList(),
+                          ),
                   ),
                 ),
               ],
@@ -561,14 +569,34 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   }
 
   void _scrollToCategory(int categoryId) {
-    ScrollController? controller = _categoryScrollControllers[categoryId];
-    print(controller);
-    if (controller != null && controller.hasClients) {
-      Scrollable.ensureVisible(
-        controller.position.context.storageContext,
-        alignment: 0.0,
-        duration: Duration(milliseconds: 300),
-      );
+    // Deselect all categories
+    for (var category in categories) {
+      category.isSelected = false;
     }
+
+    // Select the category corresponding to categoryId
+    Category? selectedCategory;
+    for (var category in categories) {
+      if (category.id == categoryId) {
+        selectedCategory = category;
+        break;
+      }
+    }
+
+    if (selectedCategory != null) {
+      // selectedCategory.isSelected = true;
+
+      // Scroll to the selected category
+      ScrollController? controller = _categoryScrollControllers[categoryId];
+      if (controller != null && controller.hasClients) {
+        Scrollable.ensureVisible(
+          controller.position.context.storageContext,
+          alignment: 0.0,
+          duration: Duration(milliseconds: 300),
+        );
+      }
+    }
+
+    // setState(() {}); // Update UI
   }
 }

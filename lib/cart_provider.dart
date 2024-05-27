@@ -5,6 +5,8 @@ import 'package:apploook/models/app_lat_long.dart';
 
 class CartProvider extends ChangeNotifier {
   List<CartItem> _cartItems = [];
+  List<Product> _products = [];
+  bool _hasData = false;
 
   List<CartItem> get cartItems => _cartItems;
   double latitude = 0.0;
@@ -31,6 +33,20 @@ class CartProvider extends ChangeNotifier {
   void removeFromCart(CartItem item) {
     _cartItems.remove(item);
     notifyListeners();
+  }
+
+  void setProducts(List<Product> products) {
+    _products = products;
+    _hasData = true;
+    notifyListeners();
+  }
+
+  List<Product> getProducts() {
+    return List.from(_products);
+  }
+
+  bool hasData() {
+    return _hasData;
   }
 
   void addLatLong(lat, long) {
