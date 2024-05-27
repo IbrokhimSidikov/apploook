@@ -197,34 +197,37 @@ class _DetailsState extends State<Details> {
                       ),
                     ],
                   ),
-                  Container(
+                  SizedBox(
                     width: MediaQuery.of(context).size.width / 2,
-                    padding:
-                        const EdgeInsets.only(top: 15, bottom: 15),
-                    decoration: BoxDecoration(
-                        color: Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(50)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            cartProvider.addToCart(widget.product, quantity);
-                            cartProvider.logItems();
-                           Navigator.pushReplacementNamed(context, '/homeNew');
-                          },
-                          child: const Text(
-                            "Add to cart",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16.0,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w600),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        cartProvider.addToCart(widget.product, quantity);
+                        cartProvider.logItems();
+                        Navigator.pushReplacementNamed(context, '/homeNew');
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                            const Color(0xFFFEC700)),
+                        shape: WidgetStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
                           ),
                         ),
-                      ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        child: Text(
+                          "Add to cart",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.0,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             )

@@ -61,6 +61,7 @@ class _CheckoutState extends State<Checkout> {
     });
   }
 
+  bool _isProcessing = false;
   String? selectedAddress;
   String? selectedBranch;
   String? selectedOption;
@@ -362,7 +363,8 @@ class _CheckoutState extends State<Checkout> {
                             'Order Price :',
                             style: TextStyle(fontSize: 16),
                           ),
-                          Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                          Text(
+                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
                         ],
                       ),
                     ),
@@ -391,7 +393,8 @@ class _CheckoutState extends State<Checkout> {
                             'Total Price :',
                             style: TextStyle(fontSize: 16),
                           ),
-                          Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                          Text(
+                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
                         ],
                       ),
                     ),
@@ -537,60 +540,101 @@ class _CheckoutState extends State<Checkout> {
               height: 50.0,
             ),
             ElevatedButton(
-              onPressed: () async {
-                // Send order to Telegram
-                await sendOrderToTelegram(
-                    selectedAddress, // address
-                    "Неизвестно", // branchName
-                    firstName, // name
-                    phoneNumber, // phone
-                    selectedOption!, // paymentType
-                    commented,
-                    orderItems, // orderItems
-                    orderPrice, // total
-                    cartProvider.showLat(), // latitude
-                    cartProvider.showLong(), // longitude
-                    orderType,
-                    cartProvider);
+              onPressed: selectedAddress != null &&
+                      selectedOption != null &&
+                      !_isProcessing
+                  ? () async {
+                      setState(() {
+                        _isProcessing = true; // Start processing
+                      });
 
-                // Show success message
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Order Success'),
-                    content: Text('Your order has been placed successfully!'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Close the dialog
-                          // Navigator.pop(
-                          //     context); // Go back to the previous screen (Checkout screen)
-                          // Navigator.pop(
-                          //     context); // Go back to the screen before the Checkout screen
-                          Navigator.pushReplacementNamed(context, '/homeNew');
-                        },
-                        child: Text('OK'),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      try {
+                        // Send order to Telegram
+                        await sendOrderToTelegram(
+                          selectedAddress, // address
+                          "Неизвестно", // branchName
+                          firstName, // name
+                          phoneNumber, // phone
+                          selectedOption!, // paymentType
+                          commented,
+                          orderItems, // orderItems
+                          orderPrice, // total
+                          cartProvider.showLat(), // latitude
+                          cartProvider.showLong(), // longitude
+                          orderType,
+                          cartProvider,
+                        );
+
+                        // Show success message
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Order Success'),
+                            content: Text(
+                                'Your order has been placed successfully!'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // Close the dialog
+                                  Navigator.pushReplacementNamed(
+                                      context, '/homeNew');
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } catch (e) {
+                        // Handle error
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('Order Error'),
+                            content: Text(
+                                'Failed to place your order. Please try again later.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context); // Close the dialog
+                                },
+                                child: Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      } finally {
+                        setState(() {
+                          _isProcessing = false; // Stop processing
+                        });
+                      }
+                    }
+                  : null, // Disable button if address is not selected
               style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all<Color>(const Color(0xffFEC700)),
+                backgroundColor: selectedAddress != null &&
+                        selectedOption != null
+                    ? WidgetStateProperty.all<Color>(const Color(0xffFEC700))
+                    : WidgetStateProperty.all<Color>(
+                        const Color(0xFFCCCCCC)), // Change color when disabled
               ),
-              child: const Padding(
-                padding:
-                    EdgeInsets.symmetric(vertical: 15.0, horizontal: 125.0),
-                child: Text(
-                  'Order',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+              child: _isProcessing
+                  ? Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 125.0),
+                      child: Text(
+                        'Order',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
             ),
             const SizedBox(
               height: 50.0,
