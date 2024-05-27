@@ -540,31 +540,51 @@ class _CheckoutState extends State<Checkout> {
               height: 50.0,
             ),
             ElevatedButton(
-              onPressed: selectedAddress != null &&
-                      selectedOption != null &&
-                      !_isProcessing
+              onPressed: (_selectedIndex == 0
+                      ? selectedAddress != null &&
+                          selectedOption != null &&
+                          !_isProcessing
+                      : selectedBranch != null &&
+                          selectedOption != null &&
+                          !_isProcessing)
                   ? () async {
                       setState(() {
                         _isProcessing = true; // Start processing
                       });
 
                       try {
-                        // Send order to Telegram
-                        await sendOrderToTelegram(
-                          selectedAddress, // address
-                          "Неизвестно", // branchName
-                          firstName, // name
-                          phoneNumber, // phone
-                          selectedOption!, // paymentType
-                          commented,
-                          orderItems, // orderItems
-                          orderPrice, // total
-                          cartProvider.showLat(), // latitude
-                          cartProvider.showLong(), // longitude
-                          orderType,
-                          cartProvider,
-                        );
-
+                        if (_selectedIndex == 0) {
+                          // Send order to Telegram
+                          await sendOrderToTelegram(
+                            selectedAddress, // address
+                            "Неизвестно", // branchName
+                            firstName, // name
+                            phoneNumber, // phone
+                            selectedOption!, // paymentType
+                            commented,
+                            orderItems, // orderItems
+                            orderPrice, // total
+                            cartProvider.showLat(), // latitude
+                            cartProvider.showLong(), // longitude
+                            orderType,
+                            cartProvider,
+                          );
+                        } else if (_selectedIndex == 1) {
+                          await sendOrderToTelegram(
+                            "Неизвестно", // address
+                            selectedBranch!, // branchName
+                            firstName, // name
+                            phoneNumber, // phone
+                            selectedOption!, // paymentType
+                            commented,
+                            orderItems, // orderItems
+                            orderPrice, // total
+                            41.313798749076454, // latitude , 
+                            69.24407311805851, // longitude
+                            orderType,
+                            cartProvider,
+                          );
+                        }
                         // Show success message
                         showDialog(
                           context: context,
@@ -610,8 +630,9 @@ class _CheckoutState extends State<Checkout> {
                     }
                   : null, // Disable button if address is not selected
               style: ButtonStyle(
-                backgroundColor: selectedAddress != null &&
-                        selectedOption != null
+                backgroundColor: (_selectedIndex == 0
+                        ? selectedAddress != null && selectedOption != null
+                        : selectedBranch != null && selectedOption != null)
                     ? WidgetStateProperty.all<Color>(const Color(0xffFEC700))
                     : WidgetStateProperty.all<Color>(
                         const Color(0xFFCCCCCC)), // Change color when disabled
