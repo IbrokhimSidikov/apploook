@@ -21,6 +21,12 @@ class _ProfileState extends State<Profile> {
     _loadCustomerName();
   }
 
+  Future<void> _clearUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('phoneNumber');
+    await prefs.remove('firstName');
+  }
+
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -77,7 +83,19 @@ class _ProfileState extends State<Profile> {
                           fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                   ],
-                )
+                ),
+                SizedBox(
+                  width: 50.0,
+                ),
+                GestureDetector(
+                    onTap: () async {
+                      await _clearUserData(); // Clear user data
+                      Navigator.pushReplacementNamed(context,
+                          '/onboard'); // Navigate to the onboard screen
+                    },
+                    child: Container(
+                      child: Icon(Icons.logout_outlined),
+                    )),
               ],
             ),
           ),
@@ -154,40 +172,40 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(
                   height: 150,
                 ),
-                GestureDetector(
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Call-Center"),
-                          content: Text(
-                              "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: const Text(
-                                "Cancel",
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                "Call",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 255, 215, 72)),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  child: SvgPicture.asset('images/lookSupport.svg'),
-                ),
+                // GestureDetector(
+                //   onTap: () {
+                //     showDialog(
+                //       context: context,
+                //       builder: (BuildContext context) {
+                //         return AlertDialog(
+                //           title: const Text("Call-Center"),
+                //           content: Text(
+                //               "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
+                //           actions: [
+                //             TextButton(
+                //               onPressed: () {
+                //                 Navigator.of(context).pop(); // Close the dialog
+                //               },
+                //               child: const Text(
+                //                 "Cancel",
+                //                 style: TextStyle(color: Colors.black),
+                //               ),
+                //             ),
+                //             TextButton(
+                //               onPressed: () {},
+                //               child: const Text(
+                //                 "Call",
+                //                 style: TextStyle(
+                //                     color: Color.fromARGB(255, 255, 215, 72)),
+                //               ),
+                //             ),
+                //           ],
+                //         );
+                //       },
+                //     );
+                //   },
+                //   child: SvgPicture.asset('images/lookSupport.svg'),
+                // ),
               ],
             ),
           )
