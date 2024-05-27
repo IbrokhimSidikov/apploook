@@ -8,6 +8,7 @@ import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(
@@ -23,33 +24,66 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // Define the default font family for the entire app
         fontFamily: 'Poppins',
-
-        // Optionally, you can customize specific text styles
         textTheme: TextTheme(
           bodyLarge: TextStyle(fontFamily: 'Poppins'),
           bodyMedium: TextStyle(fontFamily: 'Poppins'),
           displayLarge: TextStyle(fontFamily: 'Poppins'),
           displayMedium: TextStyle(fontFamily: 'Poppins'),
-          // Add other text styles as needed
         ),
       ),
-      // home: Onboard(),
-      initialRoute: '/',
+      home: InitialScreen(),
       routes: {
-        '/': (context) => Onboard(),
         '/homeNew': (context) => HomeNew(),
-        '/signin':(context)=>SignIn(),
-        '/cart':(context)=>Cart(),
-        '/checkout':(context)=>Checkout(),
-        
+        '/signin': (context) => SignIn(),
+        '/cart': (context) => Cart(),
+        '/checkout': (context) => Checkout(),
+        '/onboard': (context) => Onboard(),
       },
-    
+    );
+  }
+}
+
+class InitialScreen extends StatefulWidget {
+  @override
+  _InitialScreenState createState() => _InitialScreenState();
+}
+
+class _InitialScreenState extends State<InitialScreen> {
+  Future<String> _getInitialRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    final phoneNumber = prefs.getString('phoneNumber');
+    if (phoneNumber != null && phoneNumber.isNotEmpty) {
+      return '/homeNew';
+    } else {
+      return '/onboard';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _getInitialRoute(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
+        } else {
+          Future.microtask(() {
+            Navigator.pushReplacementNamed(context, snapshot.data!);
+          });
+          return Scaffold();
+        }
+      },
     );
   }
 }

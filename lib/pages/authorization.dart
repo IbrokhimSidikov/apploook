@@ -129,18 +129,21 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.only(bottom: 50.0),
-            child: ElevatedButton(
-              onPressed: _isPhoneNumberValid ? _continue : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 255, 215, 56),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.only(
-                    left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
-                child: Text(
-                  'Continue',
-                  style: TextStyle(fontSize: 20, color: Colors.black),
+            padding: const EdgeInsets.only(bottom: 50.0, left: 20.0, right: 20.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: ElevatedButton(
+                onPressed: _isPhoneNumberValid ? _continue : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 255, 215, 56),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.only(
+                      left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
+                  child: Text(
+                    'Continue',
+                    style: TextStyle(fontSize: 20, color: Colors.black),
+                  ),
                 ),
               ),
             ),

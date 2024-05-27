@@ -12,6 +12,7 @@ import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -86,6 +87,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   late TabController _tabController;
   List<Product> allProducts = [];
   Map<int, ScrollController> _categoryScrollControllers = {};
+  bool _isLoading = true;
 
   void _getBanners() {
     banners = BannerItem.getBanners();
@@ -95,7 +97,23 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   void initState() {
     _getBanners();
     super.initState();
-    fetchData();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedData = prefs.getString('cachedCategoryData');
+
+    if (cachedData != null) {
+      // Load data from local storage
+      setState(() {
+        processCategoryData(json.decode(cachedData));
+        _isLoading = false;
+      });
+    } else {
+      // Fetch data from the API
+      fetchData();
+    }
   }
 
   @override
@@ -112,40 +130,47 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
 
     if (response.statusCode == 200) {
       List<dynamic> categoryData = json.decode(response.body);
-      List<Product> mergedProducts = [];
-      for (var category in categoryData) {
-        String categoryName = category['name']
-            .split('_')[0]; // Get only the first part of the category name
-        if (!categoryName.toLowerCase().contains('ava')) {
-          List<dynamic> productData = category['products'];
-          int categoryId = category['id'];
-          // String categoryTitle = category['name'];
-          List<Product> products = productData.map((product) {
-            var photo = product['photo'];
-            String? imagePath = photo != null
-                ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
-                : null;
-            return Product(
-                name: product['name'],
-                id: product['id'],
-                categoryId: categoryId,
-                categoryTitle: categoryName,
-                imagePath: imagePath,
-                price:
-                    product['priceList']['price'].toDouble(), // Get the price
-                description: product['description']);
-          }).toList();
-          mergedProducts.addAll(products);
-          categories.add(Category(id: categoryId, name: categoryName));
-          _categoryScrollControllers[categoryId] = ScrollController();
-        }
-      }
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cachedCategoryData', response.body);
+
       setState(() {
-        allProducts = mergedProducts;
+        processCategoryData(categoryData);
+        _isLoading = false;
       });
     } else {
       throw Exception('Failed to load data');
     }
+  }
+
+  void processCategoryData(List<dynamic> categoryData) {
+    List<Product> mergedProducts = [];
+    for (var category in categoryData) {
+      String categoryName = category['name']
+          .split('_')[0]; // Get only the first part of the category name
+      if (!categoryName.toLowerCase().contains('ava')) {
+        List<dynamic> productData = category['products'];
+        int categoryId = category['id'];
+        List<Product> products = productData.map((product) {
+          var photo = product['photo'];
+          String? imagePath = photo != null
+              ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
+              : null;
+          return Product(
+              name: product['name'],
+              id: product['id'],
+              categoryId: categoryId,
+              categoryTitle: categoryName,
+              imagePath: imagePath,
+              price: product['priceList']['price'].toDouble(),
+              description: product['description']);
+        }).toList();
+        mergedProducts.addAll(products);
+        categories.add(Category(id: categoryId, name: categoryName));
+        _categoryScrollControllers[categoryId] = ScrollController();
+      }
+    }
+    allProducts = mergedProducts;
   }
 
   final List<String> tabTitles = [
