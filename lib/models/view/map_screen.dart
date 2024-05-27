@@ -34,7 +34,9 @@ class _MapScreenState extends State<MapScreen> {
     var cartProvider = Provider.of<CartProvider>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(
           'Your Location',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),

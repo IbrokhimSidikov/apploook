@@ -14,6 +14,7 @@ class _SignInState extends State<SignIn> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: appBar(),
       body: Column(
         children: [
@@ -76,7 +77,7 @@ class _SignInState extends State<SignIn> {
           Center(
             child: Text(
               'Version 1.0.0, build 10001',
-              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13),
+              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13, color: Colors.black26),
             ),
           )
         ],
@@ -86,8 +87,9 @@ class _SignInState extends State<SignIn> {
 
   AppBar appBar() {
     return AppBar(
+      backgroundColor: Colors.white,
       title: const Text(
-        'Profile',
+        'Sign-In',
         style: TextStyle(
             color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
       ),
@@ -103,7 +105,7 @@ class _SignInState extends State<SignIn> {
             width: 30,
           ),
           decoration: BoxDecoration(
-              color: Color(0xffF7F8F8),
+              color: Color.fromARGB(255, 255, 255, 255),
               borderRadius: BorderRadius.circular(10)),
         ),
       ),
@@ -149,7 +151,7 @@ class _SignInState extends State<SignIn> {
               width: 30,
             ),
             decoration: BoxDecoration(
-                color: Color(0xffF7F8F8),
+                color: Color.fromARGB(255, 255, 255, 255),
                 borderRadius: BorderRadius.circular(10)),
           ),
         ),

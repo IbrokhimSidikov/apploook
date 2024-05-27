@@ -187,68 +187,63 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               ),
             ),
             // Body Container
-            Container(
-              margin:
-                  EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20.0),
-                  topRight: Radius.circular(20.0),
-                ),
-              ),
-            ),
+            // Container(
+            //   margin:
+            //       EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
+            //   height: MediaQuery.of(context).size.height,
+            //   width: MediaQuery.of(context).size.width,
+            //   decoration: const BoxDecoration(
+            //     color: Colors.white,
+            //     borderRadius: BorderRadius.only(
+            //       topLeft: Radius.circular(20.0),
+            //       topRight: Radius.circular(20.0),
+            //     ),
+            //   ),
+            // ),
             Positioned(
               top: 40,
               left: 15,
-              child: GestureDetector(
-                onTap: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => Profile(),
-                  //   ),
-                  // );
-                  _scaffoldKey.currentState!.openDrawer();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: SvgPicture.asset('images/profileIconHome.svg'),
-                ),
-                // Container(
-                //   padding: const EdgeInsets.all(5),
-                //   decoration: const BoxDecoration(
-                //     shape: BoxShape.circle,
-                //     color: Colors.white,
-                //   ),
-                //   child: const Icon(
-                //     Icons.person,
-                //     size: 40,
-                //     color: Colors.black,
-                //   ),
-                // ),
-              ),
-            ),
-            Positioned(
-              top: 40,
               right: 15,
               child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(50)),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min, // Avoid unnecessary space
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Icon(Icons.location_on, size: 30),
-                    SizedBox(width: 5.0), // Add some horizontal spacing
-                    Text("Tashkent"),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => Profile(),
+                        //   ),
+                        // );
+                        _scaffoldKey.currentState!.openDrawer();
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SvgPicture.asset('images/profileIconHome.svg'),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(50)),
+                      child: const Row(
+                        mainAxisSize:
+                            MainAxisSize.min, // Avoid unnecessary space
+                        children: [
+                          Icon(Icons.location_on, size: 30),
+                          SizedBox(width: 5.0), // Add some horizontal spacing
+                          Text("Tashkent"),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
+
             const Positioned(
               top: 105,
               left: 15,
@@ -259,6 +254,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             ),
 
             Positioned(
+              //Banner items
               top: 140,
               left: 15,
               child: Container(
@@ -296,7 +292,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       topLeft: Radius.circular(20.0),
                       topRight: Radius.circular(20.0),
                     ),
-                    color: Colors.transparent,
+                    color: Colors.white,
                   ),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal, // Horizontal scroll
@@ -311,12 +307,12 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           },
                           style: ButtonStyle(
                             foregroundColor:
-                                MaterialStateProperty.resolveWith<Color>(
+                                WidgetStateProperty.resolveWith<Color>(
                                     (states) {
                               return Colors.black;
                             }),
                             backgroundColor:
-                                MaterialStateProperty.resolveWith<Color>(
+                                WidgetStateProperty.resolveWith<Color>(
                                     (states) {
                               // Check if the button is selected
                               if (category.isSelected) {
@@ -327,7 +323,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                               return Colors
                                   .transparent; // Set default background color
                             }),
-                            elevation: MaterialStateProperty.all<double>(
+                            elevation: WidgetStateProperty.all<double>(
                                 0), // No elevation
                           ),
                           child: Text(category.name),
@@ -337,144 +333,147 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
                 // List of products for each category
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: allProducts.isEmpty
-                        ? SizedBox(
-                          height: 450,
-                          child: Center(
-                              child: Container(
-                                
-                                child: CircularProgressIndicator()),
-                            ),
-                        )
-                        : Column(
-                            children: categories.map((category) {
-                              List<Product> productsInCategory = allProducts
-                                  .where((product) =>
-                                      product.categoryId == category.id)
-                                  .toList();
-                              return Container(
-                                key: ValueKey<int>(category.id),
-                                child: ListView.builder(
-                                  padding: EdgeInsets.only(bottom: 0.0),
-                                  controller:
-                                      _categoryScrollControllers[category.id],
-                                  shrinkWrap: true,
-                                  itemCount: productsInCategory.length,
-                                  itemBuilder: (context, productIndex) {
-                                    Product product =
-                                        productsInCategory[productIndex];
-                                    return GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) {
-                                              if (productsInCategory
-                                                      .isNotEmpty &&
-                                                  productIndex <
-                                                      productsInCategory
-                                                          .length) {
-                                                Product product =
-                                                    productsInCategory[
-                                                        productIndex];
-                                                return Details(
-                                                    product: product);
-                                              }
-                                              // Handle the case where the product list is empty or the index is out of bounds
-                                              return Container(); // Or any other fallback widget
-                                            },
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10.0),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 10.0),
-                                              child: Container(
-                                                width: 140.0,
-                                                height: 140.0,
-                                                decoration: BoxDecoration(
-                                                  image: DecorationImage(
-                                                    image: NetworkImage(
-                                                        product.imagePath!),
-                                                    fit: BoxFit.contain,
+                Container(
+                  height: MediaQuery.of(context).size.height - 343,
+                  decoration: BoxDecoration(color: Colors.white),
+                  child: Expanded(
+                    child: SingleChildScrollView(
+                      child: allProducts.isEmpty
+                          ? SizedBox(
+                              height: 450,
+                              child: Center(
+                                child: Container(
+                                    child: CircularProgressIndicator()),
+                              ),
+                            )
+                          : Column(
+                              children: categories.map((category) {
+                                List<Product> productsInCategory = allProducts
+                                    .where((product) =>
+                                        product.categoryId == category.id)
+                                    .toList();
+                                return Container(
+                                  key: ValueKey<int>(category.id),
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.only(bottom: 0.0),
+                                    controller:
+                                        _categoryScrollControllers[category.id],
+                                    shrinkWrap: true,
+                                    itemCount: productsInCategory.length,
+                                    itemBuilder: (context, productIndex) {
+                                      Product product =
+                                          productsInCategory[productIndex];
+                                      return GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) {
+                                                if (productsInCategory
+                                                        .isNotEmpty &&
+                                                    productIndex <
+                                                        productsInCategory
+                                                            .length) {
+                                                  Product product =
+                                                      productsInCategory[
+                                                          productIndex];
+                                                  return Details(
+                                                      product: product);
+                                                }
+                                                // Handle the case where the product list is empty or the index is out of bounds
+                                                return Container(); // Or any other fallback widget
+                                              },
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 10.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 10.0),
+                                                child: Container(
+                                                  width: 140.0,
+                                                  height: 140.0,
+                                                  decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(
+                                                          product.imagePath!),
+                                                      fit: BoxFit.contain,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    product.name,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16.0,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 5.0),
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            3.0),
-                                                    child: Text(
-                                                      product.getDescriptionInLanguage(
-                                                              'uz') ??
-                                                          'No Description',
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      product.name,
                                                       style: const TextStyle(
-                                                        color: Colors.grey,
                                                         fontWeight:
                                                             FontWeight.bold,
+                                                        fontSize: 16.0,
                                                       ),
                                                     ),
-                                                  ),
-                                                  const SizedBox(height: 5.0),
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 15.0,
-                                                      vertical: 5.0,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0),
-                                                      color: const Color(
-                                                          0xFFF1F2F7),
-                                                    ),
-                                                    child: Text(
-                                                      '${product.price.toStringAsFixed(0)} UZS',
-                                                      style: const TextStyle(
-                                                        fontSize: 14.0,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.grey,
+                                                    const SizedBox(height: 5.0),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              3.0),
+                                                      child: Text(
+                                                        product.getDescriptionInLanguage(
+                                                                'uz') ??
+                                                            'No Description',
+                                                        style: const TextStyle(
+                                                          color: Colors.grey,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                    const SizedBox(height: 5.0),
+                                                    Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 15.0,
+                                                        vertical: 5.0,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20.0),
+                                                        color: const Color(
+                                                            0xFFF1F2F7),
+                                                      ),
+                                                      child: Text(
+                                                        '${product.price.toStringAsFixed(0)} UZS',
+                                                        style: const TextStyle(
+                                                          fontSize: 14.0,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                    ),
                   ),
                 ),
               ],
@@ -528,35 +527,37 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             Positioned(
               bottom: 50.0,
               left: 25.0,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacementNamed(context, '/cart');
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 215, 71),
-                    borderRadius: BorderRadius.circular(50.0),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.shopping_bag_outlined,
-                          color: Colors.black),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        '${cartProvider.showQuantity()}',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
+              child: cartProvider.showQuantity() > 0
+                  ? GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(context, '/cart');
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 215, 71),
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 12.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.shopping_bag_outlined,
+                                color: Colors.black),
+                            const SizedBox(width: 8.0),
+                            Text(
+                              '${cartProvider.showQuantity()}',
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
+                    )
+                  : SizedBox(), // Render an empty SizedBox if quantity is 0
             ),
           ],
         ),

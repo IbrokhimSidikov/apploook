@@ -211,7 +211,7 @@ class _DetailsState extends State<Details> {
                           onTap: () {
                             cartProvider.addToCart(widget.product, quantity);
                             cartProvider.logItems();
-                           Navigator.pushReplacementNamed(context, '/cart');
+                           Navigator.pushReplacementNamed(context, '/homeNew');
                           },
                           child: const Text(
                             "Add to cart",

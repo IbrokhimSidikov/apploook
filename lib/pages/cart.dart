@@ -76,7 +76,7 @@ class _CartState extends State<Cart> {
         ),
         actions: [
           Container(
-            margin:  const EdgeInsets.only(right: 10.0),
+            margin: const EdgeInsets.only(right: 10.0),
             child: IconButton(
               onPressed: () {
                 cartProvider.clearCart();
@@ -105,16 +105,17 @@ class _CartState extends State<Cart> {
                   Text(
                     '$item items ${NumberFormat('#,##0').format(price)} UZS',
                     style: const TextStyle(
-                        fontSize: 20, 
-                        fontWeight: FontWeight.w600,
-                        ),
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(
                     height: 5.0,
                   ),
                   SingleChildScrollView(
                     child: SizedBox(
-                      height: 550, // Set a fixed height
+                      height: MediaQuery.of(context).size.height /
+                          1.8, // Set a fixed height
                       child: ListView.builder(
                         itemCount: cartProvider.cartItems.length,
                         itemBuilder: (context, index) {
@@ -278,7 +279,7 @@ class _CartState extends State<Cart> {
                   ),
                   Positioned(
                     // Position bottom buttons
-                    bottom: 25.0, // Adjust spacing from bottom as needed
+                    bottom: 50.0, // Adjust spacing from bottom as needed
                     left: 15.0, // Align buttons to left
                     right: 0.0, // Stretch buttons to full width
                     child: Column(
@@ -298,7 +299,10 @@ class _CartState extends State<Cart> {
                             padding: EdgeInsets.all(12.0),
                             child: Text(
                               'Apply promo code',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black26),
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black26),
                             ),
                           ),
                         ),
@@ -306,21 +310,35 @@ class _CartState extends State<Cart> {
                           height: 25.0,
                         ),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: price > 0
+                              ? () {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/checkout');
+                                }
+                              : null, // Disable button if price is zero
                           style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
-                                const Color(0xFFFEC700)),
+                            backgroundColor: price > 0
+                                ? WidgetStateProperty.all(
+                                    const Color(0xFFFEC700))
+                                : WidgetStateProperty.all(const Color(
+                                    0xFFCCCCCC)), // Change color when disabled
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.pushReplacementNamed(context, '/checkout');
+                                if (price > 0) {
+                                  Navigator.pushReplacementNamed(
+                                      context, '/checkout');
+                                }
                               },
                               child: Text(
                                 'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
                                 style: const TextStyle(
-                                    color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+                                  color: Colors.black,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                           ),

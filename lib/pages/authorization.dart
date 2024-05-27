@@ -14,13 +14,13 @@ class _AuthorizationState extends State<Authorization> {
   PhoneNumber? _phoneNumber;
   final _phoneFormKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
+  bool _isPhoneNumberValid = false;
 
   @override
   void initState() {
     super.initState();
     _loadPhoneNumber();
   }
-  // aaaa
 
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
@@ -42,15 +42,18 @@ class _AuthorizationState extends State<Authorization> {
     if (_phoneFormKey.currentState?.validate() ?? false) {
       _savePhoneNumber(
           _phoneNumber?.international ?? '+998', _firstNameController.text);
-      
-      Navigator.pushReplacementNamed(context, '/homeNew');;
+
+      Navigator.pushReplacementNamed(context, '/homeNew');
+      ;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text(
           'Authorization',
           style: TextStyle(
@@ -109,12 +112,16 @@ class _AuthorizationState extends State<Authorization> {
                   ),
                 ),
                 onChanged: (phoneNumber) {
-                  _phoneNumber = phoneNumber;
+                  setState(() {
+                    _phoneNumber = phoneNumber;
+                    _isPhoneNumberValid =
+                        _phoneFormKey.currentState?.validate() ?? false;
+                  });
                 },
                 countryButtonStyle: const CountryButtonStyle(
                   showDialCode: true, // Display +998
-                  showIsoCode: false, // Hide ISO code 
-                  showFlag: true, // Display Uzbekistan flag 
+                  showIsoCode: false, // Hide ISO code
+                  showFlag: true, // Display Uzbekistan flag
                   flagSize: 16,
                 ),
               ),
@@ -124,7 +131,7 @@ class _AuthorizationState extends State<Authorization> {
           Padding(
             padding: const EdgeInsets.only(bottom: 50.0),
             child: ElevatedButton(
-              onPressed: _continue,
+              onPressed: _isPhoneNumberValid ? _continue : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 255, 215, 56),
               ),
@@ -133,9 +140,7 @@ class _AuthorizationState extends State<Authorization> {
                     left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
                 child: Text(
                   'Continue',
-                  style: TextStyle(
-                    fontSize: 20,
-                  ),
+                  style: TextStyle(fontSize: 20, color: Colors.black),
                 ),
               ),
             ),

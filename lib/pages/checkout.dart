@@ -191,187 +191,212 @@ class _CheckoutState extends State<Checkout> {
               height: 40.0,
             ),
             Material(
-              elevation: 0.5,
-              borderRadius: BorderRadius.circular(15.0),
+              color: Colors.white,
               child: Expanded(
-                child: IndexedStack(
-                  index: _selectedIndex,
-                  children: [
-                    GestureDetector(
-                      onTap: () async {
-                        final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MapScreen()));
-                        if (result != null) {
-                          setState(() {
-                            selectedAddress = result;
-                          });
-                        }
-                      },
-                      child: Container(
-                        height: 140,
-                        width: 390,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xFFF1F2F7),
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Your Delivery Location!',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 20),
-                                    ),
-                                    SvgPicture.asset('images/close_black.svg'),
-                                  ],
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 15.0,
-                                    right: 15.0,
-                                    bottom: 15.0,
-                                    top: 10),
-                                child: Text(
-                                  selectedAddress ??
-                                      'Manzilingizni Tanlang -->',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    Container(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: Material(
+                    elevation: 4, // Specify the elevation here
+                    borderRadius: BorderRadius.circular(15),
+                    color: Color(0xFFF1F2F7),
+                    child: Container(
                       height: 140,
-                      width: 390,
+                      width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Color(0xFFF1F2F7)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Choose branch to pick up',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500, fontSize: 20),
-                            ),
-                            SizedBox(height: 10),
-                            DropdownButton<String>(
-                              value: selectedBranch,
-                              hint: Text('Select Branch'),
-                              isExpanded: true,
-                              items: branches.map((String branch) {
-                                return DropdownMenuItem<String>(
-                                  value: branch,
-                                  child: Text(branch),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
+                        borderRadius: BorderRadius.circular(15),
+                        color: Color(0xFFF1F2F7),
+                      ),
+                      child: IndexedStack(
+                        index: _selectedIndex,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MapScreen()));
+                              if (result != null) {
                                 setState(() {
-                                  selectedBranch = newValue;
+                                  selectedAddress = result;
                                 });
-                              },
+                              }
+                            },
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: Container(
+                                height: 140,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Color(0xFFF1F2F7),
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Your Delivery Location!',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 20),
+                                            ),
+                                            SvgPicture.asset(
+                                                'images/close_black.svg'),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 15.0,
+                                            right: 15.0,
+                                            bottom: 15.0,
+                                            top: 10),
+                                        child: Text(
+                                          selectedAddress ??
+                                              'Choose your Location -->',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
-                          ],
-                        ),
+                          ),
+                          Container(
+                            height: 140,
+                            width: 390,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Color(0xFFF1F2F7)),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Choose branch to pick up',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 20),
+                                  ),
+                                  SizedBox(height: 10),
+                                  DropdownButton<String>(
+                                    value: selectedBranch,
+                                    hint: Text('Select Branch'),
+                                    isExpanded: true,
+                                    items: branches.map((String branch) {
+                                      return DropdownMenuItem<String>(
+                                        value: branch,
+                                        child: Text(branch),
+                                      );
+                                    }).toList(),
+                                    onChanged: (String? newValue) {
+                                      setState(() {
+                                        selectedBranch = newValue;
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 140,
+                            width: 390,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Colors.amberAccent),
+                              child: const Padding(
+                                padding: EdgeInsets.all(15.0),
+                                child: Text('data3'),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(
-                      height: 140,
-                      width: 390,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color: Colors.amberAccent),
-                        child: const Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: Text('data3'),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
             const SizedBox(
               height: 40.0,
             ),
-            Container(
-              width: 390,
-              height: 180,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15.0),
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xFFD9D9D9), // Shadow color
-                    offset: Offset(0, 7), // Offset in x and y direction
-                    blurRadius: 10.0, // Spread radius
-                    spreadRadius: 2.0, // Blur radius
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Order Price :',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
-                      ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: 180,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15.0),
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xFFD9D9D9), // Shadow color
+                      offset: Offset(0, 7), // Offset in x and y direction
+                      blurRadius: 10.0, // Spread radius
+                      spreadRadius: 2.0, // Blur radius
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Delivery Price :',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Text('Неизвестно'),
-                      ],
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Order Price :',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(
-                    height: 10.0,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total Price :',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
-                      ],
+                    const Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Delivery Price :',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text('Неизвестно'),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(
+                      height: 10.0,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total Price :',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text('${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(
@@ -381,7 +406,6 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  
                   labelText: 'Payment Method',
                   labelStyle: TextStyle(color: Colors.black),
                 ),
@@ -418,93 +442,96 @@ class _CheckoutState extends State<Checkout> {
             const SizedBox(
               height: 40,
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Additional number',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(
-                  height: 15.0,
-                ),
-                Container(
-                  height: 48,
-                  width: 390,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black26),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      // Fixed country code widget
-                      SizedBox(
-                        width: 15.0,
-                      ),
-                      Text(
-                        '+998',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                      SizedBox(width: 10.0),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Enter phone number',
-                            border: InputBorder.none,
-                          ),
-                          keyboardType: TextInputType.phone,
-                          inputFormatters: [
-                            FilteringTextInputFormatter
-                                .digitsOnly, // Allows only digits
-                            LengthLimitingTextInputFormatter(
-                                9), // Limits the input to 9 digits
-                          ],
-                          onChanged: (value) {
-                            clientCommentPhone = value;
-                            _updateCommented();
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'Comments',
-                  style: TextStyle(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Additional number',
+                    style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(
-                  height: 15.0,
-                ),
-                Container(
-                  height: 100,
-                  width: 390,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.black26),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: TextField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                      ),
-                      onChanged: (value) {
-                        clientComment = value;
-                        _updateCommented();
-                      },
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                )
-              ],
+                  const SizedBox(
+                    height: 15.0,
+                  ),
+                  Container(
+                    height: 48,
+                    width: 390,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black26),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        // Fixed country code widget
+                        SizedBox(
+                          width: 15.0,
+                        ),
+                        Text(
+                          '+998',
+                          style: TextStyle(fontSize: 16.0),
+                        ),
+                        SizedBox(width: 10.0),
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Enter phone number',
+                              border: InputBorder.none,
+                            ),
+                            keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter
+                                  .digitsOnly, // Allows only digits
+                              LengthLimitingTextInputFormatter(
+                                  9), // Limits the input to 9 digits
+                            ],
+                            onChanged: (value) {
+                              clientCommentPhone = value;
+                              _updateCommented();
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 40.0,
+                  ),
+                  const Text(
+                    'Comments',
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(
+                    height: 15.0,
+                  ),
+                  Container(
+                    height: 100,
+                    width: 390,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.black26),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                        ),
+                        onChanged: (value) {
+                          clientComment = value;
+                          _updateCommented();
+                        },
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
             const SizedBox(
               height: 50.0,
@@ -622,7 +649,7 @@ class _CheckoutState extends State<Checkout> {
           "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
           "-----------------------\n" +
           "Источник: Mobile App\n";
-      
+
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
 
       final telegramDebUrl =

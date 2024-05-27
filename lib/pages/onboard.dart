@@ -13,7 +13,7 @@ class Onboard extends StatefulWidget {
 class _OnboardState extends State<Onboard> {
   late PageController _controller;
   bool isEnglishSelected = false;
-  bool isTurkishSelected = false;
+  bool isuzbekSelected = false;
 
   @override
   void initState() {
@@ -143,12 +143,12 @@ class _OnboardState extends State<Onboard> {
                           onTap: () {
                             setState(() {
                               isEnglishSelected = true;
-                              isTurkishSelected = false;
+                              isuzbekSelected = false;
                             });
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 70),
+                                vertical: 15, horizontal: 58),
                             margin: EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 15),
                             decoration: BoxDecoration(
                               color: isEnglishSelected
@@ -176,16 +176,16 @@ class _OnboardState extends State<Onboard> {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              isTurkishSelected = true;
+                              isuzbekSelected = true;
                               isEnglishSelected = false;
                             });
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 70),
+                                vertical: 15, horizontal: 58),
                             margin: EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 5),
                             decoration: BoxDecoration(
-                              color: isTurkishSelected
+                              color: isuzbekSelected
                                   ? const Color.fromARGB(255, 255, 210, 57)
                                   : Colors.white,
                               borderRadius: BorderRadius.circular(10),
@@ -199,7 +199,7 @@ class _OnboardState extends State<Onboard> {
                               ],
                             ),
                             child: const Text(
-                              'Turkish',
+                              'Uzbek',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 15,
@@ -212,7 +212,7 @@ class _OnboardState extends State<Onboard> {
                     Spacer(flex: 1), // Adjust flex to control spacing
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 151),
+                          vertical: 7, horizontal: 140),
                       margin: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
