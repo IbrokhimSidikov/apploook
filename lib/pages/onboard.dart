@@ -29,6 +29,8 @@ class _OnboardState extends State<Onboard> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Column(
@@ -80,7 +82,6 @@ class _OnboardState extends State<Onboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        
                         Row(
                           children: [
                             SvgPicture.asset(
@@ -149,7 +150,8 @@ class _OnboardState extends State<Onboard> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 70),
-                            margin: EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 15),
+                            margin: EdgeInsets.only(
+                                top: 10, bottom: 10, right: 5, left: 15),
                             decoration: BoxDecoration(
                               color: isEnglishSelected
                                   ? const Color.fromARGB(255, 255, 210, 57)
@@ -183,7 +185,8 @@ class _OnboardState extends State<Onboard> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 70),
-                            margin: EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 5),
+                            margin: EdgeInsets.only(
+                                top: 10, bottom: 10, right: 15, left: 5),
                             decoration: BoxDecoration(
                               color: isTurkishSelected
                                   ? const Color.fromARGB(255, 255, 210, 57)
@@ -211,18 +214,22 @@ class _OnboardState extends State<Onboard> {
                     ),
                     Spacer(flex: 1), // Adjust flex to control spacing
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 151),
-                      margin: const EdgeInsets.all(10),
+                      padding: EdgeInsets.symmetric(
+                        vertical: screenHeight * 0.01, // 2% of screen height
+                        horizontal: screenWidth * 0.33, // 25% of screen width
+                      ),
+                      margin: EdgeInsets.all(
+                          screenWidth * 0.05), // 5% of screen width
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(
+                            screenHeight * 0.05), // 5% of screen height
                       ),
                       child: TextButton(
                         onPressed: () {
                           Navigator.pushReplacementNamed(context, '/signin');
                         },
-                        child: const Text(
+                        child: Text(
                           "Continue",
                           style: TextStyle(
                             color: Colors.black,
