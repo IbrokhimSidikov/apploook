@@ -74,7 +74,7 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const SizedBox(height: 20.0),
           Padding(
-            padding: const EdgeInsets.only(left: 70, right: 70),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: TextFormField(
               controller: _firstNameController,
               decoration: InputDecoration(
@@ -93,7 +93,7 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const SizedBox(height: 20.0),
           Padding(
-            padding: const EdgeInsets.only(left: 70, right: 70),
+            padding: const EdgeInsets.only(left:20, right: 20),
             child: Form(
               key: _phoneFormKey,
               child: PhoneFormField(

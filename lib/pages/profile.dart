@@ -84,18 +84,6 @@ class _ProfileState extends State<Profile> {
                     ),
                   ],
                 ),
-                SizedBox(
-                  width: 50.0,
-                ),
-                GestureDetector(
-                    onTap: () async {
-                      await _clearUserData(); // Clear user data
-                      Navigator.pushReplacementNamed(context,
-                          '/onboard'); // Navigate to the onboard screen
-                    },
-                    child: Container(
-                      child: Icon(Icons.logout_outlined),
-                    )),
               ],
             ),
           ),
@@ -172,6 +160,16 @@ class _ProfileState extends State<Profile> {
                 const SizedBox(
                   height: 150,
                 ),
+                GestureDetector(
+                  onTap: () async {
+                    await _clearUserData();
+                    Navigator.pushReplacementNamed(context, '/onboard');
+                  },
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
                 // GestureDetector(
                 //   onTap: () {
                 //     showDialog(
@@ -218,6 +216,7 @@ class _ProfileState extends State<Profile> {
           children: [Text('Version 1.0.0, build 10001')],
         ),
       ),
+      
     );
   }
 }
