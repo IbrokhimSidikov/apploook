@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
@@ -9,8 +12,18 @@ import 'package:apploook/pages/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-void main() {
+import 'package:firebase_core/firebase_core.dart';
+import 'package:apploook/firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseApi().initNotifications();
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  print("FCMToken $fcmToken");
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),

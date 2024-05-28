@@ -97,6 +97,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   void initState() {
     _getBanners();
     super.initState();
+
     loadData();
   }
 

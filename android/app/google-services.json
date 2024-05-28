@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "35787525405",
+    "project_id": "loook-2b9f8",
+    "storage_bucket": "loook-2b9f8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:35787525405:android:48f7fa65ec3add982365f4",
+        "android_client_info": {
+          "package_name": "com.example.apploook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuQ1k-kDZZEZUYynSLQ_lG3ARsc27ophA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

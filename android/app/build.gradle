@@ -1,5 +1,8 @@
 plugins {
     id "com.android.application"
+    // START: FlutterFire Configuration
+    id 'com.google.gms.google-services'
+    // END: FlutterFire Configuration
     id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
 }
@@ -69,4 +72,6 @@ flutter {
 
 dependencies {
     implementation 'com.yandex.android:maps.mobile:4.5.1-full'
+    implementation platform('com.google.firebase:firebase-bom:32.1.1') // Add Firebase BOM
+    implementation 'com.google.firebase:firebase-messaging' // Add Firebase Messaging
 }
