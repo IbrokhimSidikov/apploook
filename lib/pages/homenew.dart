@@ -9,13 +9,14 @@ import 'package:apploook/pages/pizzapage.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:carousel_slider/carousel_slider.dart'; // Import carousel_slider
 
 class Category {
   final int id;
@@ -193,23 +194,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     }
   }
 
-  final List<String> tabTitles = [
-    'Combo',
-    'Chicken',
-    'Pizza',
-    'Burgers',
-    'Spinner',
-    'Appetizers',
-  ];
-  final Map<int, Widget> contentPages = {
-    0: const ComboPage(),
-    1: const ChickenPage(),
-    2: const PizzaPage(),
-    3: const BurgerPage(),
-    4: const SpinnerPage(),
-    5: const AppetizerPage(),
-  };
-
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -238,20 +222,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   color: Colors.transparent,
                 ),
               ),
-              // Body Container
-              // Container(
-              //   margin:
-              //       EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
-              //   height: MediaQuery.of(context).size.height,
-              //   width: MediaQuery.of(context).size.width,
-              //   decoration: const BoxDecoration(
-              //     color: Colors.white,
-              //     borderRadius: BorderRadius.only(
-              //       topLeft: Radius.circular(20.0),
-              //       topRight: Radius.circular(20.0),
-              //     ),
-              //   ),
-              // ),
               Positioned(
                 top: 40,
                 left: 15,
@@ -295,7 +265,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-
               const Positioned(
                 top: 105,
                 left: 15,
@@ -304,33 +273,37 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
-
               Positioned(
-                //Banner items
-                top: 140,
-                left: 15,
-                child: Container(
-                  height: 135,
-                  width: MediaQuery.of(context).size.width,
-                  color: Colors.transparent,
-                  child: ListView.separated(
-                    itemCount: banners.length,
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(right: 20.0),
-                    separatorBuilder: ((context, index) => const SizedBox(
-                          width: 25,
-                        )),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        width: 250,
-                        decoration: BoxDecoration(
-                            color: banners[index].boxColor.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(16)),
-                        child: Image.asset(banners[index].imagePath,
-                            fit: BoxFit.contain),
-                      );
-                    },
+                top: 135,
+                left: 0,
+                right: 0,
+                child: CarouselSlider(
+                  // Carousel slider
+                  options: CarouselOptions(
+                    height: 140.0,
+                    autoPlay: true,
+                    autoPlayInterval: Duration(seconds: 3),
+                    enlargeCenterPage: true,
+                    enableInfiniteScroll: true,
                   ),
+                  items: banners.map((banner) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width,
+                          margin: EdgeInsets.symmetric(horizontal: 0.0),
+                          decoration: BoxDecoration(
+                            color: banner.boxColor.withOpacity(0.0),
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          child: Image.asset(
+                            banner.imagePath,
+                            fit: BoxFit.fill,
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
               Column(
@@ -563,52 +536,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-
-              // Positioned(
-              //   top: 300.0,
-              //   left: -40.0,
-              //   right: 0.0,
-              //   child: DefaultTabController(
-              //     length: tabTitles.length,
-              //     child: Material(
-              //       color: Colors.transparent,
-              //       child: TabBar(
-              //         isScrollable: true, // Enable horizontal scrolling
-              //         labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-              //         indicatorPadding: EdgeInsets.zero, // Adjust spacing
-              //         tabs: tabTitles.map((title) => Tab(text: title)).toList(),
-              //         onTap: (index) => setState(() => selectedTabIndex = index),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // Positioned(
-              //   top: (MediaQuery.of(context).size.height / 2.5) +
-              //       10, // Adjust offset
-              //   left: 10.0,
-              //   right: 10.0,
-              //   bottom: 0.0,
-              //   child: Container(
-              //     height: MediaQuery.of(context).size.height -
-              //         (MediaQuery.of(context).size.height / 2.5) -
-              //         10,
-              //     child: SingleChildScrollView(
-              //       child: Container(
-              //         decoration: BoxDecoration(
-              //           color: Colors.white,
-              //         ),
-              //         child: Column(
-              //           children: [
-              //             IndexedStack(
-              //               index: selectedTabIndex,
-              //               children: contentPages.values.toList(),
-              //             ),
-              //           ],
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
               Positioned(
                 bottom: 50.0,
                 left: 25.0,
