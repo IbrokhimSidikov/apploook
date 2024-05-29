@@ -84,10 +84,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   List<BannerItem> banners = [];
 
   List<Category> categories = [];
-  late TabController _tabController;
   List<Product> allProducts = [];
   Map<int, ScrollController> _categoryScrollControllers = {};
   bool _isLoading = true;
+
+  ValueNotifier<int?> selectedCategoryId = ValueNotifier<int?>(null);
 
   void _getBanners() {
     banners = BannerItem.getBanners();
@@ -97,7 +98,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   void initState() {
     _getBanners();
     super.initState();
-
     loadData();
   }
 
@@ -119,7 +119,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _tabController.dispose();
+    selectedCategoryId.dispose();
     _categoryScrollControllers.values
         .forEach((controller) => controller.dispose());
     super.dispose();
@@ -174,6 +174,25 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     allProducts = mergedProducts;
   }
 
+  void _updateSelectedCategory(double scrollPosition) {
+    // Calculate the category id based on the scroll position
+    int? newCategoryId;
+    for (var entry in _categoryScrollControllers.entries) {
+      int categoryId = entry.key;
+      ScrollController controller = entry.value;
+      if (scrollPosition >= controller.position.pixels &&
+          scrollPosition < controller.position.maxScrollExtent) {
+        newCategoryId = categoryId;
+        break;
+      }
+    }
+
+    // Update the selected category if it has changed
+    if (newCategoryId != null && selectedCategoryId.value != newCategoryId) {
+      selectedCategoryId.value = newCategoryId;
+    }
+  }
+
   final List<String> tabTitles = [
     'Combo',
     'Chicken',
@@ -200,392 +219,433 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color(0xFFF1F2F7),
-      body: Container(
-        margin: const EdgeInsets.only(top: 10.0),
-        child: Stack(
-          children: [
-            Container(
-              //tabs container
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: const BoxDecoration(
-                color: Colors.transparent,
-              ),
-            ),
-            // Body Container
-            // Container(
-            //   margin:
-            //       EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
-            //   height: MediaQuery.of(context).size.height,
-            //   width: MediaQuery.of(context).size.width,
-            //   decoration: const BoxDecoration(
-            //     color: Colors.white,
-            //     borderRadius: BorderRadius.only(
-            //       topLeft: Radius.circular(20.0),
-            //       topRight: Radius.circular(20.0),
-            //     ),
-            //   ),
-            // ),
-            Positioned(
-              top: 40,
-              left: 15,
-              right: 15,
-              child: Container(
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (scrollNotification) {
+          if (scrollNotification is ScrollUpdateNotification) {
+            _updateSelectedCategory(scrollNotification.metrics.pixels);
+          }
+          return false;
+        },
+        child: Container(
+          margin: const EdgeInsets.only(top: 10.0),
+          child: Stack(
+            children: [
+              Container(
+                //tabs container
                 width: MediaQuery.of(context).size.width,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => Profile(),
-                        //   ),
-                        // );
-                        _scaffoldKey.currentState!.openDrawer();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: SvgPicture.asset('images/profileIconHome.svg'),
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(50)),
-                      child: const Row(
-                        mainAxisSize:
-                            MainAxisSize.min, // Avoid unnecessary space
-                        children: [
-                          Icon(Icons.location_on, size: 30),
-                          SizedBox(width: 5.0), // Add some horizontal spacing
-                          Text("Tashkent"),
-                        ],
-                      ),
-                    ),
-                  ],
+                height: MediaQuery.of(context).size.height,
+                decoration: const BoxDecoration(
+                  color: Colors.transparent,
                 ),
               ),
-            ),
-
-            const Positioned(
-              top: 105,
-              left: 15,
-              child: Text(
-                'WHAT`S NEW',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-            ),
-
-            Positioned(
-              //Banner items
-              top: 140,
-              left: 15,
-              child: Container(
-                height: 135,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.transparent,
-                child: ListView.separated(
-                  itemCount: banners.length,
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.only(right: 20.0),
-                  separatorBuilder: ((context, index) => const SizedBox(
-                        width: 25,
-                      )),
-                  itemBuilder: (context, index) {
-                    return Container(
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: banners[index].boxColor.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(16)),
-                      child: Image.asset(banners[index].imagePath,
-                          fit: BoxFit.contain),
-                    );
-                  },
-                ),
-              ),
-            ),
-            Column(
-              children: [
-                // Row of buttons with category names
-                Container(
-                  margin: EdgeInsets.only(top: 283.0), // Add top margin
-                  height: 50, // Set the height of the row
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20.0),
-                      topRight: Radius.circular(20.0),
-                    ),
-                    color: Colors.white,
-                  ),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal, // Horizontal scroll
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      Category category = categories[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(0.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            _scrollToCategory(category.id);
-                          },
-                          style: ButtonStyle(
-                            foregroundColor:
-                                WidgetStateProperty.resolveWith<Color>(
-                                    (states) {
-                              return Colors.black;
-                            }),
-                            backgroundColor:
-                                WidgetStateProperty.resolveWith<Color>(
-                                    (states) {
-                              // Check if the button is selected
-                              if (category.isSelected) {
-                                // Change the background color when selected
-                                return Colors
-                                    .yellow; // Change this to your desired color
-                              }
-                              return Colors
-                                  .transparent; // Set default background color
-                            }),
-                            elevation: WidgetStateProperty.all<double>(
-                                0), // No elevation
-                          ),
-                          child: Text(category.name),
+              // Body Container
+              // Container(
+              //   margin:
+              //       EdgeInsets.only(top: MediaQuery.of(context).size.height / 3),
+              //   height: MediaQuery.of(context).size.height,
+              //   width: MediaQuery.of(context).size.width,
+              //   decoration: const BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.only(
+              //       topLeft: Radius.circular(20.0),
+              //       topRight: Radius.circular(20.0),
+              //     ),
+              //   ),
+              // ),
+              Positioned(
+                top: 40,
+                left: 15,
+                right: 15,
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => Profile(),
+                          //   ),
+                          // );
+                          _scaffoldKey.currentState!.openDrawer();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: SvgPicture.asset('images/profileIconHome.svg'),
                         ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50)),
+                        child: const Row(
+                          mainAxisSize:
+                              MainAxisSize.min, // Avoid unnecessary space
+                          children: [
+                            Icon(Icons.location_on, size: 30),
+                            SizedBox(width: 5.0), // Add some horizontal spacing
+                            Text("Tashkent"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const Positioned(
+                top: 105,
+                left: 15,
+                child: Text(
+                  'WHAT`S NEW',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+
+              Positioned(
+                //Banner items
+                top: 140,
+                left: 15,
+                child: Container(
+                  height: 135,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.transparent,
+                  child: ListView.separated(
+                    itemCount: banners.length,
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.only(right: 20.0),
+                    separatorBuilder: ((context, index) => const SizedBox(
+                          width: 25,
+                        )),
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: 250,
+                        decoration: BoxDecoration(
+                            color: banners[index].boxColor.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(16)),
+                        child: Image.asset(banners[index].imagePath,
+                            fit: BoxFit.contain),
                       );
                     },
                   ),
                 ),
-                // List of products for each category
-                Container(
-                  height: MediaQuery.of(context).size.height - 343,
-                  decoration: BoxDecoration(color: Colors.white),
-                  child: Expanded(
-                    child: SingleChildScrollView(
-                      child: allProducts.isEmpty
-                          ? SizedBox(
-                              height: 450,
-                              child: Center(
-                                child: Container(
-                                    child: CircularProgressIndicator()),
+              ),
+              Column(
+                children: [
+                  // Row of buttons with category names
+                  Container(
+                    margin: EdgeInsets.only(top: 283.0), // Add top margin
+                    height: 50, // Set the height of the row
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0),
+                      ),
+                      color: Colors.white,
+                    ),
+                    child: ValueListenableBuilder<int?>(
+                      valueListenable: selectedCategoryId,
+                      builder: (context, value, child) {
+                        return ListView.builder(
+                          scrollDirection: Axis.horizontal, // Horizontal scroll
+                          itemCount: categories.length,
+                          itemBuilder: (context, index) {
+                            Category category = categories[index];
+                            return Padding(
+                              padding: const EdgeInsets.all(0.0),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  _scrollToCategory(category.id);
+                                },
+                                style: ButtonStyle(
+                                  foregroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (states) {
+                                      // Check if the button is selected
+                                      if (category.id == value) {
+                                        // Change the text color when selected
+                                        return Color(0xFF000000); // Black
+                                      } else {
+                                        return Color(0xFFB0B0B0); // Grey
+                                      }
+                                    },
+                                  ),
+                                  textStyle: WidgetStateProperty.resolveWith<
+                                      TextStyle>(
+                                    (states) {
+                                      // Check if the button is selected
+                                      if (category.id == value) {
+                                        // Change the font weight when selected
+                                        return TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        );
+                                      } else {
+                                        return TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                        );
+                                      }
+                                    },
+                                  ),
+                                  backgroundColor:
+                                      WidgetStateProperty.resolveWith<Color>(
+                                    (states) {
+                                      return Colors
+                                          .transparent; // Set default background color
+                                    },
+                                  ),
+                                  elevation: WidgetStateProperty.all<double>(
+                                      0), // No elevation
+                                ),
+                                child: Text(category.name),
                               ),
-                            )
-                          : Column(
-                              children: categories.map((category) {
-                                List<Product> productsInCategory = allProducts
-                                    .where((product) =>
-                                        product.categoryId == category.id)
-                                    .toList();
-                                return Container(
-                                  key: ValueKey<int>(category.id),
-                                  child: ListView.builder(
-                                    padding: EdgeInsets.only(bottom: 0.0),
-                                    controller:
-                                        _categoryScrollControllers[category.id],
-                                    shrinkWrap: true,
-                                    itemCount: productsInCategory.length,
-                                    itemBuilder: (context, productIndex) {
-                                      Product product =
-                                          productsInCategory[productIndex];
-                                      return GestureDetector(
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) {
-                                                if (productsInCategory
-                                                        .isNotEmpty &&
-                                                    productIndex <
-                                                        productsInCategory
-                                                            .length) {
-                                                  Product product =
-                                                      productsInCategory[
-                                                          productIndex];
-                                                  return Details(
-                                                      product: product);
-                                                }
-                                                // Handle the case where the product list is empty or the index is out of bounds
-                                                return Container(); // Or any other fallback widget
-                                              },
-                                            ),
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              vertical: 10.0),
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 10.0),
-                                                child: Container(
-                                                  width: 140.0,
-                                                  height: 140.0,
-                                                  decoration: BoxDecoration(
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(
-                                                          product.imagePath!),
-                                                      fit: BoxFit.contain,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  // List of products for each category
+                  Container(
+                    height: MediaQuery.of(context).size.height - 343,
+                    decoration: BoxDecoration(color: Colors.white),
+                    child: Expanded(
+                      child: SingleChildScrollView(
+                        child: allProducts.isEmpty
+                            ? SizedBox(
+                                height: 450,
+                                child: Center(
+                                  child: Container(
+                                      child: CircularProgressIndicator()),
+                                ),
+                              )
+                            : Column(
+                                children: categories.map((category) {
+                                  List<Product> productsInCategory = allProducts
+                                      .where((product) =>
+                                          product.categoryId == category.id)
+                                      .toList();
+                                  return Container(
+                                    key: ValueKey<int>(category.id),
+                                    child: ListView.builder(
+                                      padding: EdgeInsets.only(bottom: 0.0),
+                                      controller: _categoryScrollControllers[
+                                          category.id],
+                                      shrinkWrap: true,
+                                      itemCount: productsInCategory.length,
+                                      itemBuilder: (context, productIndex) {
+                                        Product product =
+                                            productsInCategory[productIndex];
+                                        return GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) {
+                                                  if (productsInCategory
+                                                          .isNotEmpty &&
+                                                      productIndex <
+                                                          productsInCategory
+                                                              .length) {
+                                                    Product product =
+                                                        productsInCategory[
+                                                            productIndex];
+                                                    return Details(
+                                                        product: product);
+                                                  }
+                                                  // Handle the case where the product list is empty or the index is out of bounds
+                                                  return Container(); // Or any other fallback widget
+                                                },
+                                              ),
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 10.0),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 10.0),
+                                                  child: Container(
+                                                    width: 140.0,
+                                                    height: 140.0,
+                                                    decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            product.imagePath!),
+                                                        fit: BoxFit.contain,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      product.name,
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16.0,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 5.0),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              3.0),
-                                                      child: Text(
-                                                        product.getDescriptionInLanguage(
-                                                                'uz') ??
-                                                            'No Description',
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        product.name,
                                                         style: const TextStyle(
-                                                          color: Colors.grey,
                                                           fontWeight:
                                                               FontWeight.bold,
+                                                          fontSize: 16.0,
                                                         ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(height: 5.0),
-                                                    Container(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                        horizontal: 15.0,
-                                                        vertical: 5.0,
-                                                      ),
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20.0),
-                                                        color: const Color(
-                                                            0xFFF1F2F7),
-                                                      ),
-                                                      child: Text(
-                                                        '${product.price.toStringAsFixed(0)} UZS',
-                                                        style: const TextStyle(
-                                                          fontSize: 14.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors.grey,
+                                                      const SizedBox(
+                                                          height: 5.0),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(3.0),
+                                                        child: Text(
+                                                          product.getDescriptionInLanguage(
+                                                                  'uz') ??
+                                                              'No Description',
+                                                          style:
+                                                              const TextStyle(
+                                                            color: Colors.grey,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                      const SizedBox(
+                                                          height: 5.0),
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 15.0,
+                                                          vertical: 5.0,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      20.0),
+                                                          color: const Color(
+                                                              0xFFF1F2F7),
+                                                        ),
+                                                        child: Text(
+                                                          '${product.price.toStringAsFixed(0)} UZS',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 14.0,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
 
-            // Positioned(
-            //   top: 300.0,
-            //   left: -40.0,
-            //   right: 0.0,
-            //   child: DefaultTabController(
-            //     length: tabTitles.length,
-            //     child: Material(
-            //       color: Colors.transparent,
-            //       child: TabBar(
-            //         isScrollable: true, // Enable horizontal scrolling
-            //         labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
-            //         indicatorPadding: EdgeInsets.zero, // Adjust spacing
-            //         tabs: tabTitles.map((title) => Tab(text: title)).toList(),
-            //         onTap: (index) => setState(() => selectedTabIndex = index),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // Positioned(
-            //   top: (MediaQuery.of(context).size.height / 2.5) +
-            //       10, // Adjust offset
-            //   left: 10.0,
-            //   right: 10.0,
-            //   bottom: 0.0,
-            //   child: Container(
-            //     height: MediaQuery.of(context).size.height -
-            //         (MediaQuery.of(context).size.height / 2.5) -
-            //         10,
-            //     child: SingleChildScrollView(
-            //       child: Container(
-            //         decoration: BoxDecoration(
-            //           color: Colors.white,
-            //         ),
-            //         child: Column(
-            //           children: [
-            //             IndexedStack(
-            //               index: selectedTabIndex,
-            //               children: contentPages.values.toList(),
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            Positioned(
-              bottom: 50.0,
-              left: 25.0,
-              child: cartProvider.showQuantity() > 0
-                  ? GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(context, '/cart');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 215, 71),
-                          borderRadius: BorderRadius.circular(50.0),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 12.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.shopping_bag_outlined,
-                                color: Colors.black),
-                            const SizedBox(width: 8.0),
-                            Text(
-                              '${cartProvider.showQuantity()}',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
+              // Positioned(
+              //   top: 300.0,
+              //   left: -40.0,
+              //   right: 0.0,
+              //   child: DefaultTabController(
+              //     length: tabTitles.length,
+              //     child: Material(
+              //       color: Colors.transparent,
+              //       child: TabBar(
+              //         isScrollable: true, // Enable horizontal scrolling
+              //         labelPadding: const EdgeInsets.symmetric(horizontal: 10.0),
+              //         indicatorPadding: EdgeInsets.zero, // Adjust spacing
+              //         tabs: tabTitles.map((title) => Tab(text: title)).toList(),
+              //         onTap: (index) => setState(() => selectedTabIndex = index),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // Positioned(
+              //   top: (MediaQuery.of(context).size.height / 2.5) +
+              //       10, // Adjust offset
+              //   left: 10.0,
+              //   right: 10.0,
+              //   bottom: 0.0,
+              //   child: Container(
+              //     height: MediaQuery.of(context).size.height -
+              //         (MediaQuery.of(context).size.height / 2.5) -
+              //         10,
+              //     child: SingleChildScrollView(
+              //       child: Container(
+              //         decoration: BoxDecoration(
+              //           color: Colors.white,
+              //         ),
+              //         child: Column(
+              //           children: [
+              //             IndexedStack(
+              //               index: selectedTabIndex,
+              //               children: contentPages.values.toList(),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              Positioned(
+                bottom: 50.0,
+                left: 25.0,
+                child: cartProvider.showQuantity() > 0
+                    ? GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacementNamed(context, '/cart');
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 255, 215, 71),
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 12.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.shopping_bag_outlined,
+                                  color: Colors.black),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                '${cartProvider.showQuantity()}',
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16.0,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  : SizedBox(), // Render an empty SizedBox if quantity is 0
-            ),
-          ],
+                      )
+                    : SizedBox(), // Render an empty SizedBox if quantity is 0
+              ),
+            ],
+          ),
         ),
       ),
       drawer: Drawer(
@@ -611,7 +671,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     }
 
     if (selectedCategory != null) {
-      // selectedCategory.isSelected = true;
+      selectedCategory.isSelected = true;
 
       // Scroll to the selected category
       ScrollController? controller = _categoryScrollControllers[categoryId];
@@ -624,6 +684,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       }
     }
 
-    // setState(() {}); // Update UI
+    selectedCategoryId.value = categoryId;
   }
 }
