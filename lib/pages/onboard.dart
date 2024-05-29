@@ -137,7 +137,7 @@ class _OnboardState extends State<Onboard> {
                     ),
                     Spacer(flex: 2), // Adjust flex to control spacing
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
                           onTap: () {

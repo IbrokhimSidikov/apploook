@@ -170,6 +170,12 @@ class _MapScreenState extends State<MapScreen> {
                       context: context,
                       builder: (context) {
                         return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)
+                          ),
+                          backgroundColor: const Color(0xffffffff),
+                          elevation: 5.0,
+                          contentPadding: EdgeInsets.only(top: 30, left: 15, right: 15),
                           content: Text(
                             'Do you confirm your address?\n\n$addressDetail',
                             style: TextStyle(
@@ -183,8 +189,8 @@ class _MapScreenState extends State<MapScreen> {
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                'Отмена',
-                                style: TextStyle(color: Colors.black),
+                                'Cancel',
+                                style: TextStyle(color: Colors.black26),
                               ),
                             ),
                             TextButton(
@@ -195,7 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                                     latLong.lat, latLong.long);
                               },
                               child: Text(
-                                'Да',
+                                'Confirm',
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),

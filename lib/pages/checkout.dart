@@ -592,14 +592,17 @@ class _CheckoutState extends State<Checkout> {
                             title: Text('Order Success'),
                             content: Text(
                                 'Your order has been placed successfully!'),
+                            contentPadding: EdgeInsets.only(top: 30, left: 30, right: 30),
                             actions: [
                               TextButton(
+                                
                                 onPressed: () {
                                   Navigator.pop(context); // Close the dialog
                                   Navigator.pushReplacementNamed(
                                       context, '/homeNew');
                                 },
-                                child: Text('OK'),
+                                
+                                child: Text('OK', style: TextStyle(color: Colors.black),),
                               ),
                             ],
                           ),
