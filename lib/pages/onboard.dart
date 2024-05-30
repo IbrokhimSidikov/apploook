@@ -124,7 +124,7 @@ class _OnboardState extends State<Onboard> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 15.0),
+                        padding: const EdgeInsets.only(left: 30.0),
                         child: Text(
                           'Choose Language',
                           style: TextStyle(
@@ -136,7 +136,7 @@ class _OnboardState extends State<Onboard> {
                     ),
                     Spacer(flex: 2), // Adjust flex to control spacing
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         GestureDetector(
                           onTap: () {
@@ -147,7 +147,7 @@ class _OnboardState extends State<Onboard> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 68),
+                                vertical: 15, horizontal: 60),
                             margin: EdgeInsets.only(
                                 top: 10, bottom: 10, right: 5, left: 15),
                             decoration: BoxDecoration(
@@ -182,7 +182,7 @@ class _OnboardState extends State<Onboard> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 68),
+                                vertical: 15, horizontal: 60),
                             margin: EdgeInsets.only(
                                 top: 10, bottom: 10, right: 15, left: 5),
                             decoration: BoxDecoration(
@@ -223,7 +223,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 20, horizontal: 160),
+                            vertical: 20, horizontal: 150),
                         margin: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEC700),
