@@ -391,172 +391,161 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   Container(
                     height: MediaQuery.of(context).size.height - 343,
                     decoration: BoxDecoration(color: Colors.white),
-                    child: Expanded(
-                      child: SingleChildScrollView(
-                        child: allProducts.isEmpty
-                            ? SizedBox(
-                                height: 450,
-                                child: Center(
-                                  child: Container(
-                                      child: CircularProgressIndicator()),
-                                ),
-                              )
-                            : Column(
-                                children: categories.map((category) {
-                                  List<Product> productsInCategory = allProducts
-                                      .where((product) =>
-                                          product.categoryId == category.id)
-                                      .toList();
-                                  return Container(
-                                    key: ValueKey<int>(category.id),
-                                    child: ListView.builder(
-                                      padding: EdgeInsets.only(bottom: 0.0),
-                                      controller: _categoryScrollControllers[
-                                          category.id],
-                                      shrinkWrap: true,
-                                      itemCount: productsInCategory.length,
-                                      itemBuilder: (context, productIndex) {
-                                        Product product =
-                                            productsInCategory[productIndex];
-                                        return VisibilityDetector(
-                                          key: Key(product.id.toString()),
-                                          onVisibilityChanged:
-                                              (visibilityInfo) {
-                                            if (visibilityInfo
-                                                    .visibleFraction ==
-                                                1) {
-                                              selectedCategoryId.value =
-                                                  product.categoryId;
-                                            }
+                    child: SingleChildScrollView(
+                      child: allProducts.isEmpty
+                          ? SizedBox(
+                              height: 450,
+                              child: Center(
+                                child: Container(
+                                    child: CircularProgressIndicator()),
+                              ),
+                            )
+                          : Column(
+                              children: categories.map((category) {
+                                List<Product> productsInCategory = allProducts
+                                    .where((product) =>
+                                        product.categoryId == category.id)
+                                    .toList();
+                                return Container(
+                                  key: ValueKey<int>(category.id),
+                                  child: ListView.builder(
+                                    padding: EdgeInsets.only(bottom: 0.0),
+                                    controller:
+                                        _categoryScrollControllers[category.id],
+                                    shrinkWrap: true,
+                                    itemCount: productsInCategory.length,
+                                    itemBuilder: (context, productIndex) {
+                                      Product product =
+                                          productsInCategory[productIndex];
+                                      return VisibilityDetector(
+                                        key: Key(product.id.toString()),
+                                        onVisibilityChanged: (visibilityInfo) {
+                                          if (visibilityInfo.visibleFraction ==
+                                              1) {
+                                            selectedCategoryId.value =
+                                                product.categoryId;
+                                          }
+                                        },
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) {
+                                                  if (productsInCategory
+                                                          .isNotEmpty &&
+                                                      productIndex <
+                                                          productsInCategory
+                                                              .length) {
+                                                    Product product =
+                                                        productsInCategory[
+                                                            productIndex];
+                                                    return Details(
+                                                        product: product);
+                                                  }
+                                                  // Handle the case where the product list is empty or the index is out of bounds
+                                                  return Container(); // Or any other fallback widget
+                                                },
+                                              ),
+                                            );
                                           },
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) {
-                                                    if (productsInCategory
-                                                            .isNotEmpty &&
-                                                        productIndex <
-                                                            productsInCategory
-                                                                .length) {
-                                                      Product product =
-                                                          productsInCategory[
-                                                              productIndex];
-                                                      return Details(
-                                                          product: product);
-                                                    }
-                                                    // Handle the case where the product list is empty or the index is out of bounds
-                                                    return Container(); // Or any other fallback widget
-                                                  },
-                                                ),
-                                              );
-                                            },
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 10.0),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            right: 10.0),
-                                                    child: Container(
-                                                      width: 140.0,
-                                                      height: 140.0,
-                                                      decoration: BoxDecoration(
-                                                        image: DecorationImage(
-                                                          image: NetworkImage(
-                                                              product
-                                                                  .imagePath!),
-                                                          fit: BoxFit.contain,
-                                                        ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 10.0),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 10.0),
+                                                  child: Container(
+                                                    width: 140.0,
+                                                    height: 140.0,
+                                                    decoration: BoxDecoration(
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(
+                                                            product.imagePath!),
+                                                        fit: BoxFit.contain,
                                                       ),
                                                     ),
                                                   ),
-                                                  Expanded(
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          product.name,
+                                                ),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        product.name,
+                                                        style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16.0,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 5.0),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(3.0),
+                                                        child: Text(
+                                                          product.getDescriptionInLanguage(
+                                                                  'uz') ??
+                                                              'No Description',
                                                           style:
                                                               const TextStyle(
+                                                            color: Colors.grey,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            fontSize: 16.0,
                                                           ),
                                                         ),
-                                                        const SizedBox(
-                                                            height: 5.0),
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(3.0),
-                                                          child: Text(
-                                                            product.getDescriptionInLanguage(
-                                                                    'uz') ??
-                                                                'No Description',
-                                                            style:
-                                                                const TextStyle(
-                                                              color:
-                                                                  Colors.grey,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 5.0),
+                                                      Container(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 15.0,
+                                                          vertical: 5.0,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      20.0),
+                                                          color: const Color(
+                                                              0xFFF1F2F7),
+                                                        ),
+                                                        child: Text(
+                                                          '${product.price.toStringAsFixed(0)} UZS',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 14.0,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Colors.grey,
                                                           ),
                                                         ),
-                                                        const SizedBox(
-                                                            height: 5.0),
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                            horizontal: 15.0,
-                                                            vertical: 5.0,
-                                                          ),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20.0),
-                                                            color: const Color(
-                                                                0xFFF1F2F7),
-                                                          ),
-                                                          child: Text(
-                                                            '${product.price.toStringAsFixed(0)} UZS',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 14.0,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                              color:
-                                                                  Colors.grey,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                      ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                     ),
                   ),
                 ],

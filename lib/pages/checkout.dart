@@ -191,18 +191,15 @@ class _CheckoutState extends State<Checkout> {
             const SizedBox(
               height: 40.0,
             ),
-            Material(
-              color: Colors.white,
-              child: Expanded(
-                child: Padding(
+            Column(
+              children: [
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Material(
-                    elevation: 4, // Specify the elevation here
+                    elevation: 4,
                     borderRadius: BorderRadius.circular(15),
                     color: Color(0xFFF1F2F7),
                     child: Container(
-                      height: 140,
-                      width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         color: Color(0xFFF1F2F7),
@@ -213,9 +210,11 @@ class _CheckoutState extends State<Checkout> {
                           GestureDetector(
                             onTap: () async {
                               final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MapScreen()));
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapScreen(),
+                                ),
+                              );
                               if (result != null) {
                                 setState(() {
                                   selectedAddress = result;
@@ -246,8 +245,9 @@ class _CheckoutState extends State<Checkout> {
                                             Text(
                                               'Your Delivery Location!',
                                               style: TextStyle(
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 20),
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 20,
+                                              ),
                                             ),
                                             SvgPicture.asset(
                                                 'images/close_black.svg'),
@@ -278,8 +278,9 @@ class _CheckoutState extends State<Checkout> {
                             height: 140,
                             width: 390,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Color(0xFFF1F2F7)),
+                              borderRadius: BorderRadius.circular(15),
+                              color: Color(0xFFF1F2F7),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Column(
@@ -317,8 +318,9 @@ class _CheckoutState extends State<Checkout> {
                             width: 390,
                             child: Container(
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Colors.amberAccent),
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.amberAccent,
+                              ),
                               child: const Padding(
                                 padding: EdgeInsets.all(15.0),
                                 child: Text('data3'),
@@ -330,7 +332,7 @@ class _CheckoutState extends State<Checkout> {
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
             const SizedBox(
               height: 40.0,
@@ -579,7 +581,7 @@ class _CheckoutState extends State<Checkout> {
                             commented,
                             orderItems, // orderItems
                             orderPrice, // total
-                            41.313798749076454, // latitude , 
+                            41.313798749076454, // latitude ,
                             69.24407311805851, // longitude
                             orderType,
                             cartProvider,
@@ -592,17 +594,19 @@ class _CheckoutState extends State<Checkout> {
                             title: Text('Order Success'),
                             content: Text(
                                 'Your order has been placed successfully!'),
-                            contentPadding: EdgeInsets.only(top: 30, left: 30, right: 30),
+                            contentPadding:
+                                EdgeInsets.only(top: 30, left: 30, right: 30),
                             actions: [
                               TextButton(
-                                
                                 onPressed: () {
                                   Navigator.pop(context); // Close the dialog
                                   Navigator.pushReplacementNamed(
                                       context, '/homeNew');
                                 },
-                                
-                                child: Text('OK', style: TextStyle(color: Colors.black),),
+                                child: Text(
+                                  'OK',
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               ),
                             ],
                           ),
