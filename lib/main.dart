@@ -17,13 +17,13 @@ import 'package:apploook/firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  FirebaseApi().initNotifications();
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  print("FCMToken $fcmToken");
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  // FirebaseApi().initNotifications();
+  // await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  // final fcmToken = await FirebaseMessaging.instance.getToken();
+  // print("FCMToken $fcmToken");
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),

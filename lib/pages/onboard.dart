@@ -80,7 +80,6 @@ class _OnboardState extends State<Onboard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        
                         Row(
                           children: [
                             SvgPicture.asset(
@@ -148,8 +147,9 @@ class _OnboardState extends State<Onboard> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 58),
-                            margin: EdgeInsets.only(top: 10, bottom: 10, right: 5, left: 15),
+                                vertical: 15, horizontal: 68),
+                            margin: EdgeInsets.only(
+                                top: 10, bottom: 10, right: 5, left: 15),
                             decoration: BoxDecoration(
                               color: isEnglishSelected
                                   ? const Color.fromARGB(255, 255, 210, 57)
@@ -182,8 +182,9 @@ class _OnboardState extends State<Onboard> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 15, horizontal: 58),
-                            margin: EdgeInsets.only(top: 10, bottom: 10, right: 15, left: 5),
+                                vertical: 15, horizontal: 68),
+                            margin: EdgeInsets.only(
+                                top: 10, bottom: 10, right: 15, left: 5),
                             decoration: BoxDecoration(
                               color: isuzbekSelected
                                   ? const Color.fromARGB(255, 255, 210, 57)
@@ -210,18 +211,24 @@ class _OnboardState extends State<Onboard> {
                       ],
                     ),
                     Spacer(flex: 1), // Adjust flex to control spacing
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 7, horizontal: 140),
-                      margin: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(50),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(context, '/signin');
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero, // Remove default padding
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        ),
                       ),
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacementNamed(context, '/signin');
-                        },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 20, horizontal: 160),
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEC700),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
                         child: const Text(
                           "Continue",
                           style: TextStyle(
@@ -232,6 +239,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ),
                     ),
+
                     Spacer(flex: 1), // Adjust flex to control spacing
                     Text(
                       'PRIVACY POLICY',
