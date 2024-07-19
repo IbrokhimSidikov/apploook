@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:87012829234:android:348ec4482968cd6788f42b",
         "android_client_info": {
-          "package_name": "com.example.apploook"
+          "package_name": "com.loook.v1"
         }
       },
       "oauth_client": [],
