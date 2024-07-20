@@ -33,7 +33,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.loook.apploook"
+    namespace "com.example.apploook"
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
