@@ -94,72 +94,72 @@ class _ProfileState extends State<Profile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    SvgPicture.asset('images/inventory.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'My Order History',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                Row(
-                  children: [
-                    SvgPicture.asset('images/payment.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'My Payment Card',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                Row(
-                  children: [
-                    SvgPicture.asset('images/settings.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'Settings',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'Feedback',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'About',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'Privacy Policy',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 150,
-                ),
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/inventory.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'My Order History',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/payment.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'My Payment Card',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/settings.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'Settings',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'Feedback',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'About',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'Privacy Policy',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 150,
+                // ),
                 GestureDetector(
                   onTap: () async {
                     await _clearUserData();
