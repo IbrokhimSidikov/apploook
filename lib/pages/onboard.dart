@@ -213,7 +213,7 @@ class _OnboardState extends State<Onboard> {
                     Spacer(flex: 1), // Adjust flex to control spacing
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/signin');
+                        Navigator.pushReplacementNamed(context, '/homeNew');
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero, // Remove default padding

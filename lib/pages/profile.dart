@@ -170,6 +170,17 @@ class _ProfileState extends State<Profile> {
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
+                SizedBox(height: 200,),
+                GestureDetector(
+                  onTap: () async {
+                    await _clearUserData();
+                    Navigator.pushReplacementNamed(context, '/onboard');
+                  },
+                  child: const Text(
+                    'Delete account',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
                 // GestureDetector(
                 //   onTap: () {
                 //     showDialog(

@@ -43,7 +43,7 @@ class _AuthorizationState extends State<Authorization> {
       _savePhoneNumber(
           _phoneNumber?.international ?? '+998', _firstNameController.text);
 
-      Navigator.pushReplacementNamed(context, '/homeNew');
+      Navigator.pushReplacementNamed(context, '/checkout');
       ;
     }
   }
