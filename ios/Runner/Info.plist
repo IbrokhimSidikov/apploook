@@ -31,7 +31,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Доступ к геолокации пользователя необходим для отображения текущей геопозиции</string>
+	<string>Access to the user's geolocation is required to display the geolocation to deliver the food</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
