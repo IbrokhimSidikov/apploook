@@ -725,7 +725,7 @@ class _CheckoutState extends State<Checkout> {
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1001388814073&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       // Send order details to Telegram
       final response = await http.get(
