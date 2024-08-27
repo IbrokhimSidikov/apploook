@@ -1,7 +1,6 @@
-import 'package:apploook/pages/home.dart';
-import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Onboard extends StatefulWidget {
   const Onboard({Key? key}) : super(key: key);
@@ -25,6 +24,23 @@ class _OnboardState extends State<Onboard> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _continue() async {
+    if (isEnglishSelected || isuzbekSelected) {
+      // Save the selected language in shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selected_language',
+          isEnglishSelected ? 'en' : 'uz');
+
+      // Navigate to the next page
+      Navigator.pushReplacementNamed(context, '/homeNew');
+    } else {
+      // Show a message if no language is selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a language')),
+      );
+    }
   }
 
   @override
@@ -57,7 +73,7 @@ class _OnboardState extends State<Onboard> {
                 ),
                 Column(
                   children: [
-                    Spacer(flex: 70), // Adjust flex to control spacing
+                    Spacer(flex: 70),
                     Center(
                       child: SvgPicture.asset(
                         'images/smile-loook.svg',
@@ -65,7 +81,7 @@ class _OnboardState extends State<Onboard> {
                         height: 120,
                       ),
                     ),
-                    Spacer(flex: 5), // Adjust flex to control spacing
+                    Spacer(flex: 5),
                     Text(
                       'Order Now \nNot Only Chicken',
                       style: TextStyle(
@@ -76,7 +92,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Spacer(flex: 10), // Adjust flex to control spacing
+                    Spacer(flex: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -120,7 +136,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ],
                     ),
-                    Spacer(flex: 5), // Adjust flex to control spacing
+                    Spacer(flex: 5),
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
@@ -134,7 +150,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ),
                     ),
-                    Spacer(flex: 2), // Adjust flex to control spacing
+                    Spacer(flex: 2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -210,13 +226,11 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ],
                     ),
-                    Spacer(flex: 1), // Adjust flex to control spacing
+                    Spacer(flex: 1),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/homeNew');
-                      },
+                      onPressed: _continue, // Use the new continue method
                       style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero, // Remove default padding
+                        padding: EdgeInsets.zero,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50),
                         ),
@@ -239,8 +253,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ),
                     ),
-
-                    Spacer(flex: 1), // Adjust flex to control spacing
+                    Spacer(flex: 1),
                     Text(
                       'PRIVACY POLICY',
                       style: TextStyle(
@@ -248,7 +261,7 @@ class _OnboardState extends State<Onboard> {
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    Spacer(flex: 6), // Adjust flex to control spacing
+                    Spacer(flex: 6),
                   ],
                 ),
               ],

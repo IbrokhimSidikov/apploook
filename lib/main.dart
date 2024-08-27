@@ -1,5 +1,7 @@
 import 'dart:math';
-
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/cart.dart';
@@ -9,15 +11,16 @@ import 'package:apploook/pages/login.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/signup.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:apploook/widget/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:apploook/firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
   // await Firebase.initializeApp(
   //   options: DefaultFirebaseOptions.currentPlatform,
   // );
@@ -26,20 +29,21 @@ Future<void> main() async {
   // final fcmToken = await FirebaseMessaging.instance.getToken();
   // print("FCMToken $fcmToken");
 
-  // Check for privacy policy consent
+  // Load preferences for privacy policy and language
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
+  String? selectedLanguage = prefs.getString('selectedLanguage');
 
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),
       child: acceptedPrivacyPolicy == true
-          ? const MyApp()
+          ? MyApp(initialLocale: selectedLanguage != null ? Locale(selectedLanguage) : null)
           : ConsentScreen(onAccept: () {
               runApp(
                 ChangeNotifierProvider(
                   create: (context) => CartProvider(),
-                  child: const MyApp(),
+                  child: MyApp(initialLocale: selectedLanguage != null ? Locale(selectedLanguage) : null),
                 ),
               );
             }),
@@ -47,8 +51,34 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  final Locale? initialLocale;
+
+  const MyApp({Key? key, this.initialLocale}) : super(key: key);
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = widget.initialLocale;
+  }
+
+  void setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,13 +87,14 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: ThemeData(
         fontFamily: 'Poppins',
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           bodyLarge: TextStyle(fontFamily: 'Poppins'),
           bodyMedium: TextStyle(fontFamily: 'Poppins'),
           displayLarge: TextStyle(fontFamily: 'Poppins'),
           displayMedium: TextStyle(fontFamily: 'Poppins'),
         ),
       ),
+      locale: _locale, // Set the initial locale
       home: InitialScreen(),
       routes: {
         '/homeNew': (context) => HomeNew(),
@@ -72,6 +103,17 @@ class MyApp extends StatelessWidget {
         '/checkout': (context) => Checkout(),
         '/onboard': (context) => Onboard(),
       },
+      // Localization delegates and supported locales
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // English
+        Locale('uz', ''), // Uzbek
+      ],
     );
   }
 }

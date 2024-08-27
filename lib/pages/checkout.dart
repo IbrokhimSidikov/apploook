@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:flutter/services.dart';
 
+import '../widget/app_localizations.dart';
+
 class Checkout extends StatefulWidget {
   Checkout({
     Key? key,
@@ -82,7 +84,7 @@ class _CheckoutState extends State<Checkout> {
   @override
   Widget build(BuildContext context) {
     var cartProvider = Provider.of<CartProvider>(context);
-
+     var localizations = AppLocalizations.of(context);
     orderPrice = cartProvider.getTotalPrice();
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
@@ -243,7 +245,8 @@ class _CheckoutState extends State<Checkout> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Your Delivery Location!',
+                                              localizations!.translate('location'),
+                                              //'Your Delivery Location!',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w500,
                                                 fontSize: 20,
@@ -262,7 +265,7 @@ class _CheckoutState extends State<Checkout> {
                                             top: 10),
                                         child: Text(
                                           selectedAddress ??
-                                              'Choose your Location -->',
+                                              localizations!.translate('set-location'),
                                           style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500),

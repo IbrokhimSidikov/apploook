@@ -8,6 +8,7 @@ import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/pizzapage.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
+import 'package:apploook/widget/app_localizations.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -198,6 +199,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = AppLocalizations.of(context);
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
     _getBanners();
 
@@ -267,11 +269,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 top: 105,
                 left: 15,
                 child: Text(
-                  'WHAT`S NEW',
+                  localizations!.translate('whatsup'),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
