@@ -273,7 +273,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                 top: 105,
                 left: 15,
                 child: Text(
-                  localizations!.translate('whatsup'),
+                  localizations!.translate('filial'),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),

@@ -38,15 +38,22 @@ Future<void> main() async {
     ChangeNotifierProvider(
       create: (context) => CartProvider(),
       child: acceptedPrivacyPolicy == true
-          ? MyApp(initialLocale: selectedLanguage != null ? Locale(selectedLanguage) : null)
-          : ConsentScreen(onAccept: () {
-              runApp(
-                ChangeNotifierProvider(
-                  create: (context) => CartProvider(),
-                  child: MyApp(initialLocale: selectedLanguage != null ? Locale(selectedLanguage) : null),
-                ),
-              );
-            }),
+          ? MyApp(
+              initialLocale:
+                  selectedLanguage != null ? Locale(selectedLanguage) : null)
+          : ConsentScreen(
+              onAccept: () {
+                runApp(
+                  ChangeNotifierProvider(
+                    create: (context) => CartProvider(),
+                    child: MyApp(
+                        initialLocale: selectedLanguage != null
+                            ? Locale(selectedLanguage)
+                            : null),
+                  ),
+                );
+              },
+            ),
     ),
   );
 }
