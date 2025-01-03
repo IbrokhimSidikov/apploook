@@ -9,6 +9,7 @@ import 'package:apploook/pages/pizzapage.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -276,39 +277,39 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
-              // Positioned(
-              //   top: 135,
-              //   left: 0,
-              //   right: 0,
-              //   child: CarouselSlider(
-              //     // Carousel slider
-              //     options: CarouselOptions(
-              //       height: 140.0,
-              //       autoPlay: true,
-              //       autoPlayInterval: Duration(seconds: 3),
-              //       enlargeCenterPage: true,
-              //       enableInfiniteScroll: true,
-              //     ),
-              //     items: banners.map((banner) {
-              //       return Builder(
-              //         builder: (BuildContext context) {
-              //           return Container(
-              //             width: MediaQuery.of(context).size.width,
-              //             margin: EdgeInsets.symmetric(horizontal: 0.0),
-              //             decoration: BoxDecoration(
-              //               color: banner.boxColor.withOpacity(0.0),
-              //               borderRadius: BorderRadius.circular(16.0),
-              //             ),
-              //             child: Image.asset(
-              //               banner.imagePath,
-              //               fit: BoxFit.fill,
-              //             ),
-              //           );
-              //         },
-              //       );
-              //     }).toList(),
-              //   ),
-              // ),
+              Positioned(
+                top: 135,
+                left: 0,
+                right: 0,
+                child: CarouselSlider(
+                  // Carousel slider
+                  options: CarouselOptions(
+                    height: 140.0,
+                    autoPlay: true,
+                    autoPlayInterval: Duration(seconds: 3),
+                    enlargeCenterPage: true,
+                    enableInfiniteScroll: true,
+                  ),
+                  items: banners.map((banner) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return Container(
+                          width: MediaQuery.of(context).size.width,
+                          margin: EdgeInsets.symmetric(horizontal: 0.0),
+                          decoration: BoxDecoration(
+                            color: banner.boxColor.withOpacity(0.0),
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                          child: Image.asset(
+                            banner.imagePath,
+                            fit: BoxFit.fill,
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
               Column(
                 children: [
                   // Row of buttons with category names
