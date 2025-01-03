@@ -165,27 +165,27 @@ class _CheckoutState extends State<Checkout> {
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () {},
-                  // onPressed: () => setState(() => _selectedIndex = 2),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      _selectedIndex == 2
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: const Text(
-                    'CARHOP',
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
-                  ),
-                )
+                // ElevatedButton(
+                //   onPressed: () {},
+                //   // onPressed: () => setState(() => _selectedIndex = 2),
+                //   style: ButtonStyle(
+                //     backgroundColor: WidgetStateProperty.all(
+                //       _selectedIndex == 2
+                //           ? const Color(0xffFEC700)
+                //           : const Color(0xffF1F2F7),
+                //     ),
+                //     shape: WidgetStateProperty.all(
+                //       RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(10),
+                //       ),
+                //     ),
+                //   ),
+                //   child: const Text(
+                //     'CARHOP',
+                //     style: TextStyle(
+                //         color: Colors.black, fontWeight: FontWeight.w500),
+                //   ),
+                // )
               ],
             ),
             const SizedBox(

@@ -3,7 +3,7 @@ import 'package:apploook/models/app_lat_long.dart';
 import 'package:dio/dio.dart';
 
 class AddressDetailRepository {
-  String mapApiKey = "a0ba4035-8bc1-4f5a-98f6-e15b320a2d4e";
+  String mapApiKey = "caea5b8e-5833-4148-9c64-c7c62f4d31a3";
 
   Future<AddressDetailModel?> getAddressDetail(AppLatLong latLong) async {
     try {

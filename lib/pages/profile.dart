@@ -94,72 +94,70 @@ class _ProfileState extends State<Profile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    SvgPicture.asset('images/inventory.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'My Order History',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/inventory.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'My Order History',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
                 const SizedBox(
                   height: 40.0,
                 ),
-                Row(
-                  children: [
-                    SvgPicture.asset('images/payment.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'My Payment Card',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                Row(
-                  children: [
-                    SvgPicture.asset('images/settings.svg'),
-                    const SizedBox(
-                      width: 25.0,
-                    ),
-                    const Text(
-                      'Settings',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'Feedback',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'About',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 40.0,
-                ),
-                const Text(
-                  'Privacy Policy',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(
-                  height: 150,
-                ),
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/payment.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'My Payment Card',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
+                
+                // Row(
+                //   children: [
+                //     SvgPicture.asset('images/settings.svg'),
+                //     const SizedBox(
+                //       width: 25.0,
+                //     ),
+                //     const Text(
+                //       'Settings',
+                //       style: TextStyle(fontSize: 18),
+                //     ),
+                //   ],
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'Feedback',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'About',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 40.0,
+                // ),
+                // const Text(
+                //   'Privacy Policy',
+                //   style: TextStyle(fontSize: 18),
+                // ),
+                // const SizedBox(
+                //   height: 150,
+                // ),
                 GestureDetector(
                   onTap: () async {
                     await _clearUserData();
@@ -170,6 +168,46 @@ class _ProfileState extends State<Profile> {
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
+                const SizedBox(
+                  height: 40.0,
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    bool confirmDelete = await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Confirm Delete'),
+                          content: const Text('Are you sure you want to delete your account?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(false); // User clicked Cancel
+                              },
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(true); // User confirmed Delete
+                              },
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmDelete == true) {
+                      await _clearUserData();
+                      Navigator.pushReplacementNamed(context, '/onboard');
+                    }
+                  },
+                  child: const Text(
+                    'Delete Account',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+
                 // GestureDetector(
                 //   onTap: () {
                 //     showDialog(
