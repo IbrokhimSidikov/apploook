@@ -84,6 +84,7 @@ class HomeNew extends StatefulWidget {
 }
 
 class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
+  static const cacheValidityDuration = Duration(hours: 6);
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
 
@@ -105,20 +106,29 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     super.initState();
     loadData();
   }
-
+  Future<bool> isCacheValid() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
+    if (lastUpdateTime == null) return false;
+    
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    return (currentTime - lastUpdateTime) < cacheValidityDuration.inMilliseconds;
+  }
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cachedData = prefs.getString('cachedCategoryData');
+    
+    bool isValid = await isCacheValid();
 
-    if (cachedData != null) {
-      // Load data from local storage
+    if (cachedData != null && isValid) {
+      // Load data from local storage if cache is valid
       setState(() {
         processCategoryData(json.decode(cachedData));
         _isLoading = false;
       });
     } else {
-      // Fetch data from the API
-      fetchData();
+      // Fetch fresh data from the API
+      await fetchData();
     }
   }
 
@@ -139,6 +149,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('cachedCategoryData', response.body);
+      // Save the timestamp of this update
+      await prefs.setInt('lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
 
       setState(() {
         processCategoryData(categoryData);
@@ -147,6 +159,12 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     } else {
       throw Exception('Failed to load data');
     }
+  }
+  Future<void> refreshData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await fetchData();
   }
 
   void processCategoryData(List<dynamic> categoryData) {
@@ -250,21 +268,22 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           child: SvgPicture.asset('images/profileIconHome.svg'),
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(50)),
-                        child: const Row(
-                          mainAxisSize:
-                              MainAxisSize.min, // Avoid unnecessary space
-                          children: [
-                            Icon(Icons.location_on, size: 30),
-                            SizedBox(width: 5.0), // Add some horizontal spacing
-                            Text("Tashkent"),
-                          ],
-                        ),
-                      ),
+                      // Container(
+                      //   padding: const EdgeInsets.all(10),
+                      //   decoration: BoxDecoration(
+                      //       color: Colors.white,
+                      //       borderRadius: BorderRadius.circular(50)),
+                      //   child: const Row(
+                      //     mainAxisSize:
+                      //         MainAxisSize.min, // Avoid unnecessary space
+                      //     children: [
+                      //       Icon(Icons.location_on, size: 30),
+                      //       SizedBox(width: 5.0), // Add some horizontal spacing
+                      //       Text("Tashkent"),
+                      //     ],
+                      //   ),
+                      // ),
+                      
                     ],
                   ),
                 ),
