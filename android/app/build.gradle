@@ -26,7 +26,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.loook.v1"
+    namespace "com.example.apploook"
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
