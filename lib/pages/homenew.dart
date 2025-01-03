@@ -17,7 +17,8 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart'; // Import carousel_slider
+// import 'package:carousel_slider/carousel_slider.dart'; // Import carousel_slider
+// import 'package:flutter/material.dart' hide CarouselController;
 
 class Category {
   final int id;
@@ -275,39 +276,39 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
-              Positioned(
-                top: 135,
-                left: 0,
-                right: 0,
-                child: CarouselSlider(
-                  // Carousel slider
-                  options: CarouselOptions(
-                    height: 140.0,
-                    autoPlay: true,
-                    autoPlayInterval: Duration(seconds: 3),
-                    enlargeCenterPage: true,
-                    enableInfiniteScroll: true,
-                  ),
-                  items: banners.map((banner) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          margin: EdgeInsets.symmetric(horizontal: 0.0),
-                          decoration: BoxDecoration(
-                            color: banner.boxColor.withOpacity(0.0),
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Image.asset(
-                            banner.imagePath,
-                            fit: BoxFit.fill,
-                          ),
-                        );
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
+              // Positioned(
+              //   top: 135,
+              //   left: 0,
+              //   right: 0,
+              //   child: CarouselSlider(
+              //     // Carousel slider
+              //     options: CarouselOptions(
+              //       height: 140.0,
+              //       autoPlay: true,
+              //       autoPlayInterval: Duration(seconds: 3),
+              //       enlargeCenterPage: true,
+              //       enableInfiniteScroll: true,
+              //     ),
+              //     items: banners.map((banner) {
+              //       return Builder(
+              //         builder: (BuildContext context) {
+              //           return Container(
+              //             width: MediaQuery.of(context).size.width,
+              //             margin: EdgeInsets.symmetric(horizontal: 0.0),
+              //             decoration: BoxDecoration(
+              //               color: banner.boxColor.withOpacity(0.0),
+              //               borderRadius: BorderRadius.circular(16.0),
+              //             ),
+              //             child: Image.asset(
+              //               banner.imagePath,
+              //               fit: BoxFit.fill,
+              //             ),
+              //           );
+              //         },
+              //       );
+              //     }).toList(),
+              //   ),
+              // ),
               Column(
                 children: [
                   // Row of buttons with category names
