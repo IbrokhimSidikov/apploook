@@ -2,6 +2,7 @@ import 'package:apploook/pages/home.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Onboard extends StatefulWidget {
   const Onboard({Key? key}) : super(key: key);
@@ -25,6 +26,23 @@ class _OnboardState extends State<Onboard> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _continue() async {
+    if (isEnglishSelected || isuzbekSelected) {
+      // Save the selected language in shared preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selected_language',
+          isEnglishSelected ? 'en' : 'uz');
+
+      // Navigate to the next page
+      Navigator.pushReplacementNamed(context, '/homeNew');
+    } else {
+      // Show a message if no language is selected
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a language')),
+      );
+    }
   }
 
   @override
@@ -212,9 +230,7 @@ class _OnboardState extends State<Onboard> {
                     ),
                     Spacer(flex: 1), // Adjust flex to control spacing
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/signin');
-                      },
+                      onPressed: _continue,
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero, // Remove default padding
                         shape: RoundedRectangleBorder(

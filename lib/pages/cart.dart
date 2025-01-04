@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Cart extends StatefulWidget {
   const Cart({Key? key}) : super(key: key);
@@ -25,6 +26,13 @@ class _CartState extends State<Cart> {
   void initState() {
     super.initState();
     _getCategories();
+  }
+
+  Future<bool> _isUserSignedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final phoneNumber = prefs.getString('phoneNumber');
+    final firstName = prefs.getString('firstName');
+    return phoneNumber != null && phoneNumber.isNotEmpty && firstName != null && firstName.isNotEmpty;
   }
 
   @override
@@ -214,10 +222,11 @@ class _CartState extends State<Cart> {
                   const SizedBox(height: 25.0),
                   ElevatedButton(
                     onPressed: price > 0
-                        ? () {
+                        ? () async {
+                            bool isSignedIn = await _isUserSignedIn();
                             Navigator.pushReplacementNamed(
                               context,
-                              '/checkout',
+                              isSignedIn ? '/checkout' : '/signin',
                             );
                           }
                         : null,
@@ -232,22 +241,12 @@ class _CartState extends State<Cart> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (price > 0) {
-                            Navigator.pushReplacementNamed(
-                              context,
-                              '/checkout',
-                            );
-                          }
-                        },
-                        child: Text(
-                          'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      child: Text(
+                        'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
