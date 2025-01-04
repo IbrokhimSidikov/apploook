@@ -212,12 +212,12 @@ class _MapScreenState extends State<MapScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
-                    backgroundColor: Color(0xffFEC700), // Text color
+                    backgroundColor: Color(0xffFEC700), 
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(50),
                     ),
                     padding: EdgeInsets.symmetric(vertical: 14, horizontal: 24),
-                    elevation: 0, // Remove shadow
+                    elevation: 0, 
                   ),
                   child: Text(
                     'Save',
@@ -247,7 +247,7 @@ class _MapScreenState extends State<MapScreen> {
     } catch (_) {
       location = defLocation;
     }
-    location = defLocation;
+    // location = defLocation;
     updateAddressDetail(location);
     _moveToCurrentLocation(location);
   }
