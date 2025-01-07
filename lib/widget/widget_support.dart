@@ -40,13 +40,13 @@ class AppWidget {
       fontWeight: FontWeight.bold,
       fontFamily: 'Poppins',
       shadows: [
-        Shadow(
-          // Add a single shadow here
-          offset: Offset(2.0, 2.0), // Offset the shadow slightly
-          blurRadius: 3.0, // Blur the shadow for a smoother effect
-          color: Color.fromARGB(128, 158, 158,
-              158), // Set the shadow color (semi-transparent black)
-        ),
+        // Shadow(
+        //   // Add a single shadow here
+        //   offset: Offset(2.0, 2.0), // Offset the shadow slightly
+        //   blurRadius: 3.0, // Blur the shadow for a smoother effect
+        //   color: Color.fromARGB(128, 158, 158,
+        //       158), // Set the shadow color (semi-transparent black)
+        // ),
       ],
     );
   }

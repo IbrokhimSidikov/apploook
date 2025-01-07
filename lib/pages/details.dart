@@ -53,7 +53,7 @@ class _DetailsState extends State<Details> {
     var cartProvider = Provider.of<CartProvider>(context);
 
     return Scaffold(
-      backgroundColor: Colors.white, // Set the background color here
+      backgroundColor: Colors.white,
       body: Container(
         margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
         child: Column(
@@ -65,154 +65,122 @@ class _DetailsState extends State<Details> {
               },
               child: const Icon(Icons.arrow_back_outlined, color: Colors.black),
             ),
-            Container(
-              height: 650,
-              child: Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        child: Image.network(
-                          widget.product
-                              .imagePath, // Assuming widget.product.imagePath contains the URL
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height / 2.5,
-                          fit: BoxFit.cover,
-                        ),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: Image.network(
+                        widget.product.imagePath,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 2.5,
+                        fit: BoxFit.cover,
                       ),
-                      Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Container(
-                              width: 250,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.product.name,
-                                    style: AppWidget.titleTextFieldStyle(),
-                                  ),
-                                  Text(
-                                    widget.product.categoryTitle,
-                                    style: AppWidget.HeadlineTextFieldStyle(),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          GestureDetector(
-                            onTap: () {
-                              if (quantity > 1) {
-                                setState(() {
-                                  quantity--;
-                                  totalPrice = unitPrice * quantity;
-                                });
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child:
-                                  const Icon(Icons.remove, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          Text(
-                            quantity.toString(),
-                            style: AppWidget.semiboldTextFieldStyle(),
-                          ),
-                          const SizedBox(
-                            width: 20.0,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                quantity++;
-                                totalPrice = unitPrice * quantity;
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  borderRadius: BorderRadius.circular(8)),
-                              child: const Icon(Icons.add, color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 20.0,
-                      ),
-                      Container(
-                        height: 100,
-                        child: Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.vertical,
-                            child: Text(
-                              getDescriptionInLanguage('uz') ??
-                                  '', // Change 'en' to the desired language code
-                              style: AppWidget.LightTextFieldStyle(),
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width - 180,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.product.name,
+                                  style: AppWidget.titleTextFieldStyle(),
+                                ),
+                                Text(
+                                  widget.product.categoryTitle,
+                                  style: AppWidget.HeadlineTextFieldStyle(),
+                                ),
+                              ],
                             ),
                           ),
                         ),
+                        const Spacer(),
+                        Container(
+                          height: 48,
+                          width: 140,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Color(0xFFD9D9D9)),
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (quantity > 1) {
+                                      setState(() {
+                                        quantity--;
+                                        totalPrice = unitPrice * quantity;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: const Icon(Icons.remove,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                                SizedBox(width: 20.0),
+                                Container(
+                                  child: Text(
+                                    quantity.toString(),
+                                    style: AppWidget.semiboldTextFieldStyle(),
+                                  ),
+                                ),
+                                SizedBox(width: 20.0),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      quantity++;
+                                      totalPrice = unitPrice * quantity;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(50)),
+                                    child: const Icon(Icons.add,
+                                        color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20.0),
+                    Container(
+                      height: 100,
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Text(
+                          getDescriptionInLanguage('uz') ?? '',
+                          style: AppWidget.LightTextFieldStyle(),
+                        ),
                       ),
-                      const SizedBox(
-                        height: 5.0,
-                      ),
-                      // const Row(
-                      //   mainAxisAlignment: MainAxisAlignment.start,
-                      //   children: [
-                      //     Text(
-                      //       'Change drinks',
-                      //       style: TextStyle(
-                      //         fontSize: 20,
-                      //         fontWeight: FontWeight.w500,
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      // Change Drinks container goes here
-                      // ChangeDrinks(categories: categories)
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 5.0),
+                    // ChangeDrinks(categories: categories) // Uncomment if ChangeDrinks is needed
+                  ],
                 ),
               ),
             ),
-            const SizedBox(
-              height: 20.0,
-            ),
-            // Row(
-            //   children: [
-            //     Text(
-            //       "Delivery Time",
-            //       style: AppWidget.LightTextFieldStyle(),
-            //     ),
-            //     const SizedBox(
-            //       width: 25.0,
-            //     ),
-            //     Icon(
-            //       Icons.alarm,
-            //       color: Colors.black54,
-            //     ),
-            //     const SizedBox(
-            //       width: 5.0,
-            //     ),
-            //     Text(
-            //       "30 min",
-            //       style: AppWidget.semiboldTextFieldStyle(),
-            //     )
-            //   ],
-            // ),
-            const Spacer(),
+            const SizedBox(height: 20.0),
             Padding(
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.only(bottom: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -229,136 +197,43 @@ class _DetailsState extends State<Details> {
                       ),
                     ],
                   ),
-                  Container(
+                  SizedBox(
                     width: MediaQuery.of(context).size.width / 2,
-                    padding: const EdgeInsets.only(top: 10, bottom: 10),
-                    decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 215, 31),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            cartProvider.addToCart(widget.product, quantity);
-                            cartProvider.logItems();
-
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Cart()));
-                          },
-                          child: const Text(
-                            "Add to cart",
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16.0,
-                                fontFamily: 'Poppins'),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        cartProvider.addToCart(widget.product, quantity);
+                        cartProvider.logItems();
+                        Navigator.pushReplacementNamed(context, '/homeNew');
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all<Color>(
+                            const Color(0xFFFEC700)),
+                        shape: WidgetStateProperty.all<OutlinedBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50),
                           ),
                         ),
-                        const SizedBox(
-                          width: 30.0,
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(3),
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart_outlined,
-                            color: Colors.white,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        child: Text(
+                          "Add to cart",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.0,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(
-                          width: 10.0,
-                        )
-                      ],
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             )
           ],
         ),
       ),
-    );
-  }
-}
-
-class ChangeDrinks extends StatelessWidget {
-  const ChangeDrinks({
-    super.key,
-    required this.categories,
-  });
-
-  final List<CategoryModel> categories;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 5.0),
-          child: Text(
-            'Change drinks',
-            style: TextStyle(
-                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(
-          height: 5.0,
-        ),
-        Container(
-          height: 180,
-          color: const Color.fromARGB(255, 255, 255, 255),
-          child: ListView.separated(
-            itemCount: categories.length,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            separatorBuilder: (context, index) => const SizedBox(
-              width: 25,
-            ),
-            itemBuilder: (context, index) {
-              return Stack(
-                children: [
-                  Container(
-                    width: 120,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      color: categories[index].boxColor.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Image.asset(
-                      categories[index].imagePath,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 10, // Adjust the position as needed
-                    left: 10, // Adjust the position as needed
-                    child: Container(
-                      width: 100, // Adjust the width as needed
-                      height: 30, // Adjust the height as needed
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 255, 215, 57),
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'change',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }

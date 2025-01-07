@@ -10,9 +10,11 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  final String phoneNumber = '71-207-207-0';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: appBar(),
       body: Column(
         children: [
@@ -75,7 +77,7 @@ class _SignInState extends State<SignIn> {
           Center(
             child: Text(
               'Version 1.0.0, build 10001',
-              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13),
+              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13, color: Colors.black26),
             ),
           )
         ],
@@ -85,8 +87,9 @@ class _SignInState extends State<SignIn> {
 
   AppBar appBar() {
     return AppBar(
+      backgroundColor: Colors.white,
       title: const Text(
-        'Profile',
+        'Sign-In',
         style: TextStyle(
             color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
       ),
@@ -102,13 +105,43 @@ class _SignInState extends State<SignIn> {
             width: 30,
           ),
           decoration: BoxDecoration(
-              color: Color(0xffF7F8F8),
+              color: Color.fromARGB(255, 255, 255, 255),
               borderRadius: BorderRadius.circular(10)),
         ),
       ),
       actions: [
         GestureDetector(
-          onTap: () {},
+          onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Call-Center"),
+                          content: Text(
+                              "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: const Text(
+                                "Cancel",
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text(
+                                "Call",
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 255, 215, 72)),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
           child: Container(
             margin: EdgeInsets.all(10),
             width: 37,
@@ -118,7 +151,7 @@ class _SignInState extends State<SignIn> {
               width: 30,
             ),
             decoration: BoxDecoration(
-                color: Color(0xffF7F8F8),
+                color: Color.fromARGB(255, 255, 255, 255),
                 borderRadius: BorderRadius.circular(10)),
           ),
         ),

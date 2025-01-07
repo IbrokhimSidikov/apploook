@@ -1,15 +1,15 @@
 import 'package:apploook/cart_provider.dart';
-// import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/models/category-model.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Cart extends StatefulWidget {
-  const Cart({super.key});
+  const Cart({Key? key}) : super(key: key);
 
   @override
   State<Cart> createState() => _CartState();
@@ -26,6 +26,13 @@ class _CartState extends State<Cart> {
   void initState() {
     super.initState();
     _getCategories();
+  }
+
+  Future<bool> _isUserSignedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final phoneNumber = prefs.getString('phoneNumber');
+    final firstName = prefs.getString('firstName');
+    return phoneNumber != null && phoneNumber.isNotEmpty && firstName != null && firstName.isNotEmpty;
   }
 
   @override
@@ -50,13 +57,12 @@ class _CartState extends State<Cart> {
       return totalPrice;
     }
 
-    int price = 0;
-    int item = 0;
-    item = item + getTotalQuantity(cartProvider).toInt();
-    price = price + getTotalPrice(cartProvider).toInt();
+    int price = getTotalPrice(cartProvider).toInt();
+    int item = getTotalQuantity(cartProvider).toInt();
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text(
           'Cart',
           style: TextStyle(color: Colors.black, fontSize: 18),
@@ -65,272 +71,191 @@ class _CartState extends State<Cart> {
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const HomeNew()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomeNew()),
+            );
           },
           child: Container(
             margin: const EdgeInsets.only(left: 10.0),
-            child: SvgPicture.asset('images/close.svg'),
+            child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              cartProvider.clearCart();
-            },
-            icon: Icon(Icons.delete),
-            tooltip: 'Clear Cart',
+          Container(
+            margin: const EdgeInsets.only(right: 10.0),
+            child: IconButton(
+              onPressed: () {
+                cartProvider.clearCart();
+              },
+              icon: const Icon(Icons.delete),
+              tooltip: 'Clear Cart',
+            ),
           ),
         ],
       ),
       backgroundColor: Colors.green,
-      body: Stack(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration:
-                const BoxDecoration(color: Color.fromARGB(255, 255, 255, 255)),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        color: const Color.fromARGB(255, 255, 255, 255),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 15.0),
+              Text(
+                '$item items ${NumberFormat('#,##0').format(price)} UZS',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 5.0),
+              SingleChildScrollView(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height / 1.8,
+                  child: ListView.builder(
+                    itemCount: cartProvider.cartItems.length,
+                    itemBuilder: (context, index) {
+                      final cartItem = cartProvider.cartItems[index];
+                      return ListTile(
+                        leading: Image.network(
+                          cartItem.product.imagePath,
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                        title: Text(
+                          cartItem.product.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey[200],
+                                borderRadius: BorderRadius.circular(50.0),
+                              ),
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      if (cartItem.quantity > 1) {
+                                        cartProvider.updateQuantity(
+                                          cartItem,
+                                          cartItem.quantity - 1,
+                                        );
+                                      } else {
+                                        cartProvider.removeFromCart(cartItem);
+                                      }
+                                    },
+                                    child: const Icon(Icons.remove),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  Container(
+                                    width: 20,
+                                    height: 20,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      cartItem.quantity.toString(),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8.0),
+                                  GestureDetector(
+                                    onTap: () {
+                                      cartProvider.updateQuantity(
+                                        cartItem,
+                                        cartItem.quantity + 1,
+                                      );
+                                    },
+                                    child: const Icon(Icons.add),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Text(
+                          'Total: ${NumberFormat('#,##0').format((cartItem.quantity * cartItem.product.price))} UZS',
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30.0),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  const SizedBox(
-                    height: 15.0,
-                  ),
-                  Text(
-                    '$item items ${NumberFormat('#,##0').format(price)} UZS',
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(
-                    height: 5.0,
-                  ),
-                  SingleChildScrollView(
-                    child: SizedBox(
-                      height: 550, // Set a fixed height
-                      child: ListView.builder(
-                        itemCount: cartProvider.cartItems.length,
-                        itemBuilder: (context, index) {
-                          final cartItem = cartProvider.cartItems[index];
-                          return ListTile(
-                            leading: Image.network(
-                              cartItem.product.imagePath,
-                              width: 70,
-                              height: 70,
-                              fit: BoxFit.cover,
-                            ),
-                            title: Text(
-                              cartItem.product.name,
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w600),
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(50.0),
-                                  ),
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          if (cartItem.quantity > 1) {
-                                            cartProvider.updateQuantity(
-                                                cartItem,
-                                                cartItem.quantity - 1);
-                                          } else {
-                                            cartProvider
-                                                .removeFromCart(cartItem);
-                                          }
-                                        },
-                                        child: const Icon(Icons.remove),
-                                      ),
-                                      const SizedBox(width: 8.0),
-                                      Container(
-                                        width: 20,
-                                        height: 20,
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          cartItem.quantity.toString(),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8.0),
-                                      GestureDetector(
-                                        onTap: () {
-                                          cartProvider.updateQuantity(
-                                              cartItem, cartItem.quantity + 1);
-                                        },
-                                        child: const Icon(Icons.add),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            subtitle: Text(
-                                'Total: ${NumberFormat('#,##0').format((cartItem.quantity * cartItem.product.price)).toString()} UZS'),
-                          );
-                        },
+                  ElevatedButton(
+                    onPressed: () {},
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(
+                        const Color(0xffF1F2F7),
+                      ),
+                      foregroundColor: MaterialStateProperty.all(
+                        Colors.black,
+                      ),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(12.0),
+                      child: Text(
+                        'Apply promo code',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black26,
+                        ),
                       ),
                     ),
                   ),
-                  // Container(
-                  //   height: 250,
-                  // ),
-                  // SizedBox(
-                  //   height: 10.0,
-                  // ),
-                  // Text(
-                  //   'Add it to your order?',
-                  //   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                  // ),
-                  // SizedBox(
-                  //   height: 10.0,
-                  // ),
-                  // const SizedBox(
-                  //   height: 250.0,
-                  // ),
-                  // Container(
-                  //   height: 200,
-                  //   color: Colors.white,
-                  //   child: ListView.separated(
-                  //     itemCount: categories.length,
-                  //     scrollDirection: Axis.horizontal,
-                  //     padding: EdgeInsets.only(left: 20, right: 20),
-                  //     separatorBuilder: (context, index) => SizedBox(
-                  //       width: 25.0,
-                  //     ),
-                  //     itemBuilder: (context, index) {
-                  //       return Stack(
-                  //         children: [
-                  //           Container(
-                  //             width: 150,
-                  //             height: 200,
-                  //             decoration: BoxDecoration(
-                  //               color:
-                  //                   categories[index].boxColor.withOpacity(0.3),
-                  //               borderRadius: BorderRadius.circular(20),
-                  //             ),
-                  //             child: Stack(
-                  //               children: [
-                  //                 Image.asset(
-                  //                   categories[index].imagePath,
-                  //                   fit: BoxFit.fill,
-                  //                 ),
-                  //                 Positioned(
-                  //                   top: 100,
-                  //                   left: 15,
-                  //                   child: Text(
-                  //                     'ITEM NAME',
-                  //                     style: TextStyle(
-                  //                         fontSize: 15,
-                  //                         fontWeight: FontWeight.w700),
-                  //                   ),
-                  //                 ),
-                  //                 Positioned(
-                  //                   top: 120,
-                  //                   left: 15,
-                  //                   child: Text(
-                  //                     'Item category',
-                  //                     style: TextStyle(
-                  //                         fontSize: 15,
-                  //                         fontWeight: FontWeight.w300),
-                  //                   ),
-                  //                 ),
-                  //                 Positioned(
-                  //                   bottom: 5.0,
-                  //                   left: 12.0,
-                  //                   child: ElevatedButton(
-                  //                       onPressed: () {},
-                  //                       style: ButtonStyle(
-                  //                           backgroundColor:
-                  //                               MaterialStatePropertyAll(
-                  //                                   Color(0xffF1F2F7))),
-                  //                       child: Text(
-                  //                         '32 000 UZS',
-                  //                         style: TextStyle(color: Colors.black),
-                  //                       )),
-                  //                 )
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
-                  const SizedBox(
-                    height: 30.0,
-                  ),
-                  Positioned(
-                    // Position bottom buttons
-                    bottom: 25.0, // Adjust spacing from bottom as needed
-                    left: 15.0, // Align buttons to left
-                    right: 0.0, // Stretch buttons to full width
-                    child: Column(
-                      // Arrange buttons horizontally
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceEvenly, // Distribute evenly
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color(0xffF1F2F7)),
-                            foregroundColor:
-                                MaterialStateProperty.all(Colors.black),
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(12.0),
-                            child: Text(
-                              'Apply promo code',
-                              style: TextStyle(fontSize: 18),
+                  const SizedBox(height: 25.0),
+                  ElevatedButton(
+                    onPressed: price > 0
+                        ? () async {
+                            bool isSignedIn = await _isUserSignedIn();
+                            Navigator.pushReplacementNamed(
+                              context,
+                              isSignedIn ? '/checkout' : '/signin',
+                            );
+                          }
+                        : null,
+                    style: ButtonStyle(
+                      backgroundColor: price > 0
+                          ? MaterialStateProperty.all(
+                              const Color(0xFFFEC700),
+                            )
+                          : MaterialStateProperty.all(
+                              const Color(0xFFCCCCCC),
                             ),
-                          ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(
-                          height: 25.0,
-                        ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                                const Color.fromARGB(255, 255, 215, 56)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            Checkout(price: price)));
-                              },
-                              child: Text(
-                                'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
-                                style: const TextStyle(
-                                    color: Colors.black, fontSize: 18),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-        ], //stack children
+        ),
       ),
     );
   }

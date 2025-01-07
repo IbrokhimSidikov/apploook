@@ -14,13 +14,13 @@ class _AuthorizationState extends State<Authorization> {
   PhoneNumber? _phoneNumber;
   final _phoneFormKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
+  bool _isPhoneNumberValid = false;
 
   @override
   void initState() {
     super.initState();
     _loadPhoneNumber();
   }
-  // aaaa
 
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
@@ -42,15 +42,18 @@ class _AuthorizationState extends State<Authorization> {
     if (_phoneFormKey.currentState?.validate() ?? false) {
       _savePhoneNumber(
           _phoneNumber?.international ?? '+998', _firstNameController.text);
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const HomeNew()));
+
+      Navigator.pushReplacementNamed(context, '/homeNew');
+      ;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text(
           'Authorization',
           style: TextStyle(
@@ -71,7 +74,7 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const SizedBox(height: 20.0),
           Padding(
-            padding: const EdgeInsets.only(left: 70, right: 70),
+            padding: const EdgeInsets.only(left: 20, right: 20),
             child: TextFormField(
               controller: _firstNameController,
               decoration: InputDecoration(
@@ -90,7 +93,7 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const SizedBox(height: 20.0),
           Padding(
-            padding: const EdgeInsets.only(left: 70, right: 70),
+            padding: const EdgeInsets.only(left:20, right: 20),
             child: Form(
               key: _phoneFormKey,
               child: PhoneFormField(
@@ -109,12 +112,16 @@ class _AuthorizationState extends State<Authorization> {
                   ),
                 ),
                 onChanged: (phoneNumber) {
-                  _phoneNumber = phoneNumber;
+                  setState(() {
+                    _phoneNumber = phoneNumber;
+                    _isPhoneNumberValid =
+                        _phoneFormKey.currentState?.validate() ?? false;
+                  });
                 },
                 countryButtonStyle: const CountryButtonStyle(
                   showDialCode: true, // Display +998
-                  showIsoCode: false, // Hide ISO code (optional)
-                  showFlag: true, // Display Uzbekistan flag (optional)
+                  showIsoCode: false, // Hide ISO code
+                  showFlag: true, // Display Uzbekistan flag
                   flagSize: 16,
                 ),
               ),
@@ -122,19 +129,20 @@ class _AuthorizationState extends State<Authorization> {
           ),
           const Spacer(),
           Padding(
-            padding: const EdgeInsets.only(bottom: 30.0),
-            child: ElevatedButton(
-              onPressed: _continue,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 255, 215, 56),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.only(
-                    left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
-                child: Text(
-                  'Continue',
-                  style: TextStyle(
-                    fontSize: 20,
+            padding: const EdgeInsets.only(bottom: 50.0, left: 20.0, right: 20.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: ElevatedButton(
+                onPressed: _isPhoneNumberValid ? _continue : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 255, 215, 56),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.only(
+                      left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
+                  child: Text(
+                    'Continue',
+                    style: TextStyle(fontSize: 20, color: Colors.black),
                   ),
                 ),
               ),
