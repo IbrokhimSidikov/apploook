@@ -66,8 +66,9 @@ class _CheckoutState extends State<Checkout> {
   String? selectedBranch;
   String? selectedOption;
   List<String> branches = [
-    'Loook Chilanzar',
     'Loook Yunusobod',
+    'Loook Beruniy',
+    'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
   ];

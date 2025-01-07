@@ -1,5 +1,7 @@
+import 'package:apploook/cart_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
@@ -41,8 +43,40 @@ class _ProfileState extends State<Profile> {
     });
   }
 
+  // void _showDeleteConfirmationDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //           var cartProvider = Provider.of<CartProvider>(context);
+
+  //       return AlertDialog(
+  //         title: const Text('Confirm Deletion'),
+  //         content: const Text('Are you sure you want to delete your account?'),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               await _clearUserData();
+  //               cartProvider.clearCart();
+  //               Navigator.of(context).pop();
+  //               Navigator.pushReplacementNamed(context, '/onboard');
+  //             },
+  //             child: const Text('Confirm', style: TextStyle(color: Colors.red)),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
+    var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -159,8 +193,10 @@ class _ProfileState extends State<Profile> {
                 //   height: 150,
                 // ),
                 GestureDetector(
+                  
                   onTap: () async {
                     await _clearUserData();
+                    cartProvider.clearCart();
                     Navigator.pushReplacementNamed(context, '/onboard');
                   },
                   child: const Text(
@@ -199,6 +235,7 @@ class _ProfileState extends State<Profile> {
 
                     if (confirmDelete == true) {
                       await _clearUserData();
+                      cartProvider.clearCart();
                       Navigator.pushReplacementNamed(context, '/onboard');
                     }
                   },

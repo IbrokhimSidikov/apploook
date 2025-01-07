@@ -1,13 +1,6 @@
 import 'package:apploook/cart_provider.dart';
-import 'package:apploook/pages/appetizerpage.dart';
-import 'package:apploook/pages/burgerpage.dart';
-import 'package:apploook/pages/cart.dart';
-import 'package:apploook/pages/chickenpage.dart';
-import 'package:apploook/pages/combopage.dart';
 import 'package:apploook/pages/details.dart';
-import 'package:apploook/pages/pizzapage.dart';
 import 'package:apploook/pages/profile.dart';
-import 'package:apploook/pages/spinnerpage.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
