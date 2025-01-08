@@ -57,8 +57,8 @@ flutter:
           style: italic
 
 flutter_launcher_icons:
-  android: "launcher_icon"
+  android: true
   ios: true
-  image_path: "images/512x512.png"
-  
+  image_path: "images/192x192.png"
+  remove_alpha_ios: true
   
