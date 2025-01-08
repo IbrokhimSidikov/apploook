@@ -1,20 +1,13 @@
-import 'dart:math';
 
-import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
-import 'package:apploook/pages/login.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
-import 'package:apploook/pages/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:apploook/firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
