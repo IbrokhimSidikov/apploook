@@ -30,6 +30,7 @@ dependencies:
   carousel_slider: ^5.0.0
 
   visibility_detector: ^0.4.0+2
+  firebase_remote_config: ^4.4.7
   
 
 dev_dependencies:
