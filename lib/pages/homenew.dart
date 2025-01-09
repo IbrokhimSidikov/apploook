@@ -289,12 +289,12 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
+              //Carousel Slider Banner
               Positioned(
                 top: 135,
                 left: 0,
                 right: 0,
                 child: CarouselSlider(
-                  // Carousel slider
                   options: CarouselOptions(
                     height: 140.0,
                     autoPlay: true,

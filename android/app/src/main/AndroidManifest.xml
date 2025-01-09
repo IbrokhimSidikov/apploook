@@ -5,9 +5,9 @@ package="com.example.apploook">
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     
     <application
-        android:label="apploook"
+        android:label="LOOOK"
         android:name=".MainApplication"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:exported="true"

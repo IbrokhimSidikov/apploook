@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+
 
 class Checkout extends StatefulWidget {
   Checkout({
@@ -28,12 +30,42 @@ class _CheckoutState extends State<Checkout> {
   String clientCommentPhone = '';
   String commented = '';
   String orderType = '';
+  late FirebaseRemoteConfig remoteConfig;
+  bool _isRemoteConfigInitialized = false;
+
 
   @override
   void initState() {
     super.initState();
+    _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
+
+  }
+
+  Future<void> _initializeRemoteConfig() async {
+    try {
+      remoteConfig = FirebaseRemoteConfig.instance;
+      await remoteConfig.setConfigSettings(RemoteConfigSettings(
+        fetchTimeout: const Duration(minutes: 1),
+        minimumFetchInterval: const Duration(hours: 1),
+      ));
+      
+      // Set default value as a string
+      await remoteConfig.setDefaults({
+        'chat_id': '-1002074915184'
+      });
+      
+      bool updated = await remoteConfig.fetchAndActivate();
+      _isRemoteConfigInitialized = true;
+      
+      print('Remote config updated: $updated');
+      String currentChatId = remoteConfig.getString('chat_id');
+      print('Current chat_id from Remote Config: $currentChatId');
+    } catch (e) {
+      print('Error initializing remote config: $e');
+      _isRemoteConfigInitialized = false;
+    }
   }
 
   Future<void> _loadPhoneNumber() async {
@@ -696,6 +728,27 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
+  Future<String> getChatId() async {
+    try {
+      if (!_isRemoteConfigInitialized) {
+        await _initializeRemoteConfig();
+      }
+      
+      String chatId = remoteConfig.getString('chat_id');
+      if (chatId.isEmpty) {
+        print('Using default chat_id as Remote Config value was empty');
+        return '-1002074915184';
+      }
+      
+      print('Retrieved chat_id from Remote Config: $chatId');
+      return chatId;
+      
+    } catch (e) {
+      print('Error getting chat_id: $e');
+      return '-1002074915184'; 
+    }
+  }
+
   Future<void> sendOrderToTelegram(
       String? address,
       String branchName,
@@ -710,7 +763,6 @@ class _CheckoutState extends State<Checkout> {
       String orderType,
       CartProvider cartProvider) async {
     try {
-      // Format order details
       final orderDetails = "Адрес: $address\n" +
           "Филиал: $branchName\n" +
           "Имя: $name\n" +
@@ -724,11 +776,13 @@ class _CheckoutState extends State<Checkout> {
           "Источник: Mobile App\n";
 
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
-
+      
+      String chatId = await getChatId();
+      print("Using chatId: $chatId");
+      
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
-      // Send order details to Telegram
       final response = await http.get(
         Uri.parse(telegramDebUrl),
         headers: {
@@ -741,14 +795,12 @@ class _CheckoutState extends State<Checkout> {
         print('Response body: ${response.body}');
         throw Exception('Failed to send order');
       } else {
+        print("Order sent successfully! Response: ${response.body}");
         cartProvider.clearCart();
       }
-
-      // if(response.statusCode == 200) {
-
-      // }
     } catch (e) {
-      print('Error: $e');
+      print('Error sending order: $e');
+      rethrow;
     }
   }
 }
