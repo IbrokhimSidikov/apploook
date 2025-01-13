@@ -261,22 +261,19 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           child: SvgPicture.asset('images/profileIconHome.svg'),
                         ),
                       ),
-                      // Container(
-                      //   padding: const EdgeInsets.all(10),
-                      //   decoration: BoxDecoration(
-                      //       color: Colors.white,
-                      //       borderRadius: BorderRadius.circular(50)),
-                      //   child: const Row(
-                      //     mainAxisSize:
-                      //         MainAxisSize.min, // Avoid unnecessary space
-                      //     children: [
-                      //       Icon(Icons.location_on, size: 30),
-                      //       SizedBox(width: 5.0), // Add some horizontal spacing
-                      //       Text("Tashkent"),
-                      //     ],
-                      //   ),
-                      // ),
-                      
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.pushReplacementNamed(context, '/notificationsView');
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Icon(
+                          Icons.notifications, // Use any built-in icon here
+                          size: 24.0, // Adjust size as needed
+                          color: Colors.black, 
+                                                ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

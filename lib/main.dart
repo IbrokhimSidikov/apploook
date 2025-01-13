@@ -1,6 +1,7 @@
 
 import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
         '/cart': (context) => Cart(),
         '/checkout': (context) => Checkout(),
         '/onboard': (context) => Onboard(),
+        '/notificationsView': (context) => NotificationsView(),
       },
     );
   }
