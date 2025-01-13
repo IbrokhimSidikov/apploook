@@ -1,4 +1,4 @@
-package com.example.apploook;
+package com.loook.v1;
 
 import android.app.Application;
 
