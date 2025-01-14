@@ -18,14 +18,12 @@ class FirebaseApi {
     print('Token: ${fCMToken}');
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-    // Initialize Flutter Local Notifications Plugin
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    // Handle foreground messages
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Got a message whilst in the foreground!');
       print('Message data: ${message.data}');
