@@ -197,28 +197,28 @@ class _CartState extends State<Cart> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(
-                    onPressed: () {},
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        const Color(0xffF1F2F7),
-                      ),
-                      foregroundColor: MaterialStateProperty.all(
-                        Colors.black,
-                      ),
-                    ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: Text(
-                        'Apply promo code',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black26,
-                        ),
-                      ),
-                    ),
-                  ),
+                  // ElevatedButton(
+                  //   onPressed: () {},
+                  //   style: ButtonStyle(
+                  //     backgroundColor: MaterialStateProperty.all(
+                  //       const Color(0xffF1F2F7),
+                  //     ),
+                  //     foregroundColor: MaterialStateProperty.all(
+                  //       Colors.black,
+                  //     ),
+                  //   ),
+                  //   child: const Padding(
+                  //     padding: EdgeInsets.all(12.0),
+                  //     child: Text(
+                  //       'Apply promo code',
+                  //       style: TextStyle(
+                  //         fontSize: 18,
+                  //         fontWeight: FontWeight.w500,
+                  //         color: Colors.black26,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 25.0),
                   ElevatedButton(
                     onPressed: price > 0
