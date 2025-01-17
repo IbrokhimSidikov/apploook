@@ -114,13 +114,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     bool isValid = await isCacheValid();
 
     if (cachedData != null && isValid) {
-      // Load data from local storage if cache is valid
       setState(() {
         processCategoryData(json.decode(cachedData));
         _isLoading = false;
       });
     } else {
-      // Fetch fresh data from the API
       await fetchData();
     }
   }
@@ -208,6 +206,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       selectedCategoryId.value = newCategoryId;
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
