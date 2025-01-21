@@ -469,13 +469,13 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Padding(
-  padding: const EdgeInsets.only(right: 10.0),
-  child: CachedProductImage(
-    imageUrl: product.imagePath!,
-    width: 140.0,
-    height: 140.0,
-  ),
-),
+                                                  padding: const EdgeInsets.only(right: 10.0),
+                                                  child: CachedProductImage(
+                                                    imageUrl: product.imagePath!,
+                                                    width: 140.0,
+                                                    height: 140.0,
+                                                  ),
+                                                ),
                                                 Expanded(
                                                   child: Column(
                                                     crossAxisAlignment:
