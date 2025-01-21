@@ -2,6 +2,7 @@ import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
+import 'package:apploook/widget/cached_product_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -468,21 +469,13 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 10.0),
-                                                  child: Container(
-                                                    width: 140.0,
-                                                    height: 140.0,
-                                                    decoration: BoxDecoration(
-                                                      image: DecorationImage(
-                                                        image: NetworkImage(
-                                                            product.imagePath!),
-                                                        fit: BoxFit.contain,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
+  padding: const EdgeInsets.only(right: 10.0),
+  child: CachedProductImage(
+    imageUrl: product.imagePath!,
+    width: 140.0,
+    height: 140.0,
+  ),
+),
                                                 Expanded(
                                                   child: Column(
                                                     crossAxisAlignment:
