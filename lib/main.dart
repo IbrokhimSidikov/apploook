@@ -7,6 +7,7 @@ import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,8 @@ Future<void> main() async {
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
+  CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
   runApp(
     ChangeNotifierProvider(
