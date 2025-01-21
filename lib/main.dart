@@ -6,6 +6,7 @@ import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
+import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -60,7 +61,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(child: CircularProgressIndicator()), // Loader here
+          body: CustomLoader(message: "Initializing the App..."),
         ),
       );
     }
