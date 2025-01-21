@@ -24,7 +24,6 @@ Future<void> main() async {
   print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
-  // Check for privacy policy consent
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool? acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
 
