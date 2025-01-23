@@ -16,12 +16,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  FirebaseApi().initNotifications();
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  print("FCMToken $fcmToken");
-  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  // await Firebase.initializeApp();
+  // FirebaseApi().initNotifications();
+  // await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  // final fcmToken = await FirebaseMessaging.instance.getToken();
+  // print("FCMToken $fcmToken");
+  // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
   runApp(MyLoaderApp());
 }

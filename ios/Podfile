@@ -44,6 +44,9 @@ post_install do |installer|
         '$(inherited)',
         'PERMISSION_LOCATION=1',
       ]
+
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
 end
+
