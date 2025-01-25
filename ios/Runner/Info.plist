@@ -39,6 +39,12 @@
 	<false/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+	<key>NSMotionUsageDescription</key>
+	<string>We use motion data to improve app functionality and user experience.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location data to enhance app functionality and provide location-based features.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to improve app features and functionality.</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIStatusBarStyle</key>
@@ -52,10 +58,7 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+
 	</array>
 </dict>
 </plist>

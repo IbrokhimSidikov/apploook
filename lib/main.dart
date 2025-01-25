@@ -1,4 +1,4 @@
-import 'package:apploook/api/firebase_api.dart';
+// import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
@@ -8,8 +8,8 @@ import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:firebase_core/firebase_core.dart';
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -47,8 +47,8 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
-    // Simulate initialization (e.g., loading configs, Firebase setup)
-    await Future.delayed(Duration(seconds: 2)); // Replace with real tasks
+    
+    await Future.delayed(Duration(seconds: 2)); 
 
     setState(() {
       _isLoading = false;
