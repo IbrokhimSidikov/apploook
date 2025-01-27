@@ -1,7 +1,9 @@
 import 'package:apploook/pages/home.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/providers/locale_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Onboard extends StatefulWidget {
@@ -20,6 +22,18 @@ class _OnboardState extends State<Onboard> {
   void initState() {
     _controller = PageController(initialPage: 0);
     super.initState();
+     _initializeLanguage();
+  }
+
+  Future<void> _initializeLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedLanguage = prefs.getString('selected_language');
+    if (savedLanguage != null) {
+      setState(() {
+        isEnglishSelected = savedLanguage == 'en';
+        isuzbekSelected = savedLanguage == 'uz';
+      });
+    }
   }
 
   @override
@@ -30,10 +44,15 @@ class _OnboardState extends State<Onboard> {
 
   void _continue() async {
     if (isEnglishSelected || isuzbekSelected) {
+      final selectedLocale = isEnglishSelected ? 'en' : 'uz';
+      
       // Save the selected language in shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('selected_language',
-          isEnglishSelected ? 'en' : 'uz');
+      await prefs.setString('selected_language', selectedLocale);
+
+      // Update the app's locale using LocaleProvider
+      if (!mounted) return;
+      context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
 
       // Navigate to the next page
       Navigator.pushReplacementNamed(context, '/homeNew');
@@ -47,6 +66,13 @@ class _OnboardState extends State<Onboard> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocale = context.watch<LocaleProvider>().locale.languageCode;
+
+    if (!isEnglishSelected && !isuzbekSelected) {
+      isEnglishSelected = currentLocale == 'en';
+      isuzbekSelected = currentLocale == 'uz';
+    }
+
     return Scaffold(
       backgroundColor: Colors.black87,
       body: Column(
@@ -162,6 +188,7 @@ class _OnboardState extends State<Onboard> {
                               isEnglishSelected = true;
                               isuzbekSelected = false;
                             });
+                            context.read<LocaleProvider>().setLocale(Locale('en'));
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
@@ -197,6 +224,7 @@ class _OnboardState extends State<Onboard> {
                               isuzbekSelected = true;
                               isEnglishSelected = false;
                             });
+                            context.read<LocaleProvider>().setLocale(Locale('uz'));
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
