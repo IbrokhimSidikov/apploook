@@ -11,8 +11,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/app_localizations.dart';
+import 'l10n/app_localizations_delegate.dart';
+import 'providers/locale_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -66,14 +70,20 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       );
     }
 
-    return ChangeNotifierProvider(
-      create: (context) => CartProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+      ],
       child: _acceptedPrivacyPolicy == true
           ? const MyApp()
           : ConsentScreen(onAccept: () {
               runApp(
-                ChangeNotifierProvider(
-                  create: (context) => CartProvider(),
+                MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(create: (_) => CartProvider()),
+                    ChangeNotifierProvider(create: (_) => LocaleProvider()),
+                  ],
                   child: const MyApp(),
                 ),
               );
@@ -87,26 +97,42 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        fontFamily: 'Poppins',
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(fontFamily: 'Poppins'),
-          bodyMedium: TextStyle(fontFamily: 'Poppins'),
-          displayLarge: TextStyle(fontFamily: 'Poppins'),
-          displayMedium: TextStyle(fontFamily: 'Poppins'),
-        ),
-      ),
-      home: InitialScreen(),
-      routes: {
-        '/homeNew': (context) => HomeNew(),
-        '/signin': (context) => SignIn(),
-        '/cart': (context) => Cart(),
-        '/checkout': (context) => Checkout(),
-        '/onboard': (context) => Onboard(),
-        '/notificationsView': (context) => NotificationsView(),
+    return Consumer<LocaleProvider>(
+      builder: (context, localeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Flutter Demo',
+          theme: ThemeData(
+            fontFamily: 'Poppins',
+            textTheme: TextTheme(
+              bodyLarge: TextStyle(fontFamily: 'Poppins'),
+              bodyMedium: TextStyle(fontFamily: 'Poppins'),
+              displayLarge: TextStyle(fontFamily: 'Poppins'),
+              displayMedium: TextStyle(fontFamily: 'Poppins'),
+            ),
+          ),
+          // Add localization support
+          locale: localeProvider.locale,
+          supportedLocales: const [
+            Locale('en'),
+            Locale('uz'),
+          ],
+          localizationsDelegates: const [
+            AppLocalizationsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          home: InitialScreen(),
+          routes: {
+            '/homeNew': (context) => HomeNew(),
+            '/signin': (context) => SignIn(),
+            '/cart': (context) => Cart(),
+            '/checkout': (context) => Checkout(),
+            '/onboard': (context) => Onboard(),
+            '/notificationsView': (context) => NotificationsView(),
+          },
+        );
       },
     );
   }
