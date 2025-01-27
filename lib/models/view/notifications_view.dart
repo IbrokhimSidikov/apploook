@@ -1,9 +1,6 @@
-import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/homenew.dart';
-import 'package:apploook/providers/locale_provider.dart';
 import  'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:provider/provider.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -30,27 +27,9 @@ class _NotificationsViewState extends State<NotificationsView> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Text(AppLocalizations.of(context).notification),
-          ),
-          ListTile(
-            title: Text('Language / Til'),
-            trailing: DropdownButton<String>(
-              value: context.watch<LocaleProvider>().locale.languageCode,
-              items: [
-                DropdownMenuItem(value: 'en', child: Text('English')),
-                DropdownMenuItem(value: 'uz', child: Text('O\'zbek')),
-              ],
-              onChanged: (String? value) {
-                if (value != null) {
-                  context.read<LocaleProvider>().setLocale(Locale(value));
-                }
-              },
-            ),
-          ),
-        ],
+      body: Center(
+        child: Text('Notifications will appear here'),
+        // You can add a ListView here to show notification history
       ),
     );
   }

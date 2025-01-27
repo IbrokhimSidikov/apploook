@@ -16,6 +16,8 @@ class AppLocalizations {
       'settings': 'Settings',
       'language': 'Language',
       'notification':'Notification will appear here',
+      'logout':'Log out',
+      'deleteAccount':'Delete Account',
     },
     'uz': {
       'hello': 'Salom',
@@ -23,6 +25,9 @@ class AppLocalizations {
       'settings': 'Sozlamalar',
       'language': 'Til',
       'notification':'Sizning xabarnomalaringiz bu yerda korinadi',
+      'logout':'Chiqish',
+      'deleteAccount':'Hisobni o\'chirish',
+
     }
   };
 
@@ -31,4 +36,8 @@ class AppLocalizations {
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get notification => _localizedValues[locale.languageCode]!['notification']!;
+  String get logout => _localizedValues[locale.languageCode]!['logout']!;
+  String get deleteAccount => _localizedValues[locale.languageCode]!['deleteAccount']!;
+
+
 }

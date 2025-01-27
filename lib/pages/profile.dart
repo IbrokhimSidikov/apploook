@@ -4,6 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/app_localizations.dart';
+
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -199,8 +201,8 @@ class _ProfileState extends State<Profile> {
                     cartProvider.clearCart();
                     Navigator.pushReplacementNamed(context, '/onboard');
                   },
-                  child: const Text(
-                    'Log Out',
+                  child: Text(
+                    AppLocalizations.of(context).logout,
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
@@ -239,8 +241,8 @@ class _ProfileState extends State<Profile> {
                       Navigator.pushReplacementNamed(context, '/onboard');
                     }
                   },
-                  child: const Text(
-                    'Delete Account',
+                  child:  Text(
+                    AppLocalizations.of(context).deleteAccount,
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
