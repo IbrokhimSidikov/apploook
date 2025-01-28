@@ -1,6 +1,6 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
-import 'package:apploook/pages/cart.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -188,7 +188,7 @@ class _DetailsState extends State<Details> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Total Price",
+                        AppLocalizations.of(context).totalPrice,
                         style: AppWidget.semiboldTextFieldStyle(),
                       ),
                       Text(
@@ -215,10 +215,11 @@ class _DetailsState extends State<Details> {
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                         child: Text(
-                          "Add to cart",
+                          AppLocalizations.of(context).addToCart,
                           style: TextStyle(
+                          
                             color: Colors.black,
                             fontSize: 16.0,
                             fontFamily: 'Poppins',

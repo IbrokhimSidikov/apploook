@@ -16,8 +16,12 @@ class AppLocalizations {
       'settings': 'Settings',
       'language': 'Language',
       'notification':'Notification will appear here',
+      // Profile page
       'logout':'Log out',
       'deleteAccount':'Delete Account',
+      // Details page
+      'totalPrice':'Total Price',
+      'addToCart':'Add to cart',
     },
     'uz': {
       'hello': 'Salom',
@@ -25,8 +29,12 @@ class AppLocalizations {
       'settings': 'Sozlamalar',
       'language': 'Til',
       'notification':'Sizning xabarnomalaringiz bu yerda korinadi',
+      // Profile page
       'logout':'Chiqish',
       'deleteAccount':'Hisobni o\'chirish',
+      // Details page
+      'totalPrice':'Umumiy Qiymat',
+      'addToCart':'Savatchaga qo\'shish',
 
     }
   };
@@ -36,8 +44,15 @@ class AppLocalizations {
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get notification => _localizedValues[locale.languageCode]!['notification']!;
+  // Profile page
   String get logout => _localizedValues[locale.languageCode]!['logout']!;
   String get deleteAccount => _localizedValues[locale.languageCode]!['deleteAccount']!;
+  // Details page
+  String get totalPrice => _localizedValues[locale.languageCode]!['totalPrice']!;
+  String get addToCart => _localizedValues[locale.languageCode]!['addToCart']!;
+
+
+
 
 
 }
