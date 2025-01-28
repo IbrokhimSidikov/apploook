@@ -83,7 +83,7 @@ class AppLocalizations {
       'delete':'O\'chirish',
       // Details page
       'totalPrice':'Umumiy',
-      'addToCart':'Savatchaga qo\'shish',
+      'addToCart':'Qo\'shish',
       // Cart page
       'cart':'Savatcha',
       'items':'dona',
@@ -131,6 +131,7 @@ class AppLocalizations {
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get notification => _localizedValues[locale.languageCode]!['notification']!;
+  
   // Profile page
   String get logout => _localizedValues[locale.languageCode]!['logout']!;
   String get deleteAccount => _localizedValues[locale.languageCode]!['deleteAccount']!;
@@ -138,25 +139,30 @@ class AppLocalizations {
   String get confirmDialog => _localizedValues[locale.languageCode]!['confirmDialog']!;
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
   String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  
   // Details page
   String get totalPrice => _localizedValues[locale.languageCode]!['totalPrice']!;
   String get addToCart => _localizedValues[locale.languageCode]!['addToCart']!;
+  
   // Cart page
   String get cart => _localizedValues[locale.languageCode]!['cart']!;
   String get items => _localizedValues[locale.languageCode]!['items']!;
   String get proceedToCheckout => _localizedValues[locale.languageCode]!['proceedToCheckout']!;
+  
   // Sign-in page
   String get signIn => _localizedValues[locale.languageCode]!['signIn']!;
   String get signInToYourProfile => _localizedValues[locale.languageCode]!['signInToYourProfile']!;
   String get underTitle => _localizedValues[locale.languageCode]!['underTitle']!;
   String get phoneNumberButton => _localizedValues[locale.languageCode]!['phoneNumberButton']!;
   String get privacyPolicy => _localizedValues[locale.languageCode]!['privacyPolicy']!;
+  
   // Authorization page
   String get authorization => _localizedValues[locale.languageCode]!['authorization']!;
   String get authorizationTitle => _localizedValues[locale.languageCode]!['authorizationTitle']!;
   String get firstNameHintText => _localizedValues[locale.languageCode]!['firstNameHintText']!;
   String get numberHintText => _localizedValues[locale.languageCode]!['numberHintText']!;
   String get continueButton => _localizedValues[locale.languageCode]!['continueButton']!;
+  
   // Chekout page
   String get checkout => _localizedValues[locale.languageCode]!['checkout']!;
   String get chooseOrderType => _localizedValues[locale.languageCode]!['chooseOrderType']!;
