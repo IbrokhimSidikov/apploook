@@ -337,7 +337,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       valueListenable: selectedCategoryId,
                       builder: (context, value, child) {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _scrollToCategoryBuy(value!);
+                          if (value != null) {
+                            _scrollToCategoryBuy(value!);
+                          } else {
+                            debugPrint('Value is null');
+                          }
                         });
                         return ListView.builder(
                           controller: _scrollController,

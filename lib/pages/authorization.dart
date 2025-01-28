@@ -1,3 +1,4 @@
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
@@ -54,8 +55,8 @@ class _AuthorizationState extends State<Authorization> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'Authorization',
+        title: Text(
+          AppLocalizations.of(context).authorization,
           style: TextStyle(
               fontSize: 18.0, fontWeight: FontWeight.w500, color: Colors.grey),
         ),
@@ -65,9 +66,9 @@ class _AuthorizationState extends State<Authorization> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           const SizedBox(height: 75),
-          const Center(
+           Center(
             child: Text(
-              'Please enter your details\nto log in the application',
+              AppLocalizations.of(context).authorizationTitle,
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
               textAlign: TextAlign.center,
             ),
@@ -78,14 +79,14 @@ class _AuthorizationState extends State<Authorization> {
             child: TextFormField(
               controller: _firstNameController,
               decoration: InputDecoration(
-                hintText: 'Enter your first name',
+                hintText: AppLocalizations.of(context).firstNameHintText,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter your first name';
+                  return AppLocalizations.of(context).firstNameHintText;
                 }
                 return null;
               },
@@ -106,7 +107,7 @@ class _AuthorizationState extends State<Authorization> {
                 enabled: true,
                 isCountrySelectionEnabled: false,
                 decoration: InputDecoration(
-                  hintText: 'Enter phone number',
+                  hintText: AppLocalizations.of(context).numberHintText,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -137,11 +138,11 @@ class _AuthorizationState extends State<Authorization> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 215, 56),
                 ),
-                child: const Padding(
+                child:  Padding(
                   padding: EdgeInsets.only(
                       left: 40.0, right: 40.0, top: 10.0, bottom: 10.0),
                   child: Text(
-                    'Continue',
+                    AppLocalizations.of(context).continueButton,
                     style: TextStyle(fontSize: 20, color: Colors.black),
                   ),
                 ),

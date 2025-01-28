@@ -1,3 +1,4 @@
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/authorization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -30,13 +31,13 @@ class _SignInState extends State<SignIn> {
           ),
           Center(
             child: Text(
-              'Sign in to your profile',
+              AppLocalizations.of(context).signInToYourProfile,
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
           ),
           Center(
             child: Text(
-              'To order, do authorization first',
+              AppLocalizations.of(context).underTitle,
               style: TextStyle(fontWeight: FontWeight.w200),
             ),
           ),
@@ -56,7 +57,7 @@ class _SignInState extends State<SignIn> {
                     borderRadius: BorderRadius.circular(30),
                     color: const Color(0xffFEC700)),
                 child: Text(
-                  'Enter your phone number',
+                  AppLocalizations.of(context).phoneNumberButton,
                   style: TextStyle(fontSize: 17),
                 ),
               ),
@@ -67,7 +68,7 @@ class _SignInState extends State<SignIn> {
           ),
           Center(
             child: Text(
-              'Privacy policy',
+              AppLocalizations.of(context).privacyPolicy,
               style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13),
             ),
           ),
@@ -88,8 +89,8 @@ class _SignInState extends State<SignIn> {
   AppBar appBar() {
     return AppBar(
       backgroundColor: Colors.white,
-      title: const Text(
-        'Sign-In',
+      title: Text(
+        AppLocalizations.of(context).signIn,
         style: TextStyle(
             color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
       ),
