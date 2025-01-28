@@ -20,6 +20,10 @@ class AppLocalizations {
       // Profile page
       'logout':'Log out',
       'deleteAccount':'Delete Account',
+      'confirmDelete':'Confirm Delete',
+      'confirmDialog':'Are you sure you want to delete your account?',
+      'cancel':'Cancel',
+      'delete':'Delete',
       // Details page
       'totalPrice':'Total Price',
       'addToCart':'Add to cart',
@@ -73,6 +77,10 @@ class AppLocalizations {
       // Profile page
       'logout':'Chiqish',
       'deleteAccount':'Hisobni o\'chirish',
+      'confirmDelete':'O\'chirishni tasdiqlang',
+      'confirmDialog':'Hisobingizni o\'chirishni xohlayotganingizga aminmisiz?',
+      'cancel':'Bekor qilish',
+      'delete':'O\'chirish',
       // Details page
       'totalPrice':'Umumiy',
       'addToCart':'Savatchaga qo\'shish',
@@ -126,6 +134,10 @@ class AppLocalizations {
   // Profile page
   String get logout => _localizedValues[locale.languageCode]!['logout']!;
   String get deleteAccount => _localizedValues[locale.languageCode]!['deleteAccount']!;
+  String get confirmDelete => _localizedValues[locale.languageCode]!['confirmDelete']!;
+  String get confirmDialog => _localizedValues[locale.languageCode]!['confirmDialog']!;
+  String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
+  String get delete => _localizedValues[locale.languageCode]!['delete']!;
   // Details page
   String get totalPrice => _localizedValues[locale.languageCode]!['totalPrice']!;
   String get addToCart => _localizedValues[locale.languageCode]!['addToCart']!;

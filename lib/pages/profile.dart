@@ -215,20 +215,20 @@ class _ProfileState extends State<Profile> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: const Text('Confirm Delete'),
-                          content: const Text('Are you sure you want to delete your account?'),
+                          title: Text(AppLocalizations.of(context).confirmDelete,),
+                          content: Text(AppLocalizations.of(context).confirmDialog),
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop(false); // User clicked Cancel
+                                Navigator.of(context).pop(false); 
                               },
-                              child: const Text('Cancel'),
+                              child: Text(AppLocalizations.of(context).cancel),
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop(true); // User confirmed Delete
+                                Navigator.of(context).pop(true); 
                               },
-                              child: const Text('Delete'),
+                              child: Text(AppLocalizations.of(context).delete),
                             ),
                           ],
                         );
