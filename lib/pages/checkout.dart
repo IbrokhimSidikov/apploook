@@ -200,8 +200,8 @@ class _CheckoutState extends State<Checkout> {
                   ),
                 ),
                 // ElevatedButton(
-                //   onPressed: () {},
-                //   // onPressed: () => setState(() => _selectedIndex = 2),
+                //   // onPressed: () {},
+                //   onPressed: () => setState(() => _selectedIndex = 2),
                 //   style: ButtonStyle(
                 //     backgroundColor: WidgetStateProperty.all(
                 //       _selectedIndex == 2
@@ -219,7 +219,7 @@ class _CheckoutState extends State<Checkout> {
                 //     style: TextStyle(
                 //         color: Colors.black, fontWeight: FontWeight.w500),
                 //   ),
-                // )
+                // ),
               ],
             ),
             const SizedBox(

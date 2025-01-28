@@ -1,6 +1,5 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -234,7 +233,6 @@ class _ProfileState extends State<Profile> {
                         );
                       },
                     );
-
                     if (confirmDelete == true) {
                       await _clearUserData();
                       cartProvider.clearCart();
