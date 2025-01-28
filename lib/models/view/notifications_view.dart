@@ -1,4 +1,4 @@
-import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 import  'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -14,7 +14,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notifications'),
+        title: Text(AppLocalizations.of(context).notifications),
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
@@ -28,8 +28,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         ),
       ),
       body: Center(
-        child: Text('Notifications will appear here'),
-        // You can add a ListView here to show notification history
+        child: Text(AppLocalizations.of(context).notificationsPlaceholder),
       ),
     );
   }

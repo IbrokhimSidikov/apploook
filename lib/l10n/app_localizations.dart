@@ -11,6 +11,7 @@ class AppLocalizations {
   
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
+      'whatsNew':'WHAT\'S NEW',
       'hello': 'Hello',
       'welcome': 'Welcome to our app',
       'settings': 'Settings',
@@ -49,15 +50,21 @@ class AppLocalizations {
       'selectBranch':'Select Branch',
       'orderPrice':'Order Price',
       'deliveryPrice':'Delivery Price',
+      'unknown':'Unknown',
       'paymentMethod':'Payment Method',
       'cash':'Cash',
       'card':'Card',
       'additionalNumber':'Additional Number',
       'comments':'Comments',
       'order':'Order',
-
+      'orderSuccess':'Order Success',
+      'orderSuccessSubTitle':'Your order has been placed successfully!',
+      // Notifications
+      'notifications':'Notifications',
+      'notificationsPlaceholder':'Notifications will appear here',
     },
     'uz': {
+      'whatsNew':'YANGILIKLAR',
       'hello': 'Salom',
       'welcome': 'Ilovamizga xush kelibsiz',
       'settings': 'Sozlamalar',
@@ -96,15 +103,21 @@ class AppLocalizations {
       'selectBranch':'Filial tanlang',
       'orderPrice':'Buyurtma qiymati',
       'deliveryPrice':'Yetkazib berish narxi',
+      'unknown':'Noma\'lum',
       'paymentMethod':'To\'lov usuli',
       'cash':'Naxt',
       'card':'Karta',
       'additionalNumber':'Qo\'shimcha telefon raqami',
       'comments':'Izohlar',
       'order':'Buyurtma',
+      'orderSuccess':'Buyurtma qabul qilindi',
+      'orderSuccessSubTitle':'Sizning buyurtmangiz qabul qilindi!',
+      // Notifications
+      'notifications':'Xabarnoma',
+      'notificationsPlaceholder':'Xabarlaringiz shu yerda ko\'rinadi',
     }
   };
-
+  String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
   String get hello => _localizedValues[locale.languageCode]!['hello']!;
   String get welcome => _localizedValues[locale.languageCode]!['welcome']!;
   String get settings => _localizedValues[locale.languageCode]!['settings']!;
@@ -143,11 +156,17 @@ class AppLocalizations {
   String get selectBranch => _localizedValues[locale.languageCode]!['selectBranch']!;
   String get orderPrice => _localizedValues[locale.languageCode]!['orderPrice']!;
   String get deliveryPrice => _localizedValues[locale.languageCode]!['deliveryPrice']!;
+  String get unknown => _localizedValues[locale.languageCode]!['unknown']!;
   String get paymentMethod => _localizedValues[locale.languageCode]!['paymentMethod']!;
   String get cash => _localizedValues[locale.languageCode]!['cash']!;
   String get card => _localizedValues[locale.languageCode]!['card']!;
   String get additionalNumber => _localizedValues[locale.languageCode]!['additionalNumber']!;
   String get comments => _localizedValues[locale.languageCode]!['comments']!;
   String get order => _localizedValues[locale.languageCode]!['order']!;
+  String get orderSuccess => _localizedValues[locale.languageCode]!['orderSuccess']!;
+  String get orderSuccessSubTitle => _localizedValues[locale.languageCode]!['orderSuccessSubTitle']!;
+  String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
+  String get notificationsPlaceholder => _localizedValues[locale.languageCode]!['notificationsPlaceholder']!;
+
     
 }

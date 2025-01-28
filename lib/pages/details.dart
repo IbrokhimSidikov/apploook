@@ -218,8 +218,8 @@ class _DetailsState extends State<Details> {
                         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
                         child: Text(
                           AppLocalizations.of(context).addToCart,
-                          style: TextStyle(
-                          
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
                             color: Colors.black,
                             fontSize: 16.0,
                             fontFamily: 'Poppins',

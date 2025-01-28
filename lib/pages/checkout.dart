@@ -1,3 +1,4 @@
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
 import 'package:flutter/material.dart';
@@ -145,7 +146,7 @@ class _CheckoutState extends State<Checkout> {
                   width: 15.0,
                 ),
                 Text(
-                  'Choose your order type',
+                  AppLocalizations.of(context).chooseOrderType,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 SizedBox(
@@ -172,8 +173,8 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     ),
                   ),
-                  child: const Text(
-                    'DELIVERY',
+                  child: Text(
+                    AppLocalizations.of(context).delivery,
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
@@ -192,8 +193,8 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     ),
                   ),
-                  child: const Text(
-                    'SELF-PICKUP',
+                  child: Text(
+                    AppLocalizations.of(context).selfPickup,
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
@@ -276,7 +277,7 @@ class _CheckoutState extends State<Checkout> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Your Delivery Location!',
+                                              AppLocalizations.of(context).yourDeliveryLocation,
                                               style: TextStyle(
                                                 fontWeight: FontWeight.w500,
                                                 fontSize: 20,
@@ -295,7 +296,7 @@ class _CheckoutState extends State<Checkout> {
                                             top: 10),
                                         child: Text(
                                           selectedAddress ??
-                                              'Choose your Location -->',
+                                              AppLocalizations.of(context).chooseYourLocation,
                                           style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500),
@@ -320,7 +321,7 @@ class _CheckoutState extends State<Checkout> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Choose branch to pick up',
+                                    AppLocalizations.of(context).chooseBranchToPick,
                                     style: TextStyle(
                                         fontWeight: FontWeight.w500,
                                         fontSize: 20),
@@ -328,7 +329,7 @@ class _CheckoutState extends State<Checkout> {
                                   SizedBox(height: 10),
                                   DropdownButton<String>(
                                     value: selectedBranch,
-                                    hint: Text('Select Branch'),
+                                    hint: Text(AppLocalizations.of(context).selectBranch,),
                                     isExpanded: true,
                                     items: branches.map((String branch) {
                                       return DropdownMenuItem<String>(
@@ -394,8 +395,8 @@ class _CheckoutState extends State<Checkout> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Order Price :',
+                           Text(
+                            '${AppLocalizations.of(context).orderPrice} :',
                             style: TextStyle(fontSize: 16),
                           ),
                           Text(
@@ -403,16 +404,16 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(15.0),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Delivery Price :',
-                            style: TextStyle(fontSize: 16),
+                            '${AppLocalizations.of(context).deliveryPrice} :',
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          Text('Неизвестно'),
+                          Text(AppLocalizations.of(context).unknown),
                         ],
                       ),
                     ),
@@ -424,9 +425,9 @@ class _CheckoutState extends State<Checkout> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Total Price :',
-                            style: TextStyle(fontSize: 16),
+                           Text(
+                            '${AppLocalizations.of(context).totalPrice} :',
+                            style: const TextStyle(fontSize: 16),
                           ),
                           Text(
                               '${NumberFormat('#,##0').format(orderPrice)} UZS'),
@@ -444,7 +445,7 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
-                  labelText: 'Payment Method',
+                  labelText: AppLocalizations.of(context).paymentMethod,
                   labelStyle: TextStyle(color: Colors.black),
                 ),
                 value: selectedOption,
@@ -455,7 +456,7 @@ class _CheckoutState extends State<Checkout> {
                       children: [
                         Icon(Icons.money, color: Colors.green),
                         SizedBox(width: 10),
-                        Text('Cash'),
+                        Text(AppLocalizations.of(context).cash),
                       ],
                     ),
                   ),
@@ -465,7 +466,7 @@ class _CheckoutState extends State<Checkout> {
                       children: [
                         Icon(Icons.credit_card, color: Colors.blue),
                         SizedBox(width: 10),
-                        Text('Card'),
+                        Text(AppLocalizations.of(context).card),
                       ],
                     ),
                   ),
@@ -485,9 +486,9 @@ class _CheckoutState extends State<Checkout> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Additional number',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context).additionalNumber,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -516,7 +517,7 @@ class _CheckoutState extends State<Checkout> {
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: 'Enter phone number',
+                              hintText: AppLocalizations.of(context).numberHintText,
                               border: InputBorder.none,
                             ),
                             keyboardType: TextInputType.phone,
@@ -538,9 +539,9 @@ class _CheckoutState extends State<Checkout> {
                   const SizedBox(
                     height: 40.0,
                   ),
-                  const Text(
-                    'Comments',
-                    style: TextStyle(
+                  Text(
+                    AppLocalizations.of(context).comments,
+                    style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black,
                         fontWeight: FontWeight.w600),
@@ -624,9 +625,9 @@ class _CheckoutState extends State<Checkout> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text('Order Success'),
+                            title: Text(AppLocalizations.of(context).orderSuccess),
                             content: Text(
-                                'Your order has been placed successfully!'),
+                                AppLocalizations.of(context).orderSuccessSubTitle),
                             contentPadding:
                                 EdgeInsets.only(top: 30, left: 30, right: 30),
                             actions: [
@@ -688,7 +689,7 @@ class _CheckoutState extends State<Checkout> {
                       padding: EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 125.0),
                       child: Text(
-                        'Order',
+                        AppLocalizations.of(context).order,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -709,8 +710,8 @@ class _CheckoutState extends State<Checkout> {
   AppBar appBar() {
     return AppBar(
       backgroundColor: Colors.white,
-      title: const Text(
-        'Checkout',
+      title: Text(
+        AppLocalizations.of(context).checkout,
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       ),
       centerTitle: true,

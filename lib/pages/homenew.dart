@@ -279,7 +279,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              const Positioned(
+              Positioned(
                 top: 105,
                 left: 15,
                 child: Text(
