@@ -1,6 +1,6 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
-import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -63,8 +63,8 @@ class _CartState extends State<Cart> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'Cart',
+        title: Text(
+          AppLocalizations.of(context).cart,
           style: TextStyle(color: Colors.black, fontSize: 18),
         ),
         elevation: 0.0,
@@ -242,7 +242,7 @@ class _CartState extends State<Cart> {
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
                       child: Text(
-                        'Proceed to checkout ${NumberFormat('#,##0').format(price)} UZS',
+                        '${AppLocalizations.of(context).proceedToCheckout} - ${NumberFormat('#,##0').format(price)} UZS',
                         style: const TextStyle(
                           color: Colors.black,
                           fontSize: 18,
