@@ -38,6 +38,23 @@ class AppLocalizations {
       'firstNameHintText':'Enter your first name',
       'numberHintText':'Enter phone number',
       'continueButton':'Continue',
+      // Checkout page
+      'checkout':'Checkout',
+      'chooseOrderType':'Choose your order type',
+      'delivery':'DELIVERY',
+      'selfPickup':'SELF-PICKUP',
+      'yourDeliveryLocation':'Your Delivery Location!',
+      'chooseYourLocation':'Choose your location -->',
+      'chooseBranchToPick':'Choose branch to pick up',
+      'selectBranch':'Select Branch',
+      'orderPrice':'Order Price',
+      'deliveryPrice':'Delivery Price',
+      'paymentMethod':'Payment Method',
+      'cash':'Cash',
+      'card':'Card',
+      'additionalNumber':'Additional Number',
+      'comments':'Comments',
+      'order':'Order',
 
     },
     'uz': {
@@ -68,7 +85,23 @@ class AppLocalizations {
       'firstNameHintText':'Ismingizni kiriting',
       'numberHintText':'Telefon raqamingiz',
       'continueButton':'Davom etish',
-      
+      // Checkout page
+      'checkout':'Buyurtmani rasmiylashtirish',
+      'chooseOrderType':'Buyurtma turini tanlang',
+      'delivery':'YETKAZISH',
+      'selfPickup':'OLIB KETISH',
+      'yourDeliveryLocation':'Yetkazish manzilingiz!',
+      'chooseYourLocation':'Xaritadan tanlang -->',
+      'chooseBranchToPick':'Olib ketish uchun',
+      'selectBranch':'Filial tanlang',
+      'orderPrice':'Buyurtma qiymati',
+      'deliveryPrice':'Yetkazib berish narxi',
+      'paymentMethod':'To\'lov usuli',
+      'cash':'Naxt',
+      'card':'Karta',
+      'additionalNumber':'Qo\'shimcha telefon raqami',
+      'comments':'Izohlar',
+      'order':'Buyurtma',
     }
   };
 
@@ -99,13 +132,22 @@ class AppLocalizations {
   String get firstNameHintText => _localizedValues[locale.languageCode]!['firstNameHintText']!;
   String get numberHintText => _localizedValues[locale.languageCode]!['numberHintText']!;
   String get continueButton => _localizedValues[locale.languageCode]!['continueButton']!;
-
-
-  
-  
-
-
-
-
-
+  // Chekout page
+  String get checkout => _localizedValues[locale.languageCode]!['checkout']!;
+  String get chooseOrderType => _localizedValues[locale.languageCode]!['chooseOrderType']!;
+  String get delivery => _localizedValues[locale.languageCode]!['delivery']!;
+  String get selfPickup => _localizedValues[locale.languageCode]!['selfPickup']!;
+  String get yourDeliveryLocation => _localizedValues[locale.languageCode]!['yourDeliveryLocation']!;
+  String get chooseYourLocation => _localizedValues[locale.languageCode]!['chooseYourLocation']!;
+  String get chooseBranchToPick => _localizedValues[locale.languageCode]!['chooseBranchToPick']!;
+  String get selectBranch => _localizedValues[locale.languageCode]!['selectBranch']!;
+  String get orderPrice => _localizedValues[locale.languageCode]!['orderPrice']!;
+  String get deliveryPrice => _localizedValues[locale.languageCode]!['deliveryPrice']!;
+  String get paymentMethod => _localizedValues[locale.languageCode]!['paymentMethod']!;
+  String get cash => _localizedValues[locale.languageCode]!['cash']!;
+  String get card => _localizedValues[locale.languageCode]!['card']!;
+  String get additionalNumber => _localizedValues[locale.languageCode]!['additionalNumber']!;
+  String get comments => _localizedValues[locale.languageCode]!['comments']!;
+  String get order => _localizedValues[locale.languageCode]!['order']!;
+    
 }
