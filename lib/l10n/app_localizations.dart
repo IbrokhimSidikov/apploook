@@ -66,6 +66,12 @@ class AppLocalizations {
       // Notifications
       'notifications':'Notifications',
       'notificationsPlaceholder':'Notifications will appear here',
+      // Map Screen
+      'confirmAddress':'Do you confirm your address?',
+      'confirm':'Confirm',
+      'save':'Save',
+      'yourLocation':'Your Location',
+      'selectedAddress':'Your selected address',
     },
     'uz': {
       'whatsNew':'YANGILIKLAR',
@@ -123,6 +129,15 @@ class AppLocalizations {
       // Notifications
       'notifications':'Xabarnoma',
       'notificationsPlaceholder':'Xabarlaringiz shu yerda ko\'rinadi',
+      // Map Screen
+      'confirmAddress':'Manzilingizni Tasdiqlaysizmi?',
+      'confirm':'Tasdiqlash',
+      'save':'Saqlash',
+      'yourLocation':'Sizning Manzilingiz',
+      'selectedAddress':'Siz tanlagan manzil',
+
+
+
     }
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -185,6 +200,16 @@ class AppLocalizations {
   String get orderSuccessSubTitle => _localizedValues[locale.languageCode]!['orderSuccessSubTitle']!;
   String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
   String get notificationsPlaceholder => _localizedValues[locale.languageCode]!['notificationsPlaceholder']!;
+
+  // Map screen
+  String get confirmAddress => _localizedValues[locale.languageCode]!['confirmAddress']!;
+  String get confirm => _localizedValues[locale.languageCode]!['confirm']!;
+  String get save => _localizedValues[locale.languageCode]!['save']!;
+  String get yourLocation => _localizedValues[locale.languageCode]!['yourLocation']!;
+  String get selectedAddress => _localizedValues[locale.languageCode]!['selectedAddress']!;
+
+
+
 
     
 }
