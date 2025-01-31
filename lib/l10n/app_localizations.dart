@@ -65,6 +65,11 @@ class AppLocalizations {
       'orderSuccess':'Order Success',
       'orderSuccessSubTitle':'Your order has been placed successfully!',
       'carhopService':'Please select your LOOOK Carhop store:',
+      'carhopServiceBranchInfo':'Park your car in the area of:',
+      'carDetails':'Your car details:',
+      'selectRegion':'Select Region',
+      'openingHours':'Opening Hours',
+      'viewInMap':'View in Map',
       // Notifications
       'notifications':'Notifications',
       'notificationsPlaceholder':'Notifications will appear here',
@@ -130,7 +135,11 @@ class AppLocalizations {
       'orderSuccess':'Buyurtma qabul qilindi',
       'orderSuccessSubTitle':'Sizning buyurtmangiz qabul qilindi!',
       'carhopService':'LOOOK Carhop filialini tanlang:',
-
+      'carhopServiceBranchInfo': 'Avtomobilingizni quyidagi hududga qo\'ying:',
+      'carDetails': 'Avtomobilingiz tafsilotlari:',
+      'selectRegion': 'Shaxar tanlang',
+      'openingHours': 'Ishlash vaqti',
+      'viewInMap': 'Xaritadan ko\'rish',
       // Notifications
       'notifications':'Xabarnoma',
       'notificationsPlaceholder':'Xabarlaringiz shu yerda ko\'rinadi',
@@ -207,7 +216,11 @@ class AppLocalizations {
   String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
   String get notificationsPlaceholder => _localizedValues[locale.languageCode]!['notificationsPlaceholder']!;
   String get carhopService => _localizedValues[locale.languageCode]!['carhopService']!;
-
+  String get carhopServiceBranchInfo =>_localizedValues[locale.languageCode]!['carhopServiceBranchInfo']!;
+  String get carDetails =>_localizedValues[locale.languageCode]!['carDetails']!;
+  String get selectRegion =>_localizedValues[locale.languageCode]!['selectRegion']!;
+  String get openingHours =>_localizedValues[locale.languageCode]!['openingHours']!;
+  String get viewInMap =>_localizedValues[locale.languageCode]!['viewInMap']!;
 
   // Map screen
   String get confirmAddress => _localizedValues[locale.languageCode]!['confirmAddress']!;

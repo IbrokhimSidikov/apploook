@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
+import 'package:apploook/widget/branch_locations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,6 +15,7 @@ import 'package:apploook/cart_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
+import '../widget/branch_data.dart';
 
 class Checkout extends StatefulWidget {
   Checkout({
@@ -34,14 +38,12 @@ class _CheckoutState extends State<Checkout> {
   late FirebaseRemoteConfig remoteConfig;
   bool _isRemoteConfigInitialized = false;
 
-
   @override
   void initState() {
     super.initState();
     _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
-
   }
 
   Future<void> _initializeRemoteConfig() async {
@@ -51,15 +53,13 @@ class _CheckoutState extends State<Checkout> {
         fetchTimeout: const Duration(minutes: 1),
         minimumFetchInterval: const Duration(hours: 1),
       ));
-      
+
       // Set default value as a string
-      await remoteConfig.setDefaults({
-        'chat_id': '-1002074915184'
-      });
-      
+      // await remoteConfig.setDefaults({'chat_id': '-1002074915184'});
+
       bool updated = await remoteConfig.fetchAndActivate();
       _isRemoteConfigInitialized = true;
-      
+
       print('Remote config updated: $updated');
       String currentChatId = remoteConfig.getString('chat_id');
       print('Current chat_id from Remote Config: $currentChatId');
@@ -99,7 +99,7 @@ class _CheckoutState extends State<Checkout> {
   String? selectedBranch;
   String? selectedOption;
   String? selectedCity;
-  
+
   List<String> branches = [
     'Loook Yunusobod',
     'Loook Beruniy',
@@ -107,9 +107,8 @@ class _CheckoutState extends State<Checkout> {
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
   ];
-  List<String> city =[
+  List<String> city = [
     'Tashkent',
-
   ];
 
   String? _validatePayment(String? value) {
@@ -181,14 +180,14 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   child: Text(
                     AppLocalizations.of(context).delivery,
-                    style: TextStyle(
+                    style:const TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () => setState(() => _selectedIndex = 1),
                   style: ButtonStyle(
-                    backgroundColor:MaterialStateProperty.all(
+                    backgroundColor: MaterialStateProperty.all(
                       _selectedIndex == 1
                           ? const Color(0xffFEC700)
                           : const Color(0xffF1F2F7),
@@ -201,7 +200,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   child: Text(
                     AppLocalizations.of(context).selfPickup,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
@@ -234,226 +233,410 @@ class _CheckoutState extends State<Checkout> {
             Column(
               children: [
                 Padding(
-                    padding: const EdgeInsets.only(bottom: 15, left: 15),
-                    child: Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: Text(
-                        _selectedIndex == 0
-                            ? AppLocalizations.of(context).yourDeliveryLocation
-                            : _selectedIndex == 1
-                                ? AppLocalizations.of(context).selfPickupTitle
-                                : AppLocalizations.of(context).carhopService,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
+                  padding: const EdgeInsets.only(bottom: 15, left: 15),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      _selectedIndex == 0
+                          ? AppLocalizations.of(context).yourDeliveryLocation
+                          : _selectedIndex == 1
+                              ? AppLocalizations.of(context).selfPickupTitle
+                              : AppLocalizations.of(context).carhopService,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                       ),
                     ),
                   ),
+                ),
                 IndexedStack(
-                        index: _selectedIndex,
-                        children: [
-
-                          // DELIVERY
-                          GestureDetector(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MapScreen(),
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() {
-                                  selectedAddress = result;
-                                });
-                              }
-                            },
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 15.0),
-                              child: Container(
-                                height: 140,
-                                width: MediaQuery.of(context).size.width,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Color(0xFFF1F2F7),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5), 
-                                      spreadRadius: 1, 
-                                      blurRadius: 10, 
-                                      offset: Offset(0, 5), 
-                                    ),
-                                  ],
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                  index: _selectedIndex,
+                  children: [
+                    // DELIVERY
+                    GestureDetector(
+                      onTap: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MapScreen(),
+                          ),
+                        );
+                        if (result != null) {
+                          setState(() {
+                            selectedAddress = result;
+                          });
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        child: Container(
+                          height: 140,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Color(0xFFF1F2F7),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 1,
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(15.0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(15.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              AppLocalizations.of(context).yourDeliveryLocation,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 20,
-                                              ),
-                                            ),
-                                            SvgPicture.asset(
-                                                'images/close_black.svg'),
-                                          ],
+                                      Text(
+                                        AppLocalizations.of(context)
+                                            .yourDeliveryLocation,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 20,
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 15.0,
-                                            right: 15.0,
-                                            bottom: 15.0,
-                                            top: 10),
-                                        child: Text(
-                                          selectedAddress ??
-                                              AppLocalizations.of(context).chooseYourLocation,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      ),
+                                      SvgPicture.asset(
+                                          'images/close_black.svg'),
                                     ],
                                   ),
                                 ),
-                              ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 15.0,
+                                      right: 15.0,
+                                      bottom: 15.0,
+                                      top: 10),
+                                  child: Text(
+                                    selectedAddress ??
+                                        AppLocalizations.of(context)
+                                            .chooseYourLocation,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        ),
+                      ),
+                    ),
 
-                          // SELF-PICKUP
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 15.0),
-                            child: Container(
-                              height: 140,
-                              width: 390,
+                    // SELF-PICKUP
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        height: 140,
+                        width: 390,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: const Color(0xFFF1F2F7),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context).chooseBranchToPick,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 20),
+                              ),
+                              const SizedBox(height: 10),
+                              DropdownButton<String>(
+                                value: selectedBranch,
+                                hint: Text(
+                                  AppLocalizations.of(context).selectBranch,
+                                ),
+                                dropdownColor:const Color(0xFFF1F2F7),
+                                isExpanded: true,
+                                items: branches.map((String branch) {
+                                  return DropdownMenuItem<String>(
+                                    value: branch,
+                                    child: Text(branch),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedBranch = newValue;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // CARHOP
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: SizedBox(
+                        height: _selectedIndex == 2 ? 390 : 140,
+                        width: 390,
+                        child: Column(
+                          children: [
+                            Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
-                                color: Color(0xFFF1F2F7),
+                                color:const Color(0xFFF1F2F7),
                                 boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5), 
-                                      spreadRadius: 1, 
-                                      blurRadius: 10, 
-                                      offset: Offset(0, 5), 
-                                    ),
-                                  ],
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.5),
+                                    spreadRadius: 1,
+                                    blurRadius: 10,
+                                    offset:const Offset(0, 5),
+                                  ),
+                                ],
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(15.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      AppLocalizations.of(context).chooseBranchToPick,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 20),
+                                    // City Dropdown with 'X' button
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: DropdownButton<String>(
+                                            value: selectedCity,
+                                            hint: Text(AppLocalizations.of(context).selectRegion),
+                                            isExpanded: true,
+                                            dropdownColor: const Color(0xFFF1F2F7),
+                                            items: city.map((String city) {
+                                              return DropdownMenuItem<String>(
+                                                value: city,
+                                                child: Text(
+                                                  city,
+                                                  style:const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14),
+                                                ),
+                                              );
+                                            }).toList(),
+                                            onChanged: (String? newValue) {
+                                              setState(() {
+                                                selectedCity = newValue;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        if (selectedCity != null)
+                                          IconButton(
+                                            icon: const Icon(Icons.clear,
+                                                color: Colors.grey),
+                                            onPressed: () {
+                                              setState(() {
+                                                selectedCity = null;
+                                              });
+                                            },
+                                          ),
+                                      ],
                                     ),
-                                    SizedBox(height: 10),
-                                    DropdownButton<String>(
-                                      value: selectedBranch,
-                                      hint: Text(AppLocalizations.of(context).selectBranch,),
-                                      dropdownColor: Color(0xFFF1F2F7),
-                                      isExpanded: true,
-                                      items: branches.map((String branch) {
-                                        return DropdownMenuItem<String>(
-                                          value: branch,
-                                          child: Text(branch),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          selectedBranch = newValue;
-                                        });
-                                      },
+                                    const SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: DropdownButton<String>(
+                                            value: selectedBranch,
+                                            hint: Text(AppLocalizations.of(context).selectBranch),
+                                            isExpanded: true,
+                                            dropdownColor:const Color(0xFFF1F2F7),
+                                            items:
+                                                branches.map((String branch) {
+                                              return DropdownMenuItem<String>(
+                                                value: branch,
+                                                child: Text(
+                                                  branch,
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 14),
+                                                ),
+                                              );
+                                            }).toList(),
+                                            onChanged: (String? newValue) {
+                                              setState(() {
+                                                selectedBranch = newValue;
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                        if (selectedBranch != null)
+                                          IconButton(
+                                            icon: const Icon(Icons.clear,
+                                                color: Colors.grey),
+                                            onPressed: () {
+                                              setState(() {
+                                                selectedBranch = null;
+                                              });
+                                            },
+                                          ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                          ),
-
-                          // CARHOP
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                            child: SizedBox(
-                              height: 140,
+                            const SizedBox(
+                              height: 22.0,
+                            ),
+                             Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                AppLocalizations.of(context).carhopServiceBranchInfo,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14),
+                              ),
+                            ),
+                            const SizedBox(height: 15.0,),
+                            Container(
+                              height: 158,
                               width: 390,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  color: Color(0xFFF1F2F7),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5), 
-                                      spreadRadius: 1, 
-                                      blurRadius: 10, 
-                                      offset: Offset(0, 5), 
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F2F7), 
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(color: Colors.red),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 
+                                    20.0, right:15.0 ), 
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 1,
+                                      child: Container(
+                                        color: Colors
+                                            .transparent,
+                                        child: Align(
+                                          alignment: Alignment.topRight,
+                                          child: SvgPicture.asset(
+                                              'images/carhopMetka.svg'),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10.0,),
+                                    Expanded(
+                                      flex: 6,
+                                      child: Container(
+                                        color: Colors.transparent,
+                                        child: Align(
+                                          alignment: Alignment.topLeft,
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                selectedBranch != null
+                                                    ? "$selectedBranch - LOOOK"
+                                                    : AppLocalizations.of(
+                                                            context)
+                                                        .selectBranch,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color:
+                                                       Color(0xFFff0000),
+                                                ),
+                                              ),
+                                              if (selectedBranch != null) ...[
+                                                const SizedBox(
+                                                    height:
+                                                        5.0), 
+                                                Text(
+                                                  BranchData.getBranchAddress(
+                                                      selectedBranch), 
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w500,
+                                                    color:  Color(0xff5B5B5B),
+                                                  ),
+                                                ),
+                                              ],
+                                              const SizedBox(height: 15.0,),
+                                              Text(
+                                                '${AppLocalizations.of(context).openingHours} 9:00-00:00',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 12.0,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 15.0,),
+                                              Row(
+                                                children: [
+                                                  SvgPicture.asset(
+                                                      'images/mapPointer.svg'),
+                                                  const SizedBox(
+                                                    width: 15.0,
+                                                  ),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      BranchLocations.openMap(
+                                                          selectedBranch);
+                                                    },
+                                                    child: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .viewInMap,
+                                                      style: const TextStyle(
+                                                        color:
+                                                            Color(0xFF1C90E1),
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        decoration: TextDecoration
+                                                            .underline, // To indicate it's clickable
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
-                                child:  Padding(
-                                  padding: EdgeInsets.all(15.0),
-                                  child: Column(
-                                    children: [
-                                    DropdownButton<String>(
-                                      value: selectedCity,
-                                      hint: Text('Select Region'),
-                                      isExpanded: true,
-                                      dropdownColor: Color(0xFFF1F2F7),
-                                      items: city.map((String city) {
-                                        return DropdownMenuItem<String>(
-                                          value: city,
-                                          child: Text(city),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue2) {
-                                        setState(() {
-                                          selectedCity = newValue2;
-                                        });
-                                      },
-                                    ),
-                                      DropdownButton<String>(
-                                      value: selectedBranch,
-                                      hint: Text('Select Branch'),
-                                      dropdownColor: Color(0xFFF1F2F7),
-                                      isExpanded: true,
-                                      items: branches.map((String branch) {
-                                        return DropdownMenuItem<String>(
-                                          value: branch,
-                                          child: Text(branch),
-                                        );
-                                      }).toList(),
-                                      onChanged: (String? newValue) {
-                                        setState(() {
-                                          selectedBranch = newValue;
-                                        });
-                                      },
-                                    ),
-                                    ],
-                                  ),
-                                ),
                               ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(
+                              height: 15.0,
+                            ),
+                            Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Text(
+                                AppLocalizations.of(context).carDetails,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(
               height: 40.0,
-            ),
+            ),            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Container(
@@ -462,7 +645,7 @@ class _CheckoutState extends State<Checkout> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: Colors.white,
-                  boxShadow: [
+                  boxShadow: const [
                     BoxShadow(
                       color: Color(0xFFD9D9D9), // Shadow color
                       offset: Offset(0, 7), // Offset in x and y direction
@@ -478,9 +661,9 @@ class _CheckoutState extends State<Checkout> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                           Text(
+                          Text(
                             '${AppLocalizations.of(context).orderPrice} :',
-                            style: TextStyle(fontSize: 16),
+                            style:const TextStyle(fontSize: 16),
                           ),
                           Text(
                               '${NumberFormat('#,##0').format(orderPrice)} UZS'),
@@ -508,7 +691,7 @@ class _CheckoutState extends State<Checkout> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                           Text(
+                          Text(
                             '${AppLocalizations.of(context).totalPrice} :',
                             style: const TextStyle(fontSize: 16),
                           ),
@@ -529,7 +712,7 @@ class _CheckoutState extends State<Checkout> {
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).paymentMethod,
-                  labelStyle: TextStyle(color: Colors.black),
+                  labelStyle: const TextStyle(color: Colors.black),
                 ),
                 value: selectedOption,
                 items: [
@@ -537,8 +720,8 @@ class _CheckoutState extends State<Checkout> {
                     value: 'Cash',
                     child: Row(
                       children: [
-                        Icon(Icons.money, color: Colors.green),
-                        SizedBox(width: 10),
+                        const Icon(Icons.money, color: Colors.green),
+                        const SizedBox(width: 10),
                         Text(AppLocalizations.of(context).cash),
                       ],
                     ),
@@ -547,8 +730,8 @@ class _CheckoutState extends State<Checkout> {
                     value: 'Card',
                     child: Row(
                       children: [
-                        Icon(Icons.credit_card, color: Colors.blue),
-                        SizedBox(width: 10),
+                        const Icon(Icons.credit_card, color: Colors.blue),
+                        const SizedBox(width: 10),
                         Text(AppLocalizations.of(context).card),
                       ],
                     ),
@@ -589,18 +772,19 @@ class _CheckoutState extends State<Checkout> {
                     child: Row(
                       children: [
                         // Fixed country code widget
-                        SizedBox(
+                        const SizedBox(
                           width: 15.0,
                         ),
-                        Text(
+                        const Text(
                           '+998',
                           style: TextStyle(fontSize: 16.0),
                         ),
-                        SizedBox(width: 10.0),
+                        const SizedBox(width: 10.0),
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context).numberHintText,
+                              hintText:
+                                  AppLocalizations.of(context).numberHintText,
                               border: InputBorder.none,
                             ),
                             keyboardType: TextInputType.phone,
@@ -640,9 +824,9 @@ class _CheckoutState extends State<Checkout> {
                       border: Border.all(color: Colors.black26),
                     ),
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: TextField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: InputBorder.none,
                         ),
                         onChanged: (value) {
@@ -708,9 +892,10 @@ class _CheckoutState extends State<Checkout> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text(AppLocalizations.of(context).orderSuccess),
-                            content: Text(
-                                AppLocalizations.of(context).orderSuccessSubTitle),
+                            title:
+                                Text(AppLocalizations.of(context).orderSuccess),
+                            content: Text(AppLocalizations.of(context)
+                                .orderSuccessSubTitle),
                             contentPadding:
                                 EdgeInsets.only(top: 30, left: 30, right: 30),
                             actions: [
@@ -817,19 +1002,18 @@ class _CheckoutState extends State<Checkout> {
       if (!_isRemoteConfigInitialized) {
         await _initializeRemoteConfig();
       }
-      
+
       String chatId = remoteConfig.getString('chat_id');
       if (chatId.isEmpty) {
         print('Using default chat_id as Remote Config value was empty');
         return '-1002074915184';
       }
-      
+
       print('Retrieved chat_id from Remote Config: $chatId');
       return chatId;
-      
     } catch (e) {
       print('Error getting chat_id: $e');
-      return '-1002074915184'; 
+      return '-1002074915184';
     }
   }
 
@@ -860,10 +1044,10 @@ class _CheckoutState extends State<Checkout> {
           "Источник: Mobile App\n";
 
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
-      
+
       String chatId = await getChatId();
       print("Using chatId: $chatId");
-      
+
       final telegramDebUrl =
           "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
