@@ -48,6 +48,7 @@ class AppLocalizations {
       'chooseOrderType':'Choose your order type',
       'delivery':'DELIVERY',
       'selfPickup':'SELF-PICKUP',
+      'selfPickupTitle':'Which store would you like to pick from?',
       'yourDeliveryLocation':'Your Delivery Location!',
       'chooseYourLocation':'Choose your location -->',
       'chooseBranchToPick':'Choose branch to pick up',
@@ -63,6 +64,7 @@ class AppLocalizations {
       'order':'Order',
       'orderSuccess':'Order Success',
       'orderSuccessSubTitle':'Your order has been placed successfully!',
+      'carhopService':'Please select your LOOOK Carhop store:',
       // Notifications
       'notifications':'Notifications',
       'notificationsPlaceholder':'Notifications will appear here',
@@ -111,6 +113,7 @@ class AppLocalizations {
       'chooseOrderType':'Buyurtma turini tanlang',
       'delivery':'YETKAZISH',
       'selfPickup':'OLIB KETISH',
+      'selfPickupTitle':'Olib ketish uchun filial tanlang',
       'yourDeliveryLocation':'Yetkazish manzilingiz!',
       'chooseYourLocation':'Xaritadan tanlang -->',
       'chooseBranchToPick':'Olib ketish uchun',
@@ -126,6 +129,8 @@ class AppLocalizations {
       'order':'Buyurtma',
       'orderSuccess':'Buyurtma qabul qilindi',
       'orderSuccessSubTitle':'Sizning buyurtmangiz qabul qilindi!',
+      'carhopService':'LOOOK Carhop filialini tanlang:',
+
       // Notifications
       'notifications':'Xabarnoma',
       'notificationsPlaceholder':'Xabarlaringiz shu yerda ko\'rinadi',
@@ -183,6 +188,7 @@ class AppLocalizations {
   String get chooseOrderType => _localizedValues[locale.languageCode]!['chooseOrderType']!;
   String get delivery => _localizedValues[locale.languageCode]!['delivery']!;
   String get selfPickup => _localizedValues[locale.languageCode]!['selfPickup']!;
+  String get selfPickupTitle => _localizedValues[locale.languageCode]!['selfPickupTitle']!;
   String get yourDeliveryLocation => _localizedValues[locale.languageCode]!['yourDeliveryLocation']!;
   String get chooseYourLocation => _localizedValues[locale.languageCode]!['chooseYourLocation']!;
   String get chooseBranchToPick => _localizedValues[locale.languageCode]!['chooseBranchToPick']!;
@@ -200,6 +206,8 @@ class AppLocalizations {
   String get orderSuccessSubTitle => _localizedValues[locale.languageCode]!['orderSuccessSubTitle']!;
   String get notifications => _localizedValues[locale.languageCode]!['notifications']!;
   String get notificationsPlaceholder => _localizedValues[locale.languageCode]!['notificationsPlaceholder']!;
+  String get carhopService => _localizedValues[locale.languageCode]!['carhopService']!;
+
 
   // Map screen
   String get confirmAddress => _localizedValues[locale.languageCode]!['confirmAddress']!;

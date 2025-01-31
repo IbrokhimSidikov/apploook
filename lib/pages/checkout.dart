@@ -98,12 +98,18 @@ class _CheckoutState extends State<Checkout> {
   String? selectedAddress;
   String? selectedBranch;
   String? selectedOption;
+  String? selectedCity;
+  
   List<String> branches = [
     'Loook Yunusobod',
     'Loook Beruniy',
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
+  ];
+  List<String> city =[
+    'Tashkent',
+
   ];
 
   String? _validatePayment(String? value) {
@@ -199,48 +205,56 @@ class _CheckoutState extends State<Checkout> {
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                 ),
-                // ElevatedButton(
-                //   // onPressed: () {},
-                //   onPressed: () => setState(() => _selectedIndex = 2),
-                //   style: ButtonStyle(
-                //     backgroundColor: WidgetStateProperty.all(
-                //       _selectedIndex == 2
-                //           ? const Color(0xffFEC700)
-                //           : const Color(0xffF1F2F7),
-                //     ),
-                //     shape: WidgetStateProperty.all(
-                //       RoundedRectangleBorder(
-                //         borderRadius: BorderRadius.circular(10),
-                //       ),
-                //     ),
-                //   ),
-                //   child: const Text(
-                //     'CARHOP',
-                //     style: TextStyle(
-                //         color: Colors.black, fontWeight: FontWeight.w500),
-                //   ),
-                // ),
+                ElevatedButton(
+                  // onPressed: () {},
+                  onPressed: () => setState(() => _selectedIndex = 2),
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.all(
+                      _selectedIndex == 2
+                          ? const Color(0xffFEC700)
+                          : const Color(0xffF1F2F7),
+                    ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
+                  child: const Text(
+                    'CARHOP',
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.w500),
+                  ),
+                ),
               ],
             ),
             const SizedBox(
-              height: 40.0,
+              height: 20.0,
             ),
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(15),
-                    color: Color(0xFFF1F2F7),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Color(0xFFF1F2F7),
+                    padding: const EdgeInsets.only(bottom: 15, left: 15),
+                    child: Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: Text(
+                        _selectedIndex == 0
+                            ? AppLocalizations.of(context).yourDeliveryLocation
+                            : _selectedIndex == 1
+                                ? AppLocalizations.of(context).selfPickupTitle
+                                : AppLocalizations.of(context).carhopService,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
                       ),
-                      child: IndexedStack(
+                    ),
+                  ),
+                IndexedStack(
                         index: _selectedIndex,
                         children: [
+
+                          // DELIVERY
                           GestureDetector(
                             onTap: () async {
                               final result = await Navigator.push(
@@ -264,6 +278,14 @@ class _CheckoutState extends State<Checkout> {
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
                                   color: Color(0xFFF1F2F7),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5), 
+                                      spreadRadius: 1, 
+                                      blurRadius: 10, 
+                                      offset: Offset(0, 5), 
+                                    ),
+                                  ],
                                 ),
                                 child: SingleChildScrollView(
                                   child: Column(
@@ -308,64 +330,125 @@ class _CheckoutState extends State<Checkout> {
                               ),
                             ),
                           ),
-                          Container(
-                            height: 140,
-                            width: 390,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Color(0xFFF1F2F7),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    AppLocalizations.of(context).chooseBranchToPick,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 20),
-                                  ),
-                                  SizedBox(height: 10),
-                                  DropdownButton<String>(
-                                    value: selectedBranch,
-                                    hint: Text(AppLocalizations.of(context).selectBranch,),
-                                    isExpanded: true,
-                                    items: branches.map((String branch) {
-                                      return DropdownMenuItem<String>(
-                                        value: branch,
-                                        child: Text(branch),
-                                      );
-                                    }).toList(),
-                                    onChanged: (String? newValue) {
-                                      setState(() {
-                                        selectedBranch = newValue;
-                                      });
-                                    },
-                                  ),
-                                ],
+
+                          // SELF-PICKUP
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 15.0),
+                            child: Container(
+                              height: 140,
+                              width: 390,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Color(0xFFF1F2F7),
+                                boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5), 
+                                      spreadRadius: 1, 
+                                      blurRadius: 10, 
+                                      offset: Offset(0, 5), 
+                                    ),
+                                  ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context).chooseBranchToPick,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 20),
+                                    ),
+                                    SizedBox(height: 10),
+                                    DropdownButton<String>(
+                                      value: selectedBranch,
+                                      hint: Text(AppLocalizations.of(context).selectBranch,),
+                                      dropdownColor: Color(0xFFF1F2F7),
+                                      isExpanded: true,
+                                      items: branches.map((String branch) {
+                                        return DropdownMenuItem<String>(
+                                          value: branch,
+                                          child: Text(branch),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedBranch = newValue;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                          SizedBox(
-                            height: 140,
-                            width: 390,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Colors.amberAccent,
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(15.0),
-                                child: Text('data3'),
+
+                          // CARHOP
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                            child: SizedBox(
+                              height: 140,
+                              width: 390,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color: Color(0xFFF1F2F7),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5), 
+                                      spreadRadius: 1, 
+                                      blurRadius: 10, 
+                                      offset: Offset(0, 5), 
+                                    ),
+                                  ],
+                                ),
+                                child:  Padding(
+                                  padding: EdgeInsets.all(15.0),
+                                  child: Column(
+                                    children: [
+                                    DropdownButton<String>(
+                                      value: selectedCity,
+                                      hint: Text('Select Region'),
+                                      isExpanded: true,
+                                      dropdownColor: Color(0xFFF1F2F7),
+                                      items: city.map((String city) {
+                                        return DropdownMenuItem<String>(
+                                          value: city,
+                                          child: Text(city),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue2) {
+                                        setState(() {
+                                          selectedCity = newValue2;
+                                        });
+                                      },
+                                    ),
+                                      DropdownButton<String>(
+                                      value: selectedBranch,
+                                      hint: Text('Select Branch'),
+                                      dropdownColor: Color(0xFFF1F2F7),
+                                      isExpanded: true,
+                                      items: branches.map((String branch) {
+                                        return DropdownMenuItem<String>(
+                                          value: branch,
+                                          child: Text(branch),
+                                        );
+                                      }).toList(),
+                                      onChanged: (String? newValue) {
+                                        setState(() {
+                                          selectedBranch = newValue;
+                                        });
+                                      },
+                                    ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(
