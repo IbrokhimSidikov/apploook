@@ -35,6 +35,9 @@ class _CheckoutState extends State<Checkout> {
   String clientCommentPhone = '';
   String commented = '';
   String orderType = '';
+  String carDetails = '';
+  String carDetailsExtraInfo = '';
+
   late FirebaseRemoteConfig remoteConfig;
   bool _isRemoteConfigInitialized = false;
 
@@ -93,7 +96,17 @@ class _CheckoutState extends State<Checkout> {
               : '');
     });
   }
+  void _updateCarDetails() {
+    setState(() {
+      carDetails = (carDetails.isNotEmpty ? carDetails + ', ' : '') +
+          (carDetailsExtraInfo.isNotEmpty
+              ? 'Extra Info: ' + carDetailsExtraInfo
+              : '');
+    });
+    // print('Car Details: $carDetails');
+  }
 
+  
   bool _isProcessing = false;
   String? selectedAddress;
   String? selectedBranch;
@@ -133,8 +146,10 @@ class _CheckoutState extends State<Checkout> {
 
     if (_selectedIndex == 0) {
       orderType = 'Delivery';
-    } else {
+    } else if(_selectedIndex == 1) {
       orderType = 'Self-Pickup';
+    }else{
+      orderType = 'Carhop';
     }
 
     return Scaffold(
@@ -387,7 +402,7 @@ class _CheckoutState extends State<Checkout> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15.0),
                       child: SizedBox(
-                        height: _selectedIndex == 2 ? 390 : 140,
+                        height: _selectedIndex == 2 ? 450 : 140,
                         width: 390,
                         child: Column(
                           children: [
@@ -408,7 +423,6 @@ class _CheckoutState extends State<Checkout> {
                                 padding: const EdgeInsets.all(15.0),
                                 child: Column(
                                   children: [
-                                    // City Dropdown with 'X' button
                                     Row(
                                       children: [
                                         Expanded(
@@ -599,13 +613,12 @@ class _CheckoutState extends State<Checkout> {
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         decoration: TextDecoration
-                                                            .underline, // To indicate it's clickable
+                                                            .underline, 
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
-
                                             ],
                                           ),
                                         ),
@@ -620,12 +633,53 @@ class _CheckoutState extends State<Checkout> {
                             ),
                             Align(
                               alignment: AlignmentDirectional.centerStart,
-                              child: Text(
-                                AppLocalizations.of(context).carDetails,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 14),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context).carDetails,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600, fontSize: 14),
+                                  ),
+                                  const SizedBox(width: 5,),
+                                  Text(
+                                    AppLocalizations.of(context).carDetailsHint,
+                                    style:const TextStyle(fontSize: 12, color:  Color(0xFFB0B0B0)),    
+                                  ),
+                                ],
                               ),
                             ),
+                            const SizedBox(height: 15.0,),
+                            Container(
+                              width: 390,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                    color: const Color.fromARGB(
+                                        255, 215, 213, 213)),
+                              ),
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: TextField(
+                                  decoration: InputDecoration(
+                                    hintText: AppLocalizations.of(context)
+                                        .carDetailsInputHint,
+                                    hintStyle: const TextStyle(fontSize: 12),
+                                    border: InputBorder.none,
+                                    contentPadding:
+                                        const EdgeInsets.only(left: 15.0),
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      carDetails = value;
+                                      _updateCarDetails();
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+
                           ],
                         ),
                       ),
@@ -714,7 +768,9 @@ class _CheckoutState extends State<Checkout> {
                   labelText: AppLocalizations.of(context).paymentMethod,
                   labelStyle: const TextStyle(color: Colors.black),
                 ),
+                dropdownColor: const Color(0xFFF1F2F7),
                 value: selectedOption,
+                isExpanded: true,
                 items: [
                   DropdownMenuItem<String>(
                     value: 'Cash',
@@ -790,9 +846,9 @@ class _CheckoutState extends State<Checkout> {
                             keyboardType: TextInputType.phone,
                             inputFormatters: [
                               FilteringTextInputFormatter
-                                  .digitsOnly, // Allows only digits
+                                  .digitsOnly,
                               LengthLimitingTextInputFormatter(
-                                  9), // Limits the input to 9 digits
+                                  9), 
                             ],
                             onChanged: (value) {
                               clientCommentPhone = value;
@@ -870,6 +926,7 @@ class _CheckoutState extends State<Checkout> {
                             cartProvider.showLat(), // latitude
                             cartProvider.showLong(), // longitude
                             orderType,
+                            carDetails,
                             cartProvider,
                           );
                         } else if (_selectedIndex == 1) {
@@ -885,11 +942,29 @@ class _CheckoutState extends State<Checkout> {
                             41.313798749076454, // latitude ,
                             69.24407311805851, // longitude
                             orderType,
+                            carDetails,
+                            cartProvider,
+                          );
+                        }else if (_selectedIndex == 2) {
+                          await sendOrderToTelegram(
+                            "Неизвестно", // address
+                            selectedBranch!, // branchName
+                            firstName, // name
+                            phoneNumber, // phone
+                            selectedOption!, // paymentType
+                            commented,
+                            orderItems, // orderItems
+                            orderPrice, // total
+                            41.313798749076454, // latitude ,
+                            69.24407311805851, // longitude
+                            orderType,
+                            carDetails,
                             cartProvider,
                           );
                         }
                         // Show success message
                         showDialog(
+                          // ignore: use_build_context_synchronously
                           context: context,
                           builder: (context) => AlertDialog(
                             title:
@@ -897,7 +972,7 @@ class _CheckoutState extends State<Checkout> {
                             content: Text(AppLocalizations.of(context)
                                 .orderSuccessSubTitle),
                             contentPadding:
-                                EdgeInsets.only(top: 30, left: 30, right: 30),
+                                const EdgeInsets.only(top: 30, left: 30, right: 30),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -905,7 +980,7 @@ class _CheckoutState extends State<Checkout> {
                                   Navigator.pushReplacementNamed(
                                       context, '/homeNew');
                                 },
-                                child: Text(
+                                child: const Text(
                                   'OK',
                                   style: TextStyle(color: Colors.black),
                                 ),
@@ -918,15 +993,15 @@ class _CheckoutState extends State<Checkout> {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: Text('Order Error'),
-                            content: Text(
+                            title: const Text('Order Error'),
+                            content: const Text(
                                 'Failed to place your order. Please try again later.'),
                             actions: [
                               TextButton(
                                 onPressed: () {
                                   Navigator.pop(context); // Close the dialog
                                 },
-                                child: Text('OK'),
+                                child: const Text('OK'),
                               ),
                             ],
                           ),
@@ -939,26 +1014,36 @@ class _CheckoutState extends State<Checkout> {
                     }
                   : null, // Disable button if address is not selected
               style: ButtonStyle(
-                backgroundColor: (_selectedIndex == 0
-                        ? selectedAddress != null && selectedOption != null
-                        : selectedBranch != null && selectedOption != null)
-                    ? WidgetStateProperty.all<Color>(const Color(0xffFEC700))
-                    : WidgetStateProperty.all<Color>(
-                        const Color(0xFFCCCCCC)), // Change color when disabled
+                backgroundColor: WidgetStateProperty.all<Color>(
+                  (_selectedIndex == 0 &&
+                              selectedAddress != null &&
+                              selectedOption != null) ||
+                          (_selectedIndex == 1 &&
+                              selectedBranch != null &&
+                              selectedOption != null) ||
+                          (_selectedIndex == 2 &&
+                              selectedBranch != null &&
+                              selectedOption != null &&
+                              carDetails != null &&
+                              carDetails!.trim().isNotEmpty)
+                      ? const Color(0xffFEC700) // Enabled state
+                      : const Color(0xFFCCCCCC), // Disabled state
+                ),
               ),
+
               child: _isProcessing
-                  ? Padding(
-                      padding: const EdgeInsets.all(12.0),
+                  ? const Padding(
+                      padding: EdgeInsets.all(12.0),
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : Padding(
-                      padding: EdgeInsets.symmetric(
+                      padding: const EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 125.0),
                       child: Text(
                         AppLocalizations.of(context).order,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
                           color: Colors.black,
@@ -980,7 +1065,7 @@ class _CheckoutState extends State<Checkout> {
       backgroundColor: Colors.white,
       title: Text(
         AppLocalizations.of(context).checkout,
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       ),
       centerTitle: true,
       leading: GestureDetector(
@@ -1029,6 +1114,7 @@ class _CheckoutState extends State<Checkout> {
       double latitude,
       double longitude,
       String orderType,
+      String carDetails,
       CartProvider cartProvider) async {
     try {
       final orderDetails = "Адрес: $address\n" +
@@ -1040,7 +1126,10 @@ class _CheckoutState extends State<Checkout> {
           "Заметка: ${comment.isEmpty ? 'Нет заметки' : comment}\n\n" +
           "🛒 <b>Корзина:</b>\n${orderItems.join("\n")}\n\n" +
           "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
-          "-----------------------\n" +
+         "-----------------------\n" +
+         "Mashina ma'lumotlari:\n ${carDetails.isEmpty ? 'Ma\'lumot yo\'q' : carDetails}\n\n"+
+         "-----------------------\n" +
+
           "Источник: Mobile App\n";
 
       final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
@@ -1049,7 +1138,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),

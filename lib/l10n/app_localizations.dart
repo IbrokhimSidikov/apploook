@@ -70,6 +70,8 @@ class AppLocalizations {
       'selectRegion':'Select Region',
       'openingHours':'Opening Hours',
       'viewInMap':'View in Map',
+      'carDetailsHint':'e.g: 01|A712AA Black Chevrolet Gentra',
+      'carDetailsInputHint':'Please share - your car no. color and model',
       // Notifications
       'notifications':'Notifications',
       'notificationsPlaceholder':'Notifications will appear here',
@@ -140,6 +142,8 @@ class AppLocalizations {
       'selectRegion': 'Shaxar tanlang',
       'openingHours': 'Ishlash vaqti',
       'viewInMap': 'Xaritadan ko\'rish',
+      'carDetailsHint': 'e.g: 01|A712AA Qora Chevrolet Gentra',
+      'carDetailsInputHint': 'Iltimos - Avtomobil raqami, rangi, rusumini kiriting',
       // Notifications
       'notifications':'Xabarnoma',
       'notificationsPlaceholder':'Xabarlaringiz shu yerda ko\'rinadi',
@@ -221,6 +225,8 @@ class AppLocalizations {
   String get selectRegion =>_localizedValues[locale.languageCode]!['selectRegion']!;
   String get openingHours =>_localizedValues[locale.languageCode]!['openingHours']!;
   String get viewInMap =>_localizedValues[locale.languageCode]!['viewInMap']!;
+  String get carDetailsHint => _localizedValues[locale.languageCode]!['carDetailsHint']!;
+  String get carDetailsInputHint =>_localizedValues[locale.languageCode]!['carDetailsInputHint']!;
 
   // Map screen
   String get confirmAddress => _localizedValues[locale.languageCode]!['confirmAddress']!;
