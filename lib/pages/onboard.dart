@@ -22,7 +22,7 @@ class _OnboardState extends State<Onboard> {
   void initState() {
     _controller = PageController(initialPage: 0);
     super.initState();
-     _initializeLanguage();
+    _initializeLanguage();
   }
 
   Future<void> _initializeLanguage() async {
@@ -45,7 +45,7 @@ class _OnboardState extends State<Onboard> {
   void _continue() async {
     if (isEnglishSelected || isuzbekSelected) {
       final selectedLocale = isEnglishSelected ? 'en' : 'uz';
-      
+
       // Save the selected language in shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('selected_language', selectedLocale);
@@ -59,7 +59,7 @@ class _OnboardState extends State<Onboard> {
     } else {
       // Show a message if no language is selected
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a language')),
+        const SnackBar(content: Text('Please select a language')),
       );
     }
   }
@@ -101,7 +101,7 @@ class _OnboardState extends State<Onboard> {
                 ),
                 Column(
                   children: [
-                    Spacer(flex: 70), // Adjust flex to control spacing
+                    const Spacer(flex: 70), // Adjust flex to control spacing
                     Center(
                       child: SvgPicture.asset(
                         'images/smile-loook.svg',
@@ -109,8 +109,8 @@ class _OnboardState extends State<Onboard> {
                         height: 120,
                       ),
                     ),
-                    Spacer(flex: 5), // Adjust flex to control spacing
-                    Text(
+                    const Spacer(flex: 5), // Adjust flex to control spacing
+                    const Text(
                       'Order Now \nNot Only Chicken',
                       style: TextStyle(
                         color: Colors.white,
@@ -120,7 +120,7 @@ class _OnboardState extends State<Onboard> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    Spacer(flex: 10), // Adjust flex to control spacing
+                    const Spacer(flex: 10), // Adjust flex to control spacing
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -128,8 +128,8 @@ class _OnboardState extends State<Onboard> {
                           children: [
                             SvgPicture.asset(
                                 'images/suitable-for-all-basket.svg'),
-                            SizedBox(width: 4),
-                            Text(
+                            const SizedBox(width: 4),
+                            const Text(
                               'Suitable For\nEveryone',
                               style:
                                   TextStyle(color: Colors.white, fontSize: 12),
@@ -140,8 +140,8 @@ class _OnboardState extends State<Onboard> {
                         Row(
                           children: [
                             SvgPicture.asset('images/solar--sale-linear.svg'),
-                            SizedBox(width: 4),
-                            Text(
+                            const SizedBox(width: 4),
+                            const Text(
                               'Promos\nOffer & Deals',
                               style:
                                   TextStyle(color: Colors.white, fontSize: 12),
@@ -153,8 +153,8 @@ class _OnboardState extends State<Onboard> {
                           children: [
                             SvgPicture.asset(
                                 'images/heroicons--device-phone-mobile.svg'),
-                            SizedBox(width: 4),
-                            Text(
+                            const SizedBox(width: 4),
+                            const Text(
                               'Easy\nOrdering',
                               style:
                                   TextStyle(color: Colors.white, fontSize: 12),
@@ -164,11 +164,11 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ],
                     ),
-                    Spacer(flex: 5), // Adjust flex to control spacing
-                    Align(
+                    const Spacer(flex: 5), // Adjust flex to control spacing
+                    const Align(
                       alignment: Alignment.centerLeft,
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 30.0),
+                        padding: EdgeInsets.only(left: 30.0),
                         child: Text(
                           'Choose Language',
                           style: TextStyle(
@@ -178,7 +178,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ),
                     ),
-                    Spacer(flex: 2), // Adjust flex to control spacing
+                    const Spacer(flex: 2), // Adjust flex to control spacing
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -188,12 +188,14 @@ class _OnboardState extends State<Onboard> {
                               isEnglishSelected = true;
                               isuzbekSelected = false;
                             });
-                            context.read<LocaleProvider>().setLocale(Locale('en'));
+                            context
+                                .read<LocaleProvider>()
+                                .setLocale(const Locale('en'));
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 60),
-                            margin: EdgeInsets.only(
+                            margin: const EdgeInsets.only(
                                 top: 10, bottom: 10, right: 5, left: 15),
                             decoration: BoxDecoration(
                               color: isEnglishSelected
@@ -205,7 +207,7 @@ class _OnboardState extends State<Onboard> {
                                   color: Colors.black.withOpacity(0.2),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -224,12 +226,14 @@ class _OnboardState extends State<Onboard> {
                               isuzbekSelected = true;
                               isEnglishSelected = false;
                             });
-                            context.read<LocaleProvider>().setLocale(Locale('uz'));
+                            context
+                                .read<LocaleProvider>()
+                                .setLocale(const Locale('uz'));
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
                                 vertical: 15, horizontal: 60),
-                            margin: EdgeInsets.only(
+                            margin: const EdgeInsets.only(
                                 top: 10, bottom: 10, right: 15, left: 5),
                             decoration: BoxDecoration(
                               color: isuzbekSelected
@@ -241,7 +245,7 @@ class _OnboardState extends State<Onboard> {
                                   color: Colors.black.withOpacity(0.2),
                                   spreadRadius: 1,
                                   blurRadius: 3,
-                                  offset: Offset(0, 2),
+                                  offset: const Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -256,7 +260,7 @@ class _OnboardState extends State<Onboard> {
                         ),
                       ],
                     ),
-                    Spacer(flex: 1), // Adjust flex to control spacing
+                    const Spacer(flex: 1), // Adjust flex to control spacing
                     TextButton(
                       onPressed: _continue,
                       style: TextButton.styleFrom(
@@ -284,15 +288,15 @@ class _OnboardState extends State<Onboard> {
                       ),
                     ),
 
-                    Spacer(flex: 1), // Adjust flex to control spacing
-                    Text(
+                    const Spacer(flex: 1), // Adjust flex to control spacing
+                    const Text(
                       'PRIVACY POLICY',
                       style: TextStyle(
                         color: Color.fromRGBO(95, 94, 94, 1),
                         fontFamily: 'Poppins',
                       ),
                     ),
-                    Spacer(flex: 6), // Adjust flex to control spacing
+                    const Spacer(flex: 6), // Adjust flex to control spacing
                   ],
                 ),
               ],
