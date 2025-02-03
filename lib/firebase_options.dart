@@ -41,48 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDMcNrGJ8YIbGFqneAK7Zk2pXOOqqF617Q',
-    appId: '1:35787525405:web:5471163f32714e1f2365f4',
-    messagingSenderId: '35787525405',
-    projectId: 'loook-2b9f8',
-    authDomain: 'loook-2b9f8.firebaseapp.com',
-    storageBucket: 'loook-2b9f8.appspot.com',
-    measurementId: 'G-0F2FKPZV3B',
+    apiKey: 'AIzaSyCZYRHBdJGMBmCg9l2O6uJye9oGhBhPkzE',
+    appId: '1:87012829234:web:6cb4a8e9b41d30b688f42b',
+    messagingSenderId: '87012829234',
+    projectId: 'loookuz-37798',
+    authDomain: 'loookuz-37798.firebaseapp.com',
+    storageBucket: 'loookuz-37798.firebasestorage.app',
+    measurementId: 'G-Z8RKHE9EKW',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDuQ1k-kDZZEZUYynSLQ_lG3ARsc27ophA',
-    appId: '1:35787525405:android:48f7fa65ec3add982365f4',
-    messagingSenderId: '35787525405',
-    projectId: 'loook-2b9f8',
-    storageBucket: 'loook-2b9f8.appspot.com',
+    apiKey: 'AIzaSyCr7NYaMJUkaNCPw0S_nkoArT_FkAjulXU',
+    appId: '1:87012829234:android:348ec4482968cd6788f42b',
+    messagingSenderId: '87012829234',
+    projectId: 'loookuz-37798',
+    storageBucket: 'loookuz-37798.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDHIxZuGyFoUDcYOapNFBLWaupgNsNB2yg',
-    appId: '1:35787525405:ios:968ccbf13c0515a52365f4',
-    messagingSenderId: '35787525405',
-    projectId: 'loook-2b9f8',
-    storageBucket: 'loook-2b9f8.appspot.com',
-    iosBundleId: 'com.apploook.v1',
+    apiKey: 'AIzaSyAqd3W1eKCuzbanmvcdoUri9RyGCc62xfY',
+    appId: '1:87012829234:ios:1d206bee1565cdc288f42b',
+    messagingSenderId: '87012829234',
+    projectId: 'loookuz-37798',
+    storageBucket: 'loookuz-37798.firebasestorage.app',
+    iosBundleId: 'com.loook.v1',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDHIxZuGyFoUDcYOapNFBLWaupgNsNB2yg',
-    appId: '1:35787525405:ios:cf40d7d9e29c11fd2365f4',
-    messagingSenderId: '35787525405',
-    projectId: 'loook-2b9f8',
-    storageBucket: 'loook-2b9f8.appspot.com',
+    apiKey: 'AIzaSyAqd3W1eKCuzbanmvcdoUri9RyGCc62xfY',
+    appId: '1:87012829234:ios:65e028d30352fe8988f42b',
+    messagingSenderId: '87012829234',
+    projectId: 'loookuz-37798',
+    storageBucket: 'loookuz-37798.firebasestorage.app',
     iosBundleId: 'com.example.apploook',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDMcNrGJ8YIbGFqneAK7Zk2pXOOqqF617Q',
-    appId: '1:35787525405:web:0f289c0a7f5a160b2365f4',
-    messagingSenderId: '35787525405',
-    projectId: 'loook-2b9f8',
-    authDomain: 'loook-2b9f8.firebaseapp.com',
-    storageBucket: 'loook-2b9f8.appspot.com',
-    measurementId: 'G-RX2ZK50QSZ',
+    apiKey: 'AIzaSyCZYRHBdJGMBmCg9l2O6uJye9oGhBhPkzE',
+    appId: '1:87012829234:web:214ceebcba1c62f688f42b',
+    messagingSenderId: '87012829234',
+    projectId: 'loookuz-37798',
+    authDomain: 'loookuz-37798.firebaseapp.com',
+    storageBucket: 'loookuz-37798.firebasestorage.app',
+    measurementId: 'G-H5S7YQC0DL',
   );
+
 }

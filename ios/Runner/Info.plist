@@ -22,12 +22,36 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>app-1-87012829234-ios-1d206beel565cdc288f42b</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-87012829234-ios-1d206beel565cdc288f42b</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location data to enhance app functionality and provide location-based features.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Доступ к геолокации пользователя необходим для отображения текущей геопозиции</string>
+	<string>We use your location to improve app features and functionality.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>We use motion data to improve app functionality and user experience.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
@@ -35,16 +59,8 @@
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<key>NSMotionUsageDescription</key>
-	<string>We use motion data to improve app functionality and user experience.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need location data to enhance app functionality and provide location-based features.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to improve app features and functionality.</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIStatusBarStyle</key>
@@ -58,7 +74,6 @@
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-
 	</array>
 </dict>
 </plist>

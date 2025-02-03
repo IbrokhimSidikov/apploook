@@ -1,4 +1,4 @@
-// import 'package:apploook/api/firebase_api.dart';
+import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
@@ -8,8 +8,8 @@ import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -20,12 +20,12 @@ import 'providers/locale_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
-  // FirebaseApi().initNotifications();
-  // await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  await Firebase.initializeApp();
+  FirebaseApi().initNotifications();
+  await FirebaseMessaging.instance.setAutoInitEnabled(true);
   // final fcmToken = await FirebaseMessaging.instance.getToken();
   // print("FCMToken $fcmToken");
-  // FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
   runApp(MyLoaderApp());
 }

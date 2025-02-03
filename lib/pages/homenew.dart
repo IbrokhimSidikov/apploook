@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:apploook/providers/locale_provider.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -100,18 +101,21 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     super.initState();
     loadData();
   }
+
   Future<bool> isCacheValid() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
     if (lastUpdateTime == null) return false;
-    
+
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    return (currentTime - lastUpdateTime) < cacheValidityDuration.inMilliseconds;
+    return (currentTime - lastUpdateTime) <
+        cacheValidityDuration.inMilliseconds;
   }
+
   Future<void> loadData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cachedData = prefs.getString('cachedCategoryData');
-    
+
     bool isValid = await isCacheValid();
 
     if (cachedData != null && isValid) {
@@ -142,7 +146,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('cachedCategoryData', response.body);
       // Save the timestamp of this update
-      await prefs.setInt('lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(
+          'lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
 
       setState(() {
         processCategoryData(categoryData);
@@ -152,6 +157,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       throw Exception('Failed to load data');
     }
   }
+
   Future<void> refreshData() async {
     setState(() {
       _isLoading = true;
@@ -208,8 +214,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -249,12 +253,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => Profile(),
-                          //   ),
-                          // );
                           _scaffoldKey.currentState!.openDrawer();
                         },
                         child: Padding(
@@ -262,18 +260,65 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           child: SvgPicture.asset('images/profileIconHome.svg'),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: (){
-                          Navigator.pushReplacementNamed(context, '/notificationsView');
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Icon(
-                          Icons.notifications, // Use any built-in icon here
-                          size: 24.0, // Adjust size as needed
-                          color: Colors.black, 
-                                                ),
-                        ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              final currentLocale = context
+                                  .read<LocaleProvider>()
+                                  .locale
+                                  .languageCode;
+                              final newLocale =
+                                  currentLocale == 'en' ? 'uz' : 'en';
+
+                              // Save the selected language
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString(
+                                  'selected_language', newLocale);
+                              // Update the app's locale
+                              if (!mounted) return;
+                              context
+                                  .read<LocaleProvider>()
+                                  .setLocale(Locale(newLocale));
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFEC700),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                context
+                                    .watch<LocaleProvider>()
+                                    .locale
+                                    .languageCode
+                                    .toUpperCase(),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacementNamed(
+                                  context, '/notificationsView');
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Icon(
+                                Icons.notifications,
+                                size: 24.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -473,9 +518,12 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                   CrossAxisAlignment.center,
                                               children: [
                                                 Padding(
-                                                  padding: const EdgeInsets.only(right: 10.0),
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 10.0),
                                                   child: CachedProductImage(
-                                                    imageUrl: product.imagePath!,
+                                                    imageUrl:
+                                                        product.imagePath!,
                                                     width: 140.0,
                                                     height: 140.0,
                                                   ),
@@ -568,7 +616,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 255, 215, 71),
+                            color: const Color(0xFFFEC700),
                             borderRadius: BorderRadius.circular(50.0),
                           ),
                           padding: const EdgeInsets.symmetric(

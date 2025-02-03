@@ -1,11 +1,11 @@
 import 'dart:async';
 
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/address_detail_model.dart';
 import 'package:apploook/models/app_lat_long.dart';
 import 'package:apploook/models/repository/address_detail_repository.dart';
 import 'package:apploook/services/app_location_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:apploook/cart_provider.dart';
@@ -38,7 +38,7 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
-          'Your Location',
+          AppLocalizations.of(context).yourLocation,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
@@ -126,7 +126,7 @@ class _MapScreenState extends State<MapScreen> {
                 height: 10.0,
               ),
               Text(
-                'Your selected address',
+                AppLocalizations.of(context).selectedAddress,
                 style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 14,
@@ -177,7 +177,7 @@ class _MapScreenState extends State<MapScreen> {
                           elevation: 5.0,
                           contentPadding: EdgeInsets.only(top: 30, left: 15, right: 15),
                           content: Text(
-                            'Do you confirm your address?\n\n$addressDetail',
+                            '${AppLocalizations.of(context).confirmAddress}\n\n$addressDetail',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -189,7 +189,7 @@ class _MapScreenState extends State<MapScreen> {
                                 Navigator.pop(context);
                               },
                               child: Text(
-                                'Cancel',
+                                AppLocalizations.of(context).cancel,
                                 style: TextStyle(color: Colors.black26),
                               ),
                             ),
@@ -201,7 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                                     latLong.lat, latLong.long);
                               },
                               child: Text(
-                                'Confirm',
+                                AppLocalizations.of(context).confirm,
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
@@ -220,7 +220,7 @@ class _MapScreenState extends State<MapScreen> {
                     elevation: 0, 
                   ),
                   child: Text(
-                    'Save',
+                    AppLocalizations.of(context).save,
                     style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ),
