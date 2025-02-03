@@ -2,14 +2,14 @@
   "project_info": {
     "project_number": "87012829234",
     "project_id": "loookuz-37798",
-    "storage_bucket": "loookuz-37798.appspot.com"
+    "storage_bucket": "loookuz-37798.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:87012829234:android:348ec4482968cd6788f42b",
         "android_client_info": {
-          "package_name": "com.loook.v1"
+          "package_name": "com.example.apploook"
         }
       },
       "oauth_client": [],

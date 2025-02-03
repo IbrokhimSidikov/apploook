@@ -253,12 +253,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => Profile(),
-                          //   ),
-                          // );
                           _scaffoldKey.currentState!.openDrawer();
                         },
                         child: Padding(
@@ -282,7 +276,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                   await SharedPreferences.getInstance();
                               await prefs.setString(
                                   'selected_language', newLocale);
-
                               // Update the app's locale
                               if (!mounted) return;
                               context
@@ -293,7 +286,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: const Color(0xffFEC700),
+                                color: const Color(0xFFFEC700),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
@@ -623,7 +616,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 255, 215, 71),
+                            color: const Color(0xFFFEC700),
                             borderRadius: BorderRadius.circular(50.0),
                           ),
                           padding: const EdgeInsets.symmetric(

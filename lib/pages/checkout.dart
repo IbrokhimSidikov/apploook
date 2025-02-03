@@ -1,5 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
+
+import 'package:apploook/config/branch_config.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
@@ -127,6 +130,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -281,7 +285,7 @@ class _CheckoutState extends State<Checkout> {
                         final result = await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MapScreen(),
+                            builder: (context) => const MapScreen(),
                           ),
                         );
                         if (result != null) {
@@ -297,13 +301,13 @@ class _CheckoutState extends State<Checkout> {
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            color: Color(0xFFF1F2F7),
+                            color: const Color(0xFFF1F2F7),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 1,
                                 blurRadius: 10,
-                                offset: Offset(0, 5),
+                                offset: const Offset(0, 5),
                               ),
                             ],
                           ),
@@ -320,7 +324,7 @@ class _CheckoutState extends State<Checkout> {
                                       Text(
                                         AppLocalizations.of(context)
                                             .yourDeliveryLocation,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           fontWeight: FontWeight.w500,
                                           fontSize: 20,
                                         ),
@@ -340,7 +344,7 @@ class _CheckoutState extends State<Checkout> {
                                     selectedAddress ??
                                         AppLocalizations.of(context)
                                             .chooseYourLocation,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500),
                                   ),
@@ -1157,6 +1161,79 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
+      // Handle carhop orders differently
+      if (orderType.toLowerCase() == 'carhop') {
+        if (selectedBranch == null) {
+          throw Exception('Please select a branch first');
+        }
+        final branchConfig = BranchConfigs.getConfig(selectedBranch!);
+        // Use the actual cart items from the cart provider
+        final List<Map<String, dynamic>> formattedOrderItems =
+            cartProvider.cartItems.map((item) {
+          return {
+            "actual_price": item.product.price,
+            "product_id": item.product.id.toString(),
+            "quantity": item.quantity,
+            "note": null
+          };
+        }).toList();
+
+        // Prepare the request body for Sieves API
+        final Map<String, dynamic> requestBody = {
+          "customer_quantity": 1,
+          "customer_id": null,
+          "is_fast": 0,
+          "queue_type": "sync",
+          "start_time": "now",
+          "isSynchronous": "sync",
+          "delivery_employee_id": null,
+          "employee_id": branchConfig
+              .employeeId, // You might want to make this configurable
+          "branch_id":
+              branchConfig.branchId, // You might want to make this configurable
+          "order_type_id": 8, // for carhop - zakas s parkovki
+          "orderItems": formattedOrderItems,
+          "transactions": [
+            {
+              "account_id": 1,
+              "amount": total,
+              "payment_type_id":
+                  selectedOption?.toLowerCase() == 'card' ? 1 : 2,
+              "type": "deposit"
+            }
+          ],
+          "value": total,
+          "note": comment.isEmpty ? null : comment,
+          "day_session_id": null,
+          "pager_number": phone,
+          "pos_id": null,
+          "pos_session_id": null,
+          "delivery_amount": null
+        };
+
+        final response = await http.post(
+          Uri.parse(
+              'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(requestBody),
+        );
+
+        if (response.statusCode != 200) {
+          print('Response status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          throw Exception('Failed to send carhop order');
+        } else {
+          print("Carhop order sent successfully! Response: ${response.body}");
+          cartProvider.clearCart();
+          return;
+        }
+      }
+
+      // Original telegram order sending logic for non-carhop orders
       final orderDetails = "Адрес: $address\n" +
           "Филиал: $branchName\n" +
           "Имя: $name\n" +
