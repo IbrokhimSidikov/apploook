@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
+
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
@@ -1157,6 +1159,72 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
+      // Handle carhop orders differently
+      if (orderType.toLowerCase() == 'carhop') {
+        // Use the actual cart items from the cart provider
+        final List<Map<String, dynamic>> formattedOrderItems =
+            cartProvider.cartItems.map((item) {
+          return {
+            "actual_price": item.product.price,
+            "product_id": item.product.id.toString(),
+            "quantity": item.quantity,
+            "note": null
+          };
+        }).toList();
+
+        // Prepare the request body for Sieves API
+        final Map<String, dynamic> requestBody = {
+          "customer_quantity": 1,
+          "customer_id": null,
+          "is_fast": 0,
+          "queue_type": "sync",
+          "start_time": "now",
+          "isSynchronous": "sync",
+          "delivery_employee_id": null,
+          "employee_id": 423, // You might want to make this configurable
+          "branch_id": 6, // You might want to make this configurable
+          "order_type_id": 8,
+          "orderItems": formattedOrderItems,
+          "transactions": [
+            {
+              "account_id": 1,
+              "amount": total,
+              "payment_type_id": 2,
+              "type": "deposit"
+            }
+          ],
+          "value": total,
+          "note": comment.isEmpty ? null : comment,
+          "day_session_id": null,
+          "pager_number": phone,
+          "pos_id": null,
+          "pos_session_id": null,
+          "delivery_amount": null
+        };
+
+        final response = await http.post(
+          Uri.parse(
+              'https://app.sievesapp.com/v1/order?code=c0905077-12ac-4ae8-954e-5524b3e30bb1'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer c0905077-12ac-4ae8-954e-5524b3e30bb1',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(requestBody),
+        );
+
+        if (response.statusCode != 200) {
+          print('Response status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          throw Exception('Failed to send carhop order');
+        } else {
+          print("Carhop order sent successfully! Response: ${response.body}");
+          cartProvider.clearCart();
+          return;
+        }
+      }
+
+      // Original telegram order sending logic for non-carhop orders
       final orderDetails = "Адрес: $address\n" +
           "Филиал: $branchName\n" +
           "Имя: $name\n" +
