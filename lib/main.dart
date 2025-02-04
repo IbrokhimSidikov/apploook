@@ -59,7 +59,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
-    await Future.delayed(Duration(seconds: 4));
+    await Future.delayed(const Duration(seconds: 4));
 
     setState(() {
       _isLoading = false;

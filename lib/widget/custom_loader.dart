@@ -49,7 +49,34 @@ class _CustomLoaderState extends State<CustomLoader> {
         if (_controller.value.position >= _controller.value.duration) {
           if (mounted) {
             Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => widget.nextScreen),
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    widget.nextScreen,
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  var curve = Curves.easeInOutCubic;
+                  var tween = Tween(begin: 0.0, end: 1.0).chain(
+                    CurveTween(curve: curve),
+                  );
+                  var fadeAnimation = animation.drive(tween);
+                  var slideAnimation = Tween<Offset>(
+                    begin: const Offset(0.0, 0.3),
+                    end: Offset.zero,
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: curve,
+                  ));
+
+                  return FadeTransition(
+                    opacity: fadeAnimation,
+                    child: SlideTransition(
+                      position: slideAnimation,
+                      child: child,
+                    ),
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 800),
+              ),
             );
           }
         }
