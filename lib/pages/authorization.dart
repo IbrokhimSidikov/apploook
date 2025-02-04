@@ -3,7 +3,7 @@ import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Authorization extends StatefulWidget {
   const Authorization({super.key});
@@ -17,11 +17,10 @@ class _AuthorizationState extends State<Authorization> {
   final _phoneFormKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
   bool _isPhoneNumberValid = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  String? _verificationId;
   bool _isLoading = false;
-  final TextEditingController _otpController = TextEditingController();
   bool _showOtpField = false;
+  final TextEditingController _otpController = TextEditingController();
+  String? _verifiedPhoneNumber;
 
   @override
   void initState() {
@@ -45,16 +44,14 @@ class _AuthorizationState extends State<Authorization> {
     await prefs.setString('firstName', firstName);
   }
 
-  Future<void> _verifyPhoneNumber() async {
+  Future<void> _sendOtp() async {
     if (!(_phoneFormKey.currentState?.validate() ?? false)) return;
 
-    // Check if Firebase Auth is initialized
-    if (_auth.app == null) {
+    final phone = _phoneNumber?.international ?? '';
+    if (!phone.startsWith('+998')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Firebase not initialized properly'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text("Only Uzbekistan (+998) numbers are allowed.")),
       );
       return;
     }
@@ -64,65 +61,42 @@ class _AuthorizationState extends State<Authorization> {
     });
 
     try {
-      await _auth.verifyPhoneNumber(
-        phoneNumber: _phoneNumber?.international ?? '',
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          await _auth.signInWithCredential(credential);
-          _onAuthenticationSuccess();
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Verification Failed: ${e.message}')),
-          );
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          setState(() {
-            _verificationId = verificationId;
-            _showOtpField = true;
-            _isLoading = false;
-          });
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          setState(() {
-            _verificationId = verificationId;
-            _isLoading = false;
-          });
-        },
-      );
+      await Supabase.instance.client.auth.signInWithOtp(phone: phone);
+      setState(() {
+        _showOtpField = true;
+        _verifiedPhoneNumber = phone;
+      });
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
   }
 
   Future<void> _verifyOtp() async {
-    if (_verificationId == null || _otpController.text.isEmpty) return;
+    if (_otpController.text.isEmpty || _verifiedPhoneNumber == null) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: _verificationId!,
-        smsCode: _otpController.text,
+      await Supabase.instance.client.auth.verifyOTP(
+        phone: _verifiedPhoneNumber!,
+        token: _otpController.text.trim(),
+        type: OtpType.sms,
       );
-
-      await _auth.signInWithCredential(credential);
       _onAuthenticationSuccess();
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid OTP: $e')),
+        const SnackBar(content: Text("Invalid OTP! Please try again.")),
       );
     }
   }
@@ -261,7 +235,7 @@ class _AuthorizationState extends State<Authorization> {
                     ? null
                     : _showOtpField
                         ? _verifyOtp
-                        : _verifyPhoneNumber,
+                        : _sendOtp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 215, 56),
                 ),

@@ -1,4 +1,6 @@
 PODS:
+  - app_links (0.0.2):
+    - Flutter
   - Firebase/Auth (10.25.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 10.25.0)
@@ -10,14 +12,14 @@ PODS:
   - Firebase/RemoteConfig (10.25.0):
     - Firebase/CoreOnly
     - FirebaseRemoteConfig (~> 10.25.0)
-  - firebase_auth (4.20.0):
+  - firebase_auth (4.16.0):
     - Firebase/Auth (= 10.25.0)
     - firebase_core
     - Flutter
   - firebase_core (2.32.0):
     - Firebase/CoreOnly (= 10.25.0)
     - Flutter
-  - firebase_messaging (14.9.4):
+  - firebase_messaging (14.7.10):
     - Firebase/Messaging (= 10.25.0)
     - firebase_core
     - Flutter
@@ -144,12 +146,16 @@ PODS:
     - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
+  - video_player_avfoundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - yandex_mapkit (0.0.1):
     - Flutter
-    - YandexMapsMobile (= 4.5.1-full)
-  - YandexMapsMobile (4.5.1-full)
+    - YandexMapsMobile (= 4.6.1-full)
+  - YandexMapsMobile (4.6.1-full)
 
 DEPENDENCIES:
+  - app_links (from `.symlinks/plugins/app_links/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
@@ -162,6 +168,7 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
   - yandex_mapkit (from `.symlinks/plugins/yandex_mapkit/ios`)
 
 SPEC REPOS:
@@ -190,6 +197,8 @@ SPEC REPOS:
     - YandexMapsMobile
 
 EXTERNAL SOURCES:
+  app_links:
+    :path: ".symlinks/plugins/app_links/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -214,14 +223,17 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite_darwin/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/darwin"
   yandex_mapkit:
     :path: ".symlinks/plugins/yandex_mapkit/ios"
 
 SPEC CHECKSUMS:
+  app_links: 3da4c36b46cac3bf24eb897f1a6ce80bda109874
   Firebase: 0312a2352584f782ea56f66d91606891d4607f06
-  firebase_auth: f17bd6bfc0bc3d83c6df9dc3829e5b6fee10b147
+  firebase_auth: 9cfa74cc3773c44d2f762c3baa0806234c8516f5
   firebase_core: 3b49a055ff54114cae400581c13671fe53936c36
-  firebase_messaging: 30fa3ec8cd0dc8a860b7817548911b97345a0875
+  firebase_messaging: 394589dcda43e42ec9807558a409a975e285c45b
   firebase_remote_config: 3822d0d58afaeccfbeac01b5d3565dd506884287
   FirebaseABTesting: d87f56707159bae64e269757a6e963d490f2eebe
   FirebaseAppCheckInterop: 6a1757cfd4067d8e00fccd14fcc1b8fd78cfac07
@@ -236,7 +248,7 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_image_compress_common: 1697a328fd72bfb335507c6bca1a65fa5ad87df1
   flutter_local_notifications: ad39620c743ea4c15127860f4b5641649a988100
-  geolocator_apple: d981750b9f47dbdb02427e1476d9a04397beb8d9
+  geolocator_apple: 1560c3c875af2a412242c7a923e15d0d401966ff
   GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: ea963c370a38a8069cc5f7ba4ca849a60b6d7d15
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
@@ -251,8 +263,9 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  yandex_mapkit: 207e3ef710d7bd87607aacba9b1392573d85dcf7
-  YandexMapsMobile: 2390e02fa0bc10fa2a26dc7c22c7687bc7128e33
+  video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
+  yandex_mapkit: 50f3785c9074f049dfd3d15e3229f98eee662f2e
+  YandexMapsMobile: b5f4dfeb8d1fe324dc18afb33d772b04d04d34f6
 
 PODFILE CHECKSUM: 717b277c19e9679c4c772f075ea65558584c9fea
 
