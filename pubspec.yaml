@@ -36,6 +36,8 @@ dependencies:
   firebase_remote_config: ^4.4.7
   cached_network_image: ^3.4.0
   firebase_auth: ^4.16.0
+  supabase_flutter: ^2.8.3
+  video_player: ^2.9.2
   
 
 dev_dependencies:
@@ -49,6 +51,7 @@ flutter:
 
   assets:
     - images/
+    - assets/videos/loader.mp4
 
   fonts:
     - family: Poppins
