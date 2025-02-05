@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
@@ -23,8 +24,15 @@ Future<void> main() async {
   await Firebase.initializeApp();
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  final fcmToken = await FirebaseMessaging.instance.getToken();
-  print("FCMToken $fcmToken");
+  await Supabase.initialize(
+    url:
+        'https://mqvlogfuhwwcupslbpll.supabase.co', // Replace with your Supabase URL
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xdmxvZ2Z1aHd3Y3Vwc2xicGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTIwNzUsImV4cCI6MjA1NDE2ODA3NX0.YQNe8O4e3qSTuOB_gCM11KITaquYEN1uwmwrQ3gavvg', // Replace with your Supabase Anon Key
+  );
+
+  // final fcmToken = await FirebaseMessaging.instance.getToken();
+  // print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
   runApp(MyLoaderApp());
@@ -51,8 +59,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
-    
-    await Future.delayed(Duration(seconds: 2)); 
+    await Future.delayed(const Duration(seconds: 4));
 
     setState(() {
       _isLoading = false;
@@ -62,10 +69,14 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return MaterialApp(
+      return const MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: CustomLoader(message: "Initializing the App..."),
+          body: CustomLoader(
+            message: "Loading...",
+            videoPath: "assets/videos/loader.mp4",
+            nextScreen: Onboard(),
+          ),
         ),
       );
     }

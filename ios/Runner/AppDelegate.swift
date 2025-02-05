@@ -28,13 +28,7 @@ import FirebaseCore
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey : Any] = [:]
   ) -> Bool {
-    
-    // Check if the URL scheme matches the custom scheme
-    if url.scheme == "app-1-87012829234-ios-1d206beel565cdc288f42b" {
-        print("Custom URL scheme detected: \(url.absoluteString)")
-        return true
-    }
-
-    return false
+    // Let Flutter handle the URL
+    return super.application(app, open: url, options: options)
   }
 }

@@ -3,7 +3,7 @@ import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Authorization extends StatefulWidget {
   const Authorization({super.key});
@@ -17,11 +17,10 @@ class _AuthorizationState extends State<Authorization> {
   final _phoneFormKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
   bool _isPhoneNumberValid = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  String? _verificationId;
   bool _isLoading = false;
-  final TextEditingController _otpController = TextEditingController();
   bool _showOtpField = false;
+  final TextEditingController _otpController = TextEditingController();
+  String? _verifiedPhoneNumber;
 
   @override
   void initState() {
@@ -45,9 +44,10 @@ class _AuthorizationState extends State<Authorization> {
     await prefs.setString('firstName', firstName);
   }
 
-  Future<void> _verifyPhoneNumber() async {
+  Future<void> _sendOtp() async {
     if (!(_phoneFormKey.currentState?.validate() ?? false)) return;
 
+<<<<<<< HEAD
     // Check if Firebase Auth is initialized
     try {
       final app = _auth.app;
@@ -60,6 +60,13 @@ class _AuthorizationState extends State<Authorization> {
           content: Text('Firebase initialization error: $e'),
           backgroundColor: Colors.red,
         ),
+=======
+    final phone = _phoneNumber?.international ?? '';
+    if (!phone.startsWith('+998')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Only Uzbekistan (+998) numbers are allowed.")),
+>>>>>>> 37d8d4e63702b13c0cacc889b357a7181c17cbf0
       );
       return;
     }
@@ -81,6 +88,7 @@ class _AuthorizationState extends State<Authorization> {
     });
 
     try {
+<<<<<<< HEAD
       await _auth.verifyPhoneNumber(
         phoneNumber: _phoneNumber?.international ?? '',
         timeout: const Duration(seconds: 60),
@@ -136,17 +144,26 @@ class _AuthorizationState extends State<Authorization> {
           }
         },
       );
+=======
+      await Supabase.instance.client.auth.signInWithOtp(phone: phone);
+      setState(() {
+        _showOtpField = true;
+        _verifiedPhoneNumber = phone;
+      });
+>>>>>>> 37d8d4e63702b13c0cacc889b357a7181c17cbf0
     } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    } finally {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
     }
   }
 
   Future<void> _verifyOtp() async {
+<<<<<<< HEAD
     if (_verificationId == null || _otpController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter the OTP code')),
@@ -160,16 +177,21 @@ class _AuthorizationState extends State<Authorization> {
       );
       return;
     }
+=======
+    if (_otpController.text.isEmpty || _verifiedPhoneNumber == null) return;
+>>>>>>> 37d8d4e63702b13c0cacc889b357a7181c17cbf0
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: _verificationId!,
-        smsCode: _otpController.text,
+      await Supabase.instance.client.auth.verifyOTP(
+        phone: _verifiedPhoneNumber!,
+        token: _otpController.text.trim(),
+        type: OtpType.sms,
       );
+<<<<<<< HEAD
 
       final userCredential = await _auth.signInWithCredential(credential);
       if (userCredential.user != null) {
@@ -190,12 +212,19 @@ class _AuthorizationState extends State<Authorization> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
       );
+=======
+      _onAuthenticationSuccess();
+>>>>>>> 37d8d4e63702b13c0cacc889b357a7181c17cbf0
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
+<<<<<<< HEAD
         SnackBar(content: Text('Error: $e')),
+=======
+        const SnackBar(content: Text("Invalid OTP! Please try again.")),
+>>>>>>> 37d8d4e63702b13c0cacc889b357a7181c17cbf0
       );
     }
   }
@@ -334,7 +363,7 @@ class _AuthorizationState extends State<Authorization> {
                     ? null
                     : _showOtpField
                         ? _verifyOtp
-                        : _verifyPhoneNumber,
+                        : _sendOtp,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 215, 56),
                 ),
