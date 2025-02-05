@@ -49,16 +49,33 @@ class _AuthorizationState extends State<Authorization> {
     if (!(_phoneFormKey.currentState?.validate() ?? false)) return;
 
     // Check if Firebase Auth is initialized
-    if (_auth.app == null) {
+    try {
+      final app = _auth.app;
+      print('Firebase Auth app name: ${app.name}');
+      print('Firebase Auth app options: ${app.options.projectId}');
+    } catch (e) {
+      print('Error checking Firebase Auth app: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Firebase not initialized properly'),
+        SnackBar(
+          content: Text('Firebase initialization error: $e'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
+    if (_phoneNumber?.international == null || _phoneNumber!.international.isEmpty) {
+      print('Phone number is null or empty');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid phone number'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    print('Attempting to verify phone number: ${_phoneNumber?.international}');
     setState(() {
       _isLoading = true;
     });
@@ -66,16 +83,34 @@ class _AuthorizationState extends State<Authorization> {
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: _phoneNumber?.international ?? '',
+        timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          await _auth.signInWithCredential(credential);
-          _onAuthenticationSuccess();
+          print('Auto verification completed');
+          if (Theme.of(context).platform == TargetPlatform.android) {
+            try {
+              final result = await _auth.signInWithCredential(credential);
+              print('Auto sign in successful: ${result.user?.uid}');
+              _onAuthenticationSuccess();
+            } catch (e) {
+              print('Auto sign in failed: $e');
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          }
         },
         verificationFailed: (FirebaseAuthException e) {
           setState(() {
             _isLoading = false;
           });
+          String errorMessage = 'Verification Failed';
+          if (e.code == 'invalid-phone-number') {
+            errorMessage = 'Invalid phone number format';
+          } else if (e.code == 'too-many-requests') {
+            errorMessage = 'Too many attempts. Please try again later';
+          }
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Verification Failed: ${e.message}')),
+            SnackBar(content: Text(errorMessage)),
           );
         },
         codeSent: (String verificationId, int? resendToken) {
@@ -84,12 +119,21 @@ class _AuthorizationState extends State<Authorization> {
             _showOtpField = true;
             _isLoading = false;
           });
+          // Show a success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('OTP sent successfully')),
+          );
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           setState(() {
             _verificationId = verificationId;
             _isLoading = false;
           });
+          if (_showOtpField) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('OTP verification timeout. Please try again')),
+            );
+          }
         },
       );
     } catch (e) {
@@ -103,7 +147,19 @@ class _AuthorizationState extends State<Authorization> {
   }
 
   Future<void> _verifyOtp() async {
-    if (_verificationId == null || _otpController.text.isEmpty) return;
+    if (_verificationId == null || _otpController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter the OTP code')),
+      );
+      return;
+    }
+
+    if (_otpController.text.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid 6-digit OTP code')),
+      );
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -115,14 +171,31 @@ class _AuthorizationState extends State<Authorization> {
         smsCode: _otpController.text,
       );
 
-      await _auth.signInWithCredential(credential);
-      _onAuthenticationSuccess();
+      final userCredential = await _auth.signInWithCredential(credential);
+      if (userCredential.user != null) {
+        _onAuthenticationSuccess();
+      } else {
+        throw Exception('Authentication failed');
+      }
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      String errorMessage = 'Invalid OTP';
+      if (e.code == 'invalid-verification-code') {
+        errorMessage = 'The OTP code is invalid. Please try again';
+      } else if (e.code == 'invalid-verification-id') {
+        errorMessage = 'The verification session has expired. Please request a new OTP';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
     } catch (e) {
       setState(() {
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid OTP: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }

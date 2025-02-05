@@ -23,8 +23,8 @@ Future<void> main() async {
   await Firebase.initializeApp();
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  // final fcmToken = await FirebaseMessaging.instance.getToken();
-  // print("FCMToken $fcmToken");
+  final fcmToken = await FirebaseMessaging.instance.getToken();
+  print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
 
   runApp(MyLoaderApp());
