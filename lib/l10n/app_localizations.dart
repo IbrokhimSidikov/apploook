@@ -84,6 +84,10 @@ class AppLocalizations {
       'save': 'Save',
       'yourLocation': 'Your Location',
       'selectedAddress': 'Your selected address',
+      // Verification screen
+      'verification': 'Verification',
+      'verificationTitle':
+          'Please enter the 4-digit code\nto verify your phone number',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -161,6 +165,10 @@ class AppLocalizations {
       'save': 'Saqlash',
       'yourLocation': 'Sizning Manzilingiz',
       'selectedAddress': 'Siz tanlagan manzil',
+      // Verification screen
+      'verification': 'Tasdiqlash',
+      'verificationTitle':
+          'Telefon raqamingizni tasdiqlash uchun\n4 xonali kodni kiriting',
     }
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -283,4 +291,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['yourLocation']!;
   String get selectedAddress =>
       _localizedValues[locale.languageCode]!['selectedAddress']!;
+
+  // Verification
+  String get verification =>
+      _localizedValues[locale.languageCode]!['verification']!;
+  String get verificationTitle =>
+      _localizedValues[locale.languageCode]!['verificationTitle']!;
 }
