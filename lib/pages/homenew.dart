@@ -269,7 +269,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                   .locale
                                   .languageCode;
                               final newLocale =
-                                  currentLocale == 'en' ? 'uz' : 'en';
+                                  currentLocale == 'eng' ? 'uz' : 'eng';
 
                               // Save the selected language
                               SharedPreferences prefs =
