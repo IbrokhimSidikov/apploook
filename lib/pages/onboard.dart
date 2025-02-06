@@ -77,7 +77,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
   void _continue() async {
     if (isEnglishSelected || isuzbekSelected) {
-      final selectedLocale = isEnglishSelected ? 'en' : 'uz';
+      final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
 
       // Save the selected language in shared preferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -102,7 +102,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     final currentLocale = context.watch<LocaleProvider>().locale.languageCode;
 
     if (!isEnglishSelected && !isuzbekSelected) {
-      isEnglishSelected = currentLocale == 'en';
+      isEnglishSelected = currentLocale == 'eng';
       isuzbekSelected = currentLocale == 'uz';
     }
 
