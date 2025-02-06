@@ -544,21 +544,25 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(
                                                           height: 5.0),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(3.0),
-                                                        child: Text(
-                                                          product.getDescriptionInLanguage(
-                                                                  'uz') ??
-                                                              'No Description',
-                                                          style:
-                                                              const TextStyle(
-                                                            color: Colors.grey,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
+                                                      Consumer<LocaleProvider>(
+                                                        builder: (context,
+                                                            localeProvider, _) {
+                                                          return Text(
+                                                            product.getDescriptionInLanguage(
+                                                                    localeProvider
+                                                                        .locale
+                                                                        .languageCode) ??
+                                                                'No Description',
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          );
+                                                        },
                                                       ),
                                                       const SizedBox(
                                                           height: 5.0),
