@@ -1,6 +1,7 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
+import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -166,9 +167,18 @@ class _DetailsState extends State<Details> {
                       height: 100,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        child: Text(
-                          getDescriptionInLanguage('uz') ?? '',
-                          style: AppWidget.LightTextFieldStyle(),
+                        child: Consumer<LocaleProvider>(
+                          builder: (context, localeProvider, _) {
+                            return Text(
+                              getDescriptionInLanguage(
+                                      localeProvider.locale.languageCode) ??
+                                  'No Description',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
