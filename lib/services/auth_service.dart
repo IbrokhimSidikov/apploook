@@ -4,6 +4,8 @@ import 'dart:convert';
 
 class AuthService {
   final String baseUrl = 'https://api.sievesapp.com/v1/waiter-system';
+  // Make verification code static so it persists across instances
+  static String? currentVerificationCode;
 
   Future<Map<String, dynamic>> authorizeUser(
       String phone, String firstName) async {
@@ -21,6 +23,11 @@ class AuthService {
       final responseData = json.decode(response.body);
       print('Authorization response: $responseData');
 
+      // Store the verification code
+      currentVerificationCode = responseData['verification_code']?.toString();
+      print('Stored verification code: $currentVerificationCode');
+      print('AuthService instance hash: ${identityHashCode(this)}');
+
       final message = responseData['message'] ?? 'Unknown response';
       final isVerified = message.toLowerCase() == 'successfully authorized';
 
@@ -28,6 +35,7 @@ class AuthService {
         'status_code': response.statusCode,
         'message': message,
         'is_verified': isVerified,
+        'verification_code': currentVerificationCode,
       };
     } catch (e) {
       print('Authorization error: $e');
@@ -41,41 +49,20 @@ class AuthService {
   Future<Map<String, dynamic>> verifyCode(String phone, String code) async {
     try {
       print('Verifying code - Phone: $phone, Code: $code');
-      final response = await http.post(
-        Uri.parse('$baseUrl/check-verification'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'phone': phone.replaceAll('+', ''),
-          'verification_code': code,
-        }),
-      );
+      print('Stored verification code: $currentVerificationCode');
+      print('AuthService instance hash: ${identityHashCode(this)}');
 
-      print('Raw response: ${response.body}');
-
-      // Try to parse the response, handle potential JSON parse errors
-      Map<String, dynamic> responseData;
-      try {
-        responseData = json.decode(response.body);
-      } catch (e) {
-        print('JSON decode error: $e');
-        responseData = {};
-      }
-
-      // If we get a PHP Notice about individual_id, but the verification was successful
-      if (responseData['name'] == 'PHP Notice' &&
-          responseData['message']?.contains('individual_id') == true) {
+      // Compare with stored verification code
+      if (code == currentVerificationCode) {
         return {
-          'status_code': 200, // Consider it successful
+          'status_code': 200,
           'message': 'Verification successful',
         };
       }
 
-      print('Verification response: $responseData');
-      print('Response status code: ${response.statusCode}');
-
       return {
-        'status_code': response.statusCode,
-        'message': responseData['message'] ?? 'Unknown response',
+        'status_code': 401,
+        'message': 'Invalid verification code',
       };
     } catch (e) {
       print('Verification error: $e');
@@ -84,6 +71,13 @@ class AuthService {
         'message': 'Network error: $e',
       };
     }
+  }
+
+  void clearVerificationCode() {
+    print('Clearing verification code. Current code: $currentVerificationCode');
+    print('AuthService instance hash: ${identityHashCode(this)}');
+    currentVerificationCode = null;
+    print('Verification code cleared. New value: $currentVerificationCode');
   }
 
   Future<bool> logout(String individualId) async {

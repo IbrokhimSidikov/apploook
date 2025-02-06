@@ -566,7 +566,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                         padding:
                                                             const EdgeInsets
                                                                 .symmetric(
-                                                          horizontal: 15.0,
+                                                          horizontal: 35.0,
                                                           vertical: 5.0,
                                                         ),
                                                         decoration:
@@ -582,10 +582,15 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                           '${product.price.toStringAsFixed(0)} UZS',
                                                           style:
                                                               const TextStyle(
-                                                            fontSize: 14.0,
+                                                            fontSize: 12.0,
                                                             fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.grey,
+                                                                FontWeight.w600,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                           ),
                                                         ),
                                                       ),

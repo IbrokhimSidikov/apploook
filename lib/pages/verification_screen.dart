@@ -47,12 +47,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
         if (response['status_code'] == 200) {
           // Save credentials only after successful verification
           await _saveUserData();
+          // Clear verification code after successful login
+          _authService.clearVerificationCode();
           Navigator.pushReplacementNamed(context, '/homeNew');
         } else {
           _codeController.clear();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(response['message'] ?? 'Verification failed')),
+              content: Text(response['message'] ?? 'Verification failed'),
+            ),
           );
         }
       }
