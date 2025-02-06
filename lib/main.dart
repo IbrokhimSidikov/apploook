@@ -44,7 +44,6 @@ class MyLoaderApp extends StatefulWidget {
 }
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
-  bool _isLoading = true;
   bool? _acceptedPrivacyPolicy;
 
   @override
@@ -55,32 +54,18 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
 
   Future<void> _initializeApp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // await prefs.remove('accepted_privacy_policy'); //to check the privacy policy
     _acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
-    await Future.delayed(const Duration(seconds: 4));
-
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          body: CustomLoader(
-            message: "Loading...",
-            videoPath: "assets/videos/loader.mp4",
-            nextScreen: Onboard(),
-          ),
-        ),
-      );
-    }
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
@@ -112,7 +97,7 @@ class MyApp extends StatelessWidget {
       builder: (context, localeProvider, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Flutter Demo',
+          title: 'LOOOK MOBILE',
           theme: ThemeData(
             fontFamily: 'Poppins',
             textTheme: TextTheme(
@@ -190,13 +175,14 @@ class _InitialScreenState extends State<InitialScreen> {
 }
 
 class ConsentScreen extends StatelessWidget {
-  final Function onAccept;
+  final VoidCallback onAccept;
 
-  ConsentScreen({required this.onAccept});
+  const ConsentScreen({Key? key, required this.onAccept}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: Text('Privacy Policy'),
@@ -206,7 +192,7 @@ class ConsentScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: <Widget>[
-              Expanded(
+              const Expanded(
                 child: SingleChildScrollView(
                   child: Text(
                     'Introduction\n\n'
@@ -228,7 +214,7 @@ class ConsentScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       fixedSize: Size(140, 40),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Decline',
                       style: TextStyle(color: Colors.black38),
                     ),

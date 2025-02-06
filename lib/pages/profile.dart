@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../services/auth_service.dart'; // Import AuthService
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -26,8 +27,16 @@ class _ProfileState extends State<Profile> {
 
   Future<void> _clearUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('phoneNumber');
-    await prefs.remove('firstName');
+    final individualId = prefs.getInt('individual_id');
+
+    if (individualId != null) {
+      // Call logout API
+      final authService = AuthService();
+      await authService.logout(individualId.toString());
+    }
+
+    // Clear all preferences
+    await prefs.clear();
   }
 
   Future<void> _loadPhoneNumber() async {
@@ -156,7 +165,7 @@ class _ProfileState extends State<Profile> {
                 //     ),
                 //   ],
                 // ),
-                
+
                 // Row(
                 //   children: [
                 //     SvgPicture.asset('images/settings.svg'),
@@ -194,11 +203,16 @@ class _ProfileState extends State<Profile> {
                 //   height: 150,
                 // ),
                 GestureDetector(
-                  
                   onTap: () async {
-                    await _clearUserData();
-                    cartProvider.clearCart();
-                    Navigator.pushReplacementNamed(context, '/onboard');
+                    try {
+                      await _clearUserData();
+                      cartProvider.clearCart();
+                      Navigator.pushReplacementNamed(context, '/onboard');
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error logging out: $e')),
+                      );
+                    }
                   },
                   child: Text(
                     AppLocalizations.of(context).logout,
@@ -214,18 +228,21 @@ class _ProfileState extends State<Profile> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(AppLocalizations.of(context).confirmDelete,),
-                          content: Text(AppLocalizations.of(context).confirmDialog),
+                          title: Text(
+                            AppLocalizations.of(context).confirmDelete,
+                          ),
+                          content:
+                              Text(AppLocalizations.of(context).confirmDialog),
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop(false); 
+                                Navigator.of(context).pop(false);
                               },
                               child: Text(AppLocalizations.of(context).cancel),
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pop(true); 
+                                Navigator.of(context).pop(true);
                               },
                               child: Text(AppLocalizations.of(context).delete),
                             ),
@@ -239,7 +256,7 @@ class _ProfileState extends State<Profile> {
                       Navigator.pushReplacementNamed(context, '/onboard');
                     }
                   },
-                  child:  Text(
+                  child: Text(
                     AppLocalizations.of(context).deleteAccount,
                     style: TextStyle(fontSize: 18),
                   ),
@@ -291,7 +308,6 @@ class _ProfileState extends State<Profile> {
           children: [Text('Version 1.4.0, build 10001')],
         ),
       ),
-      
     );
   }
 }

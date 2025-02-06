@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:apploook/pages/onboard.dart';
 
 class CustomLoader extends StatefulWidget {
-  final String message;
   final String videoPath;
   final Widget nextScreen;
   final Duration delayDuration;
 
   const CustomLoader({
     Key? key,
-    this.message = "Loading...",
     required this.videoPath,
     required this.nextScreen,
     this.delayDuration = const Duration(seconds: 5),
@@ -20,14 +17,28 @@ class CustomLoader extends StatefulWidget {
   State<CustomLoader> createState() => _CustomLoaderState();
 }
 
-class _CustomLoaderState extends State<CustomLoader> {
+class _CustomLoaderState extends State<CustomLoader>
+    with SingleTickerProviderStateMixin {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
+  bool _isTransitioning = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _initializeVideo();
+
+    // Setup fade animation
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> _initializeVideo() async {
@@ -44,79 +55,74 @@ class _CustomLoaderState extends State<CustomLoader> {
       _controller.setLooping(false);
       _controller.play();
 
-      // Listen for the end of the video
-      _controller.addListener(() {
-        if (_controller.value.position >= _controller.value.duration) {
-          if (mounted) {
-            Navigator.of(context).pushReplacement(
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    widget.nextScreen,
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  var curve = Curves.easeInOutCubic;
-                  var tween = Tween(begin: 0.0, end: 1.0).chain(
-                    CurveTween(curve: curve),
-                  );
-                  var fadeAnimation = animation.drive(tween);
-                  var slideAnimation = Tween<Offset>(
-                    begin: const Offset(0.0, 0.3),
-                    end: Offset.zero,
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: curve,
-                  ));
-
-                  return FadeTransition(
-                    opacity: fadeAnimation,
-                    child: SlideTransition(
-                      position: slideAnimation,
-                      child: child,
-                    ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 800),
-              ),
-            );
-          }
-        }
+      // Wait for the video to finish, then start transition
+      Future.delayed(widget.delayDuration, () {
+        if (mounted) _startTransition();
       });
     } catch (e) {
       print('Error initializing video: $e');
+      if (mounted) _startTransition();
+    }
+  }
+
+  void _startTransition() {
+    if (_isTransitioning) return;
+    _isTransitioning = true;
+
+    _animationController.forward().then((_) {
       if (mounted) {
-        // If there's an error, navigate to next screen
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => widget.nextScreen),
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                widget.nextScreen,
+            transitionDuration: const Duration(milliseconds: 800),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
         );
       }
-    }
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _isInitialized
-          ? SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller.value.size.width,
-                  height: _controller.value.size.height,
-                  child: VideoPlayer(_controller),
+      body: Stack(
+        children: [
+          // Video background
+          _isInitialized
+              ? SizedBox.expand(
+                  child: FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _controller.value.size.width,
+                      height: _controller.value.size.height,
+                      child: VideoPlayer(_controller),
+                    ),
+                  ),
+                )
+              : const Center(
+                  child: CircularProgressIndicator(
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(Color(0xFFFECC00)),
+                  ),
                 ),
-              ),
-            )
-          : const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFECC00)),
-              ),
-            ),
+          // Fade transition overlay
+          FadeTransition(
+            opacity: _fadeAnimation,
+            child: Container(color: Colors.black), // Keeps it smooth
+          ),
+        ],
+      ),
     );
   }
 }

@@ -78,7 +78,10 @@ class _SignInState extends State<SignIn> {
           Center(
             child: Text(
               'Version 1.0.0, build 10001',
-              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13, color: Colors.black26),
+              style: TextStyle(
+                  fontWeight: FontWeight.w100,
+                  fontSize: 13,
+                  color: Colors.black26),
             ),
           )
         ],
@@ -97,7 +100,9 @@ class _SignInState extends State<SignIn> {
       elevation: 0.0,
       centerTitle: true,
       leading: GestureDetector(
-        onTap: () {},
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/homeNew');
+        },
         child: Container(
           margin: EdgeInsets.all(10),
           child: SvgPicture.asset(
@@ -113,36 +118,36 @@ class _SignInState extends State<SignIn> {
       actions: [
         GestureDetector(
           onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text("Call-Center"),
-                          content: Text(
-                              "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // Close the dialog
-                              },
-                              child: const Text(
-                                "Cancel",
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text(
-                                "Call",
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 255, 215, 72)),
-                              ),
-                            ),
-                          ],
-                        );
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text("Call-Center"),
+                  content: Text(
+                      "Bizning call-markazimiz bilan \naloqaga chiqing \n$phoneNumber"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Close the dialog
                       },
-                    );
-                  },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        "Call",
+                        style:
+                            TextStyle(color: Color.fromARGB(255, 255, 215, 72)),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
           child: Container(
             margin: EdgeInsets.all(10),
             width: 37,
