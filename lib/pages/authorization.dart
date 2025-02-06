@@ -45,20 +45,6 @@ class _AuthorizationState extends State<Authorization> {
   Future<void> _validateAndContinue() async {
     if (!(_phoneFormKey.currentState?.validate() ?? false)) return;
 
-<<<<<<< HEAD
-    // Check if Firebase Auth is initialized
-    try {
-      final app = _auth.app;
-      print('Firebase Auth app name: ${app.name}');
-      print('Firebase Auth app options: ${app.options.projectId}');
-    } catch (e) {
-      print('Error checking Firebase Auth app: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Firebase initialization error: $e'),
-          backgroundColor: Colors.red,
-        ),
-=======
     final phone = _phoneNumber?.international ?? '';
     if (!phone.startsWith('+998')) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,7 +61,6 @@ class _AuthorizationState extends State<Authorization> {
       return;
     }
 
-    print('Attempting to verify phone number: ${_phoneNumber?.international}');
     setState(() {
       _isLoading = true;
     });
