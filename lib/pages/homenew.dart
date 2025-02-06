@@ -269,7 +269,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                   .locale
                                   .languageCode;
                               final newLocale =
-                                  currentLocale == 'en' ? 'uz' : 'en';
+                                  currentLocale == 'eng' ? 'uz' : 'eng';
 
                               // Save the selected language
                               SharedPreferences prefs =
@@ -544,21 +544,25 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                       ),
                                                       const SizedBox(
                                                           height: 5.0),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(3.0),
-                                                        child: Text(
-                                                          product.getDescriptionInLanguage(
-                                                                  'uz') ??
-                                                              'No Description',
-                                                          style:
-                                                              const TextStyle(
-                                                            color: Colors.grey,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                          ),
-                                                        ),
+                                                      Consumer<LocaleProvider>(
+                                                        builder: (context,
+                                                            localeProvider, _) {
+                                                          return Text(
+                                                            product.getDescriptionInLanguage(
+                                                                    localeProvider
+                                                                        .locale
+                                                                        .languageCode) ??
+                                                                'No Description',
+                                                            style:
+                                                                const TextStyle(
+                                                              color:
+                                                                  Colors.grey,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                          );
+                                                        },
                                                       ),
                                                       const SizedBox(
                                                           height: 5.0),
@@ -566,7 +570,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                         padding:
                                                             const EdgeInsets
                                                                 .symmetric(
-                                                          horizontal: 15.0,
+                                                          horizontal: 35.0,
                                                           vertical: 5.0,
                                                         ),
                                                         decoration:
@@ -582,10 +586,15 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                           '${product.price.toStringAsFixed(0)} UZS',
                                                           style:
                                                               const TextStyle(
-                                                            fontSize: 14.0,
+                                                            fontSize: 12.0,
                                                             fontWeight:
-                                                                FontWeight.bold,
-                                                            color: Colors.grey,
+                                                                FontWeight.w600,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    0,
+                                                                    0,
+                                                                    0),
                                                           ),
                                                         ),
                                                       ),

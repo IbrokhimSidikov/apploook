@@ -32,7 +32,10 @@ class _CartState extends State<Cart> {
     final prefs = await SharedPreferences.getInstance();
     final phoneNumber = prefs.getString('phoneNumber');
     final firstName = prefs.getString('firstName');
-    return phoneNumber != null && phoneNumber.isNotEmpty && firstName != null && firstName.isNotEmpty;
+    return phoneNumber != null &&
+        phoneNumber.isNotEmpty &&
+        firstName != null &&
+        firstName.isNotEmpty;
   }
 
   @override
@@ -220,7 +223,7 @@ class _CartState extends State<Cart> {
                   //   ),
                   // ),
                   const SizedBox(height: 25.0),
-                  ElevatedButton(
+                  TextButton(
                     onPressed: price > 0
                         ? () async {
                             bool isSignedIn = await _isUserSignedIn();
@@ -230,24 +233,22 @@ class _CartState extends State<Cart> {
                             );
                           }
                         : null,
-                    style: ButtonStyle(
+                    style: TextButton.styleFrom(
                       backgroundColor: price > 0
-                          ? MaterialStateProperty.all(
-                              const Color(0xFFFEC700),
-                            )
-                          : MaterialStateProperty.all(
-                              const Color(0xFFCCCCCC),
-                            ),
+                          ? const Color(0xFFFEC700)
+                          : const Color(0xFFCCCCCC),
+                      padding: const EdgeInsets.only(
+                          top: 12.0, bottom: 12.0, left: 24, right: 24),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(50),
+                      ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        '${AppLocalizations.of(context).proceedToCheckout} - ${NumberFormat('#,##0').format(price)} UZS',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    child: Text(
+                      '${AppLocalizations.of(context).proceedToCheckout} - ${NumberFormat('#,##0').format(price)} UZS',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),

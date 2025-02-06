@@ -1,6 +1,7 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
+import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -166,9 +167,18 @@ class _DetailsState extends State<Details> {
                       height: 100,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
-                        child: Text(
-                          getDescriptionInLanguage('uz') ?? '',
-                          style: AppWidget.LightTextFieldStyle(),
+                        child: Consumer<LocaleProvider>(
+                          builder: (context, localeProvider, _) {
+                            return Text(
+                              getDescriptionInLanguage(
+                                      localeProvider.locale.languageCode) ??
+                                  'No Description',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -189,7 +199,10 @@ class _DetailsState extends State<Details> {
                     children: [
                       Text(
                         AppLocalizations.of(context).totalPrice,
-                        style: AppWidget.semiboldTextFieldStyle(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0,
+                        ),
                       ),
                       Text(
                         "$totalPrice UZS",
@@ -215,7 +228,8 @@ class _DetailsState extends State<Details> {
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
                         child: Text(
                           AppLocalizations.of(context).addToCart,
                           textAlign: TextAlign.center,
@@ -223,7 +237,7 @@ class _DetailsState extends State<Details> {
                             color: Colors.black,
                             fontSize: 16.0,
                             fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
