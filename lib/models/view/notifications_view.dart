@@ -1,6 +1,62 @@
+import 'dart:convert';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class Order {
+  final String orderId;
+  final String branchName;
+  final List<Map<String, dynamic>> items;
+  final double totalPrice;
+  final String orderType;
+  final String status;
+  final DateTime orderTime;
+  final String? customerName;
+  final String? phoneNumber;
+  final String? paymentType;
+
+  Order({
+    required this.orderId,
+    required this.branchName,
+    required this.items,
+    required this.totalPrice,
+    required this.orderType,
+    required this.status,
+    required this.orderTime,
+    this.customerName,
+    this.phoneNumber,
+    this.paymentType,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'orderId': orderId,
+        'branchName': branchName,
+        'items': items,
+        'totalPrice': totalPrice,
+        'orderType': orderType,
+        'status': status,
+        'orderTime': orderTime.toIso8601String(),
+        'customerName': customerName,
+        'phoneNumber': phoneNumber,
+        'paymentType': paymentType,
+      };
+
+  factory Order.fromJson(Map<String, dynamic> json) => Order(
+        orderId: json['orderId'],
+        branchName: json['branchName'],
+        items: List<Map<String, dynamic>>.from(json['items']),
+        totalPrice: (json['totalPrice'] is int)
+            ? (json['totalPrice'] as int).toDouble()
+            : json['totalPrice'] as double,
+        orderType: json['orderType'],
+        status: json['status'],
+        orderTime: DateTime.parse(json['orderTime']),
+        customerName: json['customerName'],
+        phoneNumber: json['phoneNumber'],
+        paymentType: json['paymentType'],
+      );
+}
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -10,187 +66,173 @@ class NotificationsView extends StatefulWidget {
 }
 
 class _NotificationsViewState extends State<NotificationsView> {
-  // Mock order status for demonstration
-  String _orderStatus = 'preparing'; // can be 'preparing', 'ready', 'delivered'
+  List<Order> _orders = [];
 
-  void _showOrderTrackingDialog(BuildContext context, String orderId) {
+  @override
+  void initState() {
+    super.initState();
+    _loadOrders();
+  }
+
+  Future<void> _loadOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final orderStrings = prefs.getStringList('orders') ?? [];
+    setState(() {
+      _orders =
+          orderStrings.map((str) => Order.fromJson(jsonDecode(str))).toList();
+    });
+  }
+
+  Future<void> _notifyArrival(Order order) async {
+    // TODO: Implement the actual notification logic to the backend
+    // For now, we'll just show a confirmation dialog
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Order #$orderId'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildStatusIndicator(),
-              const SizedBox(height: 20),
-              Text('Current Status: ${_orderStatus.toUpperCase()}'),
-              const SizedBox(height: 20),
-              Text('Estimated Time: 15-20 minutes'),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Arrival Confirmed'),
+        content: Text(
+            'Thank you for letting us know you\'ve arrived for order #${order.orderId}'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildStatusIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildStatusDot('preparing', 'Preparing'),
-        _buildStatusLine('preparing'),
-        _buildStatusDot('ready', 'Ready'),
-        _buildStatusLine('ready'),
-        _buildStatusDot('delivered', 'Delivered'),
-      ],
-    );
-  }
-
-  Widget _buildStatusDot(String status, String label) {
-    bool isActive = _getStatusValue(status) <= _getStatusValue(_orderStatus);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? Colors.green : Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.green : Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusLine(String status) {
-    bool isActive = _getStatusValue(status) < _getStatusValue(_orderStatus);
-    return Container(
-      width: 50,
-      height: 2,
-      color: isActive ? Colors.green : Colors.grey,
-    );
-  }
-
-  int _getStatusValue(String status) {
-    switch (status) {
-      case 'preparing':
-        return 1;
-      case 'ready':
-        return 2;
-      case 'delivered':
-        return 3;
-      default:
-        return 0;
-    }
-  }
-
-  Widget _buildOrderContainer(String orderId, String orderTime, String status) {
-    return GestureDetector(
-      onTap: () => _showOrderTrackingDialog(context, orderId),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEC700),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.receipt_long, color: Colors.white),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Order #$orderId',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    orderTime,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _getStatusColor(status),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                status.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'preparing':
-        return Colors.orange;
-      case 'ready':
-        return Colors.green;
-      case 'delivered':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
+  Widget _buildOrderCard(Order order) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Order #${order.orderId}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                order.status.toUpperCase(),
+                style: TextStyle(
+                  color: order.status == 'preparing'
+                      ? Colors.orange
+                      : order.status == 'ready'
+                          ? Colors.green
+                          : Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Date: ${order.orderTime.toString().substring(0, 16)}',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 4),
+          Text('Branch: ${order.branchName}'),
+          Text('Type: ${order.orderType}'),
+          if (order.paymentType != null) Text('Payment: ${order.paymentType}'),
+          if (order.customerName != null)
+            Text('Customer: ${order.customerName}'),
+          if (order.phoneNumber != null) Text('Phone: ${order.phoneNumber}'),
+          const Divider(),
+          ...order.items
+              .map((item) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${item['name']} x${item['quantity']}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text('\$${item['price']}'),
+                      ],
+                    ),
+                  ))
+              .toList(),
+          const Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              Text(
+                '\$${order.totalPrice}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          if (order.status == 'preparing' &&
+              order.orderType.toLowerCase() == 'carhop') ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _notifyArrival(order),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffFEC700),
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: const Text(
+                  'I\'ve Arrived',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F2F7),
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).notifications),
+        backgroundColor: const Color(0xFFF1F2F7),
+        elevation: 0,
+        title: Text(
+          AppLocalizations.of(context).notifications,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
@@ -203,13 +245,27 @@ class _NotificationsViewState extends State<NotificationsView> {
           ),
         ),
       ),
-      body: ListView(
-        children: [
-          _buildOrderContainer('12345', '10:30 AM', 'preparing'),
-          _buildOrderContainer('12346', '11:45 AM', 'ready'),
-          _buildOrderContainer('12347', '12:15 PM', 'delivered'),
-        ],
-      ),
+      body: _orders.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SvgPicture.asset('images/noNotifications.svg'),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context).noNotifications,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: _orders.length,
+              itemBuilder: (context, index) => _buildOrderCard(_orders[index]),
+            ),
     );
   }
 }

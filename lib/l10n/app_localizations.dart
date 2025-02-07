@@ -17,6 +17,7 @@ class AppLocalizations {
       'settings': 'Settings',
       'language': 'Language',
       'notification': 'Notification will appear here',
+      'noNotifications': 'No notifications yet',
       // Profile page
       'logout': 'Log out',
       'deleteAccount': 'Delete Account',
@@ -36,7 +37,11 @@ class AppLocalizations {
       'signInToYourProfile': 'Sign in to your profile',
       'underTitle': 'To order, do authorization first',
       'phoneNumberButton': 'Enter your phone number',
-      'privacyPolicy': 'Privacy policy',
+      'privacyPolicy': 'Privacy Policy',
+      'accept': 'Accept',
+      'decline': 'Decline',
+      'privacyPolicyContent':
+          'Introduction\n\nOur privacy policy will help you understand what information we collect at Loook, how Loook uses it, and what choices you have.\nLoook built the Loook app as a free app. This SERVICE is provided by Loook at no cost and is intended for use as is.\nIf you choose to use our Service, then you agree to the collection and use of information in relation with this policy.\nThe Personal Information that we collect are used for providing and improving the Service.\nWe will not use or share your information with anyone except as described in this Privacy Policy.\n\n\nContact Information:\nEmail: loook.uz.tech@gmail.com',
       // Authorization page
       'authorization': 'Authorization',
       'authorizationTitle':
@@ -98,6 +103,8 @@ class AppLocalizations {
       'settings': 'Sozlamalar',
       'language': 'Til',
       'notification': 'Sizning xabarnomalaringiz bu yerda korinadi',
+      'noNotifications': 'Hozircha Xabarnomalar yo\'q',
+
       // Profile page
       'logout': 'Chiqish',
       'deleteAccount': 'Hisobni o\'chirish',
@@ -119,6 +126,10 @@ class AppLocalizations {
       'underTitle': 'Buyurtma uchun avval avtorizatsiyadan o\'ting',
       'phoneNumberButton': 'Telefon raqamingizni kiriting',
       'privacyPolicy': 'Maxfiylik siyosati',
+      'accept': 'Qabul qilish',
+      'decline': 'Rad etish',
+      'privacyPolicyContent':
+          'Kirish\n\nBizning maxfiylik siyosatimiz Loook-da qanday ma\'lumotlarni to\'plashimiz, Loook ulardan qanday foydalanishi va sizda qanday tanlovlar borligini tushunishga yordam beradi.\nLoook Loook ilovasini bepul ilova sifatida yaratdi. Ushbu XIZMAT Loook tomonidan bepul taqdim etiladi va mavjud bo\'lganicha foydalanish uchun mo\'ljallangan.\nAgar siz bizning Xizmatimizdan foydalanishni tanlasangiz, u holda siz ushbu siyosatga muvofiq ma\'lumotlarni to\'plash va ulardan foydalanishga rozilik bildirasiz.\nBiz to\'playdigan shaxsiy ma\'lumotlar Xizmatni taqdim etish va takomillashtirish uchun ishlatiladi.\nBiz sizning ma\'lumotlaringizni ushbu Maxfiylik siyosatida tavsiflangan holatlardan tashqari hech kim bilan almashmaymiz yoki baham ko\'rmaymiz.\n\n\nAloqa ma\'lumotlari:\nEmail: loook.uz.tech@gmail.com',
       // Authorization page
       'authorization': 'Avtorizatsiya',
       'authorizationTitle':
@@ -182,6 +193,8 @@ class AppLocalizations {
   String get language => _localizedValues[locale.languageCode]!['language']!;
   String get notification =>
       _localizedValues[locale.languageCode]!['notification']!;
+  String get noNotifications =>
+      _localizedValues[locale.languageCode]!['noNotifications']!;
 
   // Profile page
   String get logout => _localizedValues[locale.languageCode]!['logout']!;
@@ -215,6 +228,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['phoneNumberButton']!;
   String get privacyPolicy =>
       _localizedValues[locale.languageCode]!['privacyPolicy']!;
+  String get accept => _localizedValues[locale.languageCode]!['accept']!;
+  String get decline => _localizedValues[locale.languageCode]!['decline']!;
+  String get privacyPolicyContent =>
+      _localizedValues[locale.languageCode]!['privacyPolicyContent']!;
 
   // Authorization page
   String get authorization =>
