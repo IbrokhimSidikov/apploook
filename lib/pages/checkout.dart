@@ -1192,7 +1192,7 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
-      // Handle carhop orders differently
+      // Handle carhop orders
       if (orderType.toLowerCase() == 'carhop') {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
@@ -1234,7 +1234,7 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": comment.isEmpty ? null : comment,
+          "note": "$comment\nCar Details: $carDetails",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,
