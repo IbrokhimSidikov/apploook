@@ -56,6 +56,20 @@ class Order {
         phoneNumber: json['phoneNumber'],
         paymentType: json['paymentType'],
       );
+
+  static Future<void> saveOrder(Order order) async {
+    final prefs = await SharedPreferences.getInstance();
+    final orderStrings = prefs.getStringList('orders') ?? [];
+
+    // Convert the new order to JSON string
+    final orderJson = jsonEncode(order.toJson());
+
+    // Add the new order to the beginning of the list
+    orderStrings.insert(0, orderJson);
+
+    // Save the updated list
+    await prefs.setStringList('orders', orderStrings);
+  }
 }
 
 class NotificationsView extends StatefulWidget {
@@ -84,8 +98,6 @@ class _NotificationsViewState extends State<NotificationsView> {
   }
 
   Future<void> _notifyArrival(Order order) async {
-    // TODO: Implement the actual notification logic to the backend
-    // For now, we'll just show a confirmation dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
