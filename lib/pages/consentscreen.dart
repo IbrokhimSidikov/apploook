@@ -14,7 +14,7 @@ class ConsentScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            Expanded(
+            const Expanded(
               child: SingleChildScrollView(
                 child: Text(
                   'Your privacy policy goes here...',
@@ -26,7 +26,8 @@ class ConsentScreen extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () async {
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
                     await prefs.setBool('accepted_privacy_policy', true);
                     onAccept();
                   },

@@ -684,9 +684,7 @@ class _CheckoutState extends State<Checkout> {
                               height: 48,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: const Color.fromARGB(
-                                        255, 215, 213, 213)),
+                                border: Border.all(color: Colors.black26),
                               ),
                               child: GestureDetector(
                                 onTap: () {
@@ -1004,6 +1002,39 @@ class _CheckoutState extends State<Checkout> {
                             cartProvider,
                           );
                         }
+                        // Save order details
+                        final now = DateTime.now();
+                        final orderNumber =
+                            now.millisecondsSinceEpoch % 10000; // Last 4 digits
+                        final orderId =
+                            '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${orderNumber.toString().padLeft(4, '0')}';
+
+                        final order = {
+                          'orderId': orderId,
+                          'branchName': selectedBranch ?? '',
+                          'items': cartProvider.cartItems
+                              .map((item) => {
+                                    'name': item.product.name,
+                                    'quantity': item.quantity,
+                                    'price': item.product.price,
+                                  })
+                              .toList(),
+                          'totalPrice': cartProvider.totalAmount,
+                          'orderType': orderType,
+                          'status': 'preparing',
+                          'orderTime': DateTime.now().toIso8601String(),
+                          'customerName': firstName,
+                          'phoneNumber': phoneNumber,
+                          'paymentType': selectedOption,
+                        };
+
+                        // Save order to SharedPreferences
+                        final prefs = await SharedPreferences.getInstance();
+                        List<String> orders =
+                            prefs.getStringList('orders') ?? [];
+                        orders.add(jsonEncode(order));
+                        await prefs.setStringList('orders', orders);
+
                         // Show success message
                         showDialog(
                           // ignore: use_build_context_synchronously
@@ -1161,7 +1192,7 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
-      // Handle carhop orders differently
+      // Handle carhop orders
       if (orderType.toLowerCase() == 'carhop') {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
@@ -1203,7 +1234,7 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": comment.isEmpty ? null : comment,
+          "note": "$comment\nCar Details: $carDetails",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,
