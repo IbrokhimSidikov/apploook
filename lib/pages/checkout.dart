@@ -1040,8 +1040,10 @@ class _CheckoutState extends State<Checkout> {
                           // ignore: use_build_context_synchronously
                           context: context,
                           builder: (context) => AlertDialog(
-                            title:
-                                Text(AppLocalizations.of(context).orderSuccess),
+                            title: Text(
+                              AppLocalizations.of(context).orderSuccess,
+                              style: const TextStyle(fontSize: 16),
+                            ),
                             content: Text(AppLocalizations.of(context)
                                 .orderSuccessSubTitle),
                             contentPadding: const EdgeInsets.only(
