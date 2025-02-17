@@ -16,20 +16,20 @@ class BannerItem {
 
     banners.add(
       BannerItem(
-          name: 'banner1',
-          imagePath: 'images/banner2.png',
+          name: 'banner12',
+          imagePath: 'images/Dinner M.png',
           boxColor: Colors.white),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/banner3.png',
+          imagePath: 'images/Smile Set.png',
           boxColor: Colors.white),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/banner4.png',
+          imagePath: 'images/Aralash-tovuqlar.png',
           boxColor: Colors.white),
     );
     banners.add(
