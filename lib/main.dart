@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
@@ -25,13 +25,6 @@ Future<void> main() async {
   await Firebase.initializeApp();
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  await Supabase.initialize(
-    url:
-        'https://mqvlogfuhwwcupslbpll.supabase.co', // Replace with your Supabase URL
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xdmxvZ2Z1aHd3Y3Vwc2xicGxsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTIwNzUsImV4cCI6MjA1NDE2ODA3NX0.YQNe8O4e3qSTuOB_gCM11KITaquYEN1uwmwrQ3gavvg', // Replace with your Supabase Anon Key
-  );
-
   // final fcmToken = await FirebaseMessaging.instance.getToken();
   // print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);

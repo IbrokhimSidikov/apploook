@@ -287,7 +287,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           context, '/notificationsView');
                     },
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(15.0),
                       child: Icon(
                         Icons.notifications,
                         size: 24.0,
