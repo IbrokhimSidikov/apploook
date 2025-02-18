@@ -1043,21 +1043,35 @@ class _CheckoutState extends State<Checkout> {
                             title: Text(
                               AppLocalizations.of(context).orderSuccess,
                               style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
                             ),
                             content: Text(AppLocalizations.of(context)
                                 .orderSuccessSubTitle),
                             contentPadding: const EdgeInsets.only(
                                 top: 30, left: 30, right: 30),
                             actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // Close the dialog
-                                  Navigator.pushReplacementNamed(
-                                      context, '/homeNew');
-                                },
-                                child: const Text(
-                                  'OK',
-                                  style: TextStyle(color: Colors.black),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Close the dialog
+                                    Navigator.pushReplacementNamed(
+                                        context, '/homeNew');
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.green, // Green background
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          25), // Circular border
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                        color:
+                                            Colors.white), // White font color
+                                  ),
                                 ),
                               ),
                             ],
