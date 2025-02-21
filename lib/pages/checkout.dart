@@ -1243,6 +1243,27 @@ class _CheckoutState extends State<Checkout> {
           throw Exception('Failed to send carhop order');
         } else {
           print("Carhop order sent successfully! Response: ${response.body}");
+
+          // Parse the response and save order details
+          final responseData = jsonDecode(response.body);
+          final prefs = await SharedPreferences.getInstance();
+
+          // Get existing orders or initialize empty list
+          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
+
+          // Create new order object
+          Map<String, dynamic> orderDetails = {
+            'id': responseData['id'],
+            'paid': responseData['paid'],
+            'timestamp': DateTime.now().toIso8601String(),
+          };
+
+          // Add new order to the list
+          savedOrders.add(jsonEncode(orderDetails));
+
+          // Save updated list
+          await prefs.setStringList('carhop_orders', savedOrders);
+
           cartProvider.clearCart();
           return;
         }
