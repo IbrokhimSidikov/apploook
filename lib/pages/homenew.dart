@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
+import 'package:apploook/providers/notification_provider.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -281,25 +282,58 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacementNamed(
-                          context, '/notificationsView');
+                  Consumer<NotificationProvider>(
+                    builder: (context, notificationProvider, child) {
+                      return GestureDetector(
+                        onTap: () async {
+                          await notificationProvider.markAllAsRead();
+                          Navigator.pushReplacementNamed(
+                              context, '/notificationsView');
+                        },
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Icon(
+                                Icons.notifications,
+                                size: 24.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                            if (notificationProvider.unreadCount > 0)
+                              Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${notificationProvider.unreadCount}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Icon(
-                        Icons.notifications,
-                        size: 24.0,
-                        color: Colors.black,
-                      ),
-                    ),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      SizedBox(height: 100),
+                      SizedBox(height: 110),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Align(

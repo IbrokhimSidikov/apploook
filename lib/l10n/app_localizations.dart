@@ -83,6 +83,11 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Notifications',
       'notificationsPlaceholder': 'Notifications will appear here',
+      // Notifications view
+      'orderNumber': 'Order #',
+      'arrived': 'Arrived',
+      'totalAmount': 'Total Amount',
+      'currency': 'UZS',
       // Map Screen
       'confirmAddress': 'Do you confirm your address?',
       'confirm': 'Confirm',
@@ -95,6 +100,9 @@ class AppLocalizations {
           'Please enter the 4-digit code\nto verify your phone number',
       'invalidCodeMessage': 'Invalid verification code',
       'validCodeMessage': 'Verification successful',
+      'arrivedButtonHint':
+          'Tap when you arrive at the car parking zone to notify the restaurant',
+      'arrivedButtonTooltip': 'Let the restaurant know you\'re here!',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -172,6 +180,11 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
+      // Notifications view
+      'orderNumber': 'Buyurtma #',
+      'arrived': 'Yetib keldim',
+      'totalAmount': 'Umumiy summa',
+      'currency': 'UZS',
       // Map Screen
       'confirmAddress': 'Manzilingizni Tasdiqlaysizmi?',
       'confirm': 'Tasdiqlash',
@@ -184,6 +197,9 @@ class AppLocalizations {
           'Telefon raqamingizni tasdiqlash uchun\n4 xonali kodni kiriting',
       'invalidCodeMessage': 'Noto\'g\'ri kod',
       'validCodeMessage': 'Tasdiqlandi',
+      'arrivedButtonHint':
+          'Avtomobil to\'xtash joyiga yetib kelganingizda, restorantni xabardor qilish uchun bosing',
+      'arrivedButtonTooltip': 'Restoranga kelganingizni bildiring!',
     }
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -322,4 +338,16 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['invalidCodeMessage']!;
   String get validCodeMessage =>
       _localizedValues[locale.languageCode]!['validCodeMessage']!;
+
+  // Notifications view
+  String get orderNumber =>
+      _localizedValues[locale.languageCode]!['orderNumber']!;
+  String get arrived => _localizedValues[locale.languageCode]!['arrived']!;
+  String get totalAmount =>
+      _localizedValues[locale.languageCode]!['totalAmount']!;
+  String get currency => _localizedValues[locale.languageCode]!['currency']!;
+  String get arrivedButtonHint =>
+      _localizedValues[locale.languageCode]!['arrivedButtonHint']!;
+  String get arrivedButtonTooltip =>
+      _localizedValues[locale.languageCode]!['arrivedButtonTooltip']!;
 }
