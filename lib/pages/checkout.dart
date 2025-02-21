@@ -6,6 +6,7 @@ import 'package:apploook/config/branch_config.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
+import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -1243,6 +1244,45 @@ class _CheckoutState extends State<Checkout> {
           throw Exception('Failed to send carhop order');
         } else {
           print("Carhop order sent successfully! Response: ${response.body}");
+
+          // Parse the response and save order details
+          final responseData = jsonDecode(response.body);
+          final prefs = await SharedPreferences.getInstance();
+
+          // Get existing orders or initialize empty list
+          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
+
+          // Create new order object
+          Map<String, dynamic> orderDetails = {
+            'id': responseData['id'],
+            'paid': responseData['paid'],
+            'timestamp': DateTime.now().toIso8601String(),
+            'orderItems': cartProvider.cartItems
+                .map((item) => {
+                      'name': item.product.name,
+                      'quantity': item.quantity,
+                      'price': item.product.price,
+                      'carDetails': carDetails
+                    })
+                .toList(),
+          };
+
+          // Add new order to the list
+          savedOrders.add(jsonEncode(orderDetails));
+
+          // Keep only the last 50 orders to prevent memory issues
+          if (savedOrders.length > 5) {
+            savedOrders = savedOrders.sublist(savedOrders.length - 5);
+          }
+
+          // Save updated list
+          await prefs.setStringList('carhop_orders', savedOrders);
+
+          // Increment notification count
+          final notificationProvider =
+              Provider.of<NotificationProvider>(context, listen: false);
+          await notificationProvider.incrementUnreadCount();
+
           cartProvider.clearCart();
           return;
         }

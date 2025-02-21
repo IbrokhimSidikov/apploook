@@ -19,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
+import 'providers/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +65,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: _acceptedPrivacyPolicy == true
           ? const MyApp()
@@ -73,6 +75,8 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
                   providers: [
                     ChangeNotifierProvider(create: (_) => CartProvider()),
                     ChangeNotifierProvider(create: (_) => LocaleProvider()),
+                    ChangeNotifierProvider(
+                        create: (_) => NotificationProvider()),
                   ],
                   child: const MyApp(),
                 ),
