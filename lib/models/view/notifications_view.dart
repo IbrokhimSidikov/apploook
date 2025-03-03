@@ -1,6 +1,11 @@
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:apploook/providers/notification_provider.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -10,187 +15,117 @@ class NotificationsView extends StatefulWidget {
 }
 
 class _NotificationsViewState extends State<NotificationsView> {
-  // Mock order status for demonstration
-  String _orderStatus = 'preparing'; // can be 'preparing', 'ready', 'delivered'
+  List<Map<String, dynamic>> orders = [];
+  bool isLoading = true;
+  static const int pageSize = 10;
+  int currentPage = 0;
+  bool _hasShownArrivedHint = false;
 
-  void _showOrderTrackingDialog(BuildContext context, String orderId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Order #$orderId'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildStatusIndicator(),
-              const SizedBox(height: 20),
-              Text('Current Status: ${_orderStatus.toUpperCase()}'),
-              const SizedBox(height: 20),
-              Text('Estimated Time: 15-20 minutes'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    _loadOrders();
+    // Mark notifications as read when viewing
+    Provider.of<NotificationProvider>(context, listen: false).markAllAsRead();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showArrivedHintIfNeeded();
+    });
   }
 
-  Widget _buildStatusIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildStatusDot('preparing', 'Preparing'),
-        _buildStatusLine('preparing'),
-        _buildStatusDot('ready', 'Ready'),
-        _buildStatusLine('ready'),
-        _buildStatusDot('delivered', 'Delivered'),
-      ],
-    );
-  }
-
-  Widget _buildStatusDot(String status, String label) {
-    bool isActive = _getStatusValue(status) <= _getStatusValue(_orderStatus);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isActive ? Colors.green : Colors.grey,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive ? Colors.green : Colors.grey,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusLine(String status) {
-    bool isActive = _getStatusValue(status) < _getStatusValue(_orderStatus);
-    return Container(
-      width: 50,
-      height: 2,
-      color: isActive ? Colors.green : Colors.grey,
-    );
-  }
-
-  int _getStatusValue(String status) {
-    switch (status) {
-      case 'preparing':
-        return 1;
-      case 'ready':
-        return 2;
-      case 'delivered':
-        return 3;
-      default:
-        return 0;
-    }
-  }
-
-  Widget _buildOrderContainer(String orderId, String orderTime, String status) {
-    return GestureDetector(
-      onTap: () => _showOrderTrackingDialog(context, orderId),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              spreadRadius: 1,
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEC700),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.receipt_long, color: Colors.white),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Order #$orderId',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    orderTime,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _getStatusColor(status),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                status.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+  void _showArrivedHintIfNeeded() {
+    if (!_hasShownArrivedHint) {
+      _hasShownArrivedHint = true;
+      // Show the hint after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.directions_car,
+                        size: 48,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context).arrivedButtonHint,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          'OK',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      });
+    }
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'preparing':
-        return Colors.orange;
-      case 'ready':
-        return Colors.green;
-      case 'delivered':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
+  Future<void> _loadOrders() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final savedOrders = prefs.getStringList('carhop_orders') ?? [];
+
+    setState(() {
+      orders = savedOrders
+          .map((order) => jsonDecode(order) as Map<String, dynamic>)
+          .toList()
+        ..sort((a, b) => DateTime.parse(b['timestamp'])
+            .compareTo(DateTime.parse(a['timestamp'])));
+      isLoading = false;
+    });
+  }
+
+  List<Map<String, dynamic>> get paginatedOrders {
+    final startIndex = currentPage * pageSize;
+    final endIndex = (currentPage + 1) * pageSize;
+    if (startIndex >= orders.length) return [];
+    return orders.sublist(startIndex, endIndex.clamp(0, orders.length));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF1F2F7),
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).notifications),
+        backgroundColor: const Color(0xFFF1F2F7),
+        elevation: 0,
+        title: Text(
+          AppLocalizations.of(context).notifications,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
@@ -203,13 +138,239 @@ class _NotificationsViewState extends State<NotificationsView> {
           ),
         ),
       ),
-      body: ListView(
-        children: [
-          _buildOrderContainer('12345', '10:30 AM', 'preparing'),
-          _buildOrderContainer('12346', '11:45 AM', 'ready'),
-          _buildOrderContainer('12347', '12:15 PM', 'delivered'),
-        ],
-      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : orders.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset('images/noNotifications.svg'),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context).noNotifications,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (scrollInfo is ScrollEndNotification &&
+                        scrollInfo.metrics.pixels ==
+                            scrollInfo.metrics.maxScrollExtent) {
+                      // Load more when reaching the end if there are more orders
+                      if ((currentPage + 1) * pageSize < orders.length) {
+                        setState(() {
+                          currentPage++;
+                        });
+                      }
+                    }
+                    return true;
+                  },
+                  child: ListView.builder(
+                    // Only show loading indicator if we have more items to load
+                    itemCount: paginatedOrders.length,
+                    padding: const EdgeInsets.all(16),
+                    itemBuilder: (context, index) {
+                      final order = paginatedOrders[index];
+                      final timestamp = DateTime.parse(order['timestamp']);
+                      final formattedDate =
+                          DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            // Order Header
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withOpacity(0.1),
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12),
+                                  topRight: Radius.circular(12),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Order #${order['id']}',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        formattedDate,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      // You can implement the onTap functionality
+                                    },
+                                    child: Tooltip(
+                                      message: AppLocalizations.of(context)
+                                          .arrivedButtonTooltip,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 6,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFFEC700),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.directions_car,
+                                              size: 18,
+                                              color: Colors.black,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              AppLocalizations.of(context)
+                                                  .arrived,
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Order Items
+                            if (order['orderItems'] != null) ...[
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  children: [
+                                    ...List<Widget>.from(
+                                      (order['orderItems'] as List)
+                                          .map((item) => Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 12),
+                                                child: Row(
+                                                  children: [
+                                                    Container(
+                                                      width: 24,
+                                                      height: 24,
+                                                      decoration: BoxDecoration(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withOpacity(0.1),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(6),
+                                                      ),
+                                                      child: Center(
+                                                        child: Text(
+                                                          '${item['quantity']}x',
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 12),
+                                                    Expanded(
+                                                      child: Text(
+                                                        '${item['name']}',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      '${(item['price'] * item['quantity']).toStringAsFixed(0)} UZS',
+                                                      style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[50],
+                                  borderRadius: const BorderRadius.only(
+                                    bottomLeft: Radius.circular(12),
+                                    bottomRight: Radius.circular(12),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      AppLocalizations.of(context).totalAmount,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${order['paid']} UZS',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
     );
   }
 }

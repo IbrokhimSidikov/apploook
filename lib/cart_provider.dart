@@ -88,6 +88,10 @@ class CartProvider extends ChangeNotifier {
     return totalQuantity;
   }
 
+  double get totalAmount {
+    return _cartItems.fold(0, (sum, item) => sum + (item.quantity * item.product.price));
+  }
+
   getTotalPrice() {
       double totalPrice = 0;
       for (var cartItem in _cartItems) {

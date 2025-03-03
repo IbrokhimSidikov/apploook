@@ -6,6 +6,7 @@ import 'package:apploook/config/branch_config.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
+import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -69,7 +70,7 @@ class _CheckoutState extends State<Checkout> {
       ));
 
       // Set default value as a string
-      // await remoteConfig.setDefaults({'chat_id': '-1002074915184'});
+      // await remoteConfig.setDefaults({'chat_id': '-1002074915184'}); Loook Test Bot
 
       bool updated = await remoteConfig.fetchAndActivate();
       _isRemoteConfigInitialized = true;
@@ -684,9 +685,7 @@ class _CheckoutState extends State<Checkout> {
                               height: 48,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                    color: const Color.fromARGB(
-                                        255, 215, 213, 213)),
+                                border: Border.all(color: Colors.black26),
                               ),
                               child: GestureDetector(
                                 onTap: () {
@@ -1004,27 +1003,44 @@ class _CheckoutState extends State<Checkout> {
                             cartProvider,
                           );
                         }
+
                         // Show success message
                         showDialog(
                           // ignore: use_build_context_synchronously
                           context: context,
                           builder: (context) => AlertDialog(
-                            title:
-                                Text(AppLocalizations.of(context).orderSuccess),
+                            title: Text(
+                              AppLocalizations.of(context).orderSuccess,
+                              style: const TextStyle(fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
                             content: Text(AppLocalizations.of(context)
                                 .orderSuccessSubTitle),
                             contentPadding: const EdgeInsets.only(
                                 top: 30, left: 30, right: 30),
                             actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context); // Close the dialog
-                                  Navigator.pushReplacementNamed(
-                                      context, '/homeNew');
-                                },
-                                child: const Text(
-                                  'OK',
-                                  style: TextStyle(color: Colors.black),
+                              const SizedBox(height: 20),
+                              Center(
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context); // Close the dialog
+                                    Navigator.pushReplacementNamed(
+                                        context, '/homeNew');
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.green, // Green background
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          25), // Circular border
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                        color:
+                                            Colors.white), // White font color
+                                  ),
                                 ),
                               ),
                             ],
@@ -1161,7 +1177,7 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
-      // Handle carhop orders differently
+      // Handle carhop orders
       if (orderType.toLowerCase() == 'carhop') {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
@@ -1203,7 +1219,7 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": comment.isEmpty ? null : comment,
+          "note": "$comment\nCar Details: $carDetails",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,
@@ -1228,6 +1244,45 @@ class _CheckoutState extends State<Checkout> {
           throw Exception('Failed to send carhop order');
         } else {
           print("Carhop order sent successfully! Response: ${response.body}");
+
+          // Parse the response and save order details
+          final responseData = jsonDecode(response.body);
+          final prefs = await SharedPreferences.getInstance();
+
+          // Get existing orders or initialize empty list
+          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
+
+          // Create new order object
+          Map<String, dynamic> orderDetails = {
+            'id': responseData['id'],
+            'paid': responseData['paid'],
+            'timestamp': DateTime.now().toIso8601String(),
+            'orderItems': cartProvider.cartItems
+                .map((item) => {
+                      'name': item.product.name,
+                      'quantity': item.quantity,
+                      'price': item.product.price,
+                      'carDetails': carDetails
+                    })
+                .toList(),
+          };
+
+          // Add new order to the list
+          savedOrders.add(jsonEncode(orderDetails));
+
+          // Keep only the last 5 orders to prevent memory issues
+          if (savedOrders.length > 5) {
+            savedOrders = savedOrders.sublist(savedOrders.length - 5);
+          }
+
+          // Save updated list
+          await prefs.setStringList('carhop_orders', savedOrders);
+
+          // Increment notification count
+          final notificationProvider =
+              Provider.of<NotificationProvider>(context, listen: false);
+          await notificationProvider.incrementUnreadCount();
+
           cartProvider.clearCart();
           return;
         }
@@ -1254,7 +1309,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),

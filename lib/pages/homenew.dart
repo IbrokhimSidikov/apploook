@@ -9,12 +9,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
+import 'package:apploook/providers/notification_provider.dart';
 
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
-// import 'package:carousel_slider/carousel_slider.dart'; // Import carousel_slider
-// import 'package:flutter/material.dart' hide CarouselController;
 
 class Category {
   final int id;
@@ -223,440 +222,423 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Color(0xFFF1F2F7),
-      body: NotificationListener<ScrollNotification>(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollUpdateNotification) {
-            _updateSelectedCategory(scrollNotification.metrics.pixels);
-          }
-          return false;
-        },
-        child: Container(
-          margin: const EdgeInsets.only(top: 10.0),
-          child: Stack(
-            children: [
-              Container(
-                //tabs container
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                decoration: const BoxDecoration(
-                  color: Colors.transparent,
+      drawer: Drawer(
+        width: MediaQuery.of(context).size.width * 0.85,
+        child: Profile(),
+      ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 270,
+                floating: false,
+                pinned: true,
+                backgroundColor: Color(0xFFF1F2F7),
+                leading: GestureDetector(
+                  onTap: () {
+                    _scaffoldKey.currentState!.openDrawer();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SvgPicture.asset('images/profileIconHome.svg'),
+                  ),
                 ),
-              ),
-              Positioned(
-                top: 40,
-                left: 15,
-                right: 15,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          _scaffoldKey.currentState!.openDrawer();
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: SvgPicture.asset('images/profileIconHome.svg'),
+                actions: [
+                  GestureDetector(
+                    onTap: () async {
+                      final currentLocale =
+                          context.read<LocaleProvider>().locale.languageCode;
+                      final newLocale = currentLocale == 'eng' ? 'uz' : 'eng';
+
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setString('selected_language', newLocale);
+                      if (!mounted) return;
+                      context
+                          .read<LocaleProvider>()
+                          .setLocale(Locale(newLocale));
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEC700),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        context
+                            .watch<LocaleProvider>()
+                            .locale
+                            .languageCode
+                            .toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final currentLocale = context
-                                  .read<LocaleProvider>()
-                                  .locale
-                                  .languageCode;
-                              final newLocale =
-                                  currentLocale == 'eng' ? 'uz' : 'eng';
-
-                              // Save the selected language
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setString(
-                                  'selected_language', newLocale);
-                              // Update the app's locale
-                              if (!mounted) return;
-                              context
-                                  .read<LocaleProvider>()
-                                  .setLocale(Locale(newLocale));
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEC700),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                context
-                                    .watch<LocaleProvider>()
-                                    .locale
-                                    .languageCode
-                                    .toUpperCase(),
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacementNamed(
-                                  context, '/notificationsView');
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
+                    ),
+                  ),
+                  Consumer<NotificationProvider>(
+                    builder: (context, notificationProvider, child) {
+                      return GestureDetector(
+                        onTap: () async {
+                          await notificationProvider.markAllAsRead();
+                          Navigator.pushReplacementNamed(
+                              context, '/notificationsView');
+                        },
+                        child: Stack(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(15.0),
                               child: Icon(
                                 Icons.notifications,
                                 size: 24.0,
                                 color: Colors.black,
                               ),
                             ),
+                            if (notificationProvider.unreadCount > 0)
+                              Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
+                                  padding: EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  constraints: BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${notificationProvider.unreadCount}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Column(
+                    children: [
+                      SizedBox(height: 110),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 15),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'WHAT`S NEW',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18),
                           ),
-                        ],
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      // Carousel Slider Banner
+                      CarouselSlider(
+                        options: CarouselOptions(
+                          height: 160.0,
+                          autoPlay: true,
+                          autoPlayInterval: Duration(seconds: 3),
+                          enlargeCenterPage: true,
+                          enableInfiniteScroll: true,
+                        ),
+                        items: banners.map((banner) {
+                          return Builder(
+                            builder: (BuildContext context) {
+                              return Container(
+                                width: MediaQuery.of(context).size.width,
+                                margin: EdgeInsets.symmetric(horizontal: 0.0),
+                                decoration: BoxDecoration(
+                                  color: banner.boxColor.withOpacity(0.0),
+                                  borderRadius: BorderRadius.circular(16.0),
+                                ),
+                                child: Image.asset(
+                                  banner.imagePath,
+                                  fit: BoxFit.fill,
+                                ),
+                              );
+                            },
+                          );
+                        }).toList(),
                       ),
                     ],
                   ),
                 ),
               ),
-              Positioned(
-                top: 105,
-                left: 15,
-                child: Text(
-                  'WHAT`S NEW',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ),
-              //Carousel Slider Banner
-              Positioned(
-                top: 135,
-                left: 0,
-                right: 0,
-                child: CarouselSlider(
-                  options: CarouselOptions(
-                    height: 140.0,
-                    autoPlay: true,
-                    autoPlayInterval: Duration(seconds: 3),
-                    enlargeCenterPage: true,
-                    enableInfiniteScroll: true,
-                  ),
-                  items: banners.map((banner) {
-                    return Builder(
-                      builder: (BuildContext context) {
-                        return Container(
-                          width: MediaQuery.of(context).size.width,
-                          margin: EdgeInsets.symmetric(horizontal: 0.0),
-                          decoration: BoxDecoration(
-                            color: banner.boxColor.withOpacity(0.0),
-                            borderRadius: BorderRadius.circular(16.0),
-                          ),
-                          child: Image.asset(
-                            banner.imagePath,
-                            fit: BoxFit.fill,
-                          ),
-                        );
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-              Column(
-                children: [
-                  // Row of buttons with category names
-                  Container(
-                    margin: EdgeInsets.only(top: 283.0), // Add top margin
-                    height: 50, // Set the height of the row
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.0),
-                        topRight: Radius.circular(20.0),
+              // Category buttons
+              SliverPersistentHeader(
+                pinned: true,
+                delegate: _SliverCategoryHeaderDelegate(
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (scrollNotification) {
+                      if (scrollNotification is ScrollUpdateNotification) {
+                        _updateSelectedCategory(
+                            scrollNotification.metrics.pixels);
+                      }
+                      return false;
+                    },
+                    child: Container(
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                        ),
+                        color: Colors.white,
                       ),
-                      color: Colors.white,
-                    ),
-                    child: ValueListenableBuilder<int?>(
-                      valueListenable: selectedCategoryId,
-                      builder: (context, value, child) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (value != null) {
-                            _scrollToCategoryBuy(value!);
-                          } else {
-                            debugPrint('Value is null');
-                          }
-                        });
-                        return ListView.builder(
-                          controller: _scrollController,
-                          scrollDirection: Axis.horizontal, // Horizontal scroll
-                          itemCount: categories.length,
-                          itemBuilder: (context, index) {
-                            Category category = categories[index];
-                            return Padding(
-                              padding: const EdgeInsets.all(0.0),
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  _scrollToCategory(category.id);
-                                },
-                                style: ButtonStyle(
-                                  foregroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (states) {
-                                      // Check if the button is selected
-                                      if (category.id == value) {
-                                        // Change the text color when selected
-                                        return Color(0xFF000000); // Black
-                                      } else {
-                                        return Color(0xFFB0B0B0); // Grey
-                                      }
-                                    },
-                                  ),
-                                  textStyle: WidgetStateProperty.resolveWith<
-                                      TextStyle>(
-                                    (states) {
-                                      // Check if the button is selected
-                                      if (category.id == value) {
-                                        // Change the font weight when selected
+                      child: ValueListenableBuilder<int?>(
+                        valueListenable: selectedCategoryId,
+                        builder: (context, value, child) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (value != null) {
+                              _scrollToCategoryBuy(value);
+                            }
+                          });
+                          return ListView.builder(
+                            controller: _scrollController,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: categories.length,
+                            itemBuilder: (context, index) {
+                              Category category = categories[index];
+                              return Padding(
+                                padding: const EdgeInsets.all(0.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    _scrollToCategory(category.id);
+                                  },
+                                  style: ButtonStyle(
+                                    foregroundColor: MaterialStateProperty
+                                        .resolveWith<Color>(
+                                      (states) {
+                                        return category.id == value
+                                            ? Color(0xFF000000)
+                                            : Color(0xFFB0B0B0);
+                                      },
+                                    ),
+                                    textStyle: MaterialStateProperty
+                                        .resolveWith<TextStyle>(
+                                      (states) {
                                         return TextStyle(
-                                          fontWeight: FontWeight.bold,
+                                          fontWeight: category.id == value
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
                                         );
-                                      } else {
-                                        return TextStyle(
-                                          fontWeight: FontWeight.normal,
-                                        );
-                                      }
-                                    },
+                                      },
+                                    ),
+                                    backgroundColor: MaterialStateProperty
+                                        .resolveWith<Color>(
+                                      (states) => Colors.transparent,
+                                    ),
+                                    elevation:
+                                        MaterialStateProperty.all<double>(0),
                                   ),
-                                  backgroundColor:
-                                      WidgetStateProperty.resolveWith<Color>(
-                                    (states) {
-                                      return Colors
-                                          .transparent; // Set default background color
-                                    },
-                                  ),
-                                  elevation: WidgetStateProperty.all<double>(
-                                      0), // No elevation
+                                  child: Text(category.name),
                                 ),
-                                child: Text(category.name),
-                              ),
-                            );
-                          },
-                        );
-                      },
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
-
-                  // List of products for each category
-                  Container(
-                    height: MediaQuery.of(context).size.height - 343,
-                    decoration: BoxDecoration(color: Colors.white),
-                    child: SingleChildScrollView(
-                      child: allProducts.isEmpty
-                          ? SizedBox(
-                              height: 450,
-                              child: Center(
-                                child: Container(
-                                    child: CircularProgressIndicator()),
-                              ),
-                            )
-                          : Column(
-                              children: categories.map((category) {
-                                List<Product> productsInCategory = allProducts
-                                    .where((product) =>
-                                        product.categoryId == category.id)
-                                    .toList();
-                                return Container(
-                                  key: ValueKey<int>(category.id),
-                                  child: ListView.builder(
-                                    padding: EdgeInsets.only(bottom: 0.0),
-                                    controller:
-                                        _categoryScrollControllers[category.id],
-                                    shrinkWrap: true,
-                                    itemCount: productsInCategory.length,
-                                    itemBuilder: (context, productIndex) {
-                                      Product product =
-                                          productsInCategory[productIndex];
-                                      return VisibilityDetector(
-                                        key: Key(product.id.toString()),
-                                        onVisibilityChanged: (visibilityInfo) {
-                                          if (visibilityInfo.visibleFraction ==
-                                              1) {
-                                            selectedCategoryId.value =
-                                                product.categoryId;
-                                          }
-                                        },
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) {
-                                                  if (productsInCategory
-                                                          .isNotEmpty &&
-                                                      productIndex <
-                                                          productsInCategory
-                                                              .length) {
-                                                    Product product =
-                                                        productsInCategory[
-                                                            productIndex];
-                                                    return Details(
-                                                        product: product);
-                                                  }
-                                                  // Handle the case where the product list is empty or the index is out of bounds
-                                                  return Container(); // Or any other fallback widget
-                                                },
+                ),
+              ),
+              // Products list
+              SliverToBoxAdapter(
+                child: Container(
+                  decoration: BoxDecoration(color: Colors.white),
+                  child: allProducts.isEmpty
+                      ? SizedBox(
+                          height: 450,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : Column(
+                          children: categories.map((category) {
+                            List<Product> productsInCategory = allProducts
+                                .where((product) =>
+                                    product.categoryId == category.id)
+                                .toList();
+                            return Container(
+                              key: ValueKey<int>(category.id),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                controller:
+                                    _categoryScrollControllers[category.id],
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: productsInCategory.length,
+                                itemBuilder: (context, productIndex) {
+                                  Product product =
+                                      productsInCategory[productIndex];
+                                  return VisibilityDetector(
+                                    key: Key(product.id.toString()),
+                                    onVisibilityChanged: (visibilityInfo) {
+                                      if (visibilityInfo.visibleFraction == 1) {
+                                        selectedCategoryId.value =
+                                            product.categoryId;
+                                      }
+                                    },
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) {
+                                              if (productsInCategory
+                                                      .isNotEmpty &&
+                                                  productIndex <
+                                                      productsInCategory
+                                                          .length) {
+                                                return Details(
+                                                    product: product);
+                                              }
+                                              return Container();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 10.0,
+                                          horizontal: 15.0,
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  right: 10.0),
+                                              child: CachedProductImage(
+                                                imageUrl: product.imagePath!,
+                                                width: 135.0,
+                                                height: 135.0,
                                               ),
-                                            );
-                                          },
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 10.0),
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          right: 10.0),
-                                                  child: CachedProductImage(
-                                                    imageUrl:
-                                                        product.imagePath!,
-                                                    width: 140.0,
-                                                    height: 140.0,
+                                            ),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    product.name,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 16.0,
+                                                    ),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        product.name,
+                                                  const SizedBox(height: 5.0),
+                                                  Consumer<LocaleProvider>(
+                                                    builder: (context,
+                                                        localeProvider, _) {
+                                                      return Text(
+                                                        product.getDescriptionInLanguage(
+                                                                localeProvider
+                                                                    .locale
+                                                                    .languageCode) ??
+                                                            'No Description',
                                                         style: const TextStyle(
+                                                          color: Colors.grey,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          fontSize: 16.0,
                                                         ),
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 5.0),
-                                                      Consumer<LocaleProvider>(
-                                                        builder: (context,
-                                                            localeProvider, _) {
-                                                          return Text(
-                                                            product.getDescriptionInLanguage(
-                                                                    localeProvider
-                                                                        .locale
-                                                                        .languageCode) ??
-                                                                'No Description',
-                                                            style:
-                                                                const TextStyle(
-                                                              color:
-                                                                  Colors.grey,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold,
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                      const SizedBox(
-                                                          height: 5.0),
-                                                      Container(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 35.0,
-                                                          vertical: 5.0,
-                                                        ),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20.0),
-                                                          color: const Color(
-                                                              0xFFF1F2F7),
-                                                        ),
-                                                        child: Text(
-                                                          '${product.price.toStringAsFixed(0)} UZS',
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 12.0,
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            color:
-                                                                Color.fromARGB(
-                                                                    255,
-                                                                    0,
-                                                                    0,
-                                                                    0),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                      );
+                                                    },
                                                   ),
-                                                ),
-                                              ],
+                                                  const SizedBox(height: 5.0),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 35.0,
+                                                      vertical: 5.0,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20.0),
+                                                      color: const Color(
+                                                          0xFFF1F2F7),
+                                                    ),
+                                                    child: Text(
+                                                      '${product.price.toStringAsFixed(0)} UZS',
+                                                      style: const TextStyle(
+                                                        fontSize: 12.0,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color: Color.fromARGB(
+                                                            255, 0, 0, 0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                    ),
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 50.0,
-                left: 25.0,
-                child: cartProvider.showQuantity() > 0
-                    ? GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacementNamed(context, '/cart');
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEC700),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 12.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.shopping_bag_outlined,
-                                  color: Colors.black),
-                              const SizedBox(width: 8.0),
-                              Text(
-                                '${cartProvider.showQuantity()}',
-                                style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            ],
-                          ),
+                            );
+                          }).toList(),
                         ),
-                      )
-                    : SizedBox(), // Render an empty SizedBox if quantity is 0
+                ),
               ),
             ],
           ),
-        ),
-      ),
-      drawer: Drawer(
-        width: MediaQuery.of(context).size.width * 0.85,
-        child: Profile(),
+          Positioned(
+            bottom: 50.0,
+            left: 25.0,
+            child: cartProvider.showQuantity() > 0
+                ? GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacementNamed(context, '/cart');
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEC700),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 12.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.shopping_bag_outlined,
+                              color: Colors.black),
+                          const SizedBox(width: 8.0),
+                          Text(
+                            '${cartProvider.showQuantity()}',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : const SizedBox(),
+          ),
+        ],
       ),
     );
   }
@@ -705,5 +687,28 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
         );
       }
     }
+  }
+}
+
+class _SliverCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _SliverCategoryHeaderDelegate({required this.child});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 50.0;
+
+  @override
+  double get minExtent => 50.0;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
+    return true;
   }
 }
