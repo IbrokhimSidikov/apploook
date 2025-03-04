@@ -697,6 +697,7 @@ class _CheckoutState extends State<Checkout> {
                                       horizontal: 10),
                                   child: TextField(
                                     focusNode: _carDetailsFocusNode,
+                                    autocorrect: false,
                                     decoration: InputDecoration(
                                       hintText: AppLocalizations.of(context)
                                           .carDetailsInputHint,

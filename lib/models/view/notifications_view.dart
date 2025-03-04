@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
+import 'package:http/http.dart' as http;
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -17,6 +18,8 @@ class NotificationsView extends StatefulWidget {
 class _NotificationsViewState extends State<NotificationsView> {
   List<Map<String, dynamic>> orders = [];
   bool isLoading = true;
+  String?
+      updatingOrderId; // Add this line to track which order is being updated
   static const int pageSize = 10;
   int currentPage = 0;
   bool _hasShownArrivedHint = false;
@@ -102,6 +105,52 @@ class _NotificationsViewState extends State<NotificationsView> {
             .compareTo(DateTime.parse(a['timestamp'])));
       isLoading = false;
     });
+  }
+
+  Future<void> updateOrderStatus(String orderId) async {
+    setState(() {
+      updatingOrderId = orderId;
+    });
+
+    final String url =
+        'https://app.sievesapp.com/v1/order/$orderId?updateStatus=1&isDelever=1';
+
+    final Map<String, dynamic> requestBody = {
+      "id": orderId,
+      "current_status_id": 31,
+      "is_sync": 0,
+    };
+
+    const String bearerToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZWFyZXIiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.fo1-6HkjCqoQ_m4cCO6laUgHHBBqktz0SAgmOi6axqQ";
+    const String xApiKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk4ODkiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.twqu6OB88osWslaoMr6UDH8RNuSX095LlEf0OVdDglY";
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $bearerToken',
+          'x-api': xApiKey,
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        print("Order status updated successfully!");
+      } else {
+        print("Failed to update order status: ${response.body}");
+      }
+    } catch (e) {
+      print("Error updating order status: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          updatingOrderId = null;
+        });
+      }
+    }
   }
 
   List<Map<String, dynamic>> get paginatedOrders {
@@ -228,7 +277,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      // You can implement the onTap functionality
+                                      updateOrderStatus(order['id'].toString());
                                     },
                                     child: Tooltip(
                                       message: AppLocalizations.of(context)
@@ -243,26 +292,40 @@ class _NotificationsViewState extends State<NotificationsView> {
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(
-                                              Icons.directions_car,
-                                              size: 18,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              AppLocalizations.of(context)
-                                                  .arrived,
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600,
+                                        child: updatingOrderId ==
+                                                order['id'].toString()
+                                            ? const SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(Colors.black),
+                                                ),
+                                              )
+                                            : Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  const Icon(
+                                                    Icons.directions_car,
+                                                    size: 18,
+                                                    color: Colors.black,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    AppLocalizations.of(context)
+                                                        .arrived,
+                                                    style: const TextStyle(
+                                                      color: Colors.black,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
-                                          ],
-                                        ),
                                       ),
                                     ),
                                   ),
