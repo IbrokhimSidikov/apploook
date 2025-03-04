@@ -70,7 +70,7 @@ class _CheckoutState extends State<Checkout> {
       ));
 
       // Set default value as a string
-      // await remoteConfig.setDefaults({'chat_id': '-1002074915184'});
+      // await remoteConfig.setDefaults({'chat_id': '-1002074915184'}); Loook Test Bot
 
       bool updated = await remoteConfig.fetchAndActivate();
       _isRemoteConfigInitialized = true;
@@ -1270,7 +1270,7 @@ class _CheckoutState extends State<Checkout> {
           // Add new order to the list
           savedOrders.add(jsonEncode(orderDetails));
 
-          // Keep only the last 50 orders to prevent memory issues
+          // Keep only the last 5 orders to prevent memory issues
           if (savedOrders.length > 5) {
             savedOrders = savedOrders.sublist(savedOrders.length - 5);
           }
@@ -1309,7 +1309,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),
