@@ -28,7 +28,7 @@ Future<void> main() async {
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
   // Initialize socket
-  SocketService().initSocket();
+  // SocketService().initSocket();
   // final fcmToken = await FirebaseMessaging.instance.getToken();
   // print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);

@@ -29,7 +29,7 @@ class _NotificationsViewState extends State<NotificationsView> {
   @override
   void initState() {
     super.initState();
-    _socketService.initSocket();
+    // _socketService.initSocket();
     _loadOrders();
     // Mark notifications as read when viewing
     Provider.of<NotificationProvider>(context, listen: false).markAllAsRead();
@@ -156,33 +156,33 @@ class _NotificationsViewState extends State<NotificationsView> {
     }
   }
 
-  void _handleArrival(String orderId) {
-    print('🚀 _handleArrival called with orderId: $orderId');
-    try {
-      final parsedOrderId = int.parse(orderId);
-      print('✅ Successfully parsed orderId to int: $parsedOrderId');
+  // void _handleArrival(String orderId) {
+  //   print('🚀 _handleArrival called with orderId: $orderId');
+  //   try {
+  //     final parsedOrderId = int.parse(orderId);
+  //     print('✅ Successfully parsed orderId to int: $parsedOrderId');
 
-      _socketService.notifyArrival(parsedOrderId);
-      print(
-          '📤 Notification sent to socket service for orderId: $parsedOrderId');
+  //     _socketService.notifyArrival(parsedOrderId);
+  //     print(
+  //         '📤 Notification sent to socket service for orderId: $parsedOrderId');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).arrivalNotificationSent),
-          backgroundColor: Colors.green,
-        ),
-      );
-      print('✨ SnackBar shown to user for orderId: $parsedOrderId');
-    } catch (e) {
-      print('❌ Error in _handleArrival: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(AppLocalizations.of(context).arrivalNotificationSent),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+  //     print('✨ SnackBar shown to user for orderId: $parsedOrderId');
+  //   } catch (e) {
+  //     print('❌ Error in _handleArrival: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
 
   List<Map<String, dynamic>> get paginatedOrders {
     final startIndex = currentPage * pageSize;
@@ -308,7 +308,6 @@ class _NotificationsViewState extends State<NotificationsView> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      // _handleArrival(order['id'].toString());
                                       updateOrderStatus(order['id'].toString());
                                     },
                                     child: Tooltip(
@@ -327,11 +326,27 @@ class _NotificationsViewState extends State<NotificationsView> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(
-                                              Icons.directions_car,
-                                              size: 18,
-                                              color: Colors.black,
-                                            ),
+                                            if (updatingOrderId ==
+                                                order['id'].toString())
+                                              const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(
+                                                    Colors.black,
+                                                  ),
+                                                ),
+                                              )
+                                            else
+                                              const Icon(
+                                                Icons.directions_car,
+                                                size: 18,
+                                                color: Colors.black,
+                                              ),
                                             const SizedBox(width: 6),
                                             Text(
                                               AppLocalizations.of(context)

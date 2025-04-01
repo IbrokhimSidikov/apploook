@@ -89,6 +89,7 @@ class AppLocalizations {
       'arrived': 'Arrived',
       'totalAmount': 'Total Amount',
       'currency': 'UZS',
+      'updating': 'Updating',
       // Map Screen
       'confirmAddress': 'Do you confirm your address?',
       'confirm': 'Confirm',
@@ -187,6 +188,7 @@ class AppLocalizations {
       'arrived': 'Yetib keldim',
       'totalAmount': 'Umumiy summa',
       'currency': 'UZS',
+      'updating': 'Yopish',
       // Map Screen
       'confirmAddress': 'Manzilingizni Tasdiqlaysizmi?',
       'confirm': 'Tasdiqlash',
@@ -354,4 +356,5 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['arrivedButtonTooltip']!;
   String get arrivalNotificationSent =>
       _localizedValues[locale.languageCode]!['arrivalNotificationSent']!;
+  String get updating => _localizedValues[locale.languageCode]!['updating']!;
 }
