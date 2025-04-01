@@ -1310,7 +1310,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),

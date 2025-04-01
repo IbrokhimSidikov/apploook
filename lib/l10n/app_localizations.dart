@@ -83,6 +83,7 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Notifications',
       'notificationsPlaceholder': 'Notifications will appear here',
+      'arrivalNotificationSent': 'Arrival notification sent',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
@@ -180,6 +181,7 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
+      'arrivalNotificationSent': 'Arrival notification sent',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
@@ -350,4 +352,6 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['arrivedButtonHint']!;
   String get arrivedButtonTooltip =>
       _localizedValues[locale.languageCode]!['arrivedButtonTooltip']!;
+  String get arrivalNotificationSent =>
+      _localizedValues[locale.languageCode]!['arrivalNotificationSent']!;
 }

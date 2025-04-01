@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:apploook/services/socket_service.dart';
 
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
@@ -26,6 +27,8 @@ Future<void> main() async {
   await Firebase.initializeApp();
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  // Initialize socket
+  SocketService().initSocket();
   // final fcmToken = await FirebaseMessaging.instance.getToken();
   // print("FCMToken $fcmToken");
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);

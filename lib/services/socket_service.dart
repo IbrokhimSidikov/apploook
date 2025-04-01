@@ -1,50 +1,53 @@
-// import 'package:web_socket_channel/web_socket_channel.dart';
-// import 'dart:convert';
-// import 'package:flutter/foundation.dart';
-// import 'package:apploook/models/order_status.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
-// class SocketService {
-//   WebSocketChannel? _channel;
-//   final ValueNotifier<Order?> orderUpdate = ValueNotifier(null);
-//   String? _trackingOrderId;
+class SocketService {
+  late IO.Socket socket;
 
-//   void initSocket(int branchId, String orderId) {
-//     _trackingOrderId = orderId;
-//     final wsUrl = Uri.parse('wss://socket.sievesapp.com/orders/$branchId');
-//     _channel = WebSocketChannel.connect(wsUrl);
+  void initSocket() {
+    print('🔌 Initializing socket connection...');
+    socket = IO.io('https://testsocket.sievesapp.com', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': true,
+      'reconnection': true,
+      'reconnectionDelay': 1000,
+      'reconnectionDelayMax': 5000,
+    });
 
-//     _channel?.stream.listen(
-//       (message) {
-//         final data = json.decode(message);
+    socket.onConnect((_) {
+      print('✅ Socket connected successfully');
+      print('🔗 Socket ID: ${socket.id}');
+    });
 
-//         // Only process updates for the specific order we're tracking
-//         if (data['orderId'] == _trackingOrderId) {
-//           try {
-//             final order = Order.fromJson(data);
-//             orderUpdate.value = order;
-//           } catch (e) {
-//             print('Error parsing order update: $e');
-//           }
-//         }
-//       },
-//       onError: (error) {
-//         print('WebSocket Error: $error');
-//       },
-//       onDone: () {
-//         print('WebSocket Connection Closed');
-//       },
-//     );
-//   }
+    socket.onDisconnect((_) {
+      print('❌ Socket disconnected');
+    });
 
-//   void sendMessage(String message) {
-//     if (_channel != null) {
-//       _channel!.sink.add(message);
-//     }
-//   }
+    socket.onError((error) {
+      print('⚠️ Socket error: $error');
+    });
 
-//   void dispose() {
-//     _channel?.sink.close();
-//     _channel = null;
-//     _trackingOrderId = null;
-//   }
-// }
+    socket.onReconnect((_) {
+      print('🔄 Socket reconnected');
+    });
+
+    socket.onReconnectAttempt((attempt) {
+      print('⏳ Reconnection attempt #$attempt');
+    });
+
+    print('🚀 Attempting socket connection...');
+    socket.connect();
+  }
+
+  void notifyArrival(int orderId) {
+    print('📤 Emitting drive-through:customer-arrived event');
+    print('📦 Payload: {"orderId": $orderId}');
+
+    socket.emit('drive-through:customer-arrived', {'orderId': orderId});
+
+    if (socket.connected) {
+      print('✅ Event emitted successfully (socket is connected)');
+    } else {
+      print('⚠️ Warning: Socket is not connected while trying to emit event');
+    }
+  }
+}

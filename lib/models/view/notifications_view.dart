@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:apploook/services/socket_service.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -23,10 +24,12 @@ class _NotificationsViewState extends State<NotificationsView> {
   static const int pageSize = 10;
   int currentPage = 0;
   bool _hasShownArrivedHint = false;
+  final SocketService _socketService = SocketService();
 
   @override
   void initState() {
     super.initState();
+    _socketService.initSocket();
     _loadOrders();
     // Mark notifications as read when viewing
     Provider.of<NotificationProvider>(context, listen: false).markAllAsRead();
@@ -113,11 +116,11 @@ class _NotificationsViewState extends State<NotificationsView> {
     });
 
     final String url =
-        'https://app.sievesapp.com/v1/order/$orderId?updateStatus=1&isDelever=1';
+        'https://app.sievesapp.com/v1/order/$orderId?isDelever=1';
 
     final Map<String, dynamic> requestBody = {
       "id": orderId,
-      "current_status_id": 31,
+      "customer_arrived": 1,
       "is_sync": 0,
     };
 
@@ -150,6 +153,34 @@ class _NotificationsViewState extends State<NotificationsView> {
           updatingOrderId = null;
         });
       }
+    }
+  }
+
+  void _handleArrival(String orderId) {
+    print('🚀 _handleArrival called with orderId: $orderId');
+    try {
+      final parsedOrderId = int.parse(orderId);
+      print('✅ Successfully parsed orderId to int: $parsedOrderId');
+
+      _socketService.notifyArrival(parsedOrderId);
+      print(
+          '📤 Notification sent to socket service for orderId: $parsedOrderId');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).arrivalNotificationSent),
+          backgroundColor: Colors.green,
+        ),
+      );
+      print('✨ SnackBar shown to user for orderId: $parsedOrderId');
+    } catch (e) {
+      print('❌ Error in _handleArrival: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -277,6 +308,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
+                                      // _handleArrival(order['id'].toString());
                                       updateOrderStatus(order['id'].toString());
                                     },
                                     child: Tooltip(
@@ -292,40 +324,26 @@ class _NotificationsViewState extends State<NotificationsView> {
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
-                                        child: updatingOrderId ==
-                                                order['id'].toString()
-                                            ? const SizedBox(
-                                                width: 20,
-                                                height: 20,
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                          Color>(Colors.black),
-                                                ),
-                                              )
-                                            : Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  const Icon(
-                                                    Icons.directions_car,
-                                                    size: 18,
-                                                    color: Colors.black,
-                                                  ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    AppLocalizations.of(context)
-                                                        .arrived,
-                                                    style: const TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ],
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(
+                                              Icons.directions_car,
+                                              size: 18,
+                                              color: Colors.black,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              AppLocalizations.of(context)
+                                                  .arrived,
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
                                               ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -435,5 +453,11 @@ class _NotificationsViewState extends State<NotificationsView> {
                   ),
                 ),
     );
+  }
+
+  @override
+  void dispose() {
+    _socketService.socket.dispose();
+    super.dispose();
   }
 }
