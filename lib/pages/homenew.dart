@@ -221,7 +221,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Color(0xFFF1F2F7),
+      backgroundColor: Colors.white,
       drawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
         child: Profile(),
