@@ -1,4 +1,5 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
@@ -246,41 +247,80 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
                 actions: [
-                  GestureDetector(
-                    onTap: () async {
-                      final currentLocale =
-                          context.read<LocaleProvider>().locale.languageCode;
-                      final newLocale = currentLocale == 'eng' ? 'uz' : 'eng';
-
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await prefs.setString('selected_language', newLocale);
-                      if (!mounted) return;
-                      context
-                          .read<LocaleProvider>()
-                          .setLocale(Locale(newLocale));
-                    },
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 25),
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Container(
-                      margin: EdgeInsets.only(right: 10),
+                      margin: const EdgeInsets.only(right: 10),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        context
-                            .watch<LocaleProvider>()
-                            .locale
-                            .languageCode
-                            .toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context
+                                .watch<LocaleProvider>()
+                                .locale
+                                .languageCode
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down,
+                              color: Colors.black),
+                        ],
                       ),
                     ),
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'uz',
+                        child: Row(
+                          children: const [
+                            Text('🇺🇿', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 8),
+                            Text('O\'zbekcha'),
+                          ],
+                        ),
+                      ),
+                      // PopupMenuItem(
+                      //   value: 'ru',
+                      //   child: Row(
+                      //     children: const [
+                      //       Text('🇷🇺', style: TextStyle(fontSize: 20)),
+                      //       SizedBox(width: 8),
+                      //       Text('Русский'),
+                      //     ],
+                      //   ),
+                      // ),
+                      PopupMenuItem(
+                        value: 'eng',
+                        child: Row(
+                          children: const [
+                            Text('🇬🇧', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 8),
+                            Text('English'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (String newLocale) async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('selected_language', newLocale);
+                      if (!mounted) return;
+                      context
+                          .read<LocaleProvider>()
+                          .setLocale(Locale(newLocale));
+                    },
                   ),
                   Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
@@ -339,7 +379,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'WHAT`S NEW',
+                            AppLocalizations.of(context).whatsNew,
                             style: TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18),
                           ),
@@ -576,7 +616,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                           0xFFF1F2F7),
                                                     ),
                                                     child: Text(
-                                                      '${product.price.toStringAsFixed(0)} UZS',
+                                                      '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
                                                       style: const TextStyle(
                                                         fontSize: 12.0,
                                                         fontWeight:
