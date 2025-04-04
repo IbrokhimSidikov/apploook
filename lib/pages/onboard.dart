@@ -88,7 +88,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
 
       // Navigate to the next page
-      Navigator.pushReplacementNamed(context, '/homeNew');
+      Navigator.pushNamed(context, '/homeNew');
     } else {
       // Show a message if no language is selected
       ScaffoldMessenger.of(context).showSnackBar(

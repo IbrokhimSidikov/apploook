@@ -327,15 +327,14 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       return GestureDetector(
                         onTap: () async {
                           await notificationProvider.markAllAsRead();
-                          Navigator.pushReplacementNamed(
-                              context, '/notificationsView');
+                          Navigator.pushNamed(context, '/notificationsView');
                         },
                         child: Stack(
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(15.0),
                               child: Icon(
-                                Icons.notifications,
+                                Icons.shopping_bag_outlined,
                                 size: 24.0,
                                 color: Colors.black,
                               ),
@@ -369,6 +368,15 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       );
                     },
                   ),
+                  // const SizedBox(width: 10),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: Colors.black87),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notification');
+                    },
+                  ),
+                  const SizedBox(width: 10),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
@@ -649,7 +657,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             child: cartProvider.showQuantity() > 0
                 ? GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/cart');
+                      Navigator.pushNamed(context, '/cart');
                     },
                     child: Container(
                       decoration: BoxDecoration(

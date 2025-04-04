@@ -5,6 +5,7 @@ import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/widget/custom_loader.dart';
@@ -120,7 +121,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: InitialScreen(),
+          initialRoute: '/homeNew',
           routes: {
             '/homeNew': (context) => HomeNew(),
             '/signin': (context) => SignIn(),
@@ -128,6 +129,7 @@ class MyApp extends StatelessWidget {
             '/checkout': (context) => Checkout(),
             '/onboard': (context) => Onboard(),
             '/notificationsView': (context) => NotificationsView(),
+            '/notification': (context) => NotificationPage(),
           },
         );
       },
@@ -166,7 +168,7 @@ class _InitialScreenState extends State<InitialScreen> {
           );
         } else {
           Future.microtask(() {
-            Navigator.pushReplacementNamed(context, snapshot.data!);
+            Navigator.pushNamed(context, snapshot.data!);
           });
           return Scaffold();
         }

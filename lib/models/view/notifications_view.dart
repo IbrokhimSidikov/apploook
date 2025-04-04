@@ -199,7 +199,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         backgroundColor: const Color(0xFFF1F2F7),
         elevation: 0,
         title: Text(
-          AppLocalizations.of(context).notifications,
+          AppLocalizations.of(context).orderHistory,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -209,7 +209,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pushReplacementNamed(context, '/homeNew');
+            Navigator.pushNamed(context, '/homeNew');
           },
           child: SizedBox(
             height: 25,

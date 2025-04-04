@@ -10,13 +10,14 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Payload: ${message.data}');
 }
 
-void handleMessage(RemoteMessage? message){
-  if(message == null) return;
-  
+void handleMessage(RemoteMessage? message) {
+  if (message == null) return;
+
   navigateToNotificationScreen();
 }
+
 void navigateToNotificationScreen() {
-  navigatorKey.currentState?.pushReplacementNamed('/notificationsView');
+  navigatorKey.currentState?.pushNamed('/notificationsView');
 }
 
 class FirebaseApi {
@@ -45,7 +46,8 @@ class FirebaseApi {
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         navigateToNotificationScreen();
-      },);
+      },
+    );
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Got a message whilst in the foreground!');
@@ -68,8 +70,8 @@ class FirebaseApi {
   void showNotification(RemoteMessage message) {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'default_channel_id', 
-      'Default Channel', 
+      'default_channel_id',
+      'Default Channel',
       channelDescription: 'This is the default notification channel',
       importance: Importance.max,
       priority: Priority.high,

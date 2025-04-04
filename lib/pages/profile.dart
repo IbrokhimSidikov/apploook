@@ -207,7 +207,7 @@ class _ProfileState extends State<Profile> {
                     try {
                       await _clearUserData();
                       cartProvider.clearCart();
-                      Navigator.pushReplacementNamed(context, '/onboard');
+                      Navigator.pushNamed(context, '/onboard');
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Error logging out: $e')),
@@ -253,7 +253,7 @@ class _ProfileState extends State<Profile> {
                     if (confirmDelete == true) {
                       await _clearUserData();
                       cartProvider.clearCart();
-                      Navigator.pushReplacementNamed(context, '/onboard');
+                      Navigator.pushNamed(context, '/onboard');
                     }
                   },
                   child: Text(

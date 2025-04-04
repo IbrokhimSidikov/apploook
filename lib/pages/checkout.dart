@@ -1025,8 +1025,7 @@ class _CheckoutState extends State<Checkout> {
                                 child: TextButton(
                                   onPressed: () {
                                     Navigator.pop(context); // Close the dialog
-                                    Navigator.pushReplacementNamed(
-                                        context, '/homeNew');
+                                    Navigator.pushNamed(context, '/homeNew');
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor:

@@ -18,6 +18,7 @@ class AppLocalizations {
       'language': 'Language',
       'notification': 'Notification will appear here',
       'noNotifications': 'No notifications yet',
+      'noOrdersYet': 'No orders yet',
       // Profile page
       'logout': 'Log out',
       'deleteAccount': 'Delete Account',
@@ -90,6 +91,7 @@ class AppLocalizations {
       'totalAmount': 'Total Amount',
       'currency': 'UZS',
       'updating': 'Updating',
+      'orderHistory': 'Order History',
       // Map Screen
       'confirmAddress': 'Do you confirm your address?',
       'confirm': 'Confirm',
@@ -189,6 +191,7 @@ class AppLocalizations {
       'totalAmount': 'Umumiy summa',
       'currency': 'UZS',
       'updating': 'Yopish',
+      'orderHistory': 'Buyurtma tarihi',
       // Map Screen
       'confirmAddress': 'Manzilingizni Tasdiqlaysizmi?',
       'confirm': 'Tasdiqlash',
@@ -455,4 +458,6 @@ class AppLocalizations {
   String get arrivalNotificationSent =>
       _localizedValues[locale.languageCode]!['arrivalNotificationSent']!;
   String get updating => _localizedValues[locale.languageCode]!['updating']!;
+  String get orderHistory =>
+      _localizedValues[locale.languageCode]!['orderHistory']!;
 }
