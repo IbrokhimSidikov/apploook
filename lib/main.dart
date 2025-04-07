@@ -8,6 +8,7 @@ import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
+import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -28,11 +29,10 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
 
-  FirebaseApi().initNotifications();
+  NotificationService().initialize();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
   // Initialize socket
   // SocketService().initSocket();
-  final fcmToken = await FirebaseMessaging.instance.getToken();
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
   NotificationSettings settings =
       await FirebaseMessaging.instance.requestPermission();
