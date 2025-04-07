@@ -18,6 +18,7 @@ class AppLocalizations {
       'language': 'Language',
       'notification': 'Notification will appear here',
       'noNotifications': 'No notifications yet',
+      'noOrdersYet': 'No orders yet',
       // Profile page
       'logout': 'Log out',
       'deleteAccount': 'Delete Account',
@@ -25,6 +26,8 @@ class AppLocalizations {
       'confirmDialog': 'Are you sure you want to delete your account?',
       'cancel': 'Cancel',
       'delete': 'Delete',
+      'logoutConfirmation': 'Are you sure you want to log out?',
+      'loggingOut': 'Logging out...',
       // Details page
       'totalPrice': 'Total Price',
       'addToCart': 'Add to cart',
@@ -83,11 +86,15 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Notifications',
       'notificationsPlaceholder': 'Notifications will appear here',
+      'arrivalNotificationSent': 'Arrival notification sent',
+      'clearAll': 'Clear All',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
       'totalAmount': 'Total Amount',
       'currency': 'UZS',
+      'updating': 'Updating',
+      'orderHistory': 'Order History',
       // Map Screen
       'confirmAddress': 'Do you confirm your address?',
       'confirm': 'Confirm',
@@ -121,6 +128,8 @@ class AppLocalizations {
           'Hisobingizni o\'chirishni xohlayotganingizga aminmisiz?',
       'cancel': 'Bekor qilish',
       'delete': 'O\'chirish',
+      'logoutConfirmation': 'Ilovadan chiqmoqchimisiz?',
+      'loggingOut': 'Chiqish...',
       // Details page
       'totalPrice': 'Umumiy',
       'addToCart': 'Qo\'shish',
@@ -180,11 +189,15 @@ class AppLocalizations {
       // Notifications
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
+      'arrivalNotificationSent': 'Arrival notification sent',
+      'clearAll': 'Barchasini o\'chirish',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
       'totalAmount': 'Umumiy summa',
       'currency': 'UZS',
+      'updating': 'Yopish',
+      'orderHistory': 'Buyurtma tarihi',
       // Map Screen
       'confirmAddress': 'Manzilingizni Tasdiqlaysizmi?',
       'confirm': 'Tasdiqlash',
@@ -201,6 +214,104 @@ class AppLocalizations {
           'Avtomobil to\'xtash joyiga yetib kelganingizda, restorantni xabardor qilish uchun bosing',
       'arrivedButtonTooltip': 'Restoranga kelganingizni bildiring!',
     }
+    // 'ru': {
+    //   'whatsNew': 'Что нового',
+    //   'hello': 'Привет',
+    //   'welcome': 'Добро пожаловать',
+    //   'settings': 'Настройки',
+    //   'language': 'Язык',
+    //   'notification': 'Уведомления',
+    //   'noNotifications': 'Нет уведомлений',
+
+    //   // Profile page
+    //   'logout': 'Выйти',
+    //   'deleteAccount': 'Удалить аккаунт',
+    //   'confirmDelete': 'Вы уверены, что хотите удалить свой аккаунт?',
+    //   'confirmDialog': 'Вы уверены, что хотите удалить свой аккаунт?',
+    //   'cancel': 'Bekor qilish',
+    //   'delete': 'Удалить',
+    //   // Details page
+    //   'totalPrice': 'Итоговая стоимость',
+    //   'addToCart': 'Добавить в корзину',
+    //   // Cart page
+    //   'cart': 'Корзина',
+    //   'items': 'предметы',
+    //   'proceedToCheckout': 'Перейти к оплате',
+    //   // Sign-in page
+    //   'signIn': 'Войти',
+    //   'signInToYourProfile': 'Войти в профиль',
+    //   'underTitle': 'Для заказа войдите в профиль',
+    //   'phoneNumberButton': 'Введите свой номер',
+    //   'privacyPolicy': 'Maxfiylik siyosati',
+    //   'accept': 'Принять',
+    //   'decline': 'Отклонить',
+    //   'privacyPolicyContent':
+    //       'Kirish\n\nBizning maxfiylik siyosatimiz Loook-da qanday ma\'lumotlarni to\'plashimiz, Loook ulardan qanday foydalanishi va sizda qanday tanlovlar borligini tushunishga yordam beradi.\nLoook Loook ilovasini bepul ilova sifatida yaratdi. Ushbu XIZMAT Loook tomonidan bepul taqdim etiladi va mavjud bo\'lganicha foydalanish uchun mo\'ljallangan.\nAgar siz bizning Xizmatimizdan foydalanishni tanlasangiz, u holda siz ushbu siyosatga muvofiq ma\'lumotlarni to\'plash va ulardan foydalanishga rozilik bildirasiz.\nBiz to\'playdigan shaxsiy ma\'lumotlar Xizmatni taqdim etish va takomillashtirish uchun ishlatiladi.\nBiz sizning ma\'lumotlaringizni ushbu Maxfiylik siyosatida tavsiflangan holatlardan tashqari hech kim bilan almashmaymiz yoki baham ko\'rmaymiz.\n\n\nAloqa ma\'lumotlari:\nEmail: loook.uz.tech@gmail.com',
+    //   // Authorization page
+    //   'authorization': 'Авторизация',
+    //   'authorizationTitle': 'Войти в приложение\nвведите свои данные',
+    //   'firstNameHintText': 'Введите свое имя',
+    //   'numberHintText': 'Ваш номер',
+    //   'continueButton': 'Продолжить',
+    //   'phoneNumberTranslation': 'Номер телефона',
+    //   'nameTranslation': 'Имя',
+    //   // Checkout page
+    //   'checkout': 'Оформление заказа',
+    //   'chooseOrderType': 'Выберите тип заказа',
+    //   'delivery': 'Доставка',
+    //   'selfPickup': 'Самовывоз',
+    //   'selfPickupTitle': 'Выберите филиал для самовывоза',
+    //   'yourDeliveryLocation': 'Ваш адрес доставки!',
+    //   'chooseYourLocation': 'Выберите местоположение -->',
+    //   'chooseBranchToPick': 'Выберите филиал для самовывоза',
+    //   'selectBranch': 'Филиал выбор',
+    //   'orderPrice': 'Стоимость заказа',
+    //   'deliveryPrice': 'Стоимость доставки',
+    //   'unknown': 'Noma\'lum',
+    //   'paymentMethod': 'Оплата метод',
+    //   'cash': 'Наличные',
+    //   'card': 'Карта',
+    //   'additionalNumber': 'Дополнительный номер',
+    //   'comments': 'Комментарии',
+    //   'order': 'Заказ',
+    //   'orderSuccess': 'Заказ принят',
+    //   'orderSuccessSubTitle': 'Ваш заказ принят!',
+    //   'carhopService': 'LOOOK Carhop филиалыни танланг:',
+    //   'carhopServiceBranchInfo':
+    //       'Avtomobilizingizni quyidagi hududga qo\'ying:',
+    //   'carDetails': 'Avtomobilingiz tafsilotlari:',
+    //   'selectRegion': 'Shaxar tanlang',
+    //   'openingHours': 'Ishlash vaqti',
+    //   'viewInMap': 'Xaritadan ko\'rish',
+    //   'carDetailsHint': 'e.g: 01|A712AA Qora Chevrolet Gentra',
+    //   'carDetailsInputHint':
+    //       'Iltimos - Avtomobil raqami, rangi, rusumini kiriting',
+    //   // Notifications
+    //   'notifications': 'Xabarnoma',
+    //   'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
+    //   'arrivalNotificationSent': 'Arrival notification sent',
+    //   // Notifications view
+    //   'orderNumber': 'Заказ #',
+    //   'arrived': 'Прибыл',
+    //   'totalAmount': 'Общая сумма',
+    //   'currency': 'UZS',
+    //   'updating': 'Обновление',
+    //   // Map Screen
+    //   'confirmAddress': 'Вы уверены, что хотите подтвердить свой адрес?',
+    //   'confirm': 'Подтвердить',
+    //   'save': 'Сохранить',
+    //   'yourLocation': 'Ваш адрес',
+    //   'selectedAddress': 'Выбранный адрес',
+    //   // Verification screen
+    //   'verification': 'Подтверждение',
+    //   'verificationTitle':
+    //       'Введите 4-значный код\nдля подтверждения номера телефона',
+    //   'invalidCodeMessage': 'Неверный код',
+    //   'validCodeMessage': 'Подтверждено',
+    //   'arrivedButtonHint':
+    //       'Нажмите, чтобы уведомить ресторан, когда вы припаркуетесь на стоянке',
+    //   'arrivedButtonTooltip': 'Сообщить ресторану о вашем прибытии!',
+    // }
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
   String get hello => _localizedValues[locale.languageCode]!['hello']!;
@@ -222,6 +333,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['confirmDialog']!;
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
   String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  String get logoutConfirmation =>
+      _localizedValues[locale.languageCode]!['logoutConfirmation']!;
+  String get loggingOut =>
+      _localizedValues[locale.languageCode]!['loggingOut']!;
 
   // Details page
   String get totalPrice =>
@@ -350,4 +465,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['arrivedButtonHint']!;
   String get arrivedButtonTooltip =>
       _localizedValues[locale.languageCode]!['arrivedButtonTooltip']!;
+  String get arrivalNotificationSent =>
+      _localizedValues[locale.languageCode]!['arrivalNotificationSent']!;
+  String get updating => _localizedValues[locale.languageCode]!['updating']!;
+  String get orderHistory =>
+      _localizedValues[locale.languageCode]!['orderHistory']!;
+  String get clearAll => _localizedValues[locale.languageCode]!['clearAll']!;
 }

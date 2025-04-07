@@ -227,7 +227,7 @@ class _CartState extends State<Cart> {
                     onPressed: price > 0
                         ? () async {
                             bool isSignedIn = await _isUserSignedIn();
-                            Navigator.pushReplacementNamed(
+                            Navigator.pushNamed(
                               context,
                               isSignedIn ? '/checkout' : '/signin',
                             );

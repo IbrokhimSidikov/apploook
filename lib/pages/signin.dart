@@ -101,7 +101,7 @@ class _SignInState extends State<SignIn> {
       centerTitle: true,
       leading: GestureDetector(
         onTap: () {
-          Navigator.pushReplacementNamed(context, '/homeNew');
+          Navigator.pushNamed(context, '/homeNew');
         },
         child: Container(
           margin: EdgeInsets.all(10),

@@ -5,6 +5,7 @@ import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/widget/custom_loader.dart';
@@ -15,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:apploook/services/socket_service.dart';
 
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
@@ -23,12 +25,18 @@ import 'providers/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  // final fcmToken = await FirebaseMessaging.instance.getToken();
-  // print("FCMToken $fcmToken");
+  // Initialize socket
+  // SocketService().initSocket();
+  final fcmToken = await FirebaseMessaging.instance.getToken();
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  NotificationSettings settings =
+      await FirebaseMessaging.instance.requestPermission();
+  print('User granted permission: ${settings.authorizationStatus}');
 
   runApp(MyLoaderApp());
 }
@@ -117,7 +125,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          home: InitialScreen(),
+          initialRoute: '/homeNew',
           routes: {
             '/homeNew': (context) => HomeNew(),
             '/signin': (context) => SignIn(),
@@ -125,6 +133,7 @@ class MyApp extends StatelessWidget {
             '/checkout': (context) => Checkout(),
             '/onboard': (context) => Onboard(),
             '/notificationsView': (context) => NotificationsView(),
+            '/notification': (context) => NotificationPage(),
           },
         );
       },
@@ -163,7 +172,7 @@ class _InitialScreenState extends State<InitialScreen> {
           );
         } else {
           Future.microtask(() {
-            Navigator.pushReplacementNamed(context, snapshot.data!);
+            Navigator.pushNamed(context, snapshot.data!);
           });
           return Scaffold();
         }

@@ -10,13 +10,14 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Payload: ${message.data}');
 }
 
-void handleMessage(RemoteMessage? message){
-  if(message == null) return;
-  
+void handleMessage(RemoteMessage? message) {
+  if (message == null) return;
+
   navigateToNotificationScreen();
 }
+
 void navigateToNotificationScreen() {
-  navigatorKey.currentState?.pushReplacementNamed('/notificationsView');
+  navigatorKey.currentState?.pushNamed('/notificationsView');
 }
 
 class FirebaseApi {
@@ -27,7 +28,9 @@ class FirebaseApi {
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission();
     final fCMToken = await _firebaseMessaging.getToken();
-    print('Token: ${fCMToken}');
+    String? token = await FirebaseMessaging.instance.getAPNSToken();
+    print('APNSToken: $token');
+    print('FMC Token: ${fCMToken}');
 
     FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
@@ -39,13 +42,29 @@ class FirebaseApi {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     const InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
     await _flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         navigateToNotificationScreen();
-      },);
+      },
+    );
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Got a message whilst in the foreground!');
@@ -68,8 +87,8 @@ class FirebaseApi {
   void showNotification(RemoteMessage message) {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'default_channel_id', 
-      'Default Channel', 
+      'default_channel_id',
+      'Default Channel',
       channelDescription: 'This is the default notification channel',
       importance: Importance.max,
       priority: Priority.high,

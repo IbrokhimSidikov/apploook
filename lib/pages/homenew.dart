@@ -1,4 +1,5 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
@@ -221,10 +222,10 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: Color(0xFFF1F2F7),
+      backgroundColor: Colors.white,
       drawer: Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
-        child: Profile(),
+        child: const Profile(),
       ),
       body: Stack(
         children: [
@@ -235,7 +236,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                 expandedHeight: 270,
                 floating: false,
                 pinned: true,
-                backgroundColor: Color(0xFFF1F2F7),
+                backgroundColor: const Color(0xFFF1F2F7),
                 leading: GestureDetector(
                   onTap: () {
                     _scaffoldKey.currentState!.openDrawer();
@@ -246,56 +247,94 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
                 actions: [
-                  GestureDetector(
-                    onTap: () async {
-                      final currentLocale =
-                          context.read<LocaleProvider>().locale.languageCode;
-                      final newLocale = currentLocale == 'eng' ? 'uz' : 'eng';
-
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await prefs.setString('selected_language', newLocale);
-                      if (!mounted) return;
-                      context
-                          .read<LocaleProvider>()
-                          .setLocale(Locale(newLocale));
-                    },
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 25),
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     child: Container(
-                      margin: EdgeInsets.only(right: 10),
+                      margin: const EdgeInsets.only(right: 10),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        context
-                            .watch<LocaleProvider>()
-                            .locale
-                            .languageCode
-                            .toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            context
+                                .watch<LocaleProvider>()
+                                .locale
+                                .languageCode
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_drop_down,
+                              color: Colors.black),
+                        ],
                       ),
                     ),
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'uz',
+                        child: Row(
+                          children: [
+                            Text('🇺🇿', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 8),
+                            Text('O\'zbekcha'),
+                          ],
+                        ),
+                      ),
+                      // PopupMenuItem(
+                      //   value: 'ru',
+                      //   child: Row(
+                      //     children: const [
+                      //       Text('🇷🇺', style: TextStyle(fontSize: 20)),
+                      //       SizedBox(width: 8),
+                      //       Text('Русский'),
+                      //     ],
+                      //   ),
+                      // ),
+                      const PopupMenuItem(
+                        value: 'eng',
+                        child: Row(
+                          children: [
+                            Text('🇬🇧', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 8),
+                            Text('English'),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onSelected: (String newLocale) async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString('selected_language', newLocale);
+                      if (!mounted) return;
+                      context
+                          .read<LocaleProvider>()
+                          .setLocale(Locale(newLocale));
+                    },
                   ),
                   Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
                       return GestureDetector(
                         onTap: () async {
                           await notificationProvider.markAllAsRead();
-                          Navigator.pushReplacementNamed(
-                              context, '/notificationsView');
+                          Navigator.pushNamed(context, '/notificationsView');
                         },
                         child: Stack(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(15.0),
+                            const Padding(
+                              padding: EdgeInsets.all(15.0),
                               child: Icon(
-                                Icons.notifications,
+                                Icons.shopping_bag_outlined,
                                 size: 24.0,
                                 color: Colors.black,
                               ),
@@ -305,18 +344,18 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                 right: 10,
                                 top: 10,
                                 child: Container(
-                                  padding: EdgeInsets.all(4),
+                                  padding: const EdgeInsets.all(4),
                                   decoration: BoxDecoration(
                                     color: Colors.red,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  constraints: BoxConstraints(
+                                  constraints: const BoxConstraints(
                                     minWidth: 16,
                                     minHeight: 16,
                                   ),
                                   child: Text(
                                     '${notificationProvider.unreadCount}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 10,
                                     ),
@@ -329,29 +368,38 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       );
                     },
                   ),
+                  // const SizedBox(width: 10),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: Colors.black87),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notification');
+                    },
+                  ),
+                  const SizedBox(width: 10),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      SizedBox(height: 90),
+                      const SizedBox(height: 110),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            'WHAT`S NEW',
-                            style: TextStyle(
+                            AppLocalizations.of(context).whatsNew,
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 18),
                           ),
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       // Carousel Slider Banner
                       CarouselSlider(
                         options: CarouselOptions(
                           height: 160.0,
                           autoPlay: true,
-                          autoPlayInterval: Duration(seconds: 3),
+                          autoPlayInterval: const Duration(seconds: 3),
                           enlargeCenterPage: true,
                           enableInfiniteScroll: true,
                         ),
@@ -360,7 +408,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                             builder: (BuildContext context) {
                               return Container(
                                 width: MediaQuery.of(context).size.width,
-                                margin: EdgeInsets.symmetric(horizontal: 0.0),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 0.0),
                                 decoration: BoxDecoration(
                                   color: banner.boxColor.withOpacity(0.0),
                                   borderRadius: BorderRadius.circular(16.0),
@@ -424,8 +473,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                         .resolveWith<Color>(
                                       (states) {
                                         return category.id == value
-                                            ? Color(0xFF000000)
-                                            : Color(0xFFB0B0B0);
+                                            ? const Color(0xFF000000)
+                                            : const Color(0xFFB0B0B0);
                                       },
                                     ),
                                     textStyle: MaterialStateProperty
@@ -459,9 +508,9 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               // Products list
               SliverToBoxAdapter(
                 child: Container(
-                  decoration: BoxDecoration(color: Colors.white),
+                  decoration: const BoxDecoration(color: Colors.white),
                   child: allProducts.isEmpty
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 450,
                           child: Center(
                             child: CircularProgressIndicator(),
@@ -480,7 +529,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                 controller:
                                     _categoryScrollControllers[category.id],
                                 shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
+                                physics: const NeverScrollableScrollPhysics(),
                                 itemCount: productsInCategory.length,
                                 itemBuilder: (context, productIndex) {
                                   Product product =
@@ -576,7 +625,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                           0xFFF1F2F7),
                                                     ),
                                                     child: Text(
-                                                      '${product.price.toStringAsFixed(0)} UZS',
+                                                      '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
                                                       style: const TextStyle(
                                                         fontSize: 12.0,
                                                         fontWeight:
@@ -609,7 +658,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             child: cartProvider.showQuantity() > 0
                 ? GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacementNamed(context, '/cart');
+                      Navigator.pushNamed(context, '/cart');
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -667,7 +716,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
         Scrollable.ensureVisible(
           controller.position.context.storageContext,
           alignment: 0.0,
-          duration: Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 300),
         );
       }
     }
@@ -682,7 +731,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       if (index != -1) {
         _scrollController.animateTo(
           index * 100.0,
-          duration: Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 500),
           curve: Curves.easeInOut,
         );
       }

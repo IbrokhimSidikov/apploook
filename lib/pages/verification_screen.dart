@@ -49,7 +49,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
           await _saveUserData();
           // Clear verification code after successful login
           _authService.clearVerificationCode();
-          Navigator.pushReplacementNamed(context, '/homeNew');
+          Navigator.pushNamed(context, '/homeNew');
         } else {
           _codeController.clear();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -78,59 +78,146 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon:
+              const Icon(Icons.arrow_back_ios, color: Colors.black54, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           AppLocalizations.of(context).verification,
           style: const TextStyle(
-            fontSize: 18.0,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
           ),
         ),
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            AppLocalizations.of(context).verificationTitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 20,
-            ),
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: PinCodeTextField(
-              appContext: context,
-              length: 4,
-              controller: _codeController,
-              onChanged: (value) {},
-              onCompleted: (value) => _verifyCode(),
-              keyboardType: TextInputType.number,
-              pinTheme: PinTheme(
-                shape: PinCodeFieldShape.box,
-                borderRadius: BorderRadius.circular(10),
-                activeColor: const Color.fromARGB(255, 255, 215, 56),
-                selectedColor: const Color.fromARGB(255, 255, 215, 56),
-                inactiveColor: Colors.grey,
-              ),
-            ),
-          ),
-          if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(20.0),
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Color.fromARGB(255, 255, 215, 56),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 40),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 255, 215, 56)
+                            .withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.security,
+                        size: 40,
+                        color: Color.fromARGB(255, 255, 215, 56),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    Text(
+                      AppLocalizations.of(context).verificationTitle,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 24,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Enter the 4-digit code sent to\n${widget.phoneNumber}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: Colors.black54,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    PinCodeTextField(
+                      appContext: context,
+                      length: 4,
+                      controller: _codeController,
+                      onChanged: (value) {},
+                      onCompleted: (value) => _verifyCode(),
+                      keyboardType: TextInputType.number,
+                      animationType: AnimationType.scale,
+                      animationDuration: const Duration(milliseconds: 200),
+                      pinTheme: PinTheme(
+                        shape: PinCodeFieldShape.box,
+                        borderRadius: BorderRadius.circular(12),
+                        fieldHeight: 56,
+                        fieldWidth: 56,
+                        activeColor: const Color.fromARGB(255, 255, 215, 56),
+                        selectedColor: const Color.fromARGB(255, 255, 215, 56),
+                        inactiveColor: Colors.grey.withOpacity(0.3),
+                        activeFillColor: const Color.fromARGB(255, 255, 215, 56)
+                            .withOpacity(0.1),
+                        selectedFillColor:
+                            const Color.fromARGB(255, 255, 215, 56)
+                                .withOpacity(0.1),
+                        inactiveFillColor: Colors.grey.withOpacity(0.05),
+                      ),
+                      enableActiveFill: true,
+                      cursorColor: const Color.fromARGB(255, 255, 215, 56),
+                      textStyle: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    if (_isLoading)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 255, 215, 56),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2.5,
+                          ),
+                        ),
+                      )
+                    else
+                      TextButton(
+                        onPressed: () {
+                          // Add resend code functionality here
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Code resent'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Resend Code',
+                          style: TextStyle(
+                            color: Colors.black54,
+                            fontSize: 15,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }

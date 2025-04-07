@@ -131,7 +131,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -697,6 +697,7 @@ class _CheckoutState extends State<Checkout> {
                                       horizontal: 10),
                                   child: TextField(
                                     focusNode: _carDetailsFocusNode,
+                                    autocorrect: false,
                                     decoration: InputDecoration(
                                       hintText: AppLocalizations.of(context)
                                           .carDetailsInputHint,
@@ -1024,8 +1025,7 @@ class _CheckoutState extends State<Checkout> {
                                 child: TextButton(
                                   onPressed: () {
                                     Navigator.pop(context); // Close the dialog
-                                    Navigator.pushReplacementNamed(
-                                        context, '/homeNew');
+                                    Navigator.pushNamed(context, '/homeNew');
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor:
@@ -1309,7 +1309,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),
