@@ -25,14 +25,18 @@ import 'providers/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+
   FirebaseApi().initNotifications();
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
   // Initialize socket
   // SocketService().initSocket();
-  // final fcmToken = await FirebaseMessaging.instance.getToken();
-  // print("FCMToken $fcmToken");
+  final fcmToken = await FirebaseMessaging.instance.getToken();
   FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
+  NotificationSettings settings =
+      await FirebaseMessaging.instance.requestPermission();
+  print('User granted permission: ${settings.authorizationStatus}');
 
   runApp(MyLoaderApp());
 }

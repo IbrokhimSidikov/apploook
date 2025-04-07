@@ -203,62 +203,254 @@ class _ProfileState extends State<Profile> {
                 //   height: 150,
                 // ),
                 GestureDetector(
-                  onTap: () async {
-                    try {
-                      await _clearUserData();
-                      cartProvider.clearCart();
-                      Navigator.pushNamed(context, '/onboard');
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error logging out: $e')),
-                      );
-                    }
+                  onTap: () {
+                    Navigator.pushNamed(context, '/notificationsView');
                   },
-                  child: Text(
-                    AppLocalizations.of(context).logout,
-                    style: TextStyle(fontSize: 18),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.wallet_giftcard_outlined, size: 24),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.of(context).orderHistory,
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 40.0,
-                ),
+                const SizedBox(height: 40.0),
                 GestureDetector(
                   onTap: () async {
-                    bool confirmDelete = await showDialog(
+                    bool? confirmLogout = await showDialog<bool>(
                       context: context,
+                      barrierDismissible: false,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(
-                            AppLocalizations.of(context).confirmDelete,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          content:
-                              Text(AppLocalizations.of(context).confirmDialog),
+                          title: Text(
+                            AppLocalizations.of(context).logout,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          content: Text(
+                            AppLocalizations.of(context).logoutConfirmation,
+                            style: TextStyle(fontSize: 16),
+                          ),
                           actions: [
                             TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: Text(AppLocalizations.of(context).cancel),
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text(
+                                AppLocalizations.of(context).cancel,
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                             TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              },
-                              child: Text(AppLocalizations.of(context).delete),
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text(
+                                AppLocalizations.of(context).confirm,
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
                             ),
                           ],
                         );
                       },
                     );
-                    if (confirmDelete == true) {
-                      await _clearUserData();
-                      cartProvider.clearCart();
-                      Navigator.pushNamed(context, '/onboard');
+
+                    if (confirmLogout == true) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 30,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    AppLocalizations.of(context).loggingOut,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+
+                      try {
+                        await _clearUserData();
+                        cartProvider.clearCart();
+                        Navigator.of(context).pop();
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/onboard',
+                          (route) => false,
+                        );
+                      } catch (e) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error logging out: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     }
                   },
-                  child: Text(
-                    AppLocalizations.of(context).deleteAccount,
-                    style: TextStyle(fontSize: 18),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.logout, size: 24),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.of(context).logout,
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40.0),
+                GestureDetector(
+                  onTap: () async {
+                    bool? confirmDelete = await showDialog<bool>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          title: Text(
+                            AppLocalizations.of(context).confirmDelete,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          content: Text(
+                            AppLocalizations.of(context).confirmDialog,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(false),
+                              child: Text(
+                                AppLocalizations.of(context).cancel,
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(true),
+                              child: Text(
+                                AppLocalizations.of(context).delete,
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (confirmDelete == true) {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 30,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.red,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+                                  Text(
+                                    'Deleting account...',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+
+                      try {
+                        await _clearUserData();
+                        cartProvider.clearCart();
+                        Navigator.of(context).pop();
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          '/onboard',
+                          (route) => false,
+                        );
+                      } catch (e) {
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error deleting account: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(Icons.delete, size: 24),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.of(context).deleteAccount,
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
                 ),
 

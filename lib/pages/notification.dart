@@ -1,3 +1,4 @@
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -44,8 +45,8 @@ class _NotificationPageState extends State<NotificationPage> {
               const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Notifications',
+        title: Text(
+          AppLocalizations.of(context).notifications,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
@@ -57,8 +58,8 @@ class _NotificationPageState extends State<NotificationPage> {
             onPressed: () {
               // Add clear all functionality
             },
-            child: const Text(
-              'Clear All',
+            child: Text(
+              AppLocalizations.of(context).clearAll,
               style: TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
@@ -68,19 +69,19 @@ class _NotificationPageState extends State<NotificationPage> {
         ],
       ),
       body: notifications.isEmpty
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.notifications_none_outlined,
                     size: 70,
                     color: Colors.black12,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
-                    'No notifications yet',
-                    style: TextStyle(
+                    AppLocalizations.of(context).noNotifications,
+                    style: const TextStyle(
                       color: Colors.black54,
                       fontSize: 16,
                     ),

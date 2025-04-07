@@ -26,6 +26,8 @@ class AppLocalizations {
       'confirmDialog': 'Are you sure you want to delete your account?',
       'cancel': 'Cancel',
       'delete': 'Delete',
+      'logoutConfirmation': 'Are you sure you want to log out?',
+      'loggingOut': 'Logging out...',
       // Details page
       'totalPrice': 'Total Price',
       'addToCart': 'Add to cart',
@@ -85,6 +87,7 @@ class AppLocalizations {
       'notifications': 'Notifications',
       'notificationsPlaceholder': 'Notifications will appear here',
       'arrivalNotificationSent': 'Arrival notification sent',
+      'clearAll': 'Clear All',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
@@ -125,6 +128,8 @@ class AppLocalizations {
           'Hisobingizni o\'chirishni xohlayotganingizga aminmisiz?',
       'cancel': 'Bekor qilish',
       'delete': 'O\'chirish',
+      'logoutConfirmation': 'Ilovadan chiqmoqchimisiz?',
+      'loggingOut': 'Chiqish...',
       // Details page
       'totalPrice': 'Umumiy',
       'addToCart': 'Qo\'shish',
@@ -185,6 +190,7 @@ class AppLocalizations {
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
       'arrivalNotificationSent': 'Arrival notification sent',
+      'clearAll': 'Barchasini o\'chirish',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
@@ -327,6 +333,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['confirmDialog']!;
   String get cancel => _localizedValues[locale.languageCode]!['cancel']!;
   String get delete => _localizedValues[locale.languageCode]!['delete']!;
+  String get logoutConfirmation =>
+      _localizedValues[locale.languageCode]!['logoutConfirmation']!;
+  String get loggingOut =>
+      _localizedValues[locale.languageCode]!['loggingOut']!;
 
   // Details page
   String get totalPrice =>
@@ -460,4 +470,5 @@ class AppLocalizations {
   String get updating => _localizedValues[locale.languageCode]!['updating']!;
   String get orderHistory =>
       _localizedValues[locale.languageCode]!['orderHistory']!;
+  String get clearAll => _localizedValues[locale.languageCode]!['clearAll']!;
 }
