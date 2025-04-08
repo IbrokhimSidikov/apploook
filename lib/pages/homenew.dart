@@ -316,53 +316,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     builder: (context, notificationProvider, child) {
                       return GestureDetector(
                         onTap: () async {
-                          await notificationProvider.markAllAsRead();
-                          Navigator.pushNamed(context, '/notification');
-                        },
-                        child: Stack(
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(15.0),
-                              child: Icon(
-                                Icons.notifications_outlined,
-                                size: 24.0,
-                                color: Colors.black,
-                              ),
-                            ),
-                            if (notificationProvider.unreadCount > 0)
-                              Positioned(
-                                right: 10,
-                                top: 10,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  child: Text(
-                                    '${notificationProvider.unreadCount}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  Consumer<NotificationProvider>(
-                    builder: (context, notificationProvider, child) {
-                      return GestureDetector(
-                        onTap: () async {
                           await notificationProvider.markAllOrdersAsRead();
                           Navigator.pushNamed(context, '/notificationsView');
                         },
@@ -406,6 +359,54 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     },
                   ),
                   const SizedBox(width: 10),
+                  Consumer<NotificationProvider>(
+                    builder: (context, notificationProvider, child) {
+                      return GestureDetector(
+                        onTap: () async {
+                          await notificationProvider.markAllAsRead();
+                          Navigator.pushNamed(context, '/notification');
+                        },
+                        child: Stack(
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(15.0),
+                              child: Icon(
+                                Icons.notifications_outlined,
+                                size: 24.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                            if (notificationProvider.unreadCount > 0)
+                              Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${notificationProvider.unreadCount}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(

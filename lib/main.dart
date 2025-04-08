@@ -7,6 +7,7 @@ import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
+import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:apploook/api/firebase_api.dart';
+import 'package:apploook/services/socket_service.dart';
 
 import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
@@ -23,7 +24,9 @@ import 'providers/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
+
   runApp(MyLoaderApp());
 }
 
@@ -35,7 +38,7 @@ class MyLoaderApp extends StatefulWidget {
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
   final notificationProvider = NotificationProvider();
-  final firebaseApi = FirebaseApi();
+  final notificationService = NotificationService();
 
   @override
   void initState() {
@@ -45,14 +48,14 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
 
   Future<void> _initializeApp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    // await prefs.remove('accepted_privacy_policy'); //to check the privacy policy
     _acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
-    // Initialize Firebase and notifications
-    setNotificationProvider(notificationProvider);
-    await firebaseApi.initNotifications();
-    await notificationProvider.loadNotifications();
+    // Initialize notification service with provider
+    notificationService.setProvider(notificationProvider);
+    await notificationService.initialize();
 
     if (mounted) {
       setState(() {});

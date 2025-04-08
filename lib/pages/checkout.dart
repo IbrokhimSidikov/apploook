@@ -908,7 +908,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   Container(
                     height: 100,
-                    width: 390,
+                    width: MediaQuery.of(context).size.width - 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.black26),
