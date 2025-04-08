@@ -1,4 +1,3 @@
-import 'package:apploook/api/firebase_api.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
@@ -12,7 +11,6 @@ import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
@@ -29,15 +27,6 @@ Future<void> main() async {
 
   await Firebase.initializeApp();
 
-  NotificationService().initialize();
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  // Initialize socket
-  // SocketService().initSocket();
-  FirebaseMessaging.onBackgroundMessage(handleBackgroundMessage);
-  NotificationSettings settings =
-      await FirebaseMessaging.instance.requestPermission();
-  print('User granted permission: ${settings.authorizationStatus}');
-
   runApp(MyLoaderApp());
 }
 
@@ -48,6 +37,8 @@ class MyLoaderApp extends StatefulWidget {
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
+  final notificationProvider = NotificationProvider();
+  final notificationService = NotificationService();
 
   @override
   void initState() {
@@ -62,6 +53,10 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
 
+    // Initialize notification service with provider
+    notificationService.setProvider(notificationProvider);
+    await notificationService.initialize();
+
     if (mounted) {
       setState(() {});
     }
@@ -73,7 +68,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider.value(value: notificationProvider),
       ],
       child: _acceptedPrivacyPolicy == true
           ? const MyApp()
@@ -83,8 +78,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
                   providers: [
                     ChangeNotifierProvider(create: (_) => CartProvider()),
                     ChangeNotifierProvider(create: (_) => LocaleProvider()),
-                    ChangeNotifierProvider(
-                        create: (_) => NotificationProvider()),
+                    ChangeNotifierProvider.value(value: notificationProvider),
                   ],
                   child: const MyApp(),
                 ),
@@ -113,7 +107,6 @@ class MyApp extends StatelessWidget {
               displayMedium: TextStyle(fontFamily: 'Poppins'),
             ),
           ),
-          // Add localization support
           locale: localeProvider.locale,
           supportedLocales: const [
             Locale('en'),
@@ -125,7 +118,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          initialRoute: '/homeNew',
+          initialRoute: '/onboard',
           routes: {
             '/homeNew': (context) => HomeNew(),
             '/signin': (context) => SignIn(),

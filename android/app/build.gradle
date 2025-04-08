@@ -59,7 +59,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         ndk {
-            abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
+        abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
         }
     }
 
@@ -87,6 +87,7 @@ flutter {
 
 dependencies {
     implementation 'com.yandex.android:maps.mobile:4.5.1-full'
-    implementation platform('com.google.firebase:firebase-bom:32.1.1') // Add Firebase BOM
-    implementation 'com.google.firebase:firebase-messaging' // Add Firebase Messaging
+    implementation platform('com.google.firebase:firebase-bom:32.7.1')
+    implementation 'com.google.firebase:firebase-messaging'
+    implementation 'com.google.firebase:firebase-auth'
 }

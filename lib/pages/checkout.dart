@@ -908,7 +908,7 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   Container(
                     height: 100,
-                    width: 390,
+                    width: MediaQuery.of(context).size.width - 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.black26),
@@ -1278,10 +1278,14 @@ class _CheckoutState extends State<Checkout> {
           // Save updated list
           await prefs.setStringList('carhop_orders', savedOrders);
 
-          // Increment notification count
+          // Add order notification
           final notificationProvider =
               Provider.of<NotificationProvider>(context, listen: false);
-          await notificationProvider.incrementUnreadCount();
+          await notificationProvider.addOrderNotification(
+            title: "New Car-hop Order",
+            body: "Your car-hop order has been placed successfully!",
+            messageId: responseData['id'].toString(),
+          );
 
           cartProvider.clearCart();
           return;

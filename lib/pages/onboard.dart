@@ -1,9 +1,10 @@
-import 'package:apploook/providers/locale_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:apploook/providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Onboard extends StatefulWidget {
   const Onboard({Key? key}) : super(key: key);
@@ -13,52 +14,47 @@ class Onboard extends StatefulWidget {
 }
 
 class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
-  late PageController _controller;
-  bool isEnglishSelected = false;
-  bool isuzbekSelected = false;
-  late VideoPlayerController _videoController;
+  VideoPlayerController? _videoController;
   bool _showContent = false;
   late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+  bool isEnglishSelected = false;
+  bool isUzbekSelected = false;
+  bool _isMenuLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = PageController(initialPage: 0);
-    _initializeLanguage();
+    _loadLanguagePreference();
     _initializeVideo();
-
-    // Setup fade animation
+    _preloadMenuData();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnimation = CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
+      duration: const Duration(milliseconds: 1000),
     );
   }
 
-  Future<void> _initializeLanguage() async {
+  Future<void> _loadLanguagePreference() async {
     final prefs = await SharedPreferences.getInstance();
     final savedLanguage = prefs.getString('selected_language');
     if (savedLanguage != null) {
       setState(() {
         isEnglishSelected = savedLanguage == 'en';
-        isuzbekSelected = savedLanguage == 'uz';
+        isUzbekSelected = savedLanguage == 'uz';
       });
     }
   }
 
   Future<void> _initializeVideo() async {
     _videoController = VideoPlayerController.asset('assets/videos/loader.mp4');
-    await _videoController.initialize();
+    await _videoController?.initialize();
+    if (!mounted) return;
     setState(() {});
-    _videoController.play();
+    _videoController?.play();
 
     // Wait for video to complete
-    _videoController.addListener(() {
-      if (_videoController.value.position >= _videoController.value.duration) {
+    _videoController?.addListener(() {
+      final controller = _videoController;
+      if (controller != null && controller.value.position >= controller.value.duration) {
         if (!_showContent && mounted) {
           setState(() => _showContent = true);
           _animationController.forward();
@@ -67,33 +63,81 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     });
   }
 
+  Future<void> _preloadMenuData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? cachedData = prefs.getString('cachedCategoryData');
+    bool isValid = false;
+    
+    if (cachedData != null) {
+      final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
+      if (lastUpdateTime != null) {
+        final currentTime = DateTime.now().millisecondsSinceEpoch;
+        isValid = (currentTime - lastUpdateTime) < const Duration(hours: 6).inMilliseconds;
+      }
+    }
+
+    if (!isValid) {
+      try {
+        final response = await http.get(
+          Uri.parse('https://api.sievesapp.com/v1/public/pos-category?photo=1&product=1')
+        );
+        if (response.statusCode == 200) {
+          await prefs.setString('cachedCategoryData', response.body);
+          await prefs.setInt('lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
+        }
+      } catch (e) {
+        print('Error pre-loading menu data: $e');
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _isMenuLoaded = true;
+    });
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
-    _videoController.dispose();
+    _videoController?.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
-  void _continue() async {
-    if (isEnglishSelected || isuzbekSelected) {
-      final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
-
-      // Save the selected language in shared preferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> _continue() async {
+    if (!mounted) return;
+    
+    // Save the selected language
+    if (isEnglishSelected || isUzbekSelected) {
+      final selectedLocale = isEnglishSelected ? 'en' : 'uz';
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('selected_language', selectedLocale);
-
-      // Update the app's locale using LocaleProvider
+      
       if (!mounted) return;
       context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
+    }
 
-      // Navigate to the next page
-      Navigator.pushNamed(context, '/homeNew');
+    if (_isMenuLoaded) {
+      Navigator.pushReplacementNamed(context, '/homeNew');
     } else {
-      // Show a message if no language is selected
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a language')),
+      // Show loading indicator if menu is not ready
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFEC700)),
+            ),
+          );
+        },
       );
+      
+      // Wait for menu to load
+      while (!_isMenuLoaded) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+      if (!mounted) return;
+      Navigator.pop(context); // Remove loading dialog
+      Navigator.pushReplacementNamed(context, '/homeNew');
     }
   }
 
@@ -101,9 +145,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final currentLocale = context.watch<LocaleProvider>().locale.languageCode;
 
-    if (!isEnglishSelected && !isuzbekSelected) {
+    if (!isEnglishSelected && !isUzbekSelected) {
       isEnglishSelected = currentLocale == 'eng';
-      isuzbekSelected = currentLocale == 'uz';
+      isUzbekSelected = currentLocale == 'uz';
     }
 
     return Scaffold(
@@ -111,21 +155,21 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       body: Stack(
         children: [
           // Video Loader
-          if (!_showContent && _videoController.value.isInitialized)
+          if (!_showContent && _videoController!.value.isInitialized ?? false)
             SizedBox.expand(
               child: FittedBox(
                 fit: BoxFit.cover,
                 child: SizedBox(
-                  width: _videoController.value.size.width,
-                  height: _videoController.value.size.height,
-                  child: VideoPlayer(_videoController),
+                  width: _videoController?.value.size.width ?? 0,
+                  height: _videoController?.value.size.height ?? 0,
+                  child: VideoPlayer(_videoController!),
                 ),
               ),
             ),
 
           // Main Content
           FadeTransition(
-            opacity: _fadeAnimation,
+            opacity: _animationController,
             child: Column(
               children: [
                 Expanded(
@@ -237,82 +281,90 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           const Spacer(
                               flex: 2), // Adjust flex to control spacing
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isEnglishSelected = true;
-                                    isuzbekSelected = false;
-                                  });
-                                  context
-                                      .read<LocaleProvider>()
-                                      .setLocale(const Locale('en'));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15, horizontal: 60),
-                                  margin: const EdgeInsets.only(
-                                      top: 10, bottom: 10, right: 5, left: 15),
-                                  decoration: BoxDecoration(
-                                    color: isEnglishSelected
-                                        ? const Color.fromARGB(
-                                            255, 255, 210, 57)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isEnglishSelected = true;
+                                        isUzbekSelected = false;
+                                      });
+                                      context
+                                          .read<LocaleProvider>()
+                                          .setLocale(const Locale('en'));
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isEnglishSelected
+                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.2),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    'English',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
+                                      child: const Text(
+                                        'English',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isuzbekSelected = true;
-                                    isEnglishSelected = false;
-                                  });
-                                  context
-                                      .read<LocaleProvider>()
-                                      .setLocale(const Locale('uz'));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15, horizontal: 60),
-                                  margin: const EdgeInsets.only(
-                                      top: 10, bottom: 10, right: 15, left: 5),
-                                  decoration: BoxDecoration(
-                                    color: isuzbekSelected
-                                        ? const Color.fromARGB(
-                                            255, 255, 210, 57)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isUzbekSelected = true;
+                                        isEnglishSelected = false;
+                                      });
+                                      context
+                                          .read<LocaleProvider>()
+                                          .setLocale(const Locale('uz'));
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isUzbekSelected
+                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.2),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    'Uzbek',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
+                                      child: const Text(
+                                        'Uzbek',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -324,15 +376,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           TextButton(
                             onPressed: _continue,
                             style: TextButton.styleFrom(
-                              padding:
-                                  EdgeInsets.zero, // Remove default padding
+                              padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
                             ),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 150),
+                              width: MediaQuery.of(context).size.width * 0.85, // Responsive width
+                              padding: const EdgeInsets.symmetric(vertical: 20),
                               margin: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFEC700),
@@ -340,15 +391,18 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                               child: const Text(
                                 "Continue",
+                                textAlign: TextAlign.center, // Center the text
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16, // Fixed font size
                                 ),
+                                maxLines: 1, // Prevent text wrapping
+                                overflow: TextOverflow.visible, // Show all text
                               ),
                             ),
                           ),
-
                           const Spacer(
                               flex: 1), // Adjust flex to control spacing
                           const Text(

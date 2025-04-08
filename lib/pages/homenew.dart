@@ -292,16 +292,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                           ],
                         ),
                       ),
-                      // PopupMenuItem(
-                      //   value: 'ru',
-                      //   child: Row(
-                      //     children: const [
-                      //       Text('🇷🇺', style: TextStyle(fontSize: 20)),
-                      //       SizedBox(width: 8),
-                      //       Text('Русский'),
-                      //     ],
-                      //   ),
-                      // ),
                       const PopupMenuItem(
                         value: 'eng',
                         child: Row(
@@ -326,7 +316,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     builder: (context, notificationProvider, child) {
                       return GestureDetector(
                         onTap: () async {
-                          await notificationProvider.markAllAsRead();
+                          await notificationProvider.markAllOrdersAsRead();
                           Navigator.pushNamed(context, '/notificationsView');
                         },
                         child: Stack(
@@ -335,6 +325,53 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                               padding: EdgeInsets.all(15.0),
                               child: Icon(
                                 Icons.shopping_bag_outlined,
+                                size: 24.0,
+                                color: Colors.black,
+                              ),
+                            ),
+                            if (notificationProvider.unreadOrderCount > 0)
+                              Positioned(
+                                right: 10,
+                                top: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Text(
+                                    '${notificationProvider.unreadOrderCount}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Consumer<NotificationProvider>(
+                    builder: (context, notificationProvider, child) {
+                      return GestureDetector(
+                        onTap: () async {
+                          await notificationProvider.markAllAsRead();
+                          Navigator.pushNamed(context, '/notification');
+                        },
+                        child: Stack(
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(15.0),
+                              child: Icon(
+                                Icons.notifications_outlined,
                                 size: 24.0,
                                 color: Colors.black,
                               ),
@@ -368,20 +405,13 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       );
                     },
                   ),
-                  // const SizedBox(width: 10),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined,
-                        color: Colors.black87),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/notification');
-                    },
-                  ),
                   const SizedBox(width: 10),
+                  
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      const SizedBox(height: 110),
+                      const SizedBox(height: 90),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Align(
