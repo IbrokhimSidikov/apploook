@@ -38,8 +38,8 @@ class CachedProductImage extends StatelessWidget {
           child: Icon(Icons.error),
         ),
         // Configure memory cache size
-        memCacheWidth: 140,  // Set to your image width
-        memCacheHeight: 140, // Set to your image height
+        memCacheWidth: 500,  // Set to your image width
+        memCacheHeight: 500, // Set to your image height
       ),
     );
   }
