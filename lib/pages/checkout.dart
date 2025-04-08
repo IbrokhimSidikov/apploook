@@ -131,7 +131,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1278,10 +1278,14 @@ class _CheckoutState extends State<Checkout> {
           // Save updated list
           await prefs.setStringList('carhop_orders', savedOrders);
 
-          // Increment notification count
+          // Add order notification
           final notificationProvider =
               Provider.of<NotificationProvider>(context, listen: false);
-          await notificationProvider.incrementUnreadCount();
+          await notificationProvider.addOrderNotification(
+            title: "New Car-hop Order",
+            body: "Your car-hop order has been placed successfully!",
+            messageId: responseData['id'].toString(),
+          );
 
           cartProvider.clearCart();
           return;
