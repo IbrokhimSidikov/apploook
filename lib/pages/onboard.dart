@@ -237,82 +237,90 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           const Spacer(
                               flex: 2), // Adjust flex to control spacing
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isEnglishSelected = true;
-                                    isuzbekSelected = false;
-                                  });
-                                  context
-                                      .read<LocaleProvider>()
-                                      .setLocale(const Locale('en'));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15, horizontal: 60),
-                                  margin: const EdgeInsets.only(
-                                      top: 10, bottom: 10, right: 5, left: 15),
-                                  decoration: BoxDecoration(
-                                    color: isEnglishSelected
-                                        ? const Color.fromARGB(
-                                            255, 255, 210, 57)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isEnglishSelected = true;
+                                        isuzbekSelected = false;
+                                      });
+                                      context
+                                          .read<LocaleProvider>()
+                                          .setLocale(const Locale('en'));
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isEnglishSelected
+                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.2),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    'English',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
+                                      child: const Text(
+                                        'English',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isuzbekSelected = true;
-                                    isEnglishSelected = false;
-                                  });
-                                  context
-                                      .read<LocaleProvider>()
-                                      .setLocale(const Locale('uz'));
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 15, horizontal: 60),
-                                  margin: const EdgeInsets.only(
-                                      top: 10, bottom: 10, right: 15, left: 5),
-                                  decoration: BoxDecoration(
-                                    color: isuzbekSelected
-                                        ? const Color.fromARGB(
-                                            255, 255, 210, 57)
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 1,
-                                        blurRadius: 3,
-                                        offset: const Offset(0, 2),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        isuzbekSelected = true;
+                                        isEnglishSelected = false;
+                                      });
+                                      context
+                                          .read<LocaleProvider>()
+                                          .setLocale(const Locale('uz'));
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isuzbekSelected
+                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.2),
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                  child: const Text(
-                                    'Uzbek',
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 15,
+                                      child: const Text(
+                                        'Uzbek',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -324,15 +332,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           TextButton(
                             onPressed: _continue,
                             style: TextButton.styleFrom(
-                              padding:
-                                  EdgeInsets.zero, // Remove default padding
+                              padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
                             ),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 150),
+                              width: MediaQuery.of(context).size.width * 0.85, // Responsive width
+                              padding: const EdgeInsets.symmetric(vertical: 20),
                               margin: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFFEC700),
@@ -340,15 +347,18 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                               child: const Text(
                                 "Continue",
+                                textAlign: TextAlign.center, // Center the text
                                 style: TextStyle(
                                   color: Colors.black,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 16, // Fixed font size
                                 ),
+                                maxLines: 1, // Prevent text wrapping
+                                overflow: TextOverflow.visible, // Show all text
                               ),
                             ),
                           ),
-
                           const Spacer(
                               flex: 1), // Adjust flex to control spacing
                           const Text(

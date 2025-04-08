@@ -107,7 +107,6 @@ class MyApp extends StatelessWidget {
               displayMedium: TextStyle(fontFamily: 'Poppins'),
             ),
           ),
-          // Add localization support
           locale: localeProvider.locale,
           supportedLocales: const [
             Locale('en'),
@@ -119,7 +118,7 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          initialRoute: '/homeNew',
+          initialRoute: '/onboard',
           routes: {
             '/homeNew': (context) => HomeNew(),
             '/signin': (context) => SignIn(),
