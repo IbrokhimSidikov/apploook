@@ -1,10 +1,21 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../providers/notification_provider.dart';
 
 class NotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+  late NotificationProvider _notificationProvider;
+
+  // Singleton pattern
+  static final NotificationService _instance = NotificationService._internal();
+  factory NotificationService() => _instance;
+  NotificationService._internal();
+
+  void setProvider(NotificationProvider provider) {
+    _notificationProvider = provider;
+  }
 
   Future<void> initialize() async {
     print('🔔 Initializing Firebase Messaging...');
@@ -49,10 +60,18 @@ class NotificationService {
         print('🔔 New Token: $token');
       });
 
-      FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+      // Get initial messages that opened the app
+      RemoteMessage? initialMessage = await _fcm.getInitialMessage();
+      if (initialMessage != null) {
+        _handleMessage(initialMessage);
+      }
+
+      // Handle foreground messages
+      FirebaseMessaging.onMessage.listen(_handleMessage);
       print('🔔 Foreground message handler set');
 
-      FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
+      // Handle when app is opened from background
+      FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
       print('🔔 Background message handler set');
     } else {
       print(
@@ -60,13 +79,20 @@ class NotificationService {
     }
   }
 
-  Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    print('🔔 Received foreground message:');
+  void _handleMessage(RemoteMessage message) async {
+    print('🔔 Handling message:');
     print('🔔 Message ID: ${message.messageId}');
     print('🔔 Title: ${message.notification?.title}');
     print('🔔 Body: ${message.notification?.body}');
-    print('🔔 Data: ${message.data}');
 
+    // Add to provider
+    _notificationProvider.addNotification(
+      title: message.notification?.title ?? '',
+      body: message.notification?.body ?? '',
+      messageId: message.messageId ?? '',
+    );
+
+    // Show local notification
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
 
@@ -91,13 +117,5 @@ class NotificationService {
         print('❌ Error showing local notification: $e');
       }
     }
-  }
-
-  void _handleBackgroundMessage(RemoteMessage message) {
-    print('🔔 Handling background message:');
-    print('🔔 Message ID: ${message.messageId}');
-    print('🔔 Title: ${message.notification?.title}');
-    print('🔔 Body: ${message.notification?.body}');
-    print('🔔 Data: ${message.data}');
   }
 }

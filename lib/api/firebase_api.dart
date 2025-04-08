@@ -1,23 +1,39 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../providers/notification_provider.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+NotificationProvider? _notificationProvider;
+
+void setNotificationProvider(NotificationProvider provider) {
+  _notificationProvider = provider;
+}
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Title: ${message.notification?.title}');
   print('Body: ${message.notification?.body}');
   print('Payload: ${message.data}');
+  
+  // Background messages can't access the provider directly
+  // We'll handle these messages when the app is opened
 }
 
 void handleMessage(RemoteMessage? message) {
   if (message == null) return;
 
+  // Add to provider
+  _notificationProvider?.addNotification(
+    title: message.notification?.title ?? '',
+    body: message.notification?.body ?? '',
+    messageId: message.messageId ?? '',
+  );
+
   navigateToNotificationScreen();
 }
 
 void navigateToNotificationScreen() {
-  navigatorKey.currentState?.pushNamed('/notificationsView');
+  navigatorKey.currentState?.pushNamed('/notification');
 }
 
 class FirebaseApi {
@@ -72,6 +88,7 @@ class FirebaseApi {
 
       if (message.notification != null) {
         print('Message also contained a notification: ${message.notification}');
+        handleMessage(message); // Use the same handler for consistency
         showNotification(message);
       }
     });

@@ -1,5 +1,7 @@
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/notification_provider.dart';
 
 class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
@@ -9,30 +11,6 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-  final List<NotificationItem> notifications = [
-    NotificationItem(
-      title: 'Order Delivered',
-      message: 'Your order #123456 has been delivered successfully',
-      time: '2 hours ago',
-      type: NotificationType.success,
-      isRead: false,
-    ),
-    NotificationItem(
-      title: 'New Offer',
-      message: 'Get 20% off on your next order! Limited time offer',
-      time: '5 hours ago',
-      type: NotificationType.promotion,
-      isRead: true,
-    ),
-    NotificationItem(
-      title: 'Order Update',
-      message: 'Your order #123457 is out for delivery',
-      time: '1 day ago',
-      type: NotificationType.info,
-      isRead: true,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,13 +19,12 @@ class _NotificationPageState extends State<NotificationPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon:
-              const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           AppLocalizations.of(context).notifications,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Colors.black87,
@@ -56,11 +33,11 @@ class _NotificationPageState extends State<NotificationPage> {
         actions: [
           TextButton(
             onPressed: () {
-              // Add clear all functionality
+              context.read<NotificationProvider>().clearAll();
             },
             child: Text(
               AppLocalizations.of(context).clearAll,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 14,
               ),
@@ -68,35 +45,41 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ],
       ),
-      body: notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.notifications_none_outlined,
-                    size: 70,
-                    color: Colors.black12,
+      body: Consumer<NotificationProvider>(
+        builder: (context, provider, child) {
+          final notifications = provider.notifications;
+          
+          return notifications.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.notifications_none_outlined,
+                        size: 70,
+                        color: Colors.black12,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppLocalizations.of(context).noNotifications,
+                        style: const TextStyle(
+                          color: Colors.black54,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context).noNotifications,
-                    style: const TextStyle(
-                      color: Colors.black54,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return _NotificationCard(notification: notification);
-              },
-            ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return _NotificationCard(notification: notification);
+                  },
+                );
+        },
+      ),
     );
   }
 }
@@ -126,7 +109,7 @@ class _NotificationCard extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () {
-            // Handle notification tap
+            context.read<NotificationProvider>().markAsRead(notification.messageId);
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -225,6 +208,7 @@ class NotificationItem {
   final String time;
   final NotificationType type;
   final bool isRead;
+  final String? messageId;
 
   NotificationItem({
     required this.title,
@@ -232,7 +216,33 @@ class NotificationItem {
     required this.time,
     required this.type,
     required this.isRead,
+    this.messageId,
   });
+
+  // Convert NotificationItem to JSON
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'message': message,
+        'time': time,
+        'type': type.toString(),
+        'isRead': isRead,
+        'messageId': messageId,
+      };
+
+  // Create NotificationItem from JSON
+  factory NotificationItem.fromJson(Map<String, dynamic> json) {
+    return NotificationItem(
+      title: json['title'] as String,
+      message: json['message'] as String,
+      time: json['time'] as String,
+      type: NotificationType.values.firstWhere(
+        (e) => e.toString() == json['type'],
+        orElse: () => NotificationType.info,
+      ),
+      isRead: json['isRead'] as bool,
+      messageId: json['messageId'] as String?,
+    );
+  }
 }
 
 enum NotificationType {
