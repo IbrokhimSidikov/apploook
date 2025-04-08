@@ -216,7 +216,7 @@ class _DetailsState extends State<Details> {
                       onPressed: () {
                         cartProvider.addToCart(widget.product, quantity);
                         cartProvider.logItems();
-                        Navigator.pushReplacementNamed(context, '/homeNew');
+                        Navigator.pushNamed(context, '/homeNew');
                       },
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.all<Color>(

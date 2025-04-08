@@ -17,13 +17,13 @@ class BannerItem {
     banners.add(
       BannerItem(
           name: 'banner12',
-          imagePath: 'images/Dinner M.png',
+          imagePath: 'images/DinnerMBanner.png',
           boxColor: Colors.white),
     );
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/Smile Set.png',
+          imagePath: 'images/SmileSetBanner.png',
           boxColor: Colors.white),
     );
     banners.add(
@@ -35,7 +35,7 @@ class BannerItem {
     banners.add(
       BannerItem(
           name: 'banner1',
-          imagePath: 'images/banner2.png',
+          imagePath: 'images/ComboBanner.png',
           boxColor: Colors.white),
     );
     banners.add(

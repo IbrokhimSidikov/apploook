@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:apploook/services/socket_service.dart';
 
 class NotificationsView extends StatefulWidget {
   const NotificationsView({super.key});
@@ -17,13 +19,17 @@ class NotificationsView extends StatefulWidget {
 class _NotificationsViewState extends State<NotificationsView> {
   List<Map<String, dynamic>> orders = [];
   bool isLoading = true;
+  String?
+      updatingOrderId; // Add this line to track which order is being updated
   static const int pageSize = 10;
   int currentPage = 0;
   bool _hasShownArrivedHint = false;
+  final SocketService _socketService = SocketService();
 
   @override
   void initState() {
     super.initState();
+    // _socketService.initSocket();
     _loadOrders();
     // Mark notifications as read when viewing
     Provider.of<NotificationProvider>(context, listen: false).markAllAsRead();
@@ -104,6 +110,80 @@ class _NotificationsViewState extends State<NotificationsView> {
     });
   }
 
+  Future<void> updateOrderStatus(String orderId) async {
+    setState(() {
+      updatingOrderId = orderId;
+    });
+
+    final String url =
+        'https://app.sievesapp.com/v1/order/$orderId?isDelever=1';
+
+    final Map<String, dynamic> requestBody = {
+      "id": orderId,
+      "customer_arrived": 1,
+      "is_sync": 0,
+    };
+
+    const String bearerToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZWFyZXIiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.fo1-6HkjCqoQ_m4cCO6laUgHHBBqktz0SAgmOi6axqQ";
+    const String xApiKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk4ODkiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.twqu6OB88osWslaoMr6UDH8RNuSX095LlEf0OVdDglY";
+
+    try {
+      final response = await http.put(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $bearerToken',
+          'x-api': xApiKey,
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        print("Order status updated successfully!");
+      } else {
+        print("Failed to update order status: ${response.body}");
+      }
+    } catch (e) {
+      print("Error updating order status: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          updatingOrderId = null;
+        });
+      }
+    }
+  }
+
+  // void _handleArrival(String orderId) {
+  //   print('🚀 _handleArrival called with orderId: $orderId');
+  //   try {
+  //     final parsedOrderId = int.parse(orderId);
+  //     print('✅ Successfully parsed orderId to int: $parsedOrderId');
+
+  //     _socketService.notifyArrival(parsedOrderId);
+  //     print(
+  //         '📤 Notification sent to socket service for orderId: $parsedOrderId');
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(AppLocalizations.of(context).arrivalNotificationSent),
+  //         backgroundColor: Colors.green,
+  //       ),
+  //     );
+  //     print('✨ SnackBar shown to user for orderId: $parsedOrderId');
+  //   } catch (e) {
+  //     print('❌ Error in _handleArrival: $e');
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text('Error: ${e.toString()}'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
+
   List<Map<String, dynamic>> get paginatedOrders {
     final startIndex = currentPage * pageSize;
     final endIndex = (currentPage + 1) * pageSize;
@@ -119,7 +199,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         backgroundColor: const Color(0xFFF1F2F7),
         elevation: 0,
         title: Text(
-          AppLocalizations.of(context).notifications,
+          AppLocalizations.of(context).orderHistory,
           style: const TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -129,7 +209,7 @@ class _NotificationsViewState extends State<NotificationsView> {
         centerTitle: true,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pushReplacementNamed(context, '/homeNew');
+            Navigator.pushNamed(context, '/homeNew');
           },
           child: SizedBox(
             height: 25,
@@ -228,7 +308,7 @@ class _NotificationsViewState extends State<NotificationsView> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      // You can implement the onTap functionality
+                                      updateOrderStatus(order['id'].toString());
                                     },
                                     child: Tooltip(
                                       message: AppLocalizations.of(context)
@@ -246,11 +326,27 @@ class _NotificationsViewState extends State<NotificationsView> {
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            const Icon(
-                                              Icons.directions_car,
-                                              size: 18,
-                                              color: Colors.black,
-                                            ),
+                                            if (updatingOrderId ==
+                                                order['id'].toString())
+                                              const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(
+                                                    Colors.black,
+                                                  ),
+                                                ),
+                                              )
+                                            else
+                                              const Icon(
+                                                Icons.directions_car,
+                                                size: 18,
+                                                color: Colors.black,
+                                              ),
                                             const SizedBox(width: 6),
                                             Text(
                                               AppLocalizations.of(context)
@@ -372,5 +468,11 @@ class _NotificationsViewState extends State<NotificationsView> {
                   ),
                 ),
     );
+  }
+
+  @override
+  void dispose() {
+    _socketService.socket.dispose();
+    super.dispose();
   }
 }

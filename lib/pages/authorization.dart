@@ -78,16 +78,34 @@ class _AuthorizationState extends State<Authorization> {
           if (response['is_verified'] == true) {
             // If already verified, save credentials and go to home
             await _savePhoneNumber(phone, _firstNameController.text);
-            Navigator.pushReplacementNamed(context, '/homeNew');
+            Navigator.pushNamed(context, '/homeNew');
           } else {
             // If not verified, pass credentials to verification screen without saving
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (context) => VerificationScreen(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    VerificationScreen(
                   phoneNumber: phone,
                   firstName: _firstNameController.text.trim(),
                 ),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  const begin = Offset(1.0, 0.0);
+                  const end = Offset.zero;
+                  const curve = Curves.easeInOutCubic;
+                  var tween = Tween(begin: begin, end: end)
+                      .chain(CurveTween(curve: curve));
+                  var offsetAnimation = animation.drive(tween);
+                  return SlideTransition(
+                    position: offsetAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                transitionDuration: const Duration(milliseconds: 300),
               ),
             );
           }
