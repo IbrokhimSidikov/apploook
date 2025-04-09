@@ -49,7 +49,7 @@ class BannerItem {
             'https://raw.githubusercontent.com/IbrokhimSidikov/BannerItem/main/main/banners.json'),
         headers: {
           'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'Apploook-App', // Add your app name here
+          'User-Agent': 'Apploook-App',
         },
       );
 

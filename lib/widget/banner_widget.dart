@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'banner_item.dart';
 
 class BannerCarouselWidget extends StatelessWidget {
@@ -16,10 +17,16 @@ class BannerCarouselWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const SizedBox(
-        height: 160,
-        child: Center(
-          child: CircularProgressIndicator(),
+      return Shimmer.fromColors(
+        baseColor: Colors.grey[300]!,
+        highlightColor: Colors.grey[100]!,
+        child: Container(
+          height: 160,
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
       );
     }
@@ -55,8 +62,12 @@ class BannerCarouselWidget extends StatelessWidget {
       return CachedNetworkImage(
         imageUrl: imagePath,
         fit: BoxFit.fill,
-        placeholder: (context, url) => const Center(
-          child: CircularProgressIndicator(),
+        placeholder: (context, url) => Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Container(
+            color: Colors.white,
+          ),
         ),
         errorWidget: (context, url, error) => const Center(
           child: Icon(Icons.error_outline, size: 40, color: Colors.red),
