@@ -380,7 +380,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ],
                           ),
                           const Spacer(
-                              flex: 1), // Adjust flex to control spacing
+                              flex: 3), // Adjust flex to control spacing
                           TextButton(
                             onPressed: _continue,
                             style: TextButton.styleFrom(
@@ -389,26 +389,29 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(50),
                               ),
                             ),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width *
-                                  0.85, // Responsive width
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              margin: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEC700),
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: const Text(
-                                "Continue",
-                                textAlign: TextAlign.center, // Center the text
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16, // Fixed font size
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: Container(
+                                width: double.infinity,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEC700),
+                                  borderRadius: BorderRadius.circular(50),
                                 ),
-                                maxLines: 1, // Prevent text wrapping
-                                overflow: TextOverflow.visible, // Show all text
+                                child: const Text(
+                                  "Continue",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.visible,
+                                ),
                               ),
                             ),
                           ),
