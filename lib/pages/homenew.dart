@@ -423,7 +423,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      const SizedBox(height: 90),
+                      const SizedBox(height: 100),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Align(
