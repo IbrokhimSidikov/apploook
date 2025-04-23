@@ -16,6 +16,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
+import '../widget/banner_widget.dart';
+
 class Category {
   final int id;
   final String name;
@@ -82,6 +84,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   static const cacheValidityDuration = Duration(hours: 6);
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
+  bool _isLoadingBanners = true;
 
   List<Category> categories = [];
   List<Product> allProducts = [];
@@ -91,14 +94,25 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   ValueNotifier<int?> selectedCategoryId = ValueNotifier<int?>(null);
   ScrollController _scrollController = ScrollController();
 
-  void _getBanners() {
-    banners = BannerItem.getBanners();
+  Future<void> _getBanners() async {
+    try {
+      final loadedBanners = await BannerItem.getBanners();
+      setState(() {
+        banners = loadedBanners;
+        _isLoadingBanners = false;
+      });
+    } catch (e) {
+      print('Error loading banners: $e');
+      setState(() {
+        _isLoadingBanners = false;
+      });
+    }
   }
 
   @override
   void initState() {
-    _getBanners();
     super.initState();
+    _getBanners();
     loadData();
   }
 
@@ -217,7 +231,6 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-    _getBanners();
 
     var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
@@ -406,12 +419,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                     },
                   ),
                   const SizedBox(width: 10),
-                  
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      const SizedBox(height: 90),
+                      const SizedBox(height: 100),
                       Padding(
                         padding: const EdgeInsets.only(left: 15),
                         child: Align(
@@ -425,34 +437,43 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 10),
                       // Carousel Slider Banner
-                      CarouselSlider(
-                        options: CarouselOptions(
-                          height: 160.0,
-                          autoPlay: true,
-                          autoPlayInterval: const Duration(seconds: 3),
-                          enlargeCenterPage: true,
-                          enableInfiniteScroll: true,
-                        ),
-                        items: banners.map((banner) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Container(
-                                width: MediaQuery.of(context).size.width,
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 0.0),
-                                decoration: BoxDecoration(
-                                  color: banner.boxColor.withOpacity(0.0),
-                                  borderRadius: BorderRadius.circular(16.0),
-                                ),
-                                child: Image.asset(
-                                  banner.imagePath,
-                                  fit: BoxFit.fill,
-                                ),
-                              );
-                            },
-                          );
-                        }).toList(),
-                      ),
+                      _isLoadingBanners
+                          ? const Center(
+                              child: CircularProgressIndicator(),
+                            )
+                          // : CarouselSlider(
+                          //     options: CarouselOptions(
+                          //       height: 160.0,
+                          //       autoPlay: true,
+                          //       autoPlayInterval: const Duration(seconds: 3),
+                          //       enlargeCenterPage: true,
+                          //       enableInfiniteScroll: true,
+                          //     ),
+                          //     items: banners.map((banner) {
+                          //       return Builder(
+                          //         builder: (BuildContext context) {
+                          //           return Container(
+                          //             width: MediaQuery.of(context).size.width,
+                          //             margin: const EdgeInsets.symmetric(
+                          //                 horizontal: 0.0),
+                          //             decoration: BoxDecoration(
+                          //               color: banner.boxColor.withOpacity(0.0),
+                          //               borderRadius:
+                          //                   BorderRadius.circular(16.0),
+                          //             ),
+                          //             child: Image.asset(
+                          //               banner.imagePath,
+                          //               fit: BoxFit.fill,
+                          //             ),
+                          //           );
+                          //         },
+                          //       );
+                          //     }).toList(),
+                          //   ),
+                          : BannerCarouselWidget(
+                              banners: banners,
+                              isLoading: _isLoadingBanners,
+                            ),
                     ],
                   ),
                 ),

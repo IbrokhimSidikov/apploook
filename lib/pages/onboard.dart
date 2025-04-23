@@ -54,7 +54,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // Wait for video to complete
     _videoController?.addListener(() {
       final controller = _videoController;
-      if (controller != null && controller.value.position >= controller.value.duration) {
+      if (controller != null &&
+          controller.value.position >= controller.value.duration) {
         if (!_showContent && mounted) {
           setState(() => _showContent = true);
           _animationController.forward();
@@ -67,23 +68,24 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? cachedData = prefs.getString('cachedCategoryData');
     bool isValid = false;
-    
+
     if (cachedData != null) {
       final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
       if (lastUpdateTime != null) {
         final currentTime = DateTime.now().millisecondsSinceEpoch;
-        isValid = (currentTime - lastUpdateTime) < const Duration(hours: 6).inMilliseconds;
+        isValid = (currentTime - lastUpdateTime) <
+            const Duration(hours: 6).inMilliseconds;
       }
     }
 
     if (!isValid) {
       try {
-        final response = await http.get(
-          Uri.parse('https://api.sievesapp.com/v1/public/pos-category?photo=1&product=1')
-        );
+        final response = await http.get(Uri.parse(
+            'https://api.sievesapp.com/v1/public/pos-category?photo=1&product=1'));
         if (response.statusCode == 200) {
           await prefs.setString('cachedCategoryData', response.body);
-          await prefs.setInt('lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
+          await prefs.setInt(
+              'lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
         }
       } catch (e) {
         print('Error pre-loading menu data: $e');
@@ -104,13 +106,13 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
   Future<void> _continue() async {
     if (!mounted) return;
-    
+
     // Save the selected language
     if (isEnglishSelected || isUzbekSelected) {
       final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('selected_language', selectedLocale);
-      
+
       if (!mounted) return;
       context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
     }
@@ -130,7 +132,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
           );
         },
       );
-      
+
       // Wait for menu to load
       while (!_isMenuLoaded) {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -285,7 +287,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -301,12 +304,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isEnglishSelected
-                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            ? const Color.fromARGB(
+                                                255, 255, 210, 57)
                                             : Colors.white,
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.2),
+                                            color:
+                                                Colors.black.withOpacity(0.2),
                                             spreadRadius: 1,
                                             blurRadius: 3,
                                             offset: const Offset(0, 2),
@@ -328,7 +333,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -344,12 +350,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isUzbekSelected
-                                            ? const Color.fromARGB(255, 255, 210, 57)
+                                            ? const Color.fromARGB(
+                                                255, 255, 210, 57)
                                             : Colors.white,
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors.black.withOpacity(0.2),
+                                            color:
+                                                Colors.black.withOpacity(0.2),
                                             spreadRadius: 1,
                                             blurRadius: 3,
                                             offset: const Offset(0, 2),
@@ -372,7 +380,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ],
                           ),
                           const Spacer(
-                              flex: 1), // Adjust flex to control spacing
+                              flex: 3), // Adjust flex to control spacing
                           TextButton(
                             onPressed: _continue,
                             style: TextButton.styleFrom(
@@ -381,25 +389,29 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 borderRadius: BorderRadius.circular(50),
                               ),
                             ),
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.85, // Responsive width
-                              padding: const EdgeInsets.symmetric(vertical: 20),
-                              margin: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFEC700),
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: const Text(
-                                "Continue",
-                                textAlign: TextAlign.center, // Center the text
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16, // Fixed font size
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                              child: Container(
+                                width: double.infinity,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEC700),
+                                  borderRadius: BorderRadius.circular(50),
                                 ),
-                                maxLines: 1, // Prevent text wrapping
-                                overflow: TextOverflow.visible, // Show all text
+                                child: const Text(
+                                  "Continue",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.visible,
+                                ),
                               ),
                             ),
                           ),

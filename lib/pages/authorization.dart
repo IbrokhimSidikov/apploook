@@ -150,112 +150,143 @@ class _AuthorizationState extends State<Authorization> {
         ),
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 75),
-          Center(
-            child: Text(
-              AppLocalizations.of(context).authorizationTitle,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
-            ),
-          ),
-          const SizedBox(height: 40.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.of(context).nameTranslation,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: const BorderSide(
-                    color: Color.fromARGB(255, 255, 215, 56),
-                  ),
-                ),
+      body: GestureDetector(
+        onTap: () =>
+            FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
+        child: SafeArea(
+          child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom -
+                    kToolbarHeight,
               ),
-            ),
-          ),
-          const SizedBox(height: 20.0),
-          Padding(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            child: Form(
-              key: _phoneFormKey,
-              child: PhoneFormField(
-                initialValue: _phoneNumber ??
-                    const PhoneNumber(isoCode: IsoCode.UZ, nsn: ''),
-                validator: PhoneValidator.compose([
-                  PhoneValidator.required(context),
-                  PhoneValidator.validMobile(context),
-                ]),
-                decoration: InputDecoration(
-                  labelText:
-                      AppLocalizations.of(context).phoneNumberTranslation,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top content
+                  Column(
+                    children: [
+                      const SizedBox(height: 75),
+                      Center(
+                        child: Text(
+                          AppLocalizations.of(context).authorizationTitle,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 20),
+                        ),
+                      ),
+                      const SizedBox(height: 40.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: TextField(
+                          controller: _firstNameController,
+                          textInputAction: TextInputAction.next,
+                          decoration: InputDecoration(
+                            labelText:
+                                AppLocalizations.of(context).nameTranslation,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                              borderSide: const BorderSide(
+                                color: Color.fromARGB(255, 255, 215, 56),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        child: Form(
+                          key: _phoneFormKey,
+                          child: PhoneFormField(
+                            initialValue: _phoneNumber ??
+                                const PhoneNumber(isoCode: IsoCode.UZ, nsn: ''),
+                            validator: PhoneValidator.compose([
+                              PhoneValidator.required(context),
+                              PhoneValidator.validMobile(context),
+                            ]),
+                            decoration: InputDecoration(
+                              labelText: AppLocalizations.of(context)
+                                  .phoneNumberTranslation,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: const BorderSide(
+                                  color: Color.fromARGB(255, 255, 215, 56),
+                                ),
+                              ),
+                            ),
+                            onChanged: (PhoneNumber? phoneNumber) {
+                              setState(() {
+                                _phoneNumber = phoneNumber;
+                                _isPhoneNumberValid =
+                                    _phoneFormKey.currentState?.validate() ??
+                                        false;
+                              });
+                            },
+                            onSaved: (PhoneNumber? phoneNumber) {
+                              _phoneNumber = phoneNumber;
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 255, 215, 56),
+
+                  // Bottom button
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: 20.0,
+                      right: 20.0,
+                      bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                          ? 20.0
+                          : 50.0,
+                    ),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _validateAndContinue,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 255, 215, 56),
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.black),
+                                ),
+                              )
+                            : Text(
+                                AppLocalizations.of(context).continueButton,
+                                style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                      ),
                     ),
                   ),
-                ),
-                onChanged: (PhoneNumber? phoneNumber) {
-                  setState(() {
-                    _phoneNumber = phoneNumber;
-                    _isPhoneNumberValid =
-                        _phoneFormKey.currentState?.validate() ?? false;
-                  });
-                },
-                onSaved: (PhoneNumber? phoneNumber) {
-                  _phoneNumber = phoneNumber;
-                },
+                ],
               ),
             ),
           ),
-          const Spacer(),
-          Padding(
-            padding:
-                const EdgeInsets.only(bottom: 50.0, left: 20.0, right: 20.0),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _validateAndContinue,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 255, 215, 56),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    left: 40.0,
-                    right: 40.0,
-                    top: 10.0,
-                    bottom: 10.0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.black),
-                          ),
-                        )
-                      : Text(
-                          AppLocalizations.of(context).continueButton,
-                          style: const TextStyle(
-                              fontSize: 20, color: Colors.black),
-                        ),
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

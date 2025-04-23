@@ -856,52 +856,73 @@ class _CheckoutState extends State<Checkout> {
                   ),
                   Container(
                     height: 48,
-                    width: 390,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black26),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        // Fixed country code widget
-                        const SizedBox(
-                          width: 15.0,
+                        // Country code section
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(
+                                color: Colors.black26,
+                                width: 1.0,
+                              ),
+                            ),
+                          ),
+                          child: const Text(
+                            '+998',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
-                        const Text(
-                          '+998',
-                          style: TextStyle(fontSize: 16.0),
-                        ),
-                        const SizedBox(width: 10.0),
+                        // Phone number input
                         Expanded(
                           child: TextField(
                             decoration: InputDecoration(
                               hintText:
                                   AppLocalizations.of(context).numberHintText,
                               border: InputBorder.none,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              isDense: true,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w400,
                             ),
                             keyboardType: TextInputType.phone,
+                            textInputAction: TextInputAction.next,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                               LengthLimitingTextInputFormatter(9),
                             ],
                             onChanged: (value) {
-                              clientCommentPhone = value;
-                              _updateCommented();
+                              setState(() {
+                                clientCommentPhone = value;
+                                _updateCommented();
+                              });
                             },
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(
-                    height: 40.0,
-                  ),
+                  const SizedBox(height: 40.0),
                   Text(
                     AppLocalizations.of(context).comments,
                     style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600),
+                      fontSize: 16,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(
                     height: 15.0,

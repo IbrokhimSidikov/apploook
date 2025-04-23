@@ -37,6 +37,7 @@ class MyLoaderApp extends StatefulWidget {
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
+  bool _isInitialized = false;
   final notificationProvider = NotificationProvider();
   final notificationService = NotificationService();
 
@@ -48,7 +49,6 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
 
   Future<void> _initializeApp() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await prefs.remove('accepted_privacy_policy'); //to check the privacy policy
     _acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
@@ -58,12 +58,33 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     await notificationService.initialize();
 
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _isInitialized = true;
+      });
     }
+  }
+
+  void _handlePrivacyPolicyAcceptance() {
+    setState(() {
+      _acceptedPrivacyPolicy = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return MaterialApp(
+        home: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFEC700)),
+            ),
+          ),
+        ),
+      );
+    }
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
@@ -72,18 +93,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       ],
       child: _acceptedPrivacyPolicy == true
           ? const MyApp()
-          : ConsentScreen(onAccept: () {
-              runApp(
-                MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider(create: (_) => CartProvider()),
-                    ChangeNotifierProvider(create: (_) => LocaleProvider()),
-                    ChangeNotifierProvider.value(value: notificationProvider),
-                  ],
-                  child: const MyApp(),
-                ),
-              );
-            }),
+          : ConsentScreen(onAccept: _handlePrivacyPolicyAcceptance),
     );
   }
 }

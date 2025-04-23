@@ -50,14 +50,20 @@ class NotificationService {
       await _localNotifications.initialize(initSettings);
       print('🔔 Local notifications initialized');
 
+      // Get both FCM and APNS tokens
       String? token = await _fcm.getToken();
-      print('🔔 FCM Token: $token');
-
       String? apnsToken = await _fcm.getAPNSToken();
+
+      print('🔔 FCM Token for testing: $token'); // Use this token for testing
       print('🔔 APNS Token: $apnsToken');
 
-      _fcm.onTokenRefresh.listen((token) {
-        print('🔔 New Token: $token');
+      // Subscribe to a test topic for development
+      await FirebaseMessaging.instance.subscribeToTopic('dev_test');
+      print('🔔 Subscribed to dev_test topic');
+
+      _fcm.onTokenRefresh.listen((newToken) {
+        print('🔔 New Token for testing: $newToken');
+        // You might want to send this token to your server
       });
 
       // Get initial messages that opened the app
