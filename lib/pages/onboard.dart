@@ -107,7 +107,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     
     // Save the selected language
     if (isEnglishSelected || isUzbekSelected) {
-      final selectedLocale = isEnglishSelected ? 'en' : 'uz';
+      final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('selected_language', selectedLocale);
       
