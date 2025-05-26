@@ -57,8 +57,8 @@ class AppLocalizations {
       // Checkout page
       'checkout': 'Checkout',
       'chooseOrderType': 'Choose your order type',
-      'delivery': 'DELIVERY',
-      'selfPickup': 'SELF-PICKUP',
+      'delivery': 'Delivery',
+      'selfPickup': 'Self-Pickup',
       'selfPickupTitle': 'Which store would you like to pick from?',
       'yourDeliveryLocation': 'Your Delivery Location!',
       'chooseYourLocation': 'Choose your location -->',
@@ -159,8 +159,8 @@ class AppLocalizations {
       // Checkout page
       'checkout': 'Buyurtmani rasmiylashtirish',
       'chooseOrderType': 'Buyurtma turini tanlang',
-      'delivery': 'YETKAZISH',
-      'selfPickup': 'OLIB KETISH',
+      'delivery': 'Yetkazish',
+      'selfPickup': 'Olib ketish',
       'selfPickupTitle': 'Olib ketish uchun filial tanlang',
       'yourDeliveryLocation': 'Yetkazish manzilingiz!',
       'chooseYourLocation': 'Xaritadan tanlang -->',

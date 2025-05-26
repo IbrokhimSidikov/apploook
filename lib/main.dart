@@ -8,16 +8,12 @@ import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/services/notification_service.dart';
-import 'package:apploook/widget/custom_loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:apploook/services/socket_service.dart';
-
-import 'l10n/app_localizations.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
 import 'providers/notification_provider.dart';
@@ -37,7 +33,7 @@ class MyLoaderApp extends StatefulWidget {
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
-  bool _isInitialized = false;
+  // bool _isInitialized = false;
   final notificationProvider = NotificationProvider();
   final notificationService = NotificationService();
 
@@ -58,33 +54,18 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     await notificationService.initialize();
 
     if (mounted) {
-      setState(() {
-        _isInitialized = true;
-      });
+      setState(() {});
     }
   }
 
-  void _handlePrivacyPolicyAcceptance() {
-    setState(() {
-      _acceptedPrivacyPolicy = true;
-    });
-  }
+  // void _handlePrivacyPolicyAcceptance() {
+  //   setState(() {
+  //     _acceptedPrivacyPolicy = true;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return MaterialApp(
-        home: Scaffold(
-          backgroundColor: Colors.white,
-          body: Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFEC700)),
-            ),
-          ),
-        ),
-      );
-    }
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
@@ -93,7 +74,18 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
       ],
       child: _acceptedPrivacyPolicy == true
           ? const MyApp()
-          : ConsentScreen(onAccept: _handlePrivacyPolicyAcceptance),
+          : ConsentScreen(onAccept: () {
+              runApp(
+                MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(create: (_) => CartProvider()),
+                    ChangeNotifierProvider(create: (_) => LocaleProvider()),
+                    ChangeNotifierProvider.value(value: notificationProvider),
+                  ],
+                  child: const MyApp(),
+                ),
+              );
+            }),
     );
   }
 }

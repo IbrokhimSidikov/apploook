@@ -497,7 +497,7 @@ class _ProfileState extends State<Profile> {
         color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Version 1.4.0')],
+          children: [Text('Version 1.6.0')],
         ),
       ),
     );

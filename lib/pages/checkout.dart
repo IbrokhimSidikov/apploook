@@ -8,6 +8,7 @@ import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/widget/branch_locations.dart';
+import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -41,6 +42,11 @@ class _CheckoutState extends State<Checkout> {
   String orderType = '';
   String carDetails = '';
   String carDetailsExtraInfo = '';
+  
+  // Distance calculation variables
+  bool _isCalculatingDistance = false;
+  Map<String, dynamic>? _nearestBranch;
+  String _distanceMessage = '';
 
   late FirebaseRemoteConfig remoteConfig;
   bool _isRemoteConfigInitialized = false;
@@ -53,6 +59,45 @@ class _CheckoutState extends State<Checkout> {
     _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
+    // We'll calculate distance after address selection, not on page load
+  }
+  
+  // Function to calculate distance to the nearest branch
+  Future<void> _calculateDistanceToNearestBranch() async {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final clientLat = cartProvider.showLat();
+    final clientLng = cartProvider.showLong();
+    
+    // Only calculate if we have valid coordinates
+    if (clientLat != 0.0 && clientLng != 0.0) {
+      setState(() {
+        _isCalculatingDistance = true;
+        _distanceMessage = 'Calculating distance...';
+      });
+      
+      try {
+        final nearestBranch = await findNearestBranch(clientLat, clientLng);
+        
+        setState(() {
+          _nearestBranch = nearestBranch;
+          if (nearestBranch != null) {
+            _distanceMessage = 'Distance to nearest branch: ${nearestBranch['distance'].toStringAsFixed(2)} km';
+          } else {
+            _distanceMessage = 'Could not calculate distance to nearest branch';
+          }
+          _isCalculatingDistance = false;
+        });
+      } catch (e) {
+        setState(() {
+          _distanceMessage = 'Error calculating distance: $e';
+          _isCalculatingDistance = false;
+        });
+      }
+    } else {
+      setState(() {
+        _distanceMessage = 'Location coordinates not available';
+      });
+    }
   }
 
   @override
@@ -131,7 +176,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -248,7 +293,7 @@ class _CheckoutState extends State<Checkout> {
                     ),
                   ),
                   child: const Text(
-                    'CARHOP',
+                    'Carhop',
                     style: TextStyle(
                         color: Colors.black, fontWeight: FontWeight.w500),
                   ),
@@ -262,19 +307,76 @@ class _CheckoutState extends State<Checkout> {
               children: [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 15, left: 15),
-                  child: Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      _selectedIndex == 0
-                          ? AppLocalizations.of(context).yourDeliveryLocation
-                          : _selectedIndex == 1
-                              ? AppLocalizations.of(context).selfPickupTitle
-                              : AppLocalizations.of(context).carhopService,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Text(
+                        _selectedIndex == 0
+                            ? AppLocalizations.of(context).yourDeliveryLocation
+                            : _selectedIndex == 1
+                                ? AppLocalizations.of(context).selfPickupTitle
+                                : AppLocalizations.of(context).carhopService,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                    ),
+                      // Display distance to nearest branch
+                      if (_selectedIndex == 0) // Only show for delivery
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0, horizontal: 16.0),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.amber.shade300),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on, color: Colors.red),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Branch Distance Information',
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    if (_isCalculatingDistance)
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 8.0),
+                                        child: SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                SizedBox(height: 8),
+                                Text(_distanceMessage),
+                                if (_nearestBranch != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Text(
+                                      'Branch coordinates: ${_nearestBranch!['lat']?.toStringAsFixed(6)}, ${_nearestBranch!['lng']?.toStringAsFixed(6)}',
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: _calculateDistanceToNearestBranch,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.amber,
+                                    foregroundColor: Colors.black,
+                                  ),
+                                  child: Text('Recalculate Distance'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
                 IndexedStack(
@@ -293,6 +395,9 @@ class _CheckoutState extends State<Checkout> {
                           setState(() {
                             selectedAddress = result;
                           });
+                          
+                          // Calculate distance after address selection
+                          _calculateDistanceToNearestBranch();
                         }
                       },
                       child: Padding(

@@ -4,7 +4,6 @@ import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:apploook/widget/cached_product_image.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
