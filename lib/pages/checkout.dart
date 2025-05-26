@@ -355,7 +355,7 @@ class _CheckoutState extends State<Checkout> {
                                 ),
                                 SizedBox(height: 8),
                                 Text(_distanceMessage),
-                                if (_nearestBranch != null)
+                                if (_nearestBranch != null) ...[  
                                   Padding(
                                     padding: const EdgeInsets.only(top: 4.0),
                                     child: Text(
@@ -363,6 +363,30 @@ class _CheckoutState extends State<Checkout> {
                                       style: TextStyle(fontSize: 12, color: Colors.grey[700]),
                                     ),
                                   ),
+                                  if (_nearestBranch!['deliveryFee'] != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade50,
+                                          borderRadius: BorderRadius.circular(4),
+                                          border: Border.all(color: Colors.green.shade200),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.delivery_dining, color: Colors.green.shade700, size: 18),
+                                            SizedBox(width: 8),
+                                            Text(
+                                              'Delivery Fee: ${_nearestBranch!['deliveryFee'].toString()} sum',
+                                              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green.shade700),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
                                 SizedBox(height: 8),
                                 ElevatedButton(
                                   onPressed: _calculateDistanceToNearestBranch,
