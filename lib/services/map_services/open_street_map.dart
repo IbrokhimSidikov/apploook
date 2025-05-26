@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-// Delivery fee calculation constants
 const int baseDeliveryFee = 12000;
 
 final List<Map<String, dynamic>> deliveryFeeRules = [
@@ -23,28 +22,24 @@ final List<Map<String, dynamic>> deliveryFeeRules = [
   {'from': 17, 'to': 18, 'fee': 44000},
 ];
 
-// Calculate delivery fee based on distance in kilometers
 int calculateDeliveryFee(double distanceKm) {
-  // If distance is less than 2 km, use base fee
   if (distanceKm < 2) {
     return baseDeliveryFee;
   }
-  
-  // Check each rule to find the appropriate fee
+
   for (var rule in deliveryFeeRules) {
     if (distanceKm >= rule['from'] && distanceKm < rule['to']) {
       return rule['fee'];
     }
   }
-  
+
   // If distance is beyond our rules, use the highest fee + extra
   if (distanceKm >= 18) {
     // Add 2000 for each km beyond 18
     int extraKm = (distanceKm - 18).ceil();
     return 44000 + (extraKm * 2000);
   }
-  
-  // Fallback to base fee (shouldn't reach here)
+
   return baseDeliveryFee;
 }
 
@@ -54,12 +49,8 @@ Future<double?> getDistanceInMeters({
   required double endLat,
   required double endLng,
 }) async {
-  // OSRM API doesn't require an API key for the public demo server
-  // Using the OSRM demo server - for production, consider hosting your own OSRM instance
   final String baseUrl = 'https://router.project-osrm.org/route/v1/car';
 
-  // OSRM uses longitude,latitude format in the URL path
-  // Format: /route/v1/car/{longitude},{latitude};{longitude},{latitude}
   final String coordinates = '$startLng,$startLat;$endLng,$endLat';
   final String url =
       '$baseUrl/$coordinates?annotations=false&geometries=polyline6&overview=false&steps=false';
@@ -71,15 +62,13 @@ Future<double?> getDistanceInMeters({
       final data = jsonDecode(response.body);
       print('OSRM API Response: ${response.body}');
 
-      // Check if the route was found
       if (data['code'] == 'Ok' &&
           data['routes'] != null &&
           data['routes'].isNotEmpty &&
           data['routes'][0]['legs'] != null &&
           data['routes'][0]['legs'].isNotEmpty) {
-        // Extract distance from the legs section (in meters)
         final distanceInMeters = data['routes'][0]['legs'][0]['distance'];
-        return distanceInMeters / 1000; // Convert to kilometers
+        return distanceInMeters / 1000;
       } else {
         print('Route not found or invalid response format');
         return null;
@@ -109,16 +98,14 @@ Future<Map<String, dynamic>?> findNearestBranch(
   double shortestDistance = double.infinity;
   Map<String, dynamic>? nearestBranch;
 
-  // Print client coordinates for debugging
   print('Client coordinates: Lat: $clientLat, Long: $clientLng');
 
   for (var branch in branches) {
-    // Calculate distance from branch to client (branch is start, client is destination)
     final distance = await getDistanceInMeters(
-      startLat: branch['lat']!,  // Branch latitude as starting point
-      startLng: branch['lng']!,  // Branch longitude as starting point
-      endLat: clientLat,        // Client latitude as destination
-      endLng: clientLng,        // Client longitude as destination
+      startLat: branch['lat']!, // Branch latitude as starting point
+      startLng: branch['lng']!, // Branch longitude as starting point
+      endLat: clientLat, // Client latitude as destination
+      endLng: clientLng, // Client longitude as destination
     );
 
     print(
@@ -126,9 +113,8 @@ Future<Map<String, dynamic>?> findNearestBranch(
 
     if (distance != null && distance < shortestDistance) {
       shortestDistance = distance;
-      // Calculate delivery fee based on distance
       int deliveryFee = calculateDeliveryFee(distance);
-      
+
       nearestBranch = {
         'lat': branch['lat'],
         'lng': branch['lng'],
