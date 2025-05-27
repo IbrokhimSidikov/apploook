@@ -84,13 +84,13 @@ Future<double?> getDistanceInMeters({
   }
 }
 
-List<Map<String, double>> branches = [
-  {'lng': 69.244055, 'lat': 41.313691}, //Boulevard
-  {'lng': 69.206030, 'lat': 41.346379}, //Beruniy
-  {'lng': 69.293222, 'lat': 41.366780}, //Yunusobod
-  {'lng': 69.327426, 'lat': 41.326421}, //Maksim Gorkiy
-  {'lng': 69.201888, 'lat': 41.276812}, //Chilanzar
-  {'lng': 69.060309, 'lat': 41.120050}, //Yangiyol
+List<Map<String, dynamic>> branches = [
+  {'lng': 69.244055, 'lat': 41.313691, 'name': 'Loook Boulevard'},
+  {'lng': 69.206030, 'lat': 41.346379, 'name': 'Loook Beruniy'},
+  {'lng': 69.293222, 'lat': 41.366780, 'name': 'Loook Yunusobod'},
+  {'lng': 69.327426, 'lat': 41.326421, 'name': 'Loook Maksim Gorkiy'},
+  {'lng': 69.201888, 'lat': 41.276812, 'name': 'Loook Chilanzar'},
+  {'lng': 69.060309, 'lat': 41.120050, 'name': 'Loook YangiYo\'l'},
 ];
 
 Future<Map<String, dynamic>?> findNearestBranch(
@@ -118,6 +118,7 @@ Future<Map<String, dynamic>?> findNearestBranch(
       nearestBranch = {
         'lat': branch['lat'],
         'lng': branch['lng'],
+        'name': branch['name'],
         'distance': distance,
         'deliveryFee': deliveryFee,
       };
