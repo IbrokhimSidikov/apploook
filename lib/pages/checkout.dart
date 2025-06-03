@@ -9,6 +9,7 @@ import 'package:apploook/models/view/map_screen.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
+import 'package:apploook/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -1141,56 +1142,105 @@ class _CheckoutState extends State<Checkout> {
                       });
 
                       try {
-                        if (_selectedIndex == 0) {
-                          // Send order to Telegram
-                          await sendOrderToTelegram(
-                            selectedAddress, // address
-                            "Неизвестно", // branchName
-                            firstName, // name
-                            phoneNumber, // phone
-                            selectedOption!, // paymentType
-                            commented,
-                            orderItems, // orderItems
-                            orderPrice, // total
-                            cartProvider.showLat(), // latitude
-                            cartProvider.showLong(), // longitude
-                            orderType,
-                            carDetails,
-                            cartProvider,
-                          );
-                        } else if (_selectedIndex == 1) {
-                          await sendOrderToTelegram(
-                            "Неизвестно", // address
-                            selectedBranch!, // branchName
-                            firstName, // name
-                            phoneNumber, // phone
-                            selectedOption!, // paymentType
-                            commented,
-                            orderItems, // orderItems
-                            orderPrice, // total
-                            41.313798749076454, // latitude ,
-                            69.24407311805851, // longitude
-                            orderType,
-                            carDetails,
-                            cartProvider,
-                          );
-                        } else if (_selectedIndex == 2) {
-                          await sendOrderToTelegram(
-                            "Неизвестно", // address
-                            selectedBranch!, // branchName
-                            firstName, // name
-                            phoneNumber, // phone
-                            selectedOption!, // paymentType
-                            commented,
-                            orderItems, // orderItems
-                            orderPrice, // total
-                            41.313798749076454, // latitude ,
-                            69.24407311805851, // longitude
-                            orderType,
-                            carDetails,
-                            cartProvider,
-                          );
+                        // First try to use the new API endpoint
+                        bool apiSuccess = false;
+
+                        // Only use carhop flow for _selectedIndex == 2
+                        if (_selectedIndex != 2) {
+                          // Try the new API endpoint first
+                          try {
+                            if (_selectedIndex == 0) {
+                              // Delivery order
+                              apiSuccess = await sendOrderToApi(
+                                selectedAddress, // address
+                                firstName, // name
+                                phoneNumber, // phone
+                                selectedOption!, // paymentType
+                                commented, // comment
+                                orderPrice, // total
+                                cartProvider.showLat(), // latitude
+                                cartProvider.showLong(), // longitude
+                                cartProvider,
+                              );
+                            } else if (_selectedIndex == 1) {
+                              // Pickup order
+                              apiSuccess = await sendOrderToApi(
+                                "Branch: $selectedBranch", // address with branch name
+                                firstName, // name
+                                phoneNumber, // phone
+                                selectedOption!, // paymentType
+                                commented, // comment
+                                orderPrice, // total
+                                41.313798749076454, // default latitude
+                                69.24407311805851, // default longitude
+                                cartProvider,
+                              );
+                            }
+                          } catch (e) {
+                            print(
+                                'Error with new API, falling back to old method: $e');
+                            apiSuccess = false;
+                          }
                         }
+
+                        // If the new API failed or it's a carhop order, use the old method
+                        if (!apiSuccess) {
+                          if (_selectedIndex == 0) {
+                            // Send order to Telegram
+                            await sendOrderToTelegram(
+                              selectedAddress, // address
+                              "Неизвестно", // branchName
+                              firstName, // name
+                              phoneNumber, // phone
+                              selectedOption!, // paymentType
+                              commented,
+                              orderItems, // orderItems
+                              orderPrice, // total
+                              cartProvider.showLat(), // latitude
+                              cartProvider.showLong(), // longitude
+                              orderType,
+                              carDetails,
+                              cartProvider,
+                            );
+                          } else if (_selectedIndex == 1) {
+                            await sendOrderToTelegram(
+                              "Неизвестно", // address
+                              selectedBranch!, // branchName
+                              firstName, // name
+                              phoneNumber, // phone
+                              selectedOption!, // paymentType
+                              commented,
+                              orderItems, // orderItems
+                              orderPrice, // total
+                              41.313798749076454, // latitude ,
+                              69.24407311805851, // longitude
+                              orderType,
+                              carDetails,
+                              cartProvider,
+                            );
+                          } else if (_selectedIndex == 2) {
+                            await sendOrderToTelegram(
+                              "Неизвестно", // address
+                              selectedBranch!, // branchName
+                              firstName, // name
+                              phoneNumber, // phone
+                              selectedOption!, // paymentType
+                              commented,
+                              orderItems, // orderItems
+                              orderPrice, // total
+                              41.313798749076454, // latitude ,
+                              69.24407311805851, // longitude
+                              orderType,
+                              carDetails,
+                              cartProvider,
+                            );
+                          }
+                        }
+
+                        // Reset processing state
+                        setState(() {
+                          _isProcessing = false;
+                        });
 
                         // Show success message
                         showDialog(
@@ -1234,13 +1284,19 @@ class _CheckoutState extends State<Checkout> {
                           ),
                         );
                       } catch (e) {
+                        // Reset processing state
+                        setState(() {
+                          _isProcessing = false;
+                        });
+
                         // Handle error
+                        print('Error during order submission: $e');
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Order Error'),
-                            content: const Text(
-                                'Failed to place your order. Please try again later.'),
+                            content: Text(
+                                'Failed to place your order: ${e.toString().length > 100 ? e.toString().substring(0, 100) + '...' : e.toString()}\n\nPlease try again later.'),
                             actions: [
                               TextButton(
                                 onPressed: () {
@@ -1346,6 +1402,76 @@ class _CheckoutState extends State<Checkout> {
     } catch (e) {
       print('Error getting chat_id: $e');
       return '-1002074915184';
+    }
+  }
+
+  Future<bool> sendOrderToApi(
+      String? address,
+      String name,
+      String phone,
+      String paymentType,
+      String comment,
+      double total,
+      double latitude,
+      double longitude,
+      CartProvider cartProvider) async {
+    try {
+      // Get API service with client credentials
+      final remoteConfig = FirebaseRemoteConfig.instance;
+      final clientId = remoteConfig.getString('api_client_id');
+      final clientSecret = remoteConfig.getString('api_client_secret');
+
+      final apiService = ApiService(
+        clientId: clientId,
+        clientSecret: clientSecret,
+      );
+
+      // Format cart items for the API
+      List<Map<String, dynamic>> formattedItems =
+          cartProvider.cartItems.map((item) {
+        return {
+          "id": item.product.uuid, // Use the UUID from the product model
+          "name": item.product.name,
+          "price": item.product.price,
+          "quantity": item.quantity,
+          "totalPrice": item.product.price * item.quantity,
+        };
+      }).toList();
+
+      print('Formatted items with UUIDs: ${json.encode(formattedItems)}');
+
+      // Send the order using the API service
+      final response = await apiService.createOrder(
+        clientName: name,
+        phoneNumber: phone,
+        latitude: latitude,
+        longitude: longitude,
+        address: address ?? 'No address provided',
+        items: formattedItems,
+        totalCost: total,
+        paymentType: paymentType.toLowerCase() == 'card' ? 'Click' : 'cash',
+        comment: comment,
+        persons: 1,
+      );
+
+      print('Order submitted successfully: ${response.toString()}');
+
+      // Add order notification
+      final notificationProvider =
+          Provider.of<NotificationProvider>(context, listen: false);
+      await notificationProvider.addOrderNotification(
+        title: "New Order",
+        body: "Your order has been placed successfully!",
+        messageId: response['id']?.toString() ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+      );
+
+      // Clear the cart
+      cartProvider.clearCart();
+      return true;
+    } catch (e) {
+      print('Error submitting order to API: $e');
+      return false;
     }
   }
 
@@ -1500,7 +1626,7 @@ class _CheckoutState extends State<Checkout> {
       print("Using chatId: $chatId");
 
       final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
 
       final response = await http.get(
         Uri.parse(telegramDebUrl),

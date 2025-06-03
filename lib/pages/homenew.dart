@@ -10,8 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
+import 'package:apploook/services/menu_service.dart';
 
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
@@ -28,6 +28,7 @@ class Category {
 class Product {
   final String name;
   final int id;
+  final String uuid; // Original UUID from the API
   final int categoryId;
   final String categoryTitle;
   final String? imagePath;
@@ -37,6 +38,7 @@ class Product {
   Product({
     required this.name,
     required this.id,
+    required this.uuid, // Add UUID to constructor
     required this.categoryId,
     required this.categoryTitle,
     this.imagePath,
@@ -46,29 +48,78 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     dynamic description = json['description'];
-    print(description);
-    if (description is String) {
-      // Parse the description JSON string into a map if it's a string
-      description = jsonDecode(description);
+    print('Description type: ${description.runtimeType}, value: $description');
+
+    // Handle description parsing safely
+    if (description is String && description.isNotEmpty) {
+      try {
+        // Try to parse the description JSON string into a map if it's a string
+        description = jsonDecode(description);
+      } catch (e) {
+        print('Error parsing description JSON: $e');
+        // If parsing fails, keep it as a string
+      }
     }
 
+    // Handle price safely
+    double price = 0.0;
+    var rawPrice = json['price'];
+    if (rawPrice != null) {
+      if (rawPrice is double) {
+        price = rawPrice;
+      } else if (rawPrice is int) {
+        price = rawPrice.toDouble();
+      } else {
+        try {
+          price = double.parse(rawPrice.toString());
+        } catch (e) {
+          print('Error parsing price: $e');
+        }
+      }
+    }
+
+    // Store the original UUID string from the API
+    String uuid = '';
+    if (json['id'] != null) {
+      uuid = json['id'].toString();
+    }
+    
     return Product(
-      name: json['name'],
-      id: json['id'],
-      categoryId: json['categoryId'],
-      categoryTitle: json['categoryTitle'],
-      imagePath: json['imagePath'],
-      price: json['price'].toDouble(),
-      description: description,
+      name: json['name'] ?? '',
+      id: json['id'] ?? 0,
+      uuid: uuid, // Include the UUID string
+      categoryId: json['categoryId'] ?? 0,
+      categoryTitle: json['categoryTitle'] ?? '',
+      imagePath: json['imagePath'], // Keep this nullable
+      price: price,
+      description: description ?? {},
     );
   }
 
   String? getDescriptionInLanguage(String languageCode) {
-    if (description != null && description is String) {
-      Map<String, dynamic> descriptionMap = json.decode(description);
-      return descriptionMap[languageCode];
+    if (description == null) {
+      return null;
     }
-    return null;
+
+    // If description is already a Map, use it directly
+    if (description is Map<String, dynamic>) {
+      return description[languageCode]?.toString();
+    }
+
+    // If description is a String, try to parse it as JSON
+    if (description is String && description.isNotEmpty) {
+      try {
+        Map<String, dynamic> descriptionMap = json.decode(description);
+        return descriptionMap[languageCode]?.toString();
+      } catch (e) {
+        print('Error parsing description in getDescriptionInLanguage: $e');
+        // If it's not valid JSON, just return the string itself
+        return description;
+      }
+    }
+
+    // If it's any other type, convert to string
+    return description.toString();
   }
 }
 
@@ -80,7 +131,6 @@ class HomeNew extends StatefulWidget {
 }
 
 class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
-  static const cacheValidityDuration = Duration(hours: 6);
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
@@ -115,29 +165,41 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     loadData();
   }
 
-  Future<bool> isCacheValid() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
-    if (lastUpdateTime == null) return false;
-
-    final currentTime = DateTime.now().millisecondsSinceEpoch;
-    return (currentTime - lastUpdateTime) <
-        cacheValidityDuration.inMilliseconds;
-  }
+  // Cache validation is now handled by MenuService
 
   Future<void> loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cachedData = prefs.getString('cachedCategoryData');
+    try {
+      // Use MenuService which handles caching internally
+      final menuService = MenuService();
+      await menuService.initialize();
 
-    bool isValid = await isCacheValid();
-
-    if (cachedData != null && isValid) {
       setState(() {
-        processCategoryData(json.decode(cachedData));
+        // Get categories and products from the service
+        categories = menuService.categories;
+        allProducts = menuService.allProducts;
+
+        // Dispose existing controllers first
+        for (var controller in _categoryScrollControllers.values) {
+          if (controller.hasClients) {
+            controller.dispose();
+          }
+        }
+        _categoryScrollControllers.clear();
+        
+        // Initialize scroll controllers for each category with valid IDs
+        for (var category in categories) {
+          if (category.id > 0) { // Only create controllers for valid category IDs
+            _categoryScrollControllers[category.id] = ScrollController();
+          } else {
+            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+          }
+        }  
+
         _isLoading = false;
       });
-    } else {
-      await fetchData();
+    } catch (e) {
+      print('Error loading data: $e');
+      await fetchData(); // Fallback to direct fetching if service fails
     }
   }
 
@@ -150,24 +212,38 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   }
 
   Future<void> fetchData() async {
-    final response = await http.get(Uri.parse(
-        'https://api.sievesapp.com/v1/public/pos-category?photo=1&product=1'));
-
-    if (response.statusCode == 200) {
-      List<dynamic> categoryData = json.decode(response.body);
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('cachedCategoryData', response.body);
-      // Save the timestamp of this update
-      await prefs.setInt(
-          'lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
+    try {
+      // Use the MenuService to fetch data
+      final menuService = MenuService();
+      await menuService.initialize();
 
       setState(() {
-        processCategoryData(categoryData);
+        // Get categories and products from the service
+        categories = menuService.categories;
+        allProducts = menuService.allProducts;
+
+        // Dispose existing controllers first
+        for (var controller in _categoryScrollControllers.values) {
+          if (controller.hasClients) {
+            controller.dispose();
+          }
+        }
+        _categoryScrollControllers.clear();
+        
+        // Initialize scroll controllers for each category with valid IDs
+        for (var category in categories) {
+          if (category.id > 0) { // Only create controllers for valid category IDs
+            _categoryScrollControllers[category.id] = ScrollController();
+          } else {
+            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+          }
+        }  
+
         _isLoading = false;
       });
-    } else {
-      throw Exception('Failed to load data');
+    } catch (e) {
+      print('Error fetching data: $e');
+      throw Exception('Failed to load data: $e');
     }
   }
 
@@ -175,38 +251,45 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     setState(() {
       _isLoading = true;
     });
-    await fetchData();
+
+    try {
+      // Use the MenuService to refresh data
+      final menuService = MenuService();
+      await menuService.refreshData();
+
+      setState(() {
+        // Get updated categories and products from the service
+        categories = menuService.categories;
+        allProducts = menuService.allProducts;
+
+        // Dispose existing controllers first
+        for (var controller in _categoryScrollControllers.values) {
+          if (controller.hasClients) {
+            controller.dispose();
+          }
+        }
+        _categoryScrollControllers.clear();
+        
+        // Initialize scroll controllers for each category with valid IDs
+        for (var category in categories) {
+          if (category.id > 0) { // Only create controllers for valid category IDs
+            _categoryScrollControllers[category.id] = ScrollController();
+          } else {
+            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+          }
+        }
+
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error refreshing data: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
-  void processCategoryData(List<dynamic> categoryData) {
-    List<Product> mergedProducts = [];
-    for (var category in categoryData) {
-      String categoryName = category['name']
-          .split('_')[0]; // Get only the first part of the category name
-      if (!categoryName.toLowerCase().contains('ava')) {
-        List<dynamic> productData = category['products'];
-        int categoryId = category['id'];
-        List<Product> products = productData.map((product) {
-          var photo = product['photo'];
-          String? imagePath = photo != null
-              ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
-              : null;
-          return Product(
-              name: product['name'],
-              id: product['id'],
-              categoryId: categoryId,
-              categoryTitle: categoryName,
-              imagePath: imagePath,
-              price: product['priceList']['price'].toDouble(),
-              description: product['description']);
-        }).toList();
-        mergedProducts.addAll(products);
-        categories.add(Category(id: categoryId, name: categoryName));
-        _categoryScrollControllers[categoryId] = ScrollController();
-      }
-    }
-    allProducts = mergedProducts;
-  }
+  // processCategoryData has been moved to MenuService for better organization
 
   void _updateSelectedCategory(double scrollPosition) {
     // Calculate the category id based on the scroll position
@@ -227,11 +310,13 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     }
   }
 
+  // Define scaffoldKey as a class field
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+    final cartProvider = Provider.of<CartProvider>(context);
 
-    var cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.white,
@@ -585,7 +670,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                   Product product =
                                       productsInCategory[productIndex];
                                   return VisibilityDetector(
-                                    key: Key(product.id.toString()),
+                                    key: Key('${category.id}_${productIndex}_${product.id}'),
                                     onVisibilityChanged: (visibilityInfo) {
                                       if (visibilityInfo.visibleFraction == 1) {
                                         selectedCategoryId.value =
@@ -623,10 +708,26 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 10.0),
-                                              child: CachedProductImage(
-                                                imageUrl: product.imagePath!,
+                                              child: SizedBox(
                                                 width: 135.0,
-                                                height: 135.0,
+                                                child: AspectRatio(
+                                                  aspectRatio: 3/2, // Exact 600x400 ratio (3:2)
+                                                  child: product.imagePath != null
+                                                      ? CachedProductImage(
+                                                          imageUrl: product.imagePath!,
+                                                          width: 135.0,
+                                                          height: 90.0,
+                                                        )
+                                                      : Container(
+                                                          color: Colors.grey[200],
+                                                          child: const Center(
+                                                            child: Icon(
+                                                                Icons.image_not_supported,
+                                                                size: 40,
+                                                                color: Colors.grey),
+                                                          ),
+                                                        ),
+                                                ),
                                               ),
                                             ),
                                             Expanded(
@@ -646,17 +747,26 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                                   Consumer<LocaleProvider>(
                                                     builder: (context,
                                                         localeProvider, _) {
+                                                      final description = product
+                                                          .getDescriptionInLanguage(
+                                                              localeProvider
+                                                                  .locale
+                                                                  .languageCode);
+
                                                       return Text(
-                                                        product.getDescriptionInLanguage(
-                                                                localeProvider
-                                                                    .locale
-                                                                    .languageCode) ??
-                                                            'No Description',
+                                                        description != null &&
+                                                                description
+                                                                    .isNotEmpty
+                                                            ? description
+                                                            : 'No Description',
                                                         style: const TextStyle(
                                                           color: Colors.grey,
                                                           fontWeight:
                                                               FontWeight.bold,
                                                         ),
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
                                                       );
                                                     },
                                                   ),
@@ -702,6 +812,21 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
               ),
             ],
           ),
+          // // Simple Menu Button
+          // Positioned(
+          //   top: 100.0,
+          //   right: 20.0,
+          //   child: FloatingActionButton(
+          //     heroTag: 'simpleMenuButton',
+          //     backgroundColor: const Color(0xFFFEC700),
+          //     child: const Icon(Icons.menu_book, color: Colors.black),
+          //     onPressed: () {
+          //       Navigator.pushNamed(context, '/simpleMenu');
+          //     },
+          //   ),
+          // ),
+
+          // Cart Button
           Positioned(
             bottom: 50.0,
             left: 25.0,
@@ -743,6 +868,12 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   }
 
   void _scrollToCategory(int categoryId) {
+    // Safety check - if categories are empty, do nothing
+    if (categories.isEmpty) {
+      print('Cannot scroll to category: categories list is empty');
+      return;
+    }
+    
     // Deselect all categories
     for (var category in categories) {
       category.isSelected = false;
@@ -760,31 +891,62 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     if (selectedCategory != null) {
       selectedCategory.isSelected = true;
 
-      // Scroll to the selected category
-      ScrollController? controller = _categoryScrollControllers[categoryId];
-      if (controller != null && controller.hasClients) {
-        Scrollable.ensureVisible(
-          controller.position.context.storageContext,
-          alignment: 0.0,
-          duration: const Duration(milliseconds: 300),
-        );
+      // Ensure we have a controller for this category
+      if (!_categoryScrollControllers.containsKey(categoryId)) {
+        print('Creating missing scroll controller for category $categoryId');
+        _categoryScrollControllers[categoryId] = ScrollController();
       }
+      
+      // Scroll to the selected category with additional safety checks
+      ScrollController? controller = _categoryScrollControllers[categoryId];
+      if (controller != null) {
+        // Only attempt to scroll if the controller is attached to a scroll view
+        if (controller.hasClients) {
+          try {
+            Scrollable.ensureVisible(
+              controller.position.context.storageContext,
+              alignment: 0.0,
+              duration: const Duration(milliseconds: 300),
+            );
+          } catch (e) {
+            print('Error scrolling to category $categoryId: $e');
+          }
+        } else {
+          print('ScrollController for category $categoryId is not attached to any scroll views');
+        }
+      }
+    } else {
+      print('Category with ID $categoryId not found');
     }
 
+    // Update the selected category ID
     selectedCategoryId.value = categoryId;
   }
 
   void _scrollToCategoryBuy(int? categoryId) {
-    if (categoryId != null) {
-      final index =
-          categories.indexWhere((category) => category.id == categoryId);
-      if (index != -1) {
-        _scrollController.animateTo(
-          index * 100.0,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
+    // Safety check - if categories are empty or categoryId is null, do nothing
+    if (categoryId == null || categories.isEmpty) {
+      return;
+    }
+    
+    final index = categories.indexWhere((category) => category.id == categoryId);
+    if (index != -1) {
+      // Only attempt to scroll if the controller is attached to a scroll view
+      if (_scrollController.hasClients) {
+        try {
+          _scrollController.animateTo(
+            index * 100.0,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        } catch (e) {
+          print('Error scrolling to category $categoryId: $e');
+        }
+      } else {
+        print('Main ScrollController is not attached to any scroll views');
       }
+    } else {
+      print('Category with ID $categoryId not found in the list');
     }
   }
 }

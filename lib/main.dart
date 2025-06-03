@@ -7,6 +7,7 @@ import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/signin.dart';
+import 'package:apploook/pages/simple_menu.dart';
 import 'package:apploook/services/notification_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -129,6 +130,7 @@ class MyApp extends StatelessWidget {
             '/onboard': (context) => Onboard(),
             '/notificationsView': (context) => NotificationsView(),
             '/notification': (context) => NotificationPage(),
+            '/simpleMenu': (context) => SimpleMenuPage(),
           },
         );
       },

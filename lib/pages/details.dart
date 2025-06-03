@@ -30,13 +30,34 @@ class _DetailsState extends State<Details> {
   }
 
   String? getDescriptionInLanguage(String languageCode) {
-    if (widget.product.description != null &&
-        widget.product.description is String) {
-      Map<String, dynamic> descriptionMap =
-          json.decode(widget.product.description);
-      return descriptionMap[languageCode];
+    if (widget.product.description == null) {
+      return null;
     }
-    return null;
+    
+    // If description is already a Map, use it directly
+    if (widget.product.description is Map<String, dynamic>) {
+      return widget.product.description[languageCode]?.toString();
+    }
+    
+    // If description is a String, try to parse it as JSON
+    if (widget.product.description is String) {
+      String descStr = widget.product.description.toString();
+      if (descStr.isEmpty) {
+        return null;
+      }
+      
+      try {
+        Map<String, dynamic> descriptionMap = json.decode(descStr);
+        return descriptionMap[languageCode]?.toString();
+      } catch (e) {
+        print('Error parsing description JSON: $e');
+        // If parsing fails, return the raw string
+        return widget.product.description.toString();
+      }
+    }
+    
+    // For any other type, convert to string
+    return widget.product.description.toString();
   }
 
   @override

@@ -15,12 +15,12 @@ class CachedProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: width,
       height: height,
       child: CachedNetworkImage(
         imageUrl: imageUrl,
-        fit: BoxFit.contain,
+        fit: BoxFit.cover, // Changed from contain to cover for better filling
         placeholder: (context, url) => Container(
           color: Colors.grey[200],
           child: Center(
@@ -38,8 +38,8 @@ class CachedProductImage extends StatelessWidget {
           child: Icon(Icons.error),
         ),
         // Configure memory cache size
-        memCacheWidth: 500,  // Set to your image width
-        memCacheHeight: 500, // Set to your image height
+        memCacheWidth: 600, // Match original image width
+        memCacheHeight: 400, // Match original image height
       ),
     );
   }
