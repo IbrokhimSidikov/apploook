@@ -11,6 +11,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
+import 'package:apploook/services/order_mode_service.dart';
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -134,6 +135,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
+  final OrderModeService _orderModeService = OrderModeService();
 
   List<Category> categories = [];
   List<Product> allProducts = [];
@@ -161,11 +163,77 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _initializeOrderMode();
     _getBanners();
     loadData();
   }
-
-  // Cache validation is now handled by MenuService
+  
+  // Initialize order mode and show selection dialog if needed
+  Future<void> _initializeOrderMode() async {
+    await _orderModeService.initialize();
+    
+    // Only show the dialog if the order mode hasn't been set yet
+    if (!_orderModeService.hasSelectedMode) {
+      // Use a short delay to ensure the app is fully loaded
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _showOrderModeSelectionDialog();
+      });
+    }
+  }
+  
+  // Show order mode selection dialog
+  void _showOrderModeSelectionDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // User must make a selection
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Order Mode'),
+          content: const Text('Please select how you would like to order'),
+          actions: <Widget>[
+            // Delivery/Takeaway button
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+              ),
+              onPressed: () => _setOrderMode(OrderMode.deliveryTakeaway),
+              child: Text(
+                'Delivery/Takeaway',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            // Carhop button
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).primaryColor,
+              ),
+              onPressed: () => _setOrderMode(OrderMode.carhop),
+              child: Text(
+                'Carhop',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  // Set the order mode and refresh data
+  void _setOrderMode(OrderMode mode) async {
+    // Set the order mode
+    await _orderModeService.setOrderMode(mode);
+    
+    // Clear the cart
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    cartProvider.clearCart();
+    
+    // Close the dialog
+    Navigator.of(context).pop();
+    
+    // Refresh the menu data based on the new order mode
+    refreshData();
+  }
 
   Future<void> loadData() async {
     try {
@@ -344,6 +412,21 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   ),
                 ),
                 actions: [
+                  // Order mode selection icon
+                  IconButton(
+                    icon: Icon(
+                      _orderModeService.currentMode == OrderMode.deliveryTakeaway
+                          ? Icons.delivery_dining
+                          : Icons.directions_car,
+                      color: Colors.black,
+                    ),
+                    tooltip: 'Select Order Mode',
+                    onPressed: () async {
+                      // Show the order mode selection dialog
+                      _showOrderModeSelectionDialog();
+                    },
+                  ),
+                  // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),
                     color: Colors.white,
