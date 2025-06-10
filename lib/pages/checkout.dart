@@ -10,6 +10,7 @@ import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
+import 'package:apploook/services/order_mode_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -33,6 +34,8 @@ class Checkout extends StatefulWidget {
 }
 
 class _CheckoutState extends State<Checkout> {
+  // Order mode service to check current mode
+  final OrderModeService _orderModeService = OrderModeService();
   int _selectedIndex = 0;
   late double orderPrice = 0;
   String firstName = '';
@@ -60,7 +63,22 @@ class _CheckoutState extends State<Checkout> {
     _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
+    _initializeOrderMode();
     // We'll calculate distance after address selection, not on page load
+  }
+  
+  // Initialize order mode and set initial tab selection accordingly
+  Future<void> _initializeOrderMode() async {
+    await _orderModeService.initialize();
+    setState(() {
+      // If in carhop mode, select the carhop tab (index 2) by default
+      if (_orderModeService.currentMode == OrderMode.carhop) {
+        _selectedIndex = 2;
+      } else {
+        // Otherwise default to delivery tab (index 0)
+        _selectedIndex = 0;
+      }
+    });
   }
 
   // Function to calculate distance to the nearest branch
@@ -239,67 +257,128 @@ class _CheckoutState extends State<Checkout> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 0),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      _selectedIndex == 0
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                // Delivery button - disabled in carhop mode
+                _orderModeService.currentMode == OrderMode.carhop
+                  ? ElevatedButton(
+                      onPressed: null, // Disabled in carhop mode
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          const Color(0xffE0E0E0), // Gray color for disabled state
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).delivery,
+                        style: const TextStyle(
+                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => setState(() => _selectedIndex = 0),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          _selectedIndex == 0
+                              ? const Color(0xffFEC700)
+                              : const Color(0xffF1F2F7),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).delivery,
+                        style: const TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.w500),
                       ),
                     ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).delivery,
-                    style: const TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 1),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      _selectedIndex == 1
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                
+                // Self-pickup button - disabled in carhop mode
+                _orderModeService.currentMode == OrderMode.carhop
+                  ? ElevatedButton(
+                      onPressed: null, // Disabled in carhop mode
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          const Color(0xffE0E0E0), // Gray color for disabled state
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).selfPickup,
+                        style: const TextStyle(
+                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: () => setState(() => _selectedIndex = 1),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                          _selectedIndex == 1
+                              ? const Color(0xffFEC700)
+                              : const Color(0xffF1F2F7),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context).selfPickup,
+                        style: const TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.w500),
                       ),
                     ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).selfPickup,
-                    style: const TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                ElevatedButton(
-                  // onPressed: () {},
-                  onPressed: () => setState(() => _selectedIndex = 2),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      _selectedIndex == 2
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                
+                // Carhop button - disabled in delivery/takeaway mode
+                _orderModeService.currentMode == OrderMode.carhop
+                  ? ElevatedButton(
+                      onPressed: () => setState(() => _selectedIndex = 2),
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          _selectedIndex == 2
+                              ? const Color(0xffFEC700)
+                              : const Color(0xffF1F2F7),
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Carhop',
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.w500),
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: null, // Disabled button
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          const Color(0xffE0E0E0), // Gray color for disabled state
+                        ),
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        'Carhop',
+                        style: TextStyle(
+                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
                       ),
                     ),
-                  ),
-                  child: const Text(
-                    'Carhop',
-                    style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
-                  ),
-                ),
               ],
             ),
             const SizedBox(
