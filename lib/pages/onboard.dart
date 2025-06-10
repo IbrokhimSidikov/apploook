@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:apploook/providers/locale_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:apploook/providers/locale_provider.dart';
+import 'package:apploook/services/order_mode_service.dart';
+import 'package:apploook/services/menu_service.dart';
+import 'package:apploook/pages/homenew.dart';
 
 class Onboard extends StatefulWidget {
   const Onboard({Key? key}) : super(key: key);
@@ -20,17 +22,25 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   bool isEnglishSelected = false;
   bool isUzbekSelected = false;
   bool _isMenuLoaded = false;
+  bool _isLoading = false;
+
+  // Order mode selection
+  final OrderModeService _orderModeService = OrderModeService();
+  final MenuService _menuService = MenuService();
+  OrderMode? _selectedOrderMode =
+      OrderMode.deliveryTakeaway; // Default selection
 
   @override
   void initState() {
     super.initState();
     _loadLanguagePreference();
-    _initializeVideo();
-    _preloadMenuData();
+    _initializeOrderMode();
+    _initializeVideo(); // This will call _preloadMenuData() after video starts
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
+    print('Onboard initState: Order mode initialized to $_selectedOrderMode');
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -51,6 +61,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     setState(() {});
     _videoController?.play();
 
+    // Start preloading menu data as soon as video starts playing
+    _preloadMenuData();
+
     // Wait for video to complete
     _videoController?.addListener(() {
       final controller = _videoController;
@@ -64,37 +77,40 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     });
   }
 
-  Future<void> _preloadMenuData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? cachedData = prefs.getString('cachedCategoryData');
-    bool isValid = false;
+  Future<void> _preloadMenuData({OrderMode? specificOrderMode}) async {
+    print('Onboard: Starting menu preloading during video playback');
 
-    if (cachedData != null) {
-      final lastUpdateTime = prefs.getInt('lastCacheUpdateTime');
-      if (lastUpdateTime != null) {
-        final currentTime = DateTime.now().millisecondsSinceEpoch;
-        isValid = (currentTime - lastUpdateTime) <
-            const Duration(hours: 6).inMilliseconds;
-      }
-    }
+    try {
+      // First, initialize the order mode service to ensure we have a valid order mode
+      await _orderModeService.initialize();
 
-    if (!isValid) {
-      try {
-        final response = await http.get(Uri.parse(
-            'https://api.sievesapp.com/v1/public/pos-category?photo=1&product=1'));
-        if (response.statusCode == 200) {
-          await prefs.setString('cachedCategoryData', response.body);
-          await prefs.setInt(
-              'lastCacheUpdateTime', DateTime.now().millisecondsSinceEpoch);
-        }
-      } catch (e) {
-        print('Error pre-loading menu data: $e');
+      // Use the specified order mode, current order mode, or default to delivery/takeaway
+      OrderMode orderMode = specificOrderMode ?? _orderModeService.currentMode;
+      print('Onboard: Preloading menu data for order mode: $orderMode');
+
+      // If a specific order mode is provided, set it in the service
+      if (specificOrderMode != null) {
+        await _orderModeService.setOrderMode(specificOrderMode);
       }
+
+      // Preload the menu data for the current order mode
+      await _menuService.initialize();
+      await _menuService.refreshData(); // Use the correct method name
+
+      print('Onboard: Menu data preloading completed successfully');
+
+      if (!mounted) return;
+      setState(() {
+        _isMenuLoaded = true;
+      });
+    } catch (e) {
+      print('Onboard: Error preloading menu data: $e');
+      // Even if there's an error, we'll mark as loaded to not block the UI
+      if (!mounted) return;
+      setState(() {
+        _isMenuLoaded = true;
+      });
     }
-    if (!mounted) return;
-    setState(() {
-      _isMenuLoaded = true;
-    });
   }
 
   @override
@@ -104,43 +120,101 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  Future<void> _initializeOrderMode() async {
+    await _orderModeService.initialize();
+    // Set the default order mode to what's in the service if available
+    setState(() {
+      _selectedOrderMode = _orderModeService.currentMode;
+    });
+    print('OrderMode initialized from service: $_selectedOrderMode');
+  }
+
   Future<void> _continue() async {
     if (!mounted) return;
 
-    // Save the selected language
-    if (isEnglishSelected || isUzbekSelected) {
-      final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('selected_language', selectedLocale);
+    // Set loading state
+    setState(() {
+      _isLoading = true;
+    });
 
-      if (!mounted) return;
-      context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
-    }
+    print('Continue button pressed');
+    print(
+        'Language selection: English=$isEnglishSelected, Uzbek=$isUzbekSelected');
+    print('Order mode selection: $_selectedOrderMode');
 
-    if (_isMenuLoaded) {
-      Navigator.pushReplacementNamed(context, '/homeNew');
-    } else {
-      // Show loading indicator if menu is not ready
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFEC700)),
-            ),
-          );
-        },
+    // Check if language is selected
+    if (!isEnglishSelected && !isUzbekSelected) {
+      print('No language selected, showing error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a language'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
       );
-
-      // Wait for menu to load
-      while (!_isMenuLoaded) {
-        await Future.delayed(const Duration(milliseconds: 100));
-      }
-      if (!mounted) return;
-      Navigator.pop(context); // Remove loading dialog
-      Navigator.pushReplacementNamed(context, '/homeNew');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
     }
+
+    // Order mode should always have a default value now, but check just in case
+    if (_selectedOrderMode == null) {
+      print('No order mode selected, showing error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an order mode'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Save the selected language
+    final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_language', selectedLocale);
+    print('Saved language: $selectedLocale');
+
+    if (!mounted) return;
+    context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
+
+    // Save the selected order mode and reload menu data for this specific order mode
+    print('Saving order mode: $_selectedOrderMode');
+
+    // Reset menu loaded flag since we need to load for the specific order mode
+    setState(() {
+      _isMenuLoaded = false;
+    });
+
+    // Preload menu data specifically for the selected order mode
+    await _preloadMenuData(specificOrderMode: _selectedOrderMode);
+
+    // Force a refresh of the SharedPreferences to ensure it's saved
+    if (_selectedOrderMode == OrderMode.carhop) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('order_mode', OrderMode.carhop.index);
+      await prefs.setBool('has_user_selected_order_mode', true);
+      print('Explicitly saved carhop mode to SharedPreferences');
+    }
+
+    if (!mounted) return;
+
+    print('Menu loaded, navigating to HomeNew with mode: $_selectedOrderMode');
+    setState(() {
+      _isLoading = false;
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeNew(initialOrderMode: _selectedOrderMode),
+      ),
+    );
   }
 
   @override
@@ -379,10 +453,150 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ],
                           ),
-                          const Spacer(
-                              flex: 3), // Adjust flex to control spacing
+                          const Spacer(flex: 2),
+
+                          // Order Mode Selection Section
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(left: 16, bottom: 12),
+                                child: Text(
+                                  'Select Order Mode:',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  // Delivery/Takeaway Option
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        print(
+                                            'Delivery/Takeaway option tapped');
+                                        setState(() {
+                                          _selectedOrderMode =
+                                              OrderMode.deliveryTakeaway;
+                                          print(
+                                              'Selected order mode updated: $_selectedOrderMode');
+                                        });
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        decoration: BoxDecoration(
+                                          color: _selectedOrderMode ==
+                                                  OrderMode.deliveryTakeaway
+                                              ? const Color.fromARGB(
+                                                  255, 255, 210, 57)
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 1,
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.delivery_dining,
+                                              size: 32,
+                                              color: Colors.black,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            const Text(
+                                              'Delivery/Takeaway',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  // Carhop Option
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        print('Carhop option tapped');
+                                        setState(() {
+                                          _selectedOrderMode = OrderMode.carhop;
+                                          print(
+                                              'Selected order mode updated: $_selectedOrderMode');
+                                        });
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 16),
+                                        decoration: BoxDecoration(
+                                          color: _selectedOrderMode ==
+                                                  OrderMode.carhop
+                                              ? const Color.fromARGB(
+                                                  255, 255, 210, 57)
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 1,
+                                              blurRadius: 3,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Icon(
+                                              Icons.directions_car,
+                                              size: 32,
+                                              color: Colors.black,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            const Text(
+                                              'Carhop',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const Spacer(flex: 2),
                           TextButton(
-                            onPressed: _continue,
+                            onPressed: _isLoading ? null : _continue,
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
@@ -397,21 +611,36 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 20),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFFEC700),
+                                  color: _isLoading
+                                      ? const Color(0xFFE0E0E0)
+                                      : const Color(0xFFFEC700),
                                   borderRadius: BorderRadius.circular(50),
                                 ),
-                                child: const Text(
-                                  "Continue",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.visible,
-                                ),
+                                child: _isLoading
+                                    ? const Center(
+                                        child: SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                    Colors.black),
+                                            strokeWidth: 3,
+                                          ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        "Continue",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.visible,
+                                      ),
                               ),
                             ),
                           ),

@@ -84,7 +84,7 @@ class Product {
     if (json['id'] != null) {
       uuid = json['id'].toString();
     }
-    
+
     return Product(
       name: json['name'] ?? '',
       id: json['id'] ?? 0,
@@ -125,7 +125,9 @@ class Product {
 }
 
 class HomeNew extends StatefulWidget {
-  const HomeNew({super.key});
+  final OrderMode? initialOrderMode;
+
+  const HomeNew({super.key, this.initialOrderMode});
 
   @override
   State<HomeNew> createState() => _HomeNewState();
@@ -136,6 +138,9 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
   final OrderModeService _orderModeService = OrderModeService();
+
+  // Track current order mode to detect changes
+  OrderMode? _currentOrderMode;
 
   List<Category> categories = [];
   List<Product> allProducts = [];
@@ -163,24 +168,68 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _initializeOrderMode();
-    _getBanners();
-    loadData();
+    // Initialize everything in the proper sequence
+    _initializeAndLoadData();
   }
-  
-  // Initialize order mode and show selection dialog if needed
-  Future<void> _initializeOrderMode() async {
-    await _orderModeService.initialize();
-    
-    // Only show the dialog if the order mode hasn't been set yet
-    if (!_orderModeService.hasSelectedMode) {
-      // Use a short delay to ensure the app is fully loaded
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _showOrderModeSelectionDialog();
-      });
+
+  Future<void> _initializeAndLoadData() async {
+    try {
+      // First initialize order mode (this will use initialOrderMode if provided)
+      await _initializeOrderMode();
+
+      // Then get banners (non-blocking)
+      _getBanners();
+
+      // Finally load menu data after order mode is initialized
+      print(
+          'HomeNew: Loading menu data for order mode: ${_orderModeService.currentMode}');
+      await loadData();
+
+      // If we're using an initialOrderMode, force a refresh of the data
+      if (widget.initialOrderMode != null) {
+        print(
+            'HomeNew: Forcing data refresh for initialOrderMode: ${widget.initialOrderMode}');
+        await refreshData();
+      }
+
+      // Debug print to verify the order mode
+      print(
+          'HomeNew: Initialization complete with order mode: ${_orderModeService.currentMode}');
+    } catch (e) {
+      print('HomeNew: Error during initialization: $e');
+      // Still try to load data even if there was an error
+      await loadData();
     }
   }
-  
+
+  // Initialize order mode and show selection dialog if needed
+  Future<void> _initializeOrderMode() async {
+    // First initialize the order mode service
+    await _orderModeService.initialize();
+
+    // Check if we have an initialOrderMode from the onboard page
+    if (widget.initialOrderMode != null) {
+      print(
+          'HomeNew: Using initialOrderMode from onboard page: ${widget.initialOrderMode}');
+      // Set the order mode directly from the parameter
+      await _orderModeService.setOrderMode(widget.initialOrderMode!);
+
+      // Force a refresh of SharedPreferences to ensure it's saved
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('order_mode', widget.initialOrderMode!.index);
+      await prefs.setBool('has_user_selected_order_mode', true);
+      print(
+          'HomeNew: Explicitly saved order mode to SharedPreferences: ${widget.initialOrderMode}');
+    }
+
+    // Debug print to verify the order mode was loaded correctly
+    print(
+        'HomeNew: Order mode initialized to: ${_orderModeService.currentMode}');
+
+    // Store the current mode for reference
+    _currentOrderMode = _orderModeService.currentMode;
+  }
+
   // Show order mode selection dialog
   void _showOrderModeSelectionDialog() {
     showDialog(
@@ -218,19 +267,19 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       },
     );
   }
-  
+
   // Set the order mode and refresh data
   void _setOrderMode(OrderMode mode) async {
     // Set the order mode
     await _orderModeService.setOrderMode(mode);
-    
+
     // Clear the cart
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     cartProvider.clearCart();
-    
+
     // Close the dialog
     Navigator.of(context).pop();
-    
+
     // Refresh the menu data based on the new order mode
     refreshData();
   }
@@ -253,15 +302,17 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
           }
         }
         _categoryScrollControllers.clear();
-        
+
         // Initialize scroll controllers for each category with valid IDs
         for (var category in categories) {
-          if (category.id > 0) { // Only create controllers for valid category IDs
+          if (category.id > 0) {
+            // Only create controllers for valid category IDs
             _categoryScrollControllers[category.id] = ScrollController();
           } else {
-            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+            print(
+                'Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
           }
-        }  
+        }
 
         _isLoading = false;
       });
@@ -297,15 +348,17 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
           }
         }
         _categoryScrollControllers.clear();
-        
+
         // Initialize scroll controllers for each category with valid IDs
         for (var category in categories) {
-          if (category.id > 0) { // Only create controllers for valid category IDs
+          if (category.id > 0) {
+            // Only create controllers for valid category IDs
             _categoryScrollControllers[category.id] = ScrollController();
           } else {
-            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+            print(
+                'Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
           }
-        }  
+        }
 
         _isLoading = false;
       });
@@ -337,13 +390,15 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
           }
         }
         _categoryScrollControllers.clear();
-        
+
         // Initialize scroll controllers for each category with valid IDs
         for (var category in categories) {
-          if (category.id > 0) { // Only create controllers for valid category IDs
+          if (category.id > 0) {
+            // Only create controllers for valid category IDs
             _categoryScrollControllers[category.id] = ScrollController();
           } else {
-            print('Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+            print(
+                'Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
           }
         }
 
@@ -415,7 +470,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                   // Order mode selection icon
                   IconButton(
                     icon: Icon(
-                      _orderModeService.currentMode == OrderMode.deliveryTakeaway
+                      _orderModeService.currentMode ==
+                              OrderMode.deliveryTakeaway
                           ? Icons.delivery_dining
                           : Icons.directions_car,
                       color: Colors.black,
@@ -753,7 +809,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                   Product product =
                                       productsInCategory[productIndex];
                                   return VisibilityDetector(
-                                    key: Key('${category.id}_${productIndex}_${product.id}'),
+                                    key: Key(
+                                        '${category.id}_${productIndex}_${product.id}'),
                                     onVisibilityChanged: (visibilityInfo) {
                                       if (visibilityInfo.visibleFraction == 1) {
                                         selectedCategoryId.value =
@@ -794,20 +851,26 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
                                               child: SizedBox(
                                                 width: 135.0,
                                                 child: AspectRatio(
-                                                  aspectRatio: 3/2, // Exact 600x400 ratio (3:2)
-                                                  child: product.imagePath != null
+                                                  aspectRatio: 3 /
+                                                      2, // Exact 600x400 ratio (3:2)
+                                                  child: product.imagePath !=
+                                                          null
                                                       ? CachedProductImage(
-                                                          imageUrl: product.imagePath!,
+                                                          imageUrl: product
+                                                              .imagePath!,
                                                           width: 135.0,
                                                           height: 90.0,
                                                         )
                                                       : Container(
-                                                          color: Colors.grey[200],
+                                                          color:
+                                                              Colors.grey[200],
                                                           child: const Center(
                                                             child: Icon(
-                                                                Icons.image_not_supported,
+                                                                Icons
+                                                                    .image_not_supported,
                                                                 size: 40,
-                                                                color: Colors.grey),
+                                                                color: Colors
+                                                                    .grey),
                                                           ),
                                                         ),
                                                 ),
@@ -956,7 +1019,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
       print('Cannot scroll to category: categories list is empty');
       return;
     }
-    
+
     // Deselect all categories
     for (var category in categories) {
       category.isSelected = false;
@@ -979,7 +1042,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
         print('Creating missing scroll controller for category $categoryId');
         _categoryScrollControllers[categoryId] = ScrollController();
       }
-      
+
       // Scroll to the selected category with additional safety checks
       ScrollController? controller = _categoryScrollControllers[categoryId];
       if (controller != null) {
@@ -995,7 +1058,8 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
             print('Error scrolling to category $categoryId: $e');
           }
         } else {
-          print('ScrollController for category $categoryId is not attached to any scroll views');
+          print(
+              'ScrollController for category $categoryId is not attached to any scroll views');
         }
       }
     } else {
@@ -1011,8 +1075,9 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
     if (categoryId == null || categories.isEmpty) {
       return;
     }
-    
-    final index = categories.indexWhere((category) => category.id == categoryId);
+
+    final index =
+        categories.indexWhere((category) => category.id == categoryId);
     if (index != -1) {
       // Only attempt to scroll if the controller is attached to a scroll view
       if (_scrollController.hasClients) {
