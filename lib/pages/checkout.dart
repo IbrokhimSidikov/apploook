@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 
-import 'package:apploook/config/branch_config.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
@@ -11,10 +10,10 @@ import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
+import 'package:apploook/services/order_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -66,7 +65,7 @@ class _CheckoutState extends State<Checkout> {
     _initializeOrderMode();
     // We'll calculate distance after address selection, not on page load
   }
-  
+
   // Initialize order mode and set initial tab selection accordingly
   Future<void> _initializeOrderMode() async {
     await _orderModeService.initialize();
@@ -259,126 +258,132 @@ class _CheckoutState extends State<Checkout> {
               children: [
                 // Delivery button - disabled in carhop mode
                 _orderModeService.currentMode == OrderMode.carhop
-                  ? ElevatedButton(
-                      onPressed: null, // Disabled in carhop mode
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          const Color(0xffE0E0E0), // Gray color for disabled state
-                        ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    ? ElevatedButton(
+                        onPressed: null, // Disabled in carhop mode
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            const Color(
+                                0xffE0E0E0), // Gray color for disabled state
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).delivery,
-                        style: const TextStyle(
-                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () => setState(() => _selectedIndex = 0),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          _selectedIndex == 0
-                              ? const Color(0xffFEC700)
-                              : const Color(0xffF1F2F7),
+                        child: Text(
+                          AppLocalizations.of(context).delivery,
+                          style: const TextStyle(
+                              color: Color(0xFF9E9E9E),
+                              fontWeight: FontWeight.w500),
                         ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      )
+                    : ElevatedButton(
+                        onPressed: () => setState(() => _selectedIndex = 0),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            _selectedIndex == 0
+                                ? const Color(0xffFEC700)
+                                : const Color(0xffF1F2F7),
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
+                        child: Text(
+                          AppLocalizations.of(context).delivery,
+                          style: const TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w500),
+                        ),
                       ),
-                      child: Text(
-                        AppLocalizations.of(context).delivery,
-                        style: const TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                
+
                 // Self-pickup button - disabled in carhop mode
                 _orderModeService.currentMode == OrderMode.carhop
-                  ? ElevatedButton(
-                      onPressed: null, // Disabled in carhop mode
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          const Color(0xffE0E0E0), // Gray color for disabled state
-                        ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    ? ElevatedButton(
+                        onPressed: null, // Disabled in carhop mode
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            const Color(
+                                0xffE0E0E0), // Gray color for disabled state
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
-                      child: Text(
-                        AppLocalizations.of(context).selfPickup,
-                        style: const TextStyle(
-                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: () => setState(() => _selectedIndex = 1),
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          _selectedIndex == 1
-                              ? const Color(0xffFEC700)
-                              : const Color(0xffF1F2F7),
+                        child: Text(
+                          AppLocalizations.of(context).selfPickup,
+                          style: const TextStyle(
+                              color: Color(0xFF9E9E9E),
+                              fontWeight: FontWeight.w500),
                         ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      )
+                    : ElevatedButton(
+                        onPressed: () => setState(() => _selectedIndex = 1),
+                        style: ButtonStyle(
+                          backgroundColor: MaterialStateProperty.all(
+                            _selectedIndex == 1
+                                ? const Color(0xffFEC700)
+                                : const Color(0xffF1F2F7),
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
+                        child: Text(
+                          AppLocalizations.of(context).selfPickup,
+                          style: const TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w500),
+                        ),
                       ),
-                      child: Text(
-                        AppLocalizations.of(context).selfPickup,
-                        style: const TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                
+
                 // Carhop button - disabled in delivery/takeaway mode
                 _orderModeService.currentMode == OrderMode.carhop
-                  ? ElevatedButton(
-                      onPressed: () => setState(() => _selectedIndex = 2),
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                          _selectedIndex == 2
-                              ? const Color(0xffFEC700)
-                              : const Color(0xffF1F2F7),
-                        ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    ? ElevatedButton(
+                        onPressed: () => setState(() => _selectedIndex = 2),
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                            _selectedIndex == 2
+                                ? const Color(0xffFEC700)
+                                : const Color(0xffF1F2F7),
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        'Carhop',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.w500),
-                      ),
-                    )
-                  : ElevatedButton(
-                      onPressed: null, // Disabled button
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                          const Color(0xffE0E0E0), // Gray color for disabled state
+                        child: const Text(
+                          'Carhop',
+                          style: TextStyle(
+                              color: Colors.black, fontWeight: FontWeight.w500),
                         ),
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      )
+                    : ElevatedButton(
+                        onPressed: null, // Disabled button
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(
+                            const Color(
+                                0xffE0E0E0), // Gray color for disabled state
+                          ),
+                          shape: WidgetStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
+                        child: const Text(
+                          'Carhop',
+                          style: TextStyle(
+                              color: Color(0xFF9E9E9E),
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
-                      child: const Text(
-                        'Carhop',
-                        style: TextStyle(
-                            color: Color(0xFF9E9E9E), fontWeight: FontWeight.w500),
-                      ),
-                    ),
               ],
             ),
             const SizedBox(
@@ -1569,161 +1574,59 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
-      // Handle carhop orders
+      // Create an instance of OrderService
+      final orderService = OrderService();
+      
+      // Check if this is a carhop order
       if (orderType.toLowerCase() == 'carhop') {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
         }
-        final branchConfig = BranchConfigs.getConfig(selectedBranch!);
-        // Use the actual cart items from the cart provider
-        final List<Map<String, dynamic>> formattedOrderItems =
-            cartProvider.cartItems.map((item) {
-          return {
-            "actual_price": item.product.price,
-            "product_id": item.product.id.toString(),
-            "quantity": item.quantity,
-            "note": null
-          };
-        }).toList();
-
-        // Prepare the request body for Sieves API
-        final Map<String, dynamic> requestBody = {
-          "customer_quantity": 1,
-          "customer_id": null,
-          "is_fast": 0,
-          "queue_type": "sync",
-          "start_time": "now",
-          "isSynchronous": "sync",
-          "delivery_employee_id": null,
-          "employee_id": branchConfig
-              .employeeId, // You might want to make this configurable
-          "branch_id":
-              branchConfig.branchId, // You might want to make this configurable
-          "order_type_id": 8, // for carhop - zakas s parkovki
-          "orderItems": formattedOrderItems,
-          "transactions": [
-            {
-              "account_id": 1,
-              "amount": total,
-              "payment_type_id":
-                  selectedOption?.toLowerCase() == 'card' ? 1 : 2,
-              "type": "deposit"
-            }
-          ],
-          "value": total,
-          "note": "$comment\nCar Details: $carDetails",
-          "day_session_id": null,
-          "pager_number": phone,
-          "pos_id": null,
-          "pos_session_id": null,
-          "delivery_amount": null
-        };
-
-        final response = await http.post(
-          Uri.parse(
-              'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
-            'Accept': 'application/json',
-          },
-          body: jsonEncode(requestBody),
+        
+        // Use the OrderService to send carhop order
+        await orderService.sendCarhopOrder(
+          name: name,
+          phone: phone,
+          paymentType: paymentType,
+          comment: comment,
+          carDetails: carDetails,
+          cartProvider: cartProvider,
+          context: context,
         );
-
-        if (response.statusCode != 200) {
-          print('Response status code: ${response.statusCode}');
-          print('Response body: ${response.body}');
-          throw Exception('Failed to send carhop order');
-        } else {
-          print("Carhop order sent successfully! Response: ${response.body}");
-
-          // Parse the response and save order details
-          final responseData = jsonDecode(response.body);
-          final prefs = await SharedPreferences.getInstance();
-
-          // Get existing orders or initialize empty list
-          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
-
-          // Create new order object
-          Map<String, dynamic> orderDetails = {
-            'id': responseData['id'],
-            'paid': responseData['paid'],
-            'timestamp': DateTime.now().toIso8601String(),
-            'orderItems': cartProvider.cartItems
-                .map((item) => {
-                      'name': item.product.name,
-                      'quantity': item.quantity,
-                      'price': item.product.price,
-                      'carDetails': carDetails
-                    })
-                .toList(),
-          };
-
-          // Add new order to the list
-          savedOrders.add(jsonEncode(orderDetails));
-
-          // Keep only the last 5 orders to prevent memory issues
-          if (savedOrders.length > 5) {
-            savedOrders = savedOrders.sublist(savedOrders.length - 5);
-          }
-
-          // Save updated list
-          await prefs.setStringList('carhop_orders', savedOrders);
-
-          // Add order notification
-          final notificationProvider =
-              Provider.of<NotificationProvider>(context, listen: false);
-          await notificationProvider.addOrderNotification(
-            title: "New Car-hop Order",
-            body: "Your car-hop order has been placed successfully!",
-            messageId: responseData['id'].toString(),
-          );
-
-          cartProvider.clearCart();
-          return;
-        }
-      }
-
-      // Original telegram order sending logic for non-carhop orders
-      final orderDetails = "Адрес: $address\n" +
-          "Филиал: $branchName\n" +
-          "Имя: $name\n" +
-          "Тел: $phone\n" +
-          "Тип платежа: $paymentType\n\n" +
-          "Тип zakaza: $orderType\n\n" +
-          "Заметка: ${comment.isEmpty ? 'Нет заметки' : comment}\n\n" +
-          "🛒 <b>Корзина:</b>\n${orderItems.join("\n")}\n\n" +
-          "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
-          "-----------------------\n" +
-          "Mashina ma'lumotlari:\n ${carDetails.isEmpty ? 'Ma\'lumot yo\'q' : carDetails}\n\n" +
-          "-----------------------\n" +
-          "Источник: Mobile App\n";
-
-      final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
-
-      String chatId = await getChatId();
-      print("Using chatId: $chatId");
-
-      final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=-1002074915184&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
-
-      final response = await http.get(
-        Uri.parse(telegramDebUrl),
-        headers: {
-          "Content-Type": "application/json; charset=UTF-8",
-        },
-      );
-
-      if (response.statusCode != 200) {
-        print('Response status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        throw Exception('Failed to send order');
       } else {
-        print("Order sent successfully! Response: ${response.body}");
-        cartProvider.clearCart();
+        // Use the OrderService to send regular order
+        await orderService.sendRegularOrder(
+          address: address,
+          branchName: branchName,
+          name: name,
+          phone: phone,
+          paymentType: paymentType,
+          comment: comment,
+          orderItems: orderItems,
+          total: total,
+          latitude: latitude,
+          longitude: longitude,
+          orderType: orderType,
+          carDetails: carDetails,
+          cartProvider: cartProvider,
+        );
       }
     } catch (e) {
       print('Error sending order: $e');
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Error'),
+          content: Text('Failed to send order: $e'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
       rethrow;
     }
   }
