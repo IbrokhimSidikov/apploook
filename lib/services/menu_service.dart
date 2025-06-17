@@ -47,13 +47,11 @@ class MenuService {
       return;
     }
 
-    // Initialize the order mode service first
     await _orderModeService.initialize();
     print(
         'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
 
     try {
-      // First try to load from cache if it's valid
       print('MenuService: Checking cache validity');
       bool isCacheValid = await _isCacheValid();
       print('MenuService: Cache valid: $isCacheValid');
@@ -66,7 +64,6 @@ class MenuService {
           print(
               'MenuService: Initialized from cache, refreshing data in background');
 
-          // Refresh data in background even if we loaded from cache
           refreshData().catchError((e) {
             print('MenuService: Background refresh error: $e');
           });
@@ -77,7 +74,6 @@ class MenuService {
         print('MenuService: Cache is not valid or missing');
       }
 
-      // If not initialized from cache, fetch fresh data
       if (!_isInitialized) {
         print('MenuService: Not initialized from cache, fetching fresh data');
         await refreshData();
@@ -198,19 +194,24 @@ class MenuService {
           // Based on the original code, the response is a List<dynamic> directly, not a Map
           final List<dynamic> categoryData = json.decode(response.body);
           print('MenuService: Received data from old API');
-          print('MenuService: Old API returned ${categoryData.length} categories');
+          print(
+              'MenuService: Old API returned ${categoryData.length} categories');
           if (categoryData.isNotEmpty) {
-            print('MenuService: First category sample: ${json.encode(categoryData[0])}');
+            print(
+                'MenuService: First category sample: ${json.encode(categoryData[0])}');
             // Check if the first item has products
-            if (categoryData[0]['products'] != null && categoryData[0]['products'] is List) {
-              print('MenuService: First category has ${(categoryData[0]['products'] as List).length} products');
+            if (categoryData[0]['products'] != null &&
+                categoryData[0]['products'] is List) {
+              print(
+                  'MenuService: First category has ${(categoryData[0]['products'] as List).length} products');
             }
           }
 
           // Process data from the old API in the List format
           await _processOldApiCategoryList(categoryData);
         } else {
-          print('MenuService: Error fetching from old API: ${response.statusCode}');
+          print(
+              'MenuService: Error fetching from old API: ${response.statusCode}');
           print('MenuService: Error response: ${response.body}');
           // Create default data if API fails
           _createDefaultData();
@@ -227,12 +228,12 @@ class MenuService {
   // Process data from the old API in List format
   Future<void> _processOldApiCategoryList(List<dynamic> categoryList) async {
     print('MenuService: Processing old API category list');
-    
+
     try {
       // Reset collections
       _categories = [];
       _allProducts = [];
-      
+
       // Check if we're in carhop mode
       if (_orderModeService.currentMode == OrderMode.carhop) {
         print('MenuService: Processing in carhop mode');
@@ -240,7 +241,7 @@ class MenuService {
       } else {
         // Process for delivery/takeaway mode
         Map<int, bool> processedCategoryIds = {};
-        
+
         for (var category in categoryList) {
           try {
             if (category is! Map<String, dynamic>) {
@@ -251,7 +252,8 @@ class MenuService {
             // Skip categories with 'ava' in the name (availability categories)
             String rawCategoryName = category['name'] ?? '';
             if (rawCategoryName.toLowerCase().contains('ava')) {
-              print('MenuService: Skipping availability category: $rawCategoryName');
+              print(
+                  'MenuService: Skipping availability category: $rawCategoryName');
               continue;
             }
 
@@ -265,14 +267,16 @@ class MenuService {
 
             // Skip if we've already processed this category
             if (processedCategoryIds.containsKey(categoryId)) {
-              print('MenuService: Skipping duplicate category ID: $categoryId ($categoryName)');
+              print(
+                  'MenuService: Skipping duplicate category ID: $categoryId ($categoryName)');
               continue;
             }
             processedCategoryIds[categoryId] = true;
 
             // Add the category
             _categories.add(Category(id: categoryId, name: categoryName));
-            print('MenuService: Added category: $categoryName (ID: $categoryId)');
+            print(
+                'MenuService: Added category: $categoryName (ID: $categoryId)');
 
             // Process products in this category
             List<dynamic> products = category['products'] ?? [];
@@ -297,10 +301,11 @@ class MenuService {
           }
         }
       }
-      
+
       _isInitialized = true;
-      print('MenuService: Processed ${_categories.length} categories and ${_allProducts.length} products from old API');
-      
+      print(
+          'MenuService: Processed ${_categories.length} categories and ${_allProducts.length} products from old API');
+
       // Cache the data for future use
       print('MenuService: Updating old API cache');
       await _updateCache({'categories': categoryList}, isNewApi: false);
@@ -311,60 +316,61 @@ class MenuService {
       _createDefaultData();
     }
   }
-  
+
   // Special processing for carhop order mode
   void _processCarhopCategoryList(List<dynamic> categoryData) {
     print('MenuService: Processing carhop category list');
-    
+
     try {
       for (var category in categoryData) {
         if (category is! Map<String, dynamic>) {
           print('MenuService: Invalid category format: $category');
           continue;
         }
-        
+
         // Get the first part of the category name
         String rawCategoryName = category['name'] ?? '';
-        String categoryName = rawCategoryName.split('_')[0]; 
-        
+        String categoryName = rawCategoryName.split('_')[0];
+
         // Skip categories with 'ava' in the name
         if (categoryName.toLowerCase().contains('ava')) {
           print('MenuService: Skipping availability category: $categoryName');
           continue;
         }
-        
+
         // Get category ID
         int categoryId = category['id'] ?? 0;
         if (categoryId == 0) continue;
-        
+
         // Process products in this category
         List<dynamic> productData = category['products'] ?? [];
-        print('MenuService: Processing ${productData.length} products in $categoryName');
-        
+        print(
+            'MenuService: Processing ${productData.length} products in $categoryName');
+
         // Add category
         _categories.add(Category(id: categoryId, name: categoryName));
-        
+
         for (var product in productData) {
           try {
             var photo = product['photo'];
             String? imagePath = photo != null
                 ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
                 : null;
-                
+
             // Create product with the structure expected by the carhop API
             Product newProduct = Product(
-              name: product['name'] ?? 'Unknown Product',
-              id: product['id'] ?? 0,
-              uuid: product['id']?.toString() ?? '',
-              categoryId: categoryId,
-              categoryTitle: categoryName,
-              imagePath: imagePath,
-              price: (product['priceList'] != null && product['priceList']['price'] != null) 
-                  ? product['priceList']['price'].toDouble() 
-                  : 0.0,
-              description: product['description'] ?? ''
-            );
-            
+                name: product['name'] ?? 'Unknown Product',
+                id: product['id'] ?? 0,
+                uuid: product['id']?.toString() ?? '',
+                categoryId: categoryId,
+                categoryTitle: categoryName,
+                imagePath: imagePath,
+                price: (product['priceList'] != null &&
+                        product['priceList']['price'] != null)
+                    ? product['priceList']['price'].toDouble()
+                    : 0.0,
+                description: product['description'] ?? '');
+
             _allProducts.add(newProduct);
           } catch (e) {
             print('MenuService: Error processing carhop product: $e');
@@ -372,18 +378,19 @@ class MenuService {
           }
         }
       }
-      
-      print('MenuService: Processed ${_categories.length} carhop categories and ${_allProducts.length} products');
+
+      print(
+          'MenuService: Processed ${_categories.length} carhop categories and ${_allProducts.length} products');
     } catch (e) {
       print('MenuService: Error in _processCarhopCategoryList: $e');
     }
   }
-  
+
   // Process data from the old API format (map structure)
   Future<void> _processOldApiData(Map<String, dynamic> data) async {
     try {
       print('MenuService: Processing old API data');
-      print('MenuService: Old API data structure: ${data.keys.toList()}'); 
+      print('MenuService: Old API data structure: ${data.keys.toList()}');
 
       // Reset collections
       _categories = [];
@@ -392,8 +399,10 @@ class MenuService {
       // Check if categories exist in data
       if (data['categories'] != null && data['categories'] is List) {
         List<dynamic> categoryData = data['categories'];
-        print('MenuService: Found ${categoryData.length} categories in old API data');
-        print('MenuService: First category sample: ${categoryData.isNotEmpty ? json.encode(categoryData.first) : "none"}');
+        print(
+            'MenuService: Found ${categoryData.length} categories in old API data');
+        print(
+            'MenuService: First category sample: ${categoryData.isNotEmpty ? json.encode(categoryData.first) : "none"}');
 
         // Create a map to group items by category ID
         Map<int, List<Map<String, dynamic>>> itemsByCategory = {};
@@ -403,7 +412,8 @@ class MenuService {
         print('MenuService: Old API returned ${items.length} items');
         if (items.isNotEmpty) {
           print('MenuService: First item sample: ${json.encode(items.first)}');
-          print('MenuService: Item category_id format: ${items.first['category_id'] != null ? items.first['category_id'].runtimeType : "null"}');
+          print(
+              'MenuService: Item category_id format: ${items.first['category_id'] != null ? items.first['category_id'].runtimeType : "null"}');
         }
 
         // First pass: group items by category ID
@@ -423,11 +433,13 @@ class MenuService {
             }
           }
         }
-        
+
         print('MenuService: Items with valid categories: $itemsWithCategories');
-        print('MenuService: Category groups created: ${itemsByCategory.keys.length}');
+        print(
+            'MenuService: Category groups created: ${itemsByCategory.keys.length}');
         if (itemsByCategory.isNotEmpty) {
-          print('MenuService: Sample category items count: ${itemsByCategory.values.first.length}');
+          print(
+              'MenuService: Sample category items count: ${itemsByCategory.values.first.length}');
         }
 
         // Now we process categories with their items
@@ -435,23 +447,29 @@ class MenuService {
         for (var category in categoryData) {
           if (category is Map<String, dynamic>) {
             String categoryName = category['name'] ?? 'Unknown Category';
-            int categoryId = int.tryParse(category['id']?.toString() ?? '0') ?? 0;
-            print('MenuService: Processing category: $categoryName (ID: $categoryId)');
+            int categoryId =
+                int.tryParse(category['id']?.toString() ?? '0') ?? 0;
+            print(
+                'MenuService: Processing category: $categoryName (ID: $categoryId)');
 
             // Skip empty/special categories
             if (categoryId > 0) {
               // Get items for this category
-              List<Map<String, dynamic>> categoryItems = itemsByCategory[categoryId] ?? [];
-              print('MenuService: Category $categoryName has ${categoryItems.length} items');
+              List<Map<String, dynamic>> categoryItems =
+                  itemsByCategory[categoryId] ?? [];
+              print(
+                  'MenuService: Category $categoryName has ${categoryItems.length} items');
 
               // If we have items for this category, add it
               if (categoryItems.isNotEmpty) {
                 // Ensure unique category ID
                 int uniqueCategoryId = _getUniqueCategoryId(categoryId);
-                print('MenuService: Using unique category ID: $uniqueCategoryId for original ID: $categoryId');
+                print(
+                    'MenuService: Using unique category ID: $uniqueCategoryId for original ID: $categoryId');
 
                 // Create the category
-                _categories.add(Category(id: uniqueCategoryId, name: categoryName));
+                _categories
+                    .add(Category(id: uniqueCategoryId, name: categoryName));
                 processedCategories++;
 
                 // Process all items for this category
@@ -462,7 +480,8 @@ class MenuService {
             }
           }
         }
-        print('MenuService: Successfully processed $processedCategories categories');
+        print(
+            'MenuService: Successfully processed $processedCategories categories');
       } else {
         // If we don't have categories, create a default one and put all items there
         _categories.add(Category(id: 1, name: 'All Items'));
@@ -472,9 +491,10 @@ class MenuService {
           _processOldApiItem(item, 1, 'All Items');
         }
       }
-      
+
       _isInitialized = true;
-      print('MenuService: Processed ${_categories.length} categories and ${_allProducts.length} products from old API');
+      print(
+          'MenuService: Processed ${_categories.length} categories and ${_allProducts.length} products from old API');
 
       // Cache the data for future use
       print('MenuService: Updating old API cache');
@@ -488,19 +508,23 @@ class MenuService {
   }
 
   // Process a product from the old API list format (for carhop mode)
-  void _processOldApiProduct(Map<String, dynamic> product, int categoryId, String categoryName) {
+  void _processOldApiProduct(
+      Map<String, dynamic> product, int categoryId, String categoryName) {
     try {
-      print('MenuService: Processing product: ${product['name'] ?? product['title'] ?? 'Unknown'} for category ID: $categoryId');
-      print('MenuService: Raw product data: ${json.encode(product).substring(0, min(200, json.encode(product).length))}...');
-      
+      print(
+          'MenuService: Processing product: ${product['name'] ?? product['title'] ?? 'Unknown'} for category ID: $categoryId');
+      print(
+          'MenuService: Raw product data: ${json.encode(product).substring(0, min(200, json.encode(product).length))}...');
+
       // Extract product information
       String name = product['name'] ?? product['title'] ?? 'Unknown Product';
-      
+
       // Extract price safely - in the old API, price might be directly in product or in priceList
       double price = 0.0;
-      
+
       // Check for priceList first (this is the format from the provided sample code)
-      if (product['priceList'] != null && product['priceList']['price'] != null) {
+      if (product['priceList'] != null &&
+          product['priceList']['price'] != null) {
         var priceValue = product['priceList']['price'];
         if (priceValue is double) {
           price = priceValue;
@@ -514,7 +538,7 @@ class MenuService {
           }
         }
         print('MenuService: Using price from priceList: $price');
-      } 
+      }
       // Fall back to direct price field
       else if (product['price'] != null) {
         var rawPrice = product['price'];
@@ -531,45 +555,51 @@ class MenuService {
         }
         print('MenuService: Using direct price field: $price');
       }
-      
+
       // Generate unique product ID
       int originalId = int.tryParse(product['id']?.toString() ?? '0') ?? 0;
       int id = _getUniqueProductId(originalId);
       String uuid = product['id']?.toString() ?? '';
-      
+
       // Extract description - handle different formats safely
       String description = '';
       var rawDescription = product['description'];
       if (rawDescription != null) {
         if (rawDescription is String) {
           description = rawDescription;
-          print('MenuService: Got plain text description, length: ${description.length}');
+          print(
+              'MenuService: Got plain text description, length: ${description.length}');
         } else if (rawDescription is Map) {
           if (rawDescription['en'] != null) {
             description = rawDescription['en'].toString();
           } else if (rawDescription.isNotEmpty) {
             description = rawDescription.values.first.toString();
           }
-          print('MenuService: Extracted description from map, length: ${description.length}');
+          print(
+              'MenuService: Extracted description from map, length: ${description.length}');
         } else {
           description = rawDescription.toString();
         }
       }
-      
+
       // Extract image path - handle the standardized format from the sievesapp API
       String? imagePath;
-      
+
       // First check for photo with path/name/format structure (from the MenuItem.fromJson example)
       if (product['photo'] != null) {
         var photo = product['photo'];
         print('MenuService: Found photo: $photo');
-        
+
         if (photo is Map<String, dynamic>) {
           // Check for the standard format with path/name/format
-          if (photo['path'] != null && photo['name'] != null && photo['format'] != null) {
+          if (photo['path'] != null &&
+              photo['name'] != null &&
+              photo['format'] != null) {
             // Format like the MenuItem.fromJson example
-            imagePath = 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}';
-            print('MenuService: Constructed image path from path/name/format: $imagePath');
+            imagePath =
+                'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}';
+            print(
+                'MenuService: Constructed image path from path/name/format: $imagePath');
           }
           // Fall back to URL if available
           else if (photo['url'] != null) {
@@ -587,7 +617,7 @@ class MenuService {
         imagePath = product['image'].toString();
         print('MenuService: Using image field: $imagePath');
       }
-      
+
       // Create product and add to collection
       Product newProduct = Product(
         id: id,
@@ -599,32 +629,38 @@ class MenuService {
         categoryId: categoryId,
         categoryTitle: categoryName,
       );
-      
+
       _allProducts.add(newProduct);
-      print('MenuService: Added product $name with ID $id to category $categoryName (ID: $categoryId)');
+      print(
+          'MenuService: Added product $name with ID $id to category $categoryName (ID: $categoryId)');
     } catch (e) {
       print('MenuService: Error processing product: $e');
     }
   }
-  
+
   // Process an item from the old API format
   void _processOldApiItem(Map<String, dynamic> item,
       [int categoryId = 1, String categoryName = 'All Items']) {
     try {
       // First, debug log the item being processed
-      print('MenuService: Processing item: ${item['name'] ?? item['title'] ?? 'Unknown'} for category ID: $categoryId');
+      print(
+          'MenuService: Processing item: ${item['name'] ?? item['title'] ?? 'Unknown'} for category ID: $categoryId');
 
       // Validate the category ID exists
-      bool categoryExists = _categories.any((category) => category.id == categoryId);
+      bool categoryExists =
+          _categories.any((category) => category.id == categoryId);
       if (!categoryExists) {
-        print('MenuService: WARNING - Category with ID $categoryId not found in the list');
+        print(
+            'MenuService: WARNING - Category with ID $categoryId not found in the list');
         // If the category doesn't exist, use the first available category or create one
         if (_categories.isNotEmpty) {
           categoryId = _categories.first.id;
           categoryName = _categories.first.name;
-          print('MenuService: Using fallback category: $categoryName (ID: $categoryId) instead');
+          print(
+              'MenuService: Using fallback category: $categoryName (ID: $categoryId) instead');
         } else {
-          print('MenuService: No categories available, creating "All Items" category');
+          print(
+              'MenuService: No categories available, creating "All Items" category');
           categoryId = 1;
           categoryName = 'All Items';
           _categories.add(Category(id: categoryId, name: categoryName));
@@ -658,7 +694,8 @@ class MenuService {
         if (rawDescription is String) {
           // Plain text description
           description = rawDescription;
-          print('MenuService: Got plain text description, length: ${description.length}');
+          print(
+              'MenuService: Got plain text description, length: ${description.length}');
         } else if (rawDescription is Map) {
           // Map structure description, likely in multiple languages
           // Try to get English description or any available language
@@ -668,12 +705,14 @@ class MenuService {
             // Take first available language
             description = rawDescription.values.first.toString();
           }
-          print('MenuService: Extracted description from map, length: ${description.length}');
+          print(
+              'MenuService: Extracted description from map, length: ${description.length}');
         } else {
           // Handle unexpected formats
           try {
             description = rawDescription.toString();
-            print('MenuService: Converted description to string, length: ${description.length}');
+            print(
+                'MenuService: Converted description to string, length: ${description.length}');
           } catch (e) {
             print('MenuService: Failed to parse description: $e');
           }
@@ -1007,31 +1046,32 @@ class MenuService {
   // Format category names to proper display format
   String _formatCategoryName(String rawName) {
     if (rawName.isEmpty) return 'Unknown Category';
-    
+
     // Replace underscores with spaces
     String name = rawName.replaceAll('_', ' ');
-    
+
     // Remove the portion starting with numbers (e.g., "Kids Meal 8 H" -> "Kids Meal")
     RegExp numbersStartRegex = RegExp(r'\s+\d');
     Match? match = numbersStartRegex.firstMatch(name);
     if (match != null) {
       name = name.substring(0, match.start);
     }
-    
+
     // If the name ends with certain patterns like "- H", "- M", etc., remove them
     RegExp endPatternRegex = RegExp(r'\s*-\s*[A-Za-z]\s*$');
     name = name.replaceAll(endPatternRegex, '');
-    
+
     // Trim any excess whitespace
     name = name.trim();
-    
+
     // Capitalize each word
     List<String> words = name.split(' ');
     words = words.map((word) {
       if (word.isEmpty) return '';
-      return word[0].toUpperCase() + (word.length > 1 ? word.substring(1).toLowerCase() : '');
+      return word[0].toUpperCase() +
+          (word.length > 1 ? word.substring(1).toLowerCase() : '');
     }).toList();
-    
+
     // Ensure we return something meaningful
     String result = words.join(' ');
     return result.isEmpty ? 'Menu Item' : result;
