@@ -38,6 +38,7 @@ class _CheckoutState extends State<Checkout> {
   final OrderModeService _orderModeService = OrderModeService();
   int _selectedIndex = 0;
   late double orderPrice = 0;
+  double deliveryFee = 0;
   String firstName = '';
   String phoneNumber = '';
   String clientComment = '';
@@ -102,8 +103,16 @@ class _CheckoutState extends State<Checkout> {
           if (nearestBranch != null) {
             _distanceMessage =
                 'Distance to nearest branch: ${nearestBranch['distance'].toStringAsFixed(2)} km';
+            // Update delivery fee if available
+            if (nearestBranch['deliveryFee'] != null) {
+              deliveryFee =
+                  double.tryParse(nearestBranch['deliveryFee'].toString()) ?? 0;
+            } else {
+              deliveryFee = 0;
+            }
           } else {
             _distanceMessage = 'Could not calculate distance to nearest branch';
+            deliveryFee = 0;
           }
           _isCalculatingDistance = false;
         });
@@ -393,7 +402,7 @@ class _CheckoutState extends State<Checkout> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 15, left: 15),
+                  padding: const EdgeInsets.only(bottom: 10),
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
@@ -406,123 +415,6 @@ class _CheckoutState extends State<Checkout> {
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
-                      // Display distance to nearest branch
-                      if (_selectedIndex == 0) // Only show for delivery
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 8.0, horizontal: 16.0),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.amber.shade300),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on, color: Colors.red),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Branch Distance Information',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    if (_isCalculatingDistance)
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 8.0),
-                                        child: SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                              strokeWidth: 2),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                SizedBox(height: 8),
-                                Text(_distanceMessage),
-                                if (_nearestBranch != null) ...[
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4.0),
-                                    child: Text(
-                                      'Nearest branch: ${_nearestBranch!['name'] ?? 'Unknown'}',
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue[700]),
-                                    ),
-                                  ),
-                                  if (_nearestBranch!['deliveryFee'] != null)
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 8.0),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 12, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green.shade50,
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                          border: Border.all(
-                                              color: Colors.green.shade200),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(Icons.delivery_dining,
-                                                    color:
-                                                        Colors.green.shade700,
-                                                    size: 18),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'Delivery Fee: ${_nearestBranch!['deliveryFee'].toString()} sum',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors
-                                                          .green.shade700),
-                                                ),
-                                              ],
-                                            ),
-                                            const Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(Icons.shopping_bag,
-                                                    color: Colors.green,
-                                                    size: 18),
-                                                SizedBox(width: 8),
-                                                Text(
-                                                  'Paket: 2000 sum',
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      color: Colors.green),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                                SizedBox(height: 8),
-                                ElevatedButton(
-                                  onPressed: _calculateDistanceToNearestBranch,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.amber,
-                                    foregroundColor: Colors.black,
-                                  ),
-                                  child: Text('Recalculate Distance'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                     ],
                   ),
                 ),
@@ -983,7 +875,7 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 180,
+                height: 220,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: Colors.white,
@@ -1021,7 +913,36 @@ class _CheckoutState extends State<Checkout> {
                             '${AppLocalizations.of(context).deliveryPrice} :',
                             style: const TextStyle(fontSize: 16),
                           ),
-                          Text(AppLocalizations.of(context).unknown),
+                          _selectedIndex == 0 && _isCalculatingDistance
+                              ? SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.amber),
+                                  ),
+                                )
+                              : Text(
+                                  _selectedIndex == 0 &&
+                                          _nearestBranch != null &&
+                                          _nearestBranch!['deliveryFee'] != null
+                                      ? '${_nearestBranch!['deliveryFee'].toString()} UZS'
+                                      : AppLocalizations.of(context).unknown,
+                                ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Bag price :',
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          Text('2000 UZS'),
                         ],
                       ),
                     ),
@@ -1038,7 +959,7 @@ class _CheckoutState extends State<Checkout> {
                             style: const TextStyle(fontSize: 16),
                           ),
                           Text(
-                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                              '${NumberFormat('#,##0').format(orderPrice + 2000)} UZS'),
                         ],
                       ),
                     ),
