@@ -224,76 +224,78 @@ class MenuService {
     }
   }
 
-  // Process data from the old API in List format (for carhop mode)
+  // Process data from the old API in List format
   Future<void> _processOldApiCategoryList(List<dynamic> categoryList) async {
+    print('MenuService: Processing old API category list');
+    
     try {
-      print('MenuService: Processing old API category list with ${categoryList.length} categories');
-      
       // Reset collections
       _categories = [];
       _allProducts = [];
       
-      if (categoryList.isEmpty) {
-        print('MenuService: Category list is empty, creating default category');
-        _createDefaultData();
-        return;
-      }
-      
-      int processedCategories = 0;
-      int processedProducts = 0;
-      
-      // Process each category in the list
-      for (var category in categoryList) {
-        if (category is Map<String, dynamic>) {
-          // Extract category information
-          String rawCategoryName = category['name'] ?? 'Unknown Category';
-          String categoryName = _formatCategoryName(rawCategoryName);
-          
-          // Skip categories with blank, empty names or default unknown names
-          if (categoryName.trim().isEmpty || categoryName == 'Unknown Category' || 
-              categoryName == 'Menu Item') {
-            print('MenuService: Skipping blank category: "$rawCategoryName"');
-            continue;
-          }
-          
-          int categoryId = int.tryParse(category['id']?.toString() ?? '0') ?? 0;
-          
-          if (categoryId <= 0) {
-            categoryId = _getUniqueCategoryId(_nextCategoryId);
-          }
-          
-          // Process products in this category
-          List<dynamic> products = category['products'] ?? [];
-          print('MenuService: Category $categoryName has ${products.length} products');
-          
-          // Skip categories that don't have any products
-          if (products.isEmpty) {
-            print('MenuService: Skipping empty category: $categoryName (no products)');
-            continue;
-          }
-          
-          print('MenuService: Processing category: $categoryName (ID: $categoryId)');
-          
-          // Create category
-          _categories.add(Category(id: categoryId, name: categoryName));
-          processedCategories++;
-          
-          for (var product in products) {
-            if (product is Map<String, dynamic>) {
-              _processOldApiProduct(product, categoryId, categoryName);
-              processedProducts++;
+      // Check if we're in carhop mode
+      if (_orderModeService.currentMode == OrderMode.carhop) {
+        print('MenuService: Processing in carhop mode');
+        _processCarhopCategoryList(categoryList);
+      } else {
+        // Process for delivery/takeaway mode
+        Map<int, bool> processedCategoryIds = {};
+        
+        for (var category in categoryList) {
+          try {
+            if (category is! Map<String, dynamic>) {
+              print('MenuService: Invalid category format: $category');
+              continue;
             }
+
+            // Skip categories with 'ava' in the name (availability categories)
+            String rawCategoryName = category['name'] ?? '';
+            if (rawCategoryName.toLowerCase().contains('ava')) {
+              print('MenuService: Skipping availability category: $rawCategoryName');
+              continue;
+            }
+
+            // Format the category name
+            String categoryName = _formatCategoryName(rawCategoryName);
+            print('MenuService: Processing category: $categoryName');
+
+            // Get a unique category ID
+            int originalCategoryId = category['id'] ?? 0;
+            int categoryId = _getUniqueCategoryId(originalCategoryId);
+
+            // Skip if we've already processed this category
+            if (processedCategoryIds.containsKey(categoryId)) {
+              print('MenuService: Skipping duplicate category ID: $categoryId ($categoryName)');
+              continue;
+            }
+            processedCategoryIds[categoryId] = true;
+
+            // Add the category
+            _categories.add(Category(id: categoryId, name: categoryName));
+            print('MenuService: Added category: $categoryName (ID: $categoryId)');
+
+            // Process products in this category
+            List<dynamic> products = category['products'] ?? [];
+            print('MenuService: Processing ${products.length} products');
+
+            for (var product in products) {
+              if (product is! Map<String, dynamic>) {
+                print('MenuService: Invalid product format: $product');
+                continue;
+              }
+
+              try {
+                _processOldApiProduct(product, categoryId, categoryName);
+              } catch (e) {
+                print('MenuService: Error processing product: $e');
+                print('MenuService: Product data: $product');
+              }
+            }
+          } catch (e) {
+            print('MenuService: Error processing category: $e');
+            print('MenuService: Category data: $category');
           }
         }
-      }
-      
-      print('MenuService: Successfully processed $processedCategories categories with $processedProducts total products');
-      
-      // If we ended up with no categories or products, create default data
-      if (_categories.isEmpty || _allProducts.isEmpty) {
-        print('MenuService: No valid categories or products found, creating default data');
-        _createDefaultData();
-        return;
       }
       
       _isInitialized = true;
@@ -307,6 +309,73 @@ class MenuService {
       print('MenuService: Error processing old API category list: $e');
       print('MenuService: Stack trace: $stackTrace');
       _createDefaultData();
+    }
+  }
+  
+  // Special processing for carhop order mode
+  void _processCarhopCategoryList(List<dynamic> categoryData) {
+    print('MenuService: Processing carhop category list');
+    
+    try {
+      for (var category in categoryData) {
+        if (category is! Map<String, dynamic>) {
+          print('MenuService: Invalid category format: $category');
+          continue;
+        }
+        
+        // Get the first part of the category name
+        String rawCategoryName = category['name'] ?? '';
+        String categoryName = rawCategoryName.split('_')[0]; 
+        
+        // Skip categories with 'ava' in the name
+        if (categoryName.toLowerCase().contains('ava')) {
+          print('MenuService: Skipping availability category: $categoryName');
+          continue;
+        }
+        
+        // Get category ID
+        int categoryId = category['id'] ?? 0;
+        if (categoryId == 0) continue;
+        
+        // Process products in this category
+        List<dynamic> productData = category['products'] ?? [];
+        print('MenuService: Processing ${productData.length} products in $categoryName');
+        
+        // Add category
+        _categories.add(Category(id: categoryId, name: categoryName));
+        
+        for (var product in productData) {
+          try {
+            var photo = product['photo'];
+            String? imagePath = photo != null
+                ? 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}'
+                : null;
+                
+            // Create product with the structure expected by the carhop API
+            Product newProduct = Product(
+              name: product['name'] ?? 'Unknown Product',
+              id: product['id'] ?? 0,
+              uuid: product['id']?.toString() ?? '',
+              categoryId: categoryId,
+              categoryTitle: categoryName,
+              imagePath: imagePath,
+              price: (product['priceList'] != null && product['priceList']['price'] != null) 
+                  ? product['priceList']['price'].toDouble() 
+                  : 0.0,
+              description: product['description'] ?? ''
+            );
+            
+            _allProducts.add(newProduct);
+          } catch (e) {
+            print('MenuService: Error processing carhop product: $e');
+            print('MenuService: Product data: $product');
+          }
+        }
+      }
+      
+      print('MenuService: Processed ${_categories.length} carhop categories and ${_allProducts.length} products');
+    } catch (e) {
+      print('MenuService: Error in _processCarhopCategoryList: $e');
     }
   }
   

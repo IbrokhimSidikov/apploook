@@ -10,10 +10,11 @@ import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
-import 'package:apploook/services/order_service.dart';
+import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
@@ -1314,7 +1315,7 @@ class _CheckoutState extends State<Checkout> {
                               orderPrice, // total
                               41.313798749076454, // latitude ,
                               69.24407311805851, // longitude
-                              orderType,
+                              "carhop", // Explicitly set to carhop for this order type
                               carDetails,
                               cartProvider,
                             );
@@ -1574,59 +1575,161 @@ class _CheckoutState extends State<Checkout> {
       String carDetails,
       CartProvider cartProvider) async {
     try {
-      // Create an instance of OrderService
-      final orderService = OrderService();
-      
-      // Check if this is a carhop order
+      // Handle carhop orders
       if (orderType.toLowerCase() == 'carhop') {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
         }
-        
-        // Use the OrderService to send carhop order
-        await orderService.sendCarhopOrder(
-          name: name,
-          phone: phone,
-          paymentType: paymentType,
-          comment: comment,
-          carDetails: carDetails,
-          cartProvider: cartProvider,
-          context: context,
+        final branchConfig = BranchConfigs.getConfig(selectedBranch!);
+        // Use the actual cart items from the cart provider
+        final List<Map<String, dynamic>> formattedOrderItems =
+            cartProvider.cartItems.map((item) {
+          return {
+            "actual_price": item.product.price,
+            "product_id": item.product.id.toString(),
+            "quantity": item.quantity,
+            "note": null
+          };
+        }).toList();
+
+        // Prepare the request body for Sieves API
+        final Map<String, dynamic> requestBody = {
+          "customer_quantity": 1,
+          "customer_id": null,
+          "is_fast": 0,
+          "queue_type": "sync",
+          "start_time": "now",
+          "isSynchronous": "sync",
+          "delivery_employee_id": null,
+          "employee_id": branchConfig.employeeId,
+          "branch_id": branchConfig.branchId,
+          "order_type_id": 8, // for carhop - zakas s parkovki
+          "orderItems": formattedOrderItems,
+          "transactions": [
+            {
+              "account_id": 1,
+              "amount": total,
+              "payment_type_id": paymentType.toLowerCase() == 'card' ? 1 : 2,
+              "type": "deposit"
+            }
+          ],
+          "value": total,
+          "note": "$comment\nCar Details: $carDetails",
+          "day_session_id": null,
+          "pager_number": phone,
+          "pos_id": null,
+          "pos_session_id": null,
+          "delivery_amount": null
+        };
+
+        // Debug logging
+        print('Sending carhop order with payload: ${jsonEncode(requestBody)}');
+
+        final response = await http.post(
+          Uri.parse(
+              'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
+            'Accept': 'application/json',
+          },
+          body: jsonEncode(requestBody),
         );
+
+        if (response.statusCode != 200) {
+          print('Response status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
+          throw Exception('Failed to send carhop order');
+        } else {
+          print("Carhop order sent successfully! Response: ${response.body}");
+
+          // Parse the response and save order details
+          final responseData = jsonDecode(response.body);
+          final prefs = await SharedPreferences.getInstance();
+
+          // Get existing orders or initialize empty list
+          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
+
+          // Create new order object
+          Map<String, dynamic> orderDetails = {
+            'id': responseData['id'],
+            'paid': responseData['paid'],
+            'timestamp': DateTime.now().toIso8601String(),
+            'orderItems': cartProvider.cartItems
+                .map((item) => {
+                      'name': item.product.name,
+                      'quantity': item.quantity,
+                      'price': item.product.price,
+                      'carDetails': carDetails
+                    })
+                .toList(),
+          };
+
+          // Add new order to the list
+          savedOrders.add(jsonEncode(orderDetails));
+
+          // Keep only the last 5 orders to prevent memory issues
+          if (savedOrders.length > 5) {
+            savedOrders = savedOrders.sublist(savedOrders.length - 5);
+          }
+
+          // Save updated list
+          await prefs.setStringList('carhop_orders', savedOrders);
+
+          // Add order notification
+          final notificationProvider =
+              Provider.of<NotificationProvider>(context, listen: false);
+          await notificationProvider.addOrderNotification(
+            title: "New Car-hop Order",
+            body: "Your car-hop order has been placed successfully!",
+            messageId: responseData['id'].toString(),
+          );
+
+          cartProvider.clearCart();
+          return;
+        }
+      }
+
+      // Original telegram order sending logic for non-carhop orders
+      final orderDetails = "Адрес: $address\n" +
+          "Филиал: $branchName\n" +
+          "Имя: $name\n" +
+          "Тел: $phone\n" +
+          "Тип платежа: $paymentType\n\n" +
+          "Тип zakaza: $orderType\n\n" +
+          "Заметка: ${comment.isEmpty ? 'Нет заметки' : comment}\n\n" +
+          "🛒 <b>Корзина:</b>\n${orderItems.join("\n")}\n\n" +
+          "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
+          "-----------------------\n" +
+          "Mashina ma'lumotlari:\n ${carDetails.isEmpty ? 'Ma\'lumot yo\'q' : carDetails}\n\n" +
+          "-----------------------\n" +
+          "Источник: Mobile App\n";
+
+      final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
+
+      String chatId = await getChatId();
+      print("Using chatId: $chatId");
+
+      final telegramDebUrl =
+          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
+
+      final response = await http.get(
+        Uri.parse(telegramDebUrl),
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8",
+        },
+      );
+
+      if (response.statusCode != 200) {
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to send order');
       } else {
-        // Use the OrderService to send regular order
-        await orderService.sendRegularOrder(
-          address: address,
-          branchName: branchName,
-          name: name,
-          phone: phone,
-          paymentType: paymentType,
-          comment: comment,
-          orderItems: orderItems,
-          total: total,
-          latitude: latitude,
-          longitude: longitude,
-          orderType: orderType,
-          carDetails: carDetails,
-          cartProvider: cartProvider,
-        );
+        print("Order sent successfully! Response: ${response.body}");
+        cartProvider.clearCart();
       }
     } catch (e) {
       print('Error sending order: $e');
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to send order: $e'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
       rethrow;
     }
   }
