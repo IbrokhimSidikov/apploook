@@ -248,6 +248,7 @@ class ApiService {
     required String paymentType,
     String? comment,
     int persons = 1,
+    double deliveryFee = 0,
   }) async {
     try {
       print('Creating order with the new API endpoint');
@@ -286,6 +287,7 @@ class ApiService {
         },
         "paymentInfo": {
           "itemsCost": totalCost.round(),
+          "deliveryFee": deliveryFee.round(),
           "paymentType": paymentType,
           "netting_payment": false
         },
@@ -297,7 +299,7 @@ class ApiService {
           // Remove any extra fields that might be causing issues
         }).toList(),
         "persons": 2, // Fixed to match the successful example
-        "comment": "Дополнительная информация о заказе: ..." // Fixed comment to match successful example
+        "comment": comment ?? "Дополнительная информация о заказе: ..." // Use provided comment if available
       };
       
       print('Order payload: ${json.encode(orderPayload)}');
