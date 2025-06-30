@@ -1167,6 +1167,8 @@ class _CheckoutState extends State<Checkout> {
                                 cartProvider.showLat(), // latitude
                                 cartProvider.showLong(), // longitude
                                 cartProvider,
+                                deliveryFee:
+                                    deliveryFee, // Add delivery fee from nearest branch
                               );
                             } else if (_selectedIndex == 1) {
                               // Pickup order
@@ -1180,6 +1182,7 @@ class _CheckoutState extends State<Checkout> {
                                 41.313798749076454, // default latitude
                                 69.24407311805851, // default longitude
                                 cartProvider,
+                                // No delivery fee for pickup orders
                               );
                             }
                           } catch (e) {
@@ -1420,7 +1423,8 @@ class _CheckoutState extends State<Checkout> {
       double total,
       double latitude,
       double longitude,
-      CartProvider cartProvider) async {
+      CartProvider cartProvider,
+      {double deliveryFee = 0}) async {
     try {
       // Get API service with client credentials
       final remoteConfig = FirebaseRemoteConfig.instance;
@@ -1458,6 +1462,7 @@ class _CheckoutState extends State<Checkout> {
         paymentType: paymentType.toLowerCase() == 'card' ? 'Click' : 'cash',
         comment: comment,
         persons: 1,
+        deliveryFee: deliveryFee,
       );
 
       print('Order submitted successfully: ${response.toString()}');

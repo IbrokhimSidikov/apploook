@@ -594,7 +594,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ],
                           ),
 
-                          const Spacer(flex: 2),
+                          const Spacer(flex: 4),
                           TextButton(
                             onPressed: _isLoading ? null : _continue,
                             style: TextButton.styleFrom(
@@ -644,8 +644,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          const Spacer(
-                              flex: 1), // Adjust flex to control spacing
+                          const Spacer(flex: 1),
                           const Text(
                             'PRIVACY POLICY',
                             style: TextStyle(
