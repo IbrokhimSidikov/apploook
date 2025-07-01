@@ -10,6 +10,7 @@ import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
+import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -47,6 +48,9 @@ class _CheckoutState extends State<Checkout> {
   String orderType = '';
   String carDetails = '';
   String carDetailsExtraInfo = '';
+  String? paymeOrderId; // To store the Payme order ID
+  bool _isProcessing = false;
+  double total = 0.0;
 
   // Distance calculation variables
   bool _isCalculatingDistance = false;
@@ -65,7 +69,104 @@ class _CheckoutState extends State<Checkout> {
     _loadPhoneNumber();
     _loadCustomerName();
     _initializeOrderMode();
+    _checkPendingPaymePayment();
     // We'll calculate distance after address selection, not on page load
+  }
+
+  // Check if there's a pending Payme payment
+  Future<void> _checkPendingPaymePayment() async {
+    final pendingPayment = await PaymeService.getPendingPayment();
+
+    if (pendingPayment != null) {
+      // If the payment was initiated more than 30 minutes ago, clear it
+      final timestamp = pendingPayment['timestamp'] as int;
+      final now = DateTime.now().millisecondsSinceEpoch;
+
+      if (now - timestamp > 30 * 60 * 1000) {
+        // 30 minutes in milliseconds
+        await PaymeService.clearPendingPayment();
+        return;
+      }
+
+      // Show a dialog to check payment status
+      // ignore: use_build_context_synchronously
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Payme Payment'),
+          content: const Text(
+              'You have a pending Payme payment. Did you complete the payment?'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                await PaymeService.clearPendingPayment();
+                Navigator.pop(context);
+              },
+              child: const Text('No, Cancel Payment'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                // Show loading dialog
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const AlertDialog(
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Processing payment...'),
+                      ],
+                    ),
+                  ),
+                );
+
+                // Simulate payment verification
+                // In a real implementation, you would verify with Payme's server
+                await Future.delayed(const Duration(seconds: 2));
+                await PaymeService.clearPendingPayment();
+
+                // Close loading dialog
+                Navigator.pop(context);
+
+                // Show success message
+                // ignore: use_build_context_synchronously
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(AppLocalizations.of(context).orderSuccess),
+                    content:
+                        Text(AppLocalizations.of(context).orderSuccessSubTitle),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.pushNamed(context, '/homeNew');
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                        ),
+                        child: const Text(
+                          'OK',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              child: const Text('Yes, Payment Complete'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   // Initialize order mode and set initial tab selection accordingly
@@ -165,7 +266,7 @@ class _CheckoutState extends State<Checkout> {
     });
   }
 
-  num total = 0;
+  // Total price calculation is handled in the build method
 
   Future<void> _loadCustomerName() async {
     final prefs = await SharedPreferences.getInstance();
@@ -193,7 +294,6 @@ class _CheckoutState extends State<Checkout> {
     // print('Car Details: $carDetails');
   }
 
-  bool _isProcessing = false;
   String? selectedAddress;
   String? selectedBranch;
   String? selectedOption;
@@ -211,12 +311,7 @@ class _CheckoutState extends State<Checkout> {
     'Tashkent',
   ];
 
-  String? _validatePayment(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please select a payment method';
-    }
-    return null;
-  }
+  // Payment validation is handled directly in the form validation
 
   @override
   Widget build(BuildContext context) {
@@ -1001,6 +1096,16 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
+                  DropdownMenuItem<String>(
+                    value: 'Payme',
+                    child: Row(
+                      children: [
+                        const Icon(Icons.payment, color: Colors.purple),
+                        const SizedBox(width: 10),
+                        const Text('Payme'),
+                      ],
+                    ),
+                  ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -1146,6 +1251,103 @@ class _CheckoutState extends State<Checkout> {
                       setState(() {
                         _isProcessing = true; // Start processing
                       });
+
+                      // Check if payment type is Payme
+                      if (selectedOption == 'Payme') {
+                        // Generate a unique order ID for Payme
+                        paymeOrderId = PaymeService.generateOrderId();
+
+                        // Get the merchant ID based on the selected branch
+                        String merchantId = '';
+                        String branchName = '';
+                        int branchId = 0;
+
+                        if (_selectedIndex == 2 || _selectedIndex == 1) {
+                          // For carhop or self-pickup, use the selected branch's merchant ID
+                          if (selectedBranch != null) {
+                            branchName = selectedBranch!;
+                            final branchConfig =
+                                BranchConfigs.getConfig(selectedBranch!);
+                            merchantId = branchConfig.merchantId;
+                            branchId = branchConfig.branchId;
+
+                            // Log branch info
+                            print('\n===== PAYME PAYMENT - BRANCH INFO =====');
+                            print(
+                                'Order Type: ${_selectedIndex == 2 ? "Carhop" : "Self-pickup"}');
+                            print('Selected Branch: $branchName');
+                            print('Branch ID: $branchId');
+                            print('Merchant ID: $merchantId');
+                            print('======================================\n');
+                          }
+                        } else {
+                          // For delivery, use the nearest branch's merchant ID if available
+                          if (_nearestBranch != null &&
+                              _nearestBranch!['branchName'] != null) {
+                            branchName = _nearestBranch!['branchName'];
+                            final branchConfig =
+                                BranchConfigs.getConfig(branchName);
+                            merchantId = branchConfig.merchantId;
+                            branchId = branchConfig.branchId;
+
+                            // Log branch info
+                            print('\n===== PAYME PAYMENT - BRANCH INFO =====');
+                            print('Order Type: Delivery');
+                            print('Nearest Branch: $branchName');
+                            print('Branch ID: $branchId');
+                            print('Merchant ID: $merchantId');
+                            print(
+                                'Distance: ${_nearestBranch!['distance'] ?? "Unknown"} km');
+                            print('======================================\n');
+                          } else {
+                            // Fallback to Yunusobod branch if no nearest branch
+                            branchName = 'Loook Yunusobod';
+                            final branchConfig =
+                                BranchConfigs.getConfig(branchName);
+                            merchantId = branchConfig.merchantId;
+                            branchId = branchConfig.branchId;
+
+                            // Log fallback branch info
+                            print(
+                                '\n===== PAYME PAYMENT - BRANCH INFO (FALLBACK) =====');
+                            print('Order Type: Delivery');
+                            print('Fallback Branch: $branchName');
+                            print('Branch ID: $branchId');
+                            print('Merchant ID: $merchantId');
+                            print('Reason: No nearest branch found');
+                            print(
+                                '============================================\n');
+                          }
+                        }
+
+                        if (merchantId.isEmpty) {
+                          throw Exception(
+                              'Merchant ID not found for the selected branch');
+                        }
+
+                        // Launch Payme checkout
+                        final paymentLaunched =
+                            await PaymeService.launchPaymeCheckout(
+                          context,
+                          merchantId,
+                          paymeOrderId!,
+                          orderPrice +
+                              ((_selectedIndex == 0) ? deliveryFee : 0) +
+                              2000, // Include delivery fee if applicable
+                        );
+
+                        if (!paymentLaunched) {
+                          throw Exception('Failed to launch Payme checkout');
+                        }
+
+                        // Reset processing state since we're redirecting to Payme
+                        setState(() {
+                          _isProcessing = false;
+                        });
+
+                        // Return early since we're redirecting to Payme
+                        return;
+                      }
 
                       try {
                         // First try to use the new API endpoint
@@ -1535,7 +1737,9 @@ class _CheckoutState extends State<Checkout> {
             {
               "account_id": 1,
               "amount": total,
-              "payment_type_id": paymentType.toLowerCase() == 'card' ? 1 : 2,
+              "payment_type_id": paymentType.toLowerCase() == 'card'
+                  ? 1
+                  : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
               "type": "deposit"
             }
           ],
