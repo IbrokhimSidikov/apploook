@@ -1,0 +1,69 @@
+# Payme Payment Flow Update Instructions
+
+To implement the loading popup that appears after launching Payme and waits for transaction approval:
+
+## 1. For _handlePaymePayment method:
+
+Replace:
+```dart
+      // Navigate to home page after launching Payme
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/homeNew', 
+        (route) => false,
+      );
+```
+
+With:
+```dart
+      // Show transaction pending dialog and start checking status
+      await PaymeTransactionService.startTransactionStatusCheck(
+        context,
+        paymeOrderId,
+      );
+      
+      // Note: Navigation to home page will happen after successful payment processing
+      // in PaymeTransactionService._processSuccessfulPayment method
+```
+
+## 2. For _handlePaymeCarhopPayment method:
+
+Replace:
+```dart
+      // Navigate to home page after launching Payme
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/homeNew', 
+        (route) => false,
+      );
+```
+
+With:
+```dart
+      // Show transaction pending dialog and start checking status
+      await PaymeTransactionService.startTransactionStatusCheck(
+        context,
+        paymeOrderId,
+      );
+      
+      // Note: Navigation to home page will happen after successful payment processing
+      // in PaymeTransactionService._processSuccessfulCarhopPayment method
+```
+
+## 3. Verify PaymeTransactionService implementation:
+
+The PaymeTransactionService already has the necessary methods:
+- `startTransactionStatusCheck`: Shows a loading dialog and polls for transaction status
+- `_checkTransactionStatusPeriodically`: Checks transaction status every 2 seconds for up to 5 minutes
+- `_processSuccessfulPayment`: Handles successful payment for delivery orders
+- `_processSuccessfulCarhopPayment`: Handles successful payment for carhop orders
+
+These methods already include:
+- Showing a loading dialog
+- Polling transaction status
+- Submitting orders to the appropriate API
+- Clearing the cart
+- Showing success messages
+- Navigating to the home page
+
+No changes are needed to PaymeTransactionService.

@@ -14,7 +14,6 @@ import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
@@ -98,26 +97,25 @@ class _CheckoutState extends State<Checkout> {
       final remoteConfig = FirebaseRemoteConfig.instance;
       final clientId = remoteConfig.getString('api_client_id');
       final clientSecret = remoteConfig.getString('api_client_secret');
-
+      
       // Make sure branch name is not null
       if (branchName == null) {
         throw Exception('Branch name is required for Payme payment');
       }
-
+      
       // Get merchant ID from selected branch config
       final branchConfig = await BranchConfigs.getConfig(branchName);
       final merchantId = branchConfig.merchantId;
-
+      
       if (merchantId.isEmpty) {
         throw Exception('Payme merchant ID not configured for this branch');
       }
-
+      
       // Generate a unique order ID for Payme
       final paymeOrderId = PaymeService.generateOrderId();
-
+      
       // Format cart items for the API
-      List<Map<String, dynamic>> formattedItems =
-          cartProvider.cartItems.map((item) {
+      List<Map<String, dynamic>> formattedItems = cartProvider.cartItems.map((item) {
         return {
           "id": item.product.uuid,
           "name": item.product.name,
@@ -126,7 +124,7 @@ class _CheckoutState extends State<Checkout> {
           "totalPrice": item.product.price * item.quantity,
         };
       }).toList();
-
+      
       // Save the order details for later processing
       await PaymeTransactionService.savePendingOrder(
         orderId: paymeOrderId,
@@ -142,38 +140,39 @@ class _CheckoutState extends State<Checkout> {
         clientId: clientId,
         clientSecret: clientSecret,
       );
-
-      // Show the transaction status dialog first
-      // This will start checking the transaction status every 2 seconds for 5 minutes
-      PaymeTransactionService.startTransactionStatusCheck(
-          context, paymeOrderId);
-
-      // Launch Payme checkout immediately after showing the dialog
+      
+      // Launch Payme checkout
       final launched = await PaymeService.launchPaymeCheckout(
-          context, merchantId, paymeOrderId, total);
-
+        context, 
+        merchantId, 
+        paymeOrderId, 
+        total
+      );
+      
       if (!launched) {
-        // If we couldn't launch Payme, close the dialog and show error
-        if (context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-          throw Exception('Could not launch Payme checkout');
-        }
+        throw Exception('Could not launch Payme checkout');
       }
-
-      // Note: We don't navigate away - the transaction status check will handle navigation
-      // after successful payment
+      
+      // Navigate to home page after launching Payme
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/homeNew', 
+        (route) => false,
+      );
+      
     } catch (e) {
       print('Error handling Payme payment: $e');
       // Show error message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Payment error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment error: $e'))
+      );
     } finally {
       setState(() {
         _isProcessing = false;
       });
     }
   }
-
+  
   // Handle Payme payment for carhop orders
   Future<void> _handlePaymeCarhopPayment({
     required String name,
@@ -191,37 +190,35 @@ class _CheckoutState extends State<Checkout> {
       setState(() {
         _isProcessing = true;
       });
-
+      
       // Make sure branch name is not null
       if (branchName == null) {
         throw Exception('Branch name is required for Payme payment');
       }
-
+      
       // Get branch config for the selected branch
       final branchConfig = await BranchConfigs.getConfig(branchName);
       // Note: BranchConfigs.getConfig always returns a non-null value
-
+      
       // Get merchant ID from branch config
       final merchantId = branchConfig.merchantId;
-
+      
       if (merchantId.isEmpty) {
         throw Exception('Payme merchant ID not configured for this branch');
       }
-
+      
       // Generate a unique order ID for Payme
       final paymeOrderId = PaymeService.generateOrderId();
-
+      
       // Format order items for Sieves API
-      final formattedOrderItems = cartProvider.cartItems
-          .map((item) => {
-                "actual_price": item.product.price,
-                "product_id": item.product.id.toString(),
-                "quantity": item.quantity,
-                "note": null,
-                "inventoryPriceList": [] // Required by the API
-              })
-          .toList();
-
+      final formattedOrderItems = cartProvider.cartItems.map((item) => {
+        "actual_price": item.product.price,
+        "product_id": item.product.id.toString(),
+        "quantity": item.quantity,
+        "note": null,
+        "inventoryPriceList": [] // Required by the API
+      }).toList();
+      
       // Create the full request payload
       final Map<String, dynamic> requestBody = {
         "customer_quantity": 1,
@@ -251,7 +248,7 @@ class _CheckoutState extends State<Checkout> {
         "pos_session_id": null,
         "delivery_amount": null
       };
-
+      
       // Save the carhop order details for later processing using PaymeTransactionService
       await PaymeTransactionService.savePendingCarhopOrder({
         'order_id': paymeOrderId,
@@ -262,31 +259,32 @@ class _CheckoutState extends State<Checkout> {
         },
         'timestamp': DateTime.now().millisecondsSinceEpoch,
       });
-
-      // Show the transaction status dialog first
-      // This will start checking the transaction status every 2 seconds for 5 minutes
-      PaymeTransactionService.startTransactionStatusCheck(
-          context, paymeOrderId);
-
-      // Launch Payme checkout immediately after showing the dialog
+      
+      // Launch Payme checkout
       final launched = await PaymeService.launchPaymeCheckout(
-          context, merchantId, paymeOrderId, total);
-
+        context, 
+        merchantId, 
+        paymeOrderId, 
+        total
+      );
+      
       if (!launched) {
-        // If we couldn't launch Payme, close the dialog and show error
-        if (context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-          throw Exception('Could not launch Payme checkout');
-        }
+        throw Exception('Could not launch Payme checkout');
       }
-
-      // Note: We don't navigate away - the transaction status check will handle navigation
-      // after successful payment
+      
+      // Navigate to home page after launching Payme
+      Navigator.pushNamedAndRemoveUntil(
+        context, 
+        '/homeNew', 
+        (route) => false,
+      );
+      
     } catch (e) {
       print('Error handling Payme carhop payment: $e');
       // Show error message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Payment error: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment error: $e'))
+      );
     } finally {
       setState(() {
         _isProcessing = false;
@@ -1480,14 +1478,12 @@ class _CheckoutState extends State<Checkout> {
                           if (_selectedIndex == 0) {
                             // For delivery orders, use the nearest branch
                             if (_nearestBranch == null) {
-                              throw Exception(
-                                  'Unable to determine nearest branch for delivery. Please try again.');
+                              throw Exception('Unable to determine nearest branch for delivery. Please try again.');
                             }
-
+                            
                             // Get branch name from nearest branch calculation
-                            final nearestBranchName =
-                                _nearestBranch!['name'] as String;
-
+                            final nearestBranchName = _nearestBranch!['name'] as String;
+                            
                             // Delivery order with Payme payment
                             await _handlePaymePayment(
                               name: firstName,
@@ -1504,10 +1500,9 @@ class _CheckoutState extends State<Checkout> {
                           } else if (_selectedIndex == 2) {
                             // For carhop orders, branch must be selected by user
                             if (selectedBranch == null) {
-                              throw Exception(
-                                  'Please select a branch before proceeding with carhop payment');
+                              throw Exception('Please select a branch before proceeding with carhop payment');
                             }
-
+                            
                             // Carhop order with Payme payment
                             await _handlePaymeCarhopPayment(
                               name: firstName,
@@ -1537,60 +1532,26 @@ class _CheckoutState extends State<Checkout> {
                               branchName: selectedBranch!,
                             );
                           }
-
-                          // Do NOT navigate away - the transaction status check will handle navigation
-                          // after successful payment. The popup must remain visible until
-                          // the transaction is approved and the order is submitted.
-
-                          // Reset processing state but keep the popup visible
+                          
+                          // Navigate to home page after launching Payme
+                          Navigator.pushNamedAndRemoveUntil(
+                            context, 
+                            '/homeNew', 
+                            (route) => false,
+                          );
+                          
+                          // Reset processing state since we're redirecting to Payme
                           setState(() {
                             _isProcessing = false;
                           });
-
-                          // Add a test button to check the transaction status directly
-                          // This will show up in debug mode only
-                          // Future.delayed(Duration(seconds: 2), () {
-                          //   if (kDebugMode) {
-                          //     showDialog(
-                          //       context: context,
-                          //       builder: (context) => AlertDialog(
-                          //         title: Text('Test API'),
-                          //         content: Column(
-                          //           mainAxisSize: MainAxisSize.min,
-                          //           children: [
-                          //             Text('Test the Payme API directly'),
-                          //             SizedBox(height: 10),
-                          //             ElevatedButton(
-                          //               onPressed: () async {
-                          //                 // Use the generated order ID from the payment handler
-                          //                 final testOrderId = PaymeService.generateOrderId();
-                          //                 print('🧪 Testing with order ID: $testOrderId');
-                          //                 final result = await PaymeService.testCheckTransaction(testOrderId);
-                          //                 print('🧪 Test API result: $result');
-                          //               },
-                          //               child: Text('Test API with current order ID'),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //         actions: [
-                          //           TextButton(
-                          //             onPressed: () => Navigator.of(context).pop(),
-                          //             child: Text('Close'),
-                          //           ),
-                          //         ],
-                          //       ),
-                          //     );
-                          //   }
-                          // });
-
-                          // Return early but don't navigate away
+                          
+                          // Return early since we're redirecting to Payme
                           return;
                         } catch (e) {
                           print('Error handling Payme payment: $e');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                  'Error processing Payme payment: ${e.toString()}'),
+                              content: Text('Error processing Payme payment: ${e.toString()}'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -1913,8 +1874,7 @@ class _CheckoutState extends State<Checkout> {
         address: address ?? 'No address provided',
         items: formattedItems,
         totalCost: total,
-        paymentType:
-            paymentType.toLowerCase(), // Pass the actual payment type as is
+        paymentType: paymentType.toLowerCase() == 'card' ? 'Payme' : 'cash',
         comment: comment,
         persons: 1,
         deliveryFee: deliveryFee,

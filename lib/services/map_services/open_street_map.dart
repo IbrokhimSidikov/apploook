@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const int baseDeliveryFee = 12000;
+const int baseDeliveryFee = 0;
 
 final List<Map<String, dynamic>> deliveryFeeRules = [
   {'from': 2, 'to': 3, 'fee': 14000},
@@ -100,14 +100,16 @@ Future<Map<String, dynamic>?> findNearestBranch(
   String previousNearestBranchName = "None";
 
   print('🔍 BRANCH FINDER: Starting nearest branch search');
-  print('🔍 BRANCH FINDER: Client coordinates: Lat: $clientLat, Long: $clientLng');
+  print(
+      '🔍 BRANCH FINDER: Client coordinates: Lat: $clientLat, Long: $clientLng');
   print('🔍 BRANCH FINDER: Evaluating ${branches.length} branches');
 
   int branchIndex = 0;
   for (var branch in branches) {
     branchIndex++;
-    print('🔍 BRANCH FINDER: Checking branch ${branch['name']} (${branchIndex}/${branches.length})');
-    
+    print(
+        '🔍 BRANCH FINDER: Checking branch ${branch['name']} (${branchIndex}/${branches.length})');
+
     final distance = await getDistanceInMeters(
       startLat: branch['lat']!, // Branch latitude as starting point
       startLng: branch['lng']!, // Branch longitude as starting point
@@ -116,14 +118,16 @@ Future<Map<String, dynamic>?> findNearestBranch(
     );
 
     if (distance == null) {
-      print('❌ BRANCH FINDER: Distance calculation failed for branch ${branch['name']}');
+      print(
+          '❌ BRANCH FINDER: Distance calculation failed for branch ${branch['name']}');
       continue;
     }
-    
+
     print('🔍 BRANCH FINDER: Distance to ${branch['name']}: $distance km');
 
     if (distance < shortestDistance) {
-      previousNearestBranchName = nearestBranch != null ? nearestBranch!['name'] : "None";
+      previousNearestBranchName =
+          nearestBranch != null ? nearestBranch!['name'] : "None";
       shortestDistance = distance;
       int deliveryFee = calculateDeliveryFee(distance);
 
@@ -134,16 +138,20 @@ Future<Map<String, dynamic>?> findNearestBranch(
         'distance': distance,
         'deliveryFee': deliveryFee,
       };
-      
-      print('✅ BRANCH FINDER: New nearest branch: ${branch['name']} (${distance.toStringAsFixed(2)} km)');
+
+      print(
+          '✅ BRANCH FINDER: New nearest branch: ${branch['name']} (${distance.toStringAsFixed(2)} km)');
       print('✅ BRANCH FINDER: Delivery fee: $deliveryFee');
-      print('✅ BRANCH FINDER: Previous nearest was: $previousNearestBranchName');
+      print(
+          '✅ BRANCH FINDER: Previous nearest was: $previousNearestBranchName');
     }
   }
 
   if (nearestBranch != null) {
-    print('🏁 BRANCH FINDER: Final nearest branch determined: ${nearestBranch['name']}');
-    print('🏁 BRANCH FINDER: Distance: ${nearestBranch['distance'].toStringAsFixed(2)} km');
+    print(
+        '🏁 BRANCH FINDER: Final nearest branch determined: ${nearestBranch['name']}');
+    print(
+        '🏁 BRANCH FINDER: Distance: ${nearestBranch['distance'].toStringAsFixed(2)} km');
     print('🏁 BRANCH FINDER: Delivery fee: ${nearestBranch['deliveryFee']}');
   } else {
     print('❌ BRANCH FINDER: No nearest branch could be determined');

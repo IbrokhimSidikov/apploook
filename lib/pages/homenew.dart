@@ -4,13 +4,15 @@ import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:apploook/widget/cached_product_image.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
+import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
 
 import 'dart:convert';
@@ -133,7 +135,7 @@ class HomeNew extends StatefulWidget {
   State<HomeNew> createState() => _HomeNewState();
 }
 
-class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
+class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin, WidgetsBindingObserver {
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
@@ -168,8 +170,33 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // Register observer for app lifecycle changes
+    WidgetsBinding.instance.addObserver(this);
     // Initialize everything in the proper sequence
     _initializeAndLoadData();
+    // Check for pending Payme payments
+    _checkPendingPaymePayments();
+  }
+  
+  // Lifecycle observer methods are integrated into the existing dispose method below
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When app resumes from background (like returning from Payme app)
+    if (state == AppLifecycleState.resumed) {
+      // Check for pending Payme payments
+      _checkPendingPaymePayments();
+    }
+  }
+  
+  // Check for pending Payme payments and show loading popup if needed
+  Future<void> _checkPendingPaymePayments() async {
+    // Use a small delay to ensure the app is fully resumed
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (mounted) {
+      // Check for pending payments and show loading popup if needed
+      PaymeTransactionService.checkPendingOrders(context);
+    }
   }
 
   Future<void> _initializeAndLoadData() async {
@@ -324,9 +351,11 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    // Unregister observer when disposing
+    WidgetsBinding.instance.removeObserver(this);
     selectedCategoryId.dispose();
-    _categoryScrollControllers.values
-        .forEach((controller) => controller.dispose());
+    _scrollController.dispose();
+    _categoryScrollControllers.forEach((_, controller) => controller.dispose());
     super.dispose();
   }
 

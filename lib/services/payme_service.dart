@@ -3,14 +3,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:http/http.dart' as http;
 
 class PaymeService {
   // Generate a unique order ID for Payme
   static String generateOrderId() {
     final random = Random();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return '${random.nextInt(1000)}$timestamp';
+    // Generate a random 8-digit number between 10000000 and 99999999
+    final orderNumber = 10000000 + random.nextInt(90000000);
+    return orderNumber.toString();
   }
 
   // Create the Payme checkout URL
@@ -24,7 +26,7 @@ class PaymeService {
 
     // Encode to base64
     final base64Params = base64Encode(utf8.encode(params));
-
+    print('Base64 params: https://checkout.paycom.uz/$base64Params');
     // Return the full URL
     return 'https://checkout.paycom.uz/$base64Params';
   }
@@ -49,20 +51,33 @@ class PaymeService {
       // Create the URL
       final url = createPaymeCheckoutUrl(merchantId, orderId, amount);
 
-      // Launch the URL in external browser
-      if (await canLaunch(url)) {
-        await launch(
-          url,
-          forceSafariVC: false, // iOS: Don't use SafariVC
-          forceWebView: false, // Android: Don't use WebView
-          enableJavaScript: true,
-          enableDomStorage: true,
-          universalLinksOnly: false, // Don't restrict to universal links
+      // Try to launch with payme:// scheme first for mobile app
+      final paymeAppUrl =
+          'payme://payment?payload=${Uri.encodeComponent(url.substring(url.lastIndexOf('/') + 1))}';
+
+      bool launched = false;
+
+      // Try to launch the Payme mobile app first
+      if (await canLaunchUrlString(paymeAppUrl)) {
+        launched = await launchUrlString(
+          paymeAppUrl,
+          mode: LaunchMode.externalApplication,
         );
-        return true;
-      } else {
+      }
+
+      // If Payme app launch failed, try web URL as fallback
+      if (!launched && await canLaunchUrlString(url)) {
+        launched = await launchUrlString(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
+      }
+
+      if (!launched) {
         throw 'Could not launch Payme URL';
       }
+
+      return true;
     } catch (e) {
       print('Error launching Payme checkout: $e');
       return false;
@@ -106,23 +121,106 @@ class PaymeService {
   }
 
   // Handle payment verification
-  // Note: In a real implementation, you would need to verify the payment status
-  // with Payme's server using their API. This is a simplified version.
-  static Future<bool> verifyPayment(String orderId) async {
+  // This method should be called to check the status of a Payme transaction
+  static Future<Map<String, dynamic>> verifyPayment(String orderId) async {
     try {
+      // Check if we have a pending payment for this order ID
       final pendingPayment = await getPendingPayment();
-
-      if (pendingPayment != null && pendingPayment['order_id'] == orderId) {
-        // In a real implementation, you would verify with Payme's server
-        // For now, we'll just clear the pending payment and return true
-        await clearPendingPayment();
-        return true;
+      if (pendingPayment == null || pendingPayment['order_id'] != orderId) {
+        print('⚠️ No pending payment found in local storage for order: $orderId');
+        print('⚠️ Will still check with API to show response');
+        // Continue with API call anyway to see the response
       }
 
-      return false;
+      // Make API call to check transaction status
+      final url =
+          'https://api.sievesapp.com/v1/public/check-payme-transaction?order_id=$orderId';
+      print('🔄 Checking Payme transaction status: $url');
+      
+      final response = await http.get(Uri.parse(url));
+      print('📥 Payme API response status: ${response.statusCode}');
+      print('📥 Payme API response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Payme transaction check response: $responseData');
+
+        // If success is true and transaction is paid, payment is successful
+        if (responseData['success'] == true &&
+            responseData['transaction'] != null &&
+            responseData['transaction']['is_paid'] == true) {
+          // Clear the pending payment since it's now confirmed
+          await clearPendingPayment();
+
+          return {
+            'success': true,
+            'message': 'Payment verified successfully',
+            'transaction_id': responseData['transaction']
+                ['payme_transaction_id'],
+            'order_id': orderId,
+            'transaction_data': responseData['transaction']
+          };
+        } else if (responseData['success'] == false &&
+            responseData['message'] == 'No transaction found for this order') {
+          // Payment was cancelled or never completed
+          return {
+            'success': false,
+            'message': 'Payment was cancelled or not completed',
+            'order_id': orderId
+          };
+        } else {
+          // Payment is still pending
+          return {
+            'success': false,
+            'message': 'Payment is still pending',
+            'order_id': orderId
+          };
+        }
+      } else {
+        // API call failed
+        return {
+          'success': false,
+          'message': 'API error: ${response.statusCode}',
+          'order_id': orderId
+        };
+      }
     } catch (e) {
       print('Error verifying payment: $e');
-      return false;
+      return {'success': false, 'message': 'Error: $e', 'order_id': orderId};
+    }
+  }
+
+  // Test function to directly check transaction status without pending payment check
+  static Future<Map<String, dynamic>> testCheckTransaction(String orderId) async {
+    try {
+      print('🧪 TEST: Directly checking transaction status for order: $orderId');
+      
+      // Make API call to check transaction status
+      final url =
+          'https://api.sievesapp.com/v1/public/check-payme-transaction?order_id=$orderId';
+      print('🔄 TEST: API URL: $url');
+      
+      final response = await http.get(Uri.parse(url));
+      print('📥 TEST: API response status: ${response.statusCode}');
+      print('📥 TEST: API response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return {
+          'success': true,
+          'response_data': responseData,
+          'order_id': orderId
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'API error: ${response.statusCode}',
+          'order_id': orderId
+        };
+      }
+    } catch (e) {
+      print('❌ TEST: Error checking transaction: $e');
+      return {'success': false, 'message': 'Error: $e', 'order_id': orderId};
     }
   }
 }

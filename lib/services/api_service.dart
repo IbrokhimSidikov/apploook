@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:apploook/services/payme_service.dart';
 
 class ApiService {
-  static const String _baseUrl = 'https://test.integrator.api.delever.uz/v1';
+  static const String _baseUrl = 'https://integrator.api.delever.uz/v1';
+  // static const String _baseUrl = 'https://test.integrator.api.delever.uz/v1';
+
   static const String _tokenEndpoint = '$_baseUrl/security/oauth/token';
   static const String _orderEndpoint = '$_baseUrl/order';
   static const String _restaurantId = '15adf579-b2f2-43b3-bbb5-30334109386e';
@@ -142,7 +145,7 @@ class ApiService {
 
     if (response.statusCode == 200) {
       print('Request successful: ${response.statusCode}');
-      
+
       // Ensure proper UTF-8 encoding when decoding the response
       final responseBody = utf8.decode(response.bodyBytes);
       return json.decode(responseBody);
@@ -186,7 +189,9 @@ class ApiService {
             final id = item['id'] ?? 'N/A';
             final name = item['name'] ?? item['title'] ?? 'N/A';
             final price = item['price'] ??
-                (item['priceList'] != null ? item['priceList']['price'] : 'N/A');
+                (item['priceList'] != null
+                    ? item['priceList']['price']
+                    : 'N/A');
             print('  - ID: $id, Name: $name, Price: $price');
           }
         }
@@ -206,7 +211,6 @@ class ApiService {
         // Try to find any lists in the response
         for (var key in data.keys) {
           if (data[key] is List) {
-            print('Found list in key: $key with ${(data[key] as List).length} items');
             print(
                 'Found list in key: $key with ${(data[key] as List).length} items');
 
@@ -235,7 +239,7 @@ class ApiService {
       rethrow;
     }
   }
-  
+
   // Method to create a new order
   Future<Map<String, dynamic>> createOrder({
     required String clientName,
@@ -243,28 +247,35 @@ class ApiService {
     required double latitude,
     required double longitude,
     required String address,
-    required List<Map<String, dynamic>> items, 
+    required List<Map<String, dynamic>> items,
     required double totalCost,
     required String paymentType,
     String? comment,
     int persons = 1,
     double deliveryFee = 0,
+    String? paymeOrderId,
   }) async {
     try {
       print('Creating order with the new API endpoint');
-      
+
       // Format the phone number correctly (remove + if present)
-      String formattedPhone = phoneNumber.startsWith('+') 
-          ? phoneNumber.substring(1) 
-          : phoneNumber;
-      
+      String formattedPhone =
+          phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
+
       // Generate a unique order ID in the format used by the successful example
       // Format: YYMMDD-randomnumber
       final now = DateTime.now();
-      final datePrefix = '${now.year.toString().substring(2)}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-      final randomPart = (10000000 + DateTime.now().millisecondsSinceEpoch % 90000000).toString();
+      final datePrefix =
+          '${now.year.toString().substring(2)}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+      final randomPart =
+          (10000000 + DateTime.now().millisecondsSinceEpoch % 90000000)
+              .toString();
       String orderId = '$datePrefix-$randomPart';
-      
+
+      // Determine the payment type based on Payme verification
+      String finalPaymentType =
+          await _determinePaymentType(paymentType, paymeOrderId);
+
       // Create the order payload according to the new API format
       final Map<String, dynamic> orderPayload = {
         "platform": "YE",
@@ -275,35 +286,40 @@ class ApiService {
           "clientName": clientName,
           "phoneNumber": phoneNumber,
           "additionalPhoneNumbers": [phoneNumber],
-          "deliveryDate": "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
+          "deliveryDate":
+              "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
           "deliveryAddress": {
             "full": address,
             "latitude": latitude.toString(),
             "longitude": longitude.toString(),
           },
-          "courierArrivementDate": "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
+          "courierArrivementDate":
+              "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
           "realPhoneNumber": formattedPhone,
           "pickupCode": 123, // Adding this as it's in the successful example
         },
         "paymentInfo": {
           "itemsCost": totalCost.round(),
           "deliveryFee": deliveryFee.round(),
-          "paymentType": paymentType,
+          "paymentType": finalPaymentType,
           "netting_payment": false
         },
-        "items": items.map((item) => {
-          "id": item["id"],
-          "name": item["name"],
-          "quantity": item["quantity"],
-          "price": item["price"],
-          // Remove any extra fields that might be causing issues
-        }).toList(),
+        "items": items
+            .map((item) => {
+                  "id": item["id"],
+                  "name": item["name"],
+                  "quantity": item["quantity"],
+                  "price": item["price"],
+                  // Remove any extra fields that might be causing issues
+                })
+            .toList(),
         "persons": 2, // Fixed to match the successful example
-        "comment": comment ?? "Дополнительная информация о заказе: ..." // Use provided comment if available
+        "comment": comment ??
+            "Дополнительная информация о заказе: ..." // Use provided comment if available
       };
-      
+
       print('Order payload: ${json.encode(orderPayload)}');
-      
+
       // Send the order request using the endpoint constant
       // Remove the leading slash since _orderEndpoint already includes the full path
       final response = await _authenticatedRequest(
@@ -311,12 +327,39 @@ class ApiService {
         method: 'POST',
         body: orderPayload,
       );
-      
+
       print('Order created successfully: $response');
       return response;
     } catch (e) {
       print('Error creating order: $e');
       rethrow;
+    }
+  }
+
+  Future<String> _determinePaymentType(
+      String originalPaymentType, String? paymeOrderId) async {
+    // If payment was made through Payme and we have an order ID, verify the payment
+    if (originalPaymentType.toLowerCase() == 'payme' && paymeOrderId != null) {
+      // Check if the Payme payment was successful
+      final paymentResult = await PaymeService.verifyPayment(paymeOrderId);
+      final isVerified = paymentResult['success'] == true;
+      if (isVerified) {
+        print(
+            'Payme payment verified as successful, setting payment type to card');
+        return 'card';
+      }
+    }
+
+    // Map the payment types to what the API expects
+    switch (originalPaymentType.toLowerCase()) {
+      case 'card':
+        return 'card';
+      case 'cash':
+        return 'cash';
+      case 'payme':
+        return 'payme';
+      default:
+        return originalPaymentType;
     }
   }
 }
