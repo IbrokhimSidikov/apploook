@@ -1283,8 +1283,10 @@ class _CheckoutState extends State<Checkout> {
                         } else {
                           // For delivery, use the nearest branch's merchant ID if available
                           if (_nearestBranch != null &&
-                              _nearestBranch!['branchName'] != null) {
-                            branchName = _nearestBranch!['branchName'];
+                              _nearestBranch!['name'] != null) {
+                            branchName = _nearestBranch!['name'];
+                            print('\n🔍 DEBUG: Found nearest branch with name: $branchName');
+                            
                             final branchConfig =
                                 BranchConfigs.getConfig(branchName);
                             merchantId = branchConfig.merchantId;
