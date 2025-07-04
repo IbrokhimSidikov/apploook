@@ -14,9 +14,9 @@ import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
+import 'package:apploook/services/order_tracking_service.dart';
 
 import 'dart:convert';
-import 'package:flutter/material.dart';
 
 import '../widget/banner_widget.dart';
 
@@ -135,7 +135,8 @@ class HomeNew extends StatefulWidget {
   State<HomeNew> createState() => _HomeNewState();
 }
 
-class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin, WidgetsBindingObserver {
+class _HomeNewState extends State<HomeNew>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
@@ -177,9 +178,9 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin, Widget
     // Check for pending Payme payments
     _checkPendingPaymePayments();
   }
-  
+
   // Lifecycle observer methods are integrated into the existing dispose method below
-  
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // When app resumes from background (like returning from Payme app)
@@ -188,7 +189,7 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin, Widget
       _checkPendingPaymePayments();
     }
   }
-  
+
   // Check for pending Payme payments and show loading popup if needed
   Future<void> _checkPendingPaymePayments() async {
     // Use a small delay to ensure the app is fully resumed
@@ -577,44 +578,87 @@ class _HomeNewState extends State<HomeNew> with TickerProviderStateMixin, Widget
                           .setLocale(Locale(newLocale));
                     },
                   ),
-                  Consumer<NotificationProvider>(
-                    builder: (context, notificationProvider, child) {
+                  // Consumer<NotificationProvider>(
+                  //   builder: (context, notificationProvider, child) {
+                  //     return GestureDetector(
+                  //       onTap: () async {
+                  //         await notificationProvider.markAllOrdersAsRead();
+                  //         Navigator.pushNamed(context, '/notificationsView');
+                  //       },
+                  //       child: Stack(
+                  //         children: [
+                  //           const Padding(
+                  //             padding: EdgeInsets.all(15.0),
+                  //             child: Icon(
+                  //               Icons.shopping_bag_outlined,
+                  //               size: 24.0,
+                  //               color: Colors.black,
+                  //             ),
+                  //           ),
+                  //           if (notificationProvider.unreadOrderCount > 0)
+                  //             Positioned(
+                  //               right: 10,
+                  //               top: 10,
+                  //               child: Container(
+                  //                 padding: const EdgeInsets.all(4),
+                  //                 decoration: BoxDecoration(
+                  //                   color: Colors.red,
+                  //                   borderRadius: BorderRadius.circular(10),
+                  //                 ),
+                  //                 constraints: const BoxConstraints(
+                  //                   minWidth: 16,
+                  //                   minHeight: 16,
+                  //                 ),
+                  //                 child: Text(
+                  //                   '${notificationProvider.unreadOrderCount}',
+                  //                   style: const TextStyle(
+                  //                     color: Colors.white,
+                  //                     fontSize: 10,
+                  //                   ),
+                  //                   textAlign: TextAlign.center,
+                  //                 ),
+                  //               ),
+                  //             ),
+                  //         ],
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+                  // const SizedBox(width: 10),
+                  // Order tracking button
+                  Builder(
+                    builder: (context) {
+                      final orderTrackingService = OrderTrackingService();
                       return GestureDetector(
-                        onTap: () async {
-                          await notificationProvider.markAllOrdersAsRead();
-                          Navigator.pushNamed(context, '/notificationsView');
+                        onTap: () {
+                          // Mark orders as read when navigating to tracking page
+                          orderTrackingService.markOrdersAsRead();
+                          Navigator.pushNamed(context, '/unifiedOrderTracking');
                         },
                         child: Stack(
                           children: [
                             const Padding(
                               padding: EdgeInsets.all(15.0),
                               child: Icon(
-                                Icons.shopping_bag_outlined,
+                                Icons.receipt_long,
                                 size: 24.0,
                                 color: Colors.black,
                               ),
                             ),
-                            if (notificationProvider.unreadOrderCount > 0)
+                            // Show notification badge if there are new orders
+                            if (orderTrackingService.hasNewOrders)
                               Positioned(
                                 right: 10,
                                 top: 10,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: const EdgeInsets.all(2),
                                   decoration: BoxDecoration(
                                     color: Colors.red,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
-                                  ),
-                                  child: Text(
-                                    '${notificationProvider.unreadOrderCount}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                    ),
-                                    textAlign: TextAlign.center,
+                                    minWidth: 14,
+                                    minHeight: 14,
                                   ),
                                 ),
                               ),

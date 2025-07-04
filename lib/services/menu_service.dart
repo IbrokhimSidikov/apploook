@@ -15,6 +15,7 @@ class MenuService {
   List<Category> _categories = [];
   List<Product> _allProducts = [];
   bool _isInitialized = false;
+  String? _nearestBranchDeliverId;
 
   // Cache constants
   static const String _cacheKey = 'cachedCategoryData';
@@ -34,10 +35,19 @@ class MenuService {
 
   MenuService._internal() {
     _apiService = ApiService(
-      clientId: '5e5e55a2-30f4-4adb-b929-a27428be9776',
-      clientSecret: 'bG9vb2tBcHBBZ2dAMTpsb29va0FwcEFnZ0Ax',
+      clientId: '0cd4095f-cfe5-4852-b18b-d4f97832b653', //Production
+      // clientId: '5e5e55a2-30f4-4adb-b929-a27428be9776', //Test
+
+      clientSecret: 'bW9iaWxlQXBwOm1vYmlsZUFwcEU1JCQ=', //Production
+      // clientSecret: 'bG9vb2tBcHBBZ2dAMTpsb29va0FwcEFnZ0Ax', //Test
     );
     _orderModeService = OrderModeService();
+  }
+  
+  // Set the nearest branch deliver ID to be used for API requests
+  void setNearestBranchDeliverId(String deliverId) {
+    _nearestBranchDeliverId = deliverId;
+    print('MenuService: Set nearest branch deliver ID: $deliverId');
   }
 
   Future<void> initialize() async {
@@ -157,6 +167,12 @@ class MenuService {
     print(
         'MenuService: Starting refreshData for mode: ${_orderModeService.currentMode}');
     try {
+      // Set the restaurant ID if we have a nearest branch deliver ID
+      if (_nearestBranchDeliverId != null && _nearestBranchDeliverId!.isNotEmpty) {
+        print('MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
+        ApiService.setRestaurantId(_nearestBranchDeliverId!);
+      }
+      
       // Use different APIs based on the order mode
       if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
         // Fetch from the new API for delivery/takeaway

@@ -6,6 +6,8 @@ import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
+import 'package:apploook/pages/order_tracking_page.dart';
+import 'package:apploook/pages/unified_order_tracking_page.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/simple_menu.dart';
 import 'package:apploook/services/notification_service.dart';
@@ -131,6 +133,8 @@ class MyApp extends StatelessWidget {
             '/notificationsView': (context) => NotificationsView(),
             '/notification': (context) => NotificationPage(),
             '/simpleMenu': (context) => SimpleMenuPage(),
+            '/orderTracking': (context) => const OrderTrackingPage(),
+            '/unifiedOrderTracking': (context) => const UnifiedOrderTrackingPage(),
           },
         );
       },

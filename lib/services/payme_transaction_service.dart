@@ -1,10 +1,11 @@
-import 'dart:async';
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/api_service.dart';
+import 'package:apploook/services/payme_service.dart';
+import 'package:apploook/services/order_tracking_service.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 
@@ -359,6 +360,42 @@ class PaymeTransactionService {
 
           print('Order submitted successfully: $result');
 
+          // Get the order ID from the API response
+          String apiOrderId;
+          print('Full API response: ${result.toString()}');
+
+          if (result.containsKey('orderId')) {
+            apiOrderId = result['orderId'].toString();
+            print('Using orderId from API response: $apiOrderId');
+          } else if (result.containsKey('id')) {
+            apiOrderId = result['id'].toString();
+            print('Using id from API response: $apiOrderId');
+          } else if (result.containsKey('eatsId')) {
+            apiOrderId = result['eatsId'].toString();
+            print('Using eatsId from API response: $apiOrderId');
+          } else {
+            // Fallback to the Payme order ID if no ID is found in the response
+            apiOrderId = orderId;
+            print('No order ID found in response, using Payme order ID: $apiOrderId');
+          }
+
+          // Log the order status endpoint that will be used for tracking
+          print('ORDER TRACKING: Order submitted successfully with ID: $apiOrderId');
+          print('ORDER TRACKING: Status endpoint will be: https://integrator.api.delever.uz/v1/order/$apiOrderId/status');
+
+          // Save order to tracking system for display in order tracking UI
+          print('ORDER TRACKING: Saving Payme order to tracking system: $apiOrderId');
+          await _saveDeliveryOrderToPrefs(
+            orderId: apiOrderId,
+            address: address ?? 'No address provided',
+            paymentType: 'Payme',
+            items: items,
+            total: total,
+            deliveryFee: deliveryFee,
+            latitude: latitude,
+            longitude: longitude
+          );
+
           // Clear pending order data
           await clearPendingOrder();
           await PaymeService.clearPendingPayment();
@@ -394,27 +431,31 @@ class PaymeTransactionService {
               body: requestBody,
             );
 
-            if (response.statusCode == 200) {
-              print('Request successful: ${response.statusCode}');
-              print('Order created successfully: ${response.body}');
-
-              // Clear pending order data
-              await _clearPendingCarhopOrder();
-              await PaymeService.clearPendingPayment();
-
-              // Reset the processing flag
-              _orderBeingProcessed = false;
-              print('🔓 Order processing completed and unlocked');
+            if (response.statusCode == 200 || response.statusCode == 201) {
+              print('Carhop order submitted successfully: ${response.body}');
             } else {
               print('Request failed with status: ${response.statusCode}');
               print('Error message: ${response.body}');
             }
+
+            // Clear pending order data
+            await _clearPendingCarhopOrder();
+            await PaymeService.clearPendingPayment();
+
+            // Reset the processing flag
+            _orderBeingProcessed = false;
+            print('🔓 Order processing completed and unlocked');
           } catch (e) {
-            print('Error processing successful carhop payment: $e');
+            print('Error processing carhop payment: $e');
+            // Reset the processing flag in case of error
+            _orderBeingProcessed = false;
+            print('🔓 Order processing unlocked after error');
           }
         } else {
           // No pending order found
           print('Payment verified but no pending order found');
+          _orderBeingProcessed = false;
+          print('🔓 Order processing unlocked - no order found');
         }
       }
     } catch (e) {
@@ -425,10 +466,6 @@ class PaymeTransactionService {
     }
   }
 
-  // Note: The functionality of _processSuccessfulPayment and _processSuccessfulCarhopPayment
-  // has been moved directly into the _processPaymentInBackground method to avoid context issues
-
-  // Get pending carhop order from SharedPreferences
   static Future<Map<String, dynamic>?> _getPendingCarhopOrder() async {
     final prefs = await SharedPreferences.getInstance();
     final orderString = prefs.getString(_pendingCarhopOrderKey);
@@ -485,6 +522,64 @@ class PaymeTransactionService {
           '💯 Payment $orderId marked as completed to prevent additional verification');
     } catch (e) {
       print('Error marking payment as completed: $e');
+    }
+  }
+  
+  /// Save delivery order to SharedPreferences for order tracking
+  static Future<void> _saveDeliveryOrderToPrefs({
+    required String orderId,
+    required String address,
+    required String paymentType,
+    required List<Map<String, dynamic>> items,
+    required double total,
+    required double deliveryFee,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      print('ORDER TRACKING: Saving Payme delivery order to SharedPreferences: $orderId');
+      final prefs = await SharedPreferences.getInstance();
+
+      // Get existing orders or initialize empty list
+      final savedOrders = prefs.getStringList('delivery_orders') ?? [];
+      print('ORDER TRACKING: Found ${savedOrders.length} existing saved orders');
+
+      // Create new order object
+      final Map<String, dynamic> orderData = {
+        'id': orderId,
+        'status': 'pending', // Initial status
+        'timestamp': DateTime.now().toIso8601String(),
+        'address': address,
+        'paymentType': paymentType,
+        'items': items,
+        'total': total,
+        'deliveryFee': deliveryFee,
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+      // Add new order to the beginning of the list
+      savedOrders.insert(0, jsonEncode(orderData));
+      
+      // Keep only the 10 most recent orders
+      if (savedOrders.length > 10) {
+        savedOrders.removeRange(10, savedOrders.length);
+      }
+      
+      // Mark that we have a new order for notification
+      OrderTrackingService().markNewOrderAdded();
+      
+      // Save updated list back to SharedPreferences
+      await prefs.setStringList('delivery_orders', savedOrders);
+      print('ORDER TRACKING: Saved Payme order to tracking system: $orderId');
+      print('ORDER TRACKING: Total orders in tracking: ${savedOrders.length}');
+      
+      // Create OrderTrackingService and update the order status
+      final orderTrackingService = OrderTrackingService();
+      await orderTrackingService.updateOrderStatus(orderId);
+      print('ORDER TRACKING: Initiated status update for order: $orderId');
+    } catch (e) {
+      print('ORDER TRACKING: Error saving order to tracking: $e');
     }
   }
 

@@ -1922,22 +1922,170 @@ class _CheckoutState extends State<Checkout> {
 
       print('Order submitted successfully: ${response.toString()}');
 
+      // Get the order ID from the response
+      String orderId;
+      print('Full API response: ${response.toString()}');
+
+      if (response.containsKey('orderId')) {
+        // Format: {"result": "OK", "orderId": "2d968150-48e6-4730-bfbf-0403187b54d1"}
+        orderId = response['orderId'].toString();
+        print('Using orderId from API response: $orderId');
+      } else if (response.containsKey('id')) {
+        orderId = response['id'].toString();
+        print('Using id from API response: $orderId');
+      } else if (response.containsKey('eatsId')) {
+        orderId = response['eatsId'].toString();
+        print('Using eatsId from API response: $orderId');
+      } else {
+        // Fallback to timestamp only if no ID is found in the response
+        orderId = DateTime.now().millisecondsSinceEpoch.toString();
+        print('No order ID found in response, using timestamp: $orderId');
+      }
+
+      // Log the order status endpoint that will be used for tracking
+      print('ORDER TRACKING: Order submitted successfully with ID: $orderId');
+      print(
+          'ORDER TRACKING: Status endpoint will be: https://integrator.api.delever.uz/v1/order/$orderId/status');
+
+      // Immediately try to fetch the initial status to verify the endpoint works
+      try {
+        print('ORDER TRACKING: Attempting to fetch initial status...');
+        final statusResponse = await apiService.getOrderStatus(orderId);
+        print('ORDER TRACKING: Initial status response: $statusResponse');
+      } catch (e) {
+        print('ORDER TRACKING: Error fetching initial status: $e');
+      }
+
+      // Save order details to SharedPreferences for tracking
+      await _saveDeliveryOrderToPrefs(
+          orderId: orderId,
+          address: address ?? 'No address provided',
+          paymentType: paymentType,
+          items: formattedItems,
+          total: total,
+          deliveryFee: deliveryFee,
+          latitude: latitude,
+          longitude: longitude);
+
       // Add order notification
       final notificationProvider =
           Provider.of<NotificationProvider>(context, listen: false);
       await notificationProvider.addOrderNotification(
         title: "New Order",
         body: "Your order has been placed successfully!",
-        messageId: response['id']?.toString() ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
+        messageId: orderId,
       );
 
       // Clear the cart
       cartProvider.clearCart();
+
+      // Show success dialog with option to track order
+      // if (mounted) {
+      //   _showOrderSuccessDialog(orderId);
+      // }
+
       return true;
     } catch (e) {
       print('Error submitting order to API: $e');
       return false;
+    }
+  }
+
+  // Show order success dialog with tracking option
+  void _showOrderSuccessDialog(String orderId) {
+    final localizations = AppLocalizations.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(localizations.orderPlacedSuccess),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 64,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                  '${localizations.yourOrderText} #$orderId ${localizations.hasBeenPlaced}'),
+              const SizedBox(height: 8),
+              Text(localizations.trackOrderMessage),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: Text(localizations.closeButton),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Return to previous screen
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFEC700),
+                foregroundColor: Colors.black,
+              ),
+              child: Text(localizations.trackOrderButton),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushNamed(context, '/orderTracking');
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Save delivery order details to SharedPreferences for tracking
+  Future<void> _saveDeliveryOrderToPrefs({
+    required String orderId,
+    required String address,
+    required String paymentType,
+    required List<Map<String, dynamic>> items,
+    required double total,
+    required double deliveryFee,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      print('Saving delivery order to SharedPreferences: $orderId');
+      final prefs = await SharedPreferences.getInstance();
+
+      // Get existing orders or initialize empty list
+      List<String> savedOrders = prefs.getStringList('delivery_orders') ?? [];
+
+      // Create new order object
+      Map<String, dynamic> orderDetails = {
+        'id': orderId,
+        'status': 'pending', // Initial status
+        'timestamp': DateTime.now().toIso8601String(),
+        'address': address,
+        'paymentType': paymentType,
+        'items': items,
+        'total': total,
+        'deliveryFee': deliveryFee,
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+      // Add new order to the list
+      savedOrders.add(jsonEncode(orderDetails));
+
+      // Keep only the last 5 orders to prevent memory issues
+      if (savedOrders.length > 5) {
+        savedOrders = savedOrders.sublist(savedOrders.length - 5);
+      }
+
+      // Save updated list
+      await prefs.setStringList('delivery_orders', savedOrders);
+      print('Delivery order saved successfully: $orderId');
+    } catch (e) {
+      print('Error saving delivery order to SharedPreferences: $e');
     }
   }
 

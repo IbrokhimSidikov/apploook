@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/menu_service.dart';
+import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/pages/homenew.dart';
 
 class Onboard extends StatefulWidget {
@@ -27,20 +28,37 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   // Order mode selection
   final OrderModeService _orderModeService = OrderModeService();
   final MenuService _menuService = MenuService();
+  final NearestBranchService _nearestBranchService = NearestBranchService();
   OrderMode? _selectedOrderMode =
       OrderMode.deliveryTakeaway; // Default selection
+  String? _nearestBranchDeliverId;
 
   @override
   void initState() {
     super.initState();
     _loadLanguagePreference();
     _initializeOrderMode();
+    _findNearestBranch(); // Find the nearest branch before initializing video
     _initializeVideo(); // This will call _preloadMenuData() after video starts
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
     print('Onboard initState: Order mode initialized to $_selectedOrderMode');
+  }
+  
+  // Find the nearest branch based on user's location
+  Future<void> _findNearestBranch() async {
+    try {
+      // Find the nearest branch
+      await _nearestBranchService.findNearestBranch();
+      
+      // Get the deliver ID for the nearest branch
+      _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+      print('Nearest branch deliver ID: $_nearestBranchDeliverId');
+    } catch (e) {
+      print('Error finding nearest branch: $e');
+    }
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -91,6 +109,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       // If a specific order mode is provided, set it in the service
       if (specificOrderMode != null) {
         await _orderModeService.setOrderMode(specificOrderMode);
+      }
+
+      // Set the nearest branch deliver ID in the menu service if available
+      if (_nearestBranchDeliverId != null && _nearestBranchDeliverId!.isNotEmpty) {
+        print('Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
+        _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
       }
 
       // Preload the menu data for the current order mode

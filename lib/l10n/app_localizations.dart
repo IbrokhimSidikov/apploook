@@ -110,6 +110,25 @@ class AppLocalizations {
       'arrivedButtonHint':
           'Tap when you arrive at the car parking zone to notify the restaurant',
       'arrivedButtonTooltip': 'Let the restaurant know you\'re here!',
+      // Order tracking
+      'orderTracking': 'Order Tracking',
+      'deliveryOrders': 'Delivery Orders',
+      'carhopOrders': 'Carhop Orders',
+      'noDeliveryOrders': 'No delivery orders yet',
+      'noCarhopOrders': 'No carhop orders yet',
+      'placeOrderToSee': 'Place an order to see it here',
+      'refreshStatus': 'Refresh Status',
+      'orderSummary': 'Order Summary',
+      'subtotal': 'Subtotal',
+      'deliveryFee': 'Delivery Fee',
+      'total': 'Total',
+      'orderStatus': 'Order Status',
+      'orderPlacedSuccess': 'Order Placed Successfully',
+      'yourOrderText': 'Your order',
+      'hasBeenPlaced': 'has been placed successfully',
+      'trackOrderMessage': 'You can track your order status in the order tracking page',
+      'closeButton': 'Close',
+      'trackOrderButton': 'Track Order',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -213,6 +232,25 @@ class AppLocalizations {
       'arrivedButtonHint':
           'Avtomobil to\'xtash joyiga yetib kelganingizda, restorantni xabardor qilish uchun bosing',
       'arrivedButtonTooltip': 'Restoranga kelganingizni bildiring!',
+      // Order tracking
+      'orderTracking': 'Buyurtma kuzatuvi',
+      'deliveryOrders': 'Yetkazib berish buyurtmalari',
+      'carhopOrders': 'Carhop buyurtmalari',
+      'noDeliveryOrders': 'Yetkazib berish buyurtmalari yo\'q',
+      'noCarhopOrders': 'Carhop buyurtmalari yo\'q',
+      'placeOrderToSee': 'Kuzatuvni ko\'rish uchun buyurtma bering',
+      'refreshStatus': 'Holatni yangilash',
+      'orderSummary': 'Buyurtma tafsilotlari',
+      'subtotal': 'Oraliq summa',
+      'deliveryFee': 'Yetkazib berish narxi',
+      'total': 'Jami',
+      'orderStatus': 'Buyurtma holati',
+      'orderPlacedSuccess': 'Buyurtma muvaffaqiyatli joylashtirildi',
+      'yourOrderText': 'Sizning buyurtmangiz',
+      'hasBeenPlaced': 'muvaffaqiyatli joylashtirildi',
+      'trackOrderMessage': 'Buyurtma holatini buyurtma kuzatuvi sahifasida kuzatishingiz mumkin',
+      'closeButton': 'Yopish',
+      'trackOrderButton': 'Buyurtmani kuzatish',
     }
     // 'ru': {
     //   'whatsNew': 'Что нового',
@@ -471,4 +509,46 @@ class AppLocalizations {
   String get orderHistory =>
       _localizedValues[locale.languageCode]!['orderHistory']!;
   String get clearAll => _localizedValues[locale.languageCode]!['clearAll']!;
+
+  // Order tracking getters
+  String get orderTracking =>
+      _localizedValues[locale.languageCode]!['orderTracking']!;
+  String get deliveryOrders =>
+      _localizedValues[locale.languageCode]!['deliveryOrders']!;
+  String get carhopOrders =>
+      _localizedValues[locale.languageCode]!['carhopOrders']!;
+  String get noDeliveryOrders =>
+      _localizedValues[locale.languageCode]!['noDeliveryOrders']!;
+  String get noCarhopOrders =>
+      _localizedValues[locale.languageCode]!['noCarhopOrders']!;
+  String get placeOrderToSee =>
+      _localizedValues[locale.languageCode]!['placeOrderToSee']!;
+  String get refreshStatus =>
+      _localizedValues[locale.languageCode]!['refreshStatus']!;
+  String get orderSummary =>
+      _localizedValues[locale.languageCode]!['orderSummary']!;
+  String get subtotal =>
+      _localizedValues[locale.languageCode]!['subtotal']!;
+  String get deliveryFee =>
+      _localizedValues[locale.languageCode]!['deliveryFee']!;
+  String get orderStatus =>
+      _localizedValues[locale.languageCode]!['orderStatus']!;
+      
+  String get orderPlacedSuccess =>
+      _localizedValues[locale.languageCode]!['orderPlacedSuccess']!;
+      
+  String get yourOrderText =>
+      _localizedValues[locale.languageCode]!['yourOrderText']!;
+      
+  String get hasBeenPlaced =>
+      _localizedValues[locale.languageCode]!['hasBeenPlaced']!;
+      
+  String get trackOrderMessage =>
+      _localizedValues[locale.languageCode]!['trackOrderMessage']!;
+      
+  String get closeButton =>
+      _localizedValues[locale.languageCode]!['closeButton']!;
+      
+  String get trackOrderButton =>
+      _localizedValues[locale.languageCode]!['trackOrderButton']!;
 }

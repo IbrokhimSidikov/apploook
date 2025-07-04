@@ -9,7 +9,8 @@ class ApiService {
 
   static const String _tokenEndpoint = '$_baseUrl/security/oauth/token';
   static const String _orderEndpoint = '$_baseUrl/order';
-  static const String _restaurantId = '15adf579-b2f2-43b3-bbb5-30334109386e';
+  // Default restaurant ID - not const because it can be changed at runtime
+  static String _restaurantId = 'a96eb53e-b865-415f-b4d1-5d06c06f3fb1';
 
   // Token cache keys
   static const String _tokenKey = 'auth_token';
@@ -20,6 +21,14 @@ class ApiService {
   final String _clientSecret;
   final String _grantType;
   final String _scope;
+
+  // For setting the restaurant ID dynamically
+  static void setRestaurantId(String restaurantId) {
+    if (restaurantId.isNotEmpty) {
+      _restaurantId = restaurantId;
+      print('ApiService: Restaurant ID set to $_restaurantId');
+    }
+  }
 
   ApiService({
     required String clientId,
@@ -159,8 +168,8 @@ class ApiService {
 
   // Method to fetch menu items
   Future<List<dynamic>> getMenuItems() async {
-    // Using the specific menu endpoint
-    const endpoint = '/menu/$_restaurantId/composition';
+    // Using the specific menu endpoint - not const because _restaurantId can change
+    final endpoint = '/menu/$_restaurantId/composition';
 
     try {
       final data = await _authenticatedRequest(endpoint);
@@ -241,6 +250,71 @@ class ApiService {
   }
 
   // Method to create a new order
+  /// Fetches the status of an order by its ID
+  /// Returns the order status response from the API
+  Future<Map<String, dynamic>> getOrderStatus(String orderId) async {
+    try {
+      print('ORDER TRACKING: ApiService: Fetching status for order: $orderId');
+      
+      // Construct the status endpoint URL
+      final statusEndpoint = '/order/$orderId/status';
+      print('ORDER TRACKING: ApiService: Using endpoint: $statusEndpoint');
+      
+      // Log the request details
+      print('ORDER TRACKING: ApiService: Making authenticated GET request');
+      print('ORDER TRACKING: ApiService: Full URL: ${_baseUrl + statusEndpoint}');
+      
+      // Log auth token being used
+      final token = await getToken();
+      print('ORDER TRACKING: ApiService: Using auth token: ${token.substring(0, 10)}...');
+      
+      // Make an authenticated GET request to the status endpoint
+      final response = await _authenticatedRequest(
+        statusEndpoint,
+        method: 'GET',
+      );
+      
+      // Log the complete response
+      print('ORDER TRACKING: ApiService: Order status raw response: $response');
+      
+      // Log specific fields in the response
+      if (response is Map<String, dynamic>) {
+        print('ORDER TRACKING: ApiService: Response type: Map');
+        print('ORDER TRACKING: ApiService: Response keys: ${response.keys.toList()}');
+        
+        if (response.containsKey('status')) {
+          print('ORDER TRACKING: ApiService: Status field found: ${response['status']}');
+        }
+        
+        if (response.containsKey('orderStatus')) {
+          print('ORDER TRACKING: ApiService: OrderStatus field found: ${response['orderStatus']}');
+        }
+        
+        if (response.containsKey('error')) {
+          print('ORDER TRACKING: ApiService: Error field found: ${response['error']}');
+        }
+        
+        // Additional fields that might contain status information
+        if (response.containsKey('state')) {
+          print('ORDER TRACKING: ApiService: State field found: ${response['state']}');
+        }
+        
+        if (response.containsKey('deliveryStatus')) {
+          print('ORDER TRACKING: ApiService: DeliveryStatus field found: ${response['deliveryStatus']}');
+        }
+      } else {
+        print('ORDER TRACKING: ApiService: Response is not a Map: ${response.runtimeType}');
+      }
+      
+      return response;
+    } catch (e) {
+      print('ORDER TRACKING: ApiService: Error fetching order status: $e');
+      print('ORDER TRACKING: ApiService: Error type: ${e.runtimeType}');
+      print('ORDER TRACKING: ApiService: Stack trace: ${StackTrace.current}');
+      return {'error': e.toString(), 'status': 'unknown'};
+    }
+  }
+
   Future<Map<String, dynamic>> createOrder({
     required String clientName,
     required String phoneNumber,
@@ -335,6 +409,8 @@ class ApiService {
       rethrow;
     }
   }
+
+  // This duplicate getOrderStatus method has been merged with the one above
 
   Future<String> _determinePaymentType(
       String originalPaymentType, String? paymeOrderId) async {
