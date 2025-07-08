@@ -8,6 +8,7 @@ import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/providers/notification_provider.dart';
 
 /// Service to handle Payme payment transactions for both delivery and carhop orders.
 /// Manages saving pending orders, checking transaction status, and processing successful payments.
@@ -413,7 +414,7 @@ class PaymeTransactionService {
           try {
             // Extract data from carhopOrderData
             final String paymeOrderId = carhopOrderData['order_id'];
-            final String requestBody = carhopOrderData['request_body'];
+            final Map<String, dynamic> requestBody = carhopOrderData['request_body'];
             final branchConfigData = carhopOrderData['branch_config'];
 
             print(
@@ -428,11 +429,57 @@ class PaymeTransactionService {
                 'Authorization': 'Bearer ${branchConfigData['sievesApiToken']}',
                 'Accept': 'application/json',
               },
-              body: requestBody,
+              body: jsonEncode(requestBody),
             );
 
             if (response.statusCode == 200 || response.statusCode == 201) {
               print('Carhop order submitted successfully: ${response.body}');
+              
+              // Parse the response and save order details
+              final responseData = jsonDecode(response.body);
+              final prefs = await SharedPreferences.getInstance();
+              
+              // Get existing orders or initialize empty list
+              List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
+              
+              // Get cart items from the saved carhop order data
+              final cartItems = carhopOrderData['cart_items'] ?? [];
+              
+              // Create new order object
+              Map<String, dynamic> orderDetails = {
+                'id': responseData['id'],
+                'paid': responseData['paid'],
+                'timestamp': DateTime.now().toIso8601String(),
+                'orderItems': cartItems,
+              };
+              
+              // Add new order to the list
+              savedOrders.add(jsonEncode(orderDetails));
+              
+              // Keep only the last 5 orders to prevent memory issues
+              if (savedOrders.length > 5) {
+                savedOrders = savedOrders.sublist(savedOrders.length - 5);
+              }
+              
+              // Save updated list
+              await prefs.setStringList('carhop_orders', savedOrders);
+              
+              // Mark payment as completed to prevent duplicate processing
+              await _markPaymentAsCompleted(paymeOrderId);
+              
+              // Add notification if context is available
+              if (context.mounted) {
+                final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+                await notificationProvider.addOrderNotification(
+                  title: "New Car-hop Order",
+                  body: "Your car-hop order has been placed successfully!",
+                  messageId: responseData['id'].toString(),
+                );
+              }
+              
+              // Update order tracking notification indicator
+              final orderTrackingService = OrderTrackingService();
+              orderTrackingService.markNewOrderAdded();
             } else {
               print('Request failed with status: ${response.statusCode}');
               print('Error message: ${response.body}');

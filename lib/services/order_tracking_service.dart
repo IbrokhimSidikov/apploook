@@ -10,6 +10,9 @@ class OrderTrackingService {
   // Track whether there are new unread orders
   bool _hasNewOrders = false;
   
+  // Track the count of new unread orders
+  int _newOrdersCount = 0;
+  
   // API service instance
   late final ApiService _apiService;
   
@@ -32,14 +35,19 @@ class OrderTrackingService {
   // Getter for new orders flag
   bool get hasNewOrders => _hasNewOrders;
   
+  // Getter for new orders count
+  int get newOrdersCount => _newOrdersCount;
+  
   // Mark a new order as added
   void markNewOrderAdded() {
     _hasNewOrders = true;
+    _newOrdersCount++;
   }
   
   // Mark orders as read when user visits the tracking page
   void markOrdersAsRead() {
     _hasNewOrders = false;
+    _newOrdersCount = 0;
   }
 
   // Get all saved delivery orders from SharedPreferences

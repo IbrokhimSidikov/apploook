@@ -6,6 +6,7 @@ import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
 import 'package:apploook/providers/notification_provider.dart';
+import 'package:apploook/services/order_tracking_service.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
@@ -264,10 +265,16 @@ class _CheckoutState extends State<Checkout> {
         'order_id': paymeOrderId,
         'request_body': requestBody,
         'branch_config': {
-          'sieves_api_code': branchConfig.sievesApiCode,
-          'sieves_api_token': branchConfig.sievesApiToken,
+          'sievesApiCode': branchConfig.sievesApiCode,
+          'sievesApiToken': branchConfig.sievesApiToken,
         },
         'timestamp': DateTime.now().millisecondsSinceEpoch,
+        'cart_items': cartProvider.cartItems.map((item) => {
+          'name': item.product.name,
+          'quantity': item.quantity,
+          'price': item.product.price,
+          'carDetails': carDetails
+        }).toList(),
       });
 
       // Show the transaction status dialog first
@@ -2154,6 +2161,24 @@ class _CheckoutState extends State<Checkout> {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
         }
+        
+        // Handle Payme payment for carhop orders
+        if (paymentType.toLowerCase() == 'payme') {
+          await _handlePaymeCarhopPayment(
+            name: name,
+            phone: phone,
+            branchName: selectedBranch,
+            comment: comment,
+            carDetails: carDetails,
+            total: total,
+            latitude: latitude,
+            longitude: longitude,
+            cartProvider: cartProvider,
+            orderType: orderType,
+          );
+          return;
+        }
+        
         final branchConfig = BranchConfigs.getConfig(selectedBranch!);
         // Use the actual cart items from the cart provider
         final List<Map<String, dynamic>> formattedOrderItems =
@@ -2260,12 +2285,15 @@ class _CheckoutState extends State<Checkout> {
             body: "Your car-hop order has been placed successfully!",
             messageId: responseData['id'].toString(),
           );
+          
+          // Update order tracking notification indicator
+          final orderTrackingService = OrderTrackingService();
+          orderTrackingService.markNewOrderAdded();
 
           cartProvider.clearCart();
           return;
         }
-      }
-
+      } 
       // Original telegram order sending logic for non-carhop orders
       final orderDetails = "Адрес: $address\n" +
           "Филиал: $branchName\n" +
