@@ -258,7 +258,7 @@ class _CheckoutState extends State<Checkout> {
           }
         ],
         "value": total,
-        "note": "$comment\nCar Details: $carDetails",
+        "note": "$comment\nCar Details: $carDetails\nPayment Method: Payme",
         "day_session_id": null,
         "pager_number": phone,
         "pos_id": null,
@@ -2273,7 +2273,7 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": "$comment\nCar Details: $carDetails",
+          "note": "$comment\nCar Details: $carDetails\nPayment Method: $paymentType",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,
