@@ -134,6 +134,12 @@ class _CheckoutState extends State<Checkout> {
           "totalPrice": item.product.price * item.quantity,
         };
       }).toList();
+      
+      // Calculate the final total including delivery fee and bag price (2000 UZS for delivery, 0 for pickup)
+      final double bagPrice = _selectedIndex == 0 ? 2000.0 : 0.0;
+      final double finalTotal = total + deliveryFee + bagPrice;
+      
+      print('Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Bag price: $bagPrice UZS, Final total: $finalTotal UZS');
 
       // Save the order details for later processing
       await PaymeTransactionService.savePendingOrder(
@@ -142,7 +148,7 @@ class _CheckoutState extends State<Checkout> {
         phone: phone,
         address: address,
         comment: comment,
-        total: total,
+        total: finalTotal, // Use the final total that includes all fees
         latitude: latitude,
         longitude: longitude,
         deliveryFee: deliveryFee,
@@ -156,9 +162,9 @@ class _CheckoutState extends State<Checkout> {
       PaymeTransactionService.startTransactionStatusCheck(
           context, paymeOrderId);
 
-      // Launch Payme checkout immediately after showing the dialog
+      // Launch Payme checkout with the final total that includes delivery fee and bag price
       final launched = await PaymeService.launchPaymeCheckout(
-          context, merchantId, paymeOrderId, total);
+          context, merchantId, paymeOrderId, finalTotal);
 
       if (!launched) {
         // If we couldn't launch Payme, close the dialog and show error
@@ -1252,7 +1258,7 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 220,
+                height: 230,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: Colors.white,
@@ -1319,7 +1325,9 @@ class _CheckoutState extends State<Checkout> {
                             AppLocalizations.of(context).bagPrice,
                             style: const TextStyle(fontSize: 16),
                           ),
-                          const Text('2000 UZS'),
+                          Text(
+                            _selectedIndex == 0 ? '2000 UZS' : '0 UZS',
+                          ),
                         ],
                       ),
                     ),
@@ -1333,10 +1341,16 @@ class _CheckoutState extends State<Checkout> {
                         children: [
                           Text(
                             '${AppLocalizations.of(context).totalPrice} :',
-                            style: const TextStyle(fontSize: 16),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           Text(
-                              '${NumberFormat('#,##0').format(orderPrice + 2000)} UZS'),
+                            _selectedIndex == 0
+                                ? (_nearestBranch != null && _nearestBranch!['deliveryFee'] != null
+                                    ? '${NumberFormat('#,##0').format(orderPrice + 2000 + (_nearestBranch!['deliveryFee'] as num))} UZS'
+                                    : '${NumberFormat('#,##0').format(orderPrice + 2000)} UZS')
+                                : '${NumberFormat('#,##0').format(orderPrice)} UZS', // No bag price for self-pickup
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ],
                       ),
                     ),

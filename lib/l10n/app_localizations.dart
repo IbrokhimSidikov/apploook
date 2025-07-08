@@ -270,7 +270,7 @@ class AppLocalizations {
       'carhop': 'Carhop',
       'alreadyArrived': 'Yetib Keldim',
       'arrivedSuccessfully': 'Habar yetkazildi',
-      'bagPrice': 'Xalta narxi',
+      'bagPrice': 'Paket narxi:',
     },
     'ru': {
       'whatsNew': 'ЧТО НОВОГО',
