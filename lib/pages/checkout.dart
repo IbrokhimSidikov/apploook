@@ -134,12 +134,13 @@ class _CheckoutState extends State<Checkout> {
           "totalPrice": item.product.price * item.quantity,
         };
       }).toList();
-      
+
       // Calculate the final total including delivery fee and bag price (2000 UZS for delivery, 0 for pickup)
       final double bagPrice = _selectedIndex == 0 ? 2000.0 : 0.0;
       final double finalTotal = total + deliveryFee + bagPrice;
-      
-      print('Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Bag price: $bagPrice UZS, Final total: $finalTotal UZS');
+
+      print(
+          'Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Bag price: $bagPrice UZS, Final total: $finalTotal UZS');
 
       // Save the order details for later processing
       await PaymeTransactionService.savePendingOrder(
@@ -1341,11 +1342,13 @@ class _CheckoutState extends State<Checkout> {
                         children: [
                           Text(
                             '${AppLocalizations.of(context).totalPrice} :',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             _selectedIndex == 0
-                                ? (_nearestBranch != null && _nearestBranch!['deliveryFee'] != null
+                                ? (_nearestBranch != null &&
+                                        _nearestBranch!['deliveryFee'] != null
                                     ? '${NumberFormat('#,##0').format(orderPrice + 2000 + (_nearestBranch!['deliveryFee'] as num))} UZS'
                                     : '${NumberFormat('#,##0').format(orderPrice + 2000)} UZS')
                                 : '${NumberFormat('#,##0').format(orderPrice)} UZS', // No bag price for self-pickup
@@ -2273,7 +2276,8 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": "$comment\nCar Details: $carDetails\nPayment Method: $paymentType",
+          "note":
+              "$comment\nCar Details: $carDetails\nPayment Method: $paymentType",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,

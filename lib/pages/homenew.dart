@@ -154,6 +154,8 @@ class _HomeNewState extends State<HomeNew>
   ScrollController _scrollController = ScrollController();
   bool _isScrolling = false;
 
+  OrderMode? _loadingOrderMode; // Track which order mode button is loading
+
   Future<void> _getBanners() async {
     try {
       final loadedBanners = await BannerItem.getBanners();
@@ -269,89 +271,127 @@ class _HomeNewState extends State<HomeNew>
       context: context,
       barrierDismissible: true, // Allow closing by tapping outside
       builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Close button in top-right corner
-                Align(
-                  alignment: Alignment.topRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.of(context).pop(),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ),
-                const SizedBox(height: 8.0),
-                // Title
-                Text(
-                  AppLocalizations.of(context).orderModeTitle,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 16.0),
-                // Description
-                Text(
-                  AppLocalizations.of(context).orderModeSubtitle,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24.0),
-                // Delivery/Takeaway button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+              child: Container(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Close button in top-right corner
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: _loadingOrderMode == null
+                            ? () => Navigator.of(context).pop()
+                            : null, // Disable close button while loading
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
                     ),
-                    onPressed: () => _setOrderMode(OrderMode.deliveryTakeaway),
-                    child: Text(
-                      AppLocalizations.of(context).deliveryTakeaway,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8.0),
+                    // Title
+                    Text(
+                      AppLocalizations.of(context).orderModeTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16.0),
+                    // Description
+                    Text(
+                      AppLocalizations.of(context).orderModeSubtitle,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24.0),
+                    // Delivery/Takeaway button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        onPressed: _loadingOrderMode == null
+                            ? () {
+                                setDialogState(() {
+                                  _loadingOrderMode = OrderMode.deliveryTakeaway;
+                                });
+                                _setOrderMode(OrderMode.deliveryTakeaway);
+                              }
+                            : null, // Disable button while loading
+                        child: _loadingOrderMode == OrderMode.deliveryTakeaway
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.0,
+                                ),
+                              )
+                            : Text(
+                                AppLocalizations.of(context).deliveryTakeaway,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 12.0),
+                    // Carhop button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        onPressed: _loadingOrderMode == null
+                            ? () {
+                                setDialogState(() {
+                                  _loadingOrderMode = OrderMode.carhop;
+                                });
+                                _setOrderMode(OrderMode.carhop);
+                              }
+                            : null, // Disable button while loading
+                        child: _loadingOrderMode == OrderMode.carhop
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.0,
+                                ),
+                              )
+                            : Text(
+                                AppLocalizations.of(context).carhop,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12.0),
-                // Carhop button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    onPressed: () => _setOrderMode(OrderMode.carhop),
-                    child: Text(
-                      AppLocalizations.of(context).carhop,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -366,11 +406,18 @@ class _HomeNewState extends State<HomeNew>
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     cartProvider.clearCart();
 
-    // Close the dialog
-    Navigator.of(context).pop();
-
     // Refresh the menu data based on the new order mode
-    refreshData();
+    await refreshData();
+
+    // Reset loading state
+    setState(() {
+      _loadingOrderMode = null;
+    });
+
+    // Close the dialog if it's still open
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   Future<void> loadData() async {
