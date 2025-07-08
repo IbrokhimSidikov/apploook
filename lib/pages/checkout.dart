@@ -269,12 +269,14 @@ class _CheckoutState extends State<Checkout> {
           'sievesApiToken': branchConfig.sievesApiToken,
         },
         'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'cart_items': cartProvider.cartItems.map((item) => {
-          'name': item.product.name,
-          'quantity': item.quantity,
-          'price': item.product.price,
-          'carDetails': carDetails
-        }).toList(),
+        'cart_items': cartProvider.cartItems
+            .map((item) => {
+                  'name': item.product.name,
+                  'quantity': item.quantity,
+                  'price': item.product.price,
+                  'carDetails': carDetails
+                })
+            .toList(),
       });
 
       // Show the transaction status dialog first
@@ -611,11 +613,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context).delivery,
-                          style: const TextStyle(
-                              color: Color(0xFF9E9E9E),
-                              fontWeight: FontWeight.w500),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delivery_dining_outlined,
+                                color: Colors.black),
+                            const SizedBox(width: 5),
+                            Text(
+                              AppLocalizations.of(context).delivery,
+                              style: const TextStyle(
+                                  color: Color(0xFF9E9E9E),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       )
                     : ElevatedButton(
@@ -632,10 +641,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context).delivery,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w500),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.delivery_dining_outlined,
+                                color: Colors.black),
+                            const SizedBox(width: 5),
+                            Text(
+                              AppLocalizations.of(context).delivery,
+                              style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       ),
 
@@ -654,11 +671,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context).selfPickup,
-                          style: const TextStyle(
-                              color: Color(0xFF9E9E9E),
-                              fontWeight: FontWeight.w500),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.shopping_bag_outlined,
+                                color: Colors.black),
+                            const SizedBox(width: 10),
+                            Text(
+                              AppLocalizations.of(context).selfPickup,
+                              style: const TextStyle(
+                                  color: Color(0xFF9E9E9E),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       )
                     : ElevatedButton(
@@ -675,10 +699,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: Text(
-                          AppLocalizations.of(context).selfPickup,
-                          style: const TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w500),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.shopping_bag_outlined,
+                                color: Colors.black),
+                            const SizedBox(width: 5),
+                            Text(
+                              AppLocalizations.of(context).selfPickup,
+                              style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       ),
 
@@ -698,10 +730,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Carhop',
-                          style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.w500),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.car_repair_outlined,
+                                color: Colors.black),
+                            SizedBox(width: 5),
+                            Text(
+                              'Carhop',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       )
                     : ElevatedButton(
@@ -717,11 +757,18 @@ class _CheckoutState extends State<Checkout> {
                             ),
                           ),
                         ),
-                        child: const Text(
-                          'Carhop',
-                          style: TextStyle(
-                              color: Color(0xFF9E9E9E),
-                              fontWeight: FontWeight.w500),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.car_repair_outlined,
+                                color: Colors.black),
+                            SizedBox(width: 5),
+                            Text(
+                              'Carhop',
+                              style: TextStyle(
+                                  color: Color(0xFF9E9E9E),
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
                         ),
                       ),
               ],
@@ -1006,7 +1053,8 @@ class _CheckoutState extends State<Checkout> {
                             Align(
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
-                                AppLocalizations.of(context).carhopServiceBranchInfo,
+                                AppLocalizations.of(context)
+                                    .carhopServiceBranchInfo,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 14),
                               ),
@@ -1375,7 +1423,7 @@ class _CheckoutState extends State<Checkout> {
                     child: Row(
                       children: [
                         // Country code section
-                         Container(
+                        Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: const BoxDecoration(
                             border: Border(
@@ -1741,18 +1789,14 @@ class _CheckoutState extends State<Checkout> {
                                     Navigator.pushNamed(context, '/homeNew');
                                   },
                                   style: TextButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.green,
+                                    backgroundColor: Colors.green,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          25),
+                                      borderRadius: BorderRadius.circular(25),
                                     ),
                                   ),
                                   child: const Text(
                                     'OK',
-                                    style: TextStyle(
-                                        color:
-                                            Colors.white),
+                                    style: TextStyle(color: Colors.white),
                                   ),
                                 ),
                               ),
@@ -1785,7 +1829,7 @@ class _CheckoutState extends State<Checkout> {
                         );
                       } finally {
                         setState(() {
-                          _isProcessing = false; 
+                          _isProcessing = false;
                         });
                       }
                     }
@@ -1809,7 +1853,6 @@ class _CheckoutState extends State<Checkout> {
                       : const Color(0xFFCCCCCC), // Disabled state
                 ),
               ),
-
               child: _isProcessing
                   ? const Padding(
                       padding: EdgeInsets.all(12.0),
@@ -1921,7 +1964,8 @@ class _CheckoutState extends State<Checkout> {
 
           // Show success dialog
           if (mounted) {
-            _showOrderSuccessDialog('self-pickup-${DateTime.now().millisecondsSinceEpoch}');
+            _showOrderSuccessDialog(
+                'self-pickup-${DateTime.now().millisecondsSinceEpoch}');
           }
 
           return true;
@@ -2161,7 +2205,7 @@ class _CheckoutState extends State<Checkout> {
         if (selectedBranch == null) {
           throw Exception('Please select a branch first');
         }
-        
+
         // Handle Payme payment for carhop orders
         if (paymentType.toLowerCase() == 'payme') {
           await _handlePaymeCarhopPayment(
@@ -2178,7 +2222,7 @@ class _CheckoutState extends State<Checkout> {
           );
           return;
         }
-        
+
         final branchConfig = BranchConfigs.getConfig(selectedBranch!);
         // Use the actual cart items from the cart provider
         final List<Map<String, dynamic>> formattedOrderItems =
@@ -2285,7 +2329,7 @@ class _CheckoutState extends State<Checkout> {
             body: "Your car-hop order has been placed successfully!",
             messageId: responseData['id'].toString(),
           );
-          
+
           // Update order tracking notification indicator
           final orderTrackingService = OrderTrackingService();
           orderTrackingService.markNewOrderAdded();
@@ -2293,7 +2337,7 @@ class _CheckoutState extends State<Checkout> {
           cartProvider.clearCart();
           return;
         }
-      } 
+      }
       // Original telegram order sending logic for non-carhop orders
       final orderDetails = "Адрес: $address\n" +
           "Филиал: $branchName\n" +

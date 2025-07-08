@@ -30,14 +30,14 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
 
     try {
       final orders = await _trackingService.getSavedDeliveryOrders();
-      
+
       // Sort orders by timestamp (newest first)
       orders.sort((a, b) {
         final aTime = DateTime.parse(a['timestamp'] ?? '');
         final bTime = DateTime.parse(b['timestamp'] ?? '');
         return bTime.compareTo(aTime);
       });
-      
+
       setState(() {
         _deliveryOrders = orders;
         _isLoading = false;
@@ -49,36 +49,38 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
       });
     }
   }
-  
+
   // Show confirmation dialog before clearing all orders
   Future<void> _showClearConfirmationDialog() async {
     final localizations = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.clearAll),
-        content: Text('Are you sure you want to clear all order history? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(localizations.cancel),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(localizations.clearAll),
+            content: Text(
+                'Are you sure you want to clear all order history? This action cannot be undone.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(localizations.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  localizations.delete,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              localizations.delete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (confirmed && mounted) {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         final success = await _trackingService.clearAllOrders();
         if (success && mounted) {
@@ -104,7 +106,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.orderTracking),
