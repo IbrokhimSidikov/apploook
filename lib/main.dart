@@ -3,6 +3,7 @@ import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
+import 'package:apploook/splash_screen.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
@@ -36,7 +37,7 @@ class MyLoaderApp extends StatefulWidget {
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
-  // bool _isInitialized = false;
+  bool _isLoading = true; // Add loading state
   final notificationProvider = NotificationProvider();
   final notificationService = NotificationService();
 
@@ -47,8 +48,21 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   }
 
   Future<void> _initializeApp() async {
+    // Start with loading state
+    setState(() {
+      _isLoading = true;
+    });
+    
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
+    
+    // Check if the privacy policy has been accepted
+    // Default to false if not found (instead of null)
+    final hasAccepted = prefs.getBool('accepted_privacy_policy') ?? false;
+    print('Privacy policy acceptance status loaded: $hasAccepted');
+    
+    // Update the state with the loaded preference
+    _acceptedPrivacyPolicy = hasAccepted;
+    
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
 
@@ -56,16 +70,28 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     notificationService.setProvider(notificationProvider);
     await notificationService.initialize();
 
+    // Only update UI after all initialization is complete
     if (mounted) {
-      setState(() {});
+      setState(() {
+        _acceptedPrivacyPolicy = hasAccepted;
+        _isLoading = false; // Finish loading
+      });
     }
   }
 
-  // void _handlePrivacyPolicyAcceptance() {
-  //   setState(() {
-  //     _acceptedPrivacyPolicy = true;
-  //   });
-  // }
+  // Handle privacy policy acceptance and ensure it persists
+  void _handlePrivacyPolicyAcceptance() async {
+    // Save to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('accepted_privacy_policy', true);
+    
+    // Update state
+    if (mounted) {
+      setState(() {
+        _acceptedPrivacyPolicy = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,20 +101,39 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider.value(value: notificationProvider),
       ],
-      child: _acceptedPrivacyPolicy == true
-          ? const MyApp()
-          : ConsentScreen(onAccept: () {
-              runApp(
-                MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider(create: (_) => CartProvider()),
-                    ChangeNotifierProvider(create: (_) => LocaleProvider()),
-                    ChangeNotifierProvider.value(value: notificationProvider),
-                  ],
-                  child: const MyApp(),
-                ),
-              );
-            }),
+      // Show elegant branded splash screen while initializing
+      child: _isLoading 
+          ? MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                fontFamily: 'Poppins',
+                useMaterial3: true,
+              ),
+              home: const SplashScreen(),
+            )
+          : _acceptedPrivacyPolicy == true
+              ? const MyApp()
+              : ConsentScreen(onAccept: () async {
+                // Handle privacy policy acceptance
+                _handlePrivacyPolicyAcceptance();
+                
+                // Wait a moment to ensure the preference is saved
+                await Future.delayed(const Duration(milliseconds: 100));
+                
+                // Then run the app with the updated state
+                if (mounted) {
+                  runApp(
+                    MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(create: (_) => CartProvider()),
+                        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+                        ChangeNotifierProvider.value(value: notificationProvider),
+                      ],
+                      child: const MyApp(),
+                    ),
+                  );
+                }
+              }),
     );
   }
 }
@@ -136,7 +181,8 @@ class MyApp extends StatelessWidget {
             '/notification': (context) => const NotificationPage(),
             '/simpleMenu': (context) => const SimpleMenuPage(),
             '/orderTracking': (context) => const OrderTrackingPage(),
-            '/unifiedOrderTracking': (context) => const UnifiedOrderTrackingPage(),
+            '/unifiedOrderTracking': (context) =>
+                const UnifiedOrderTrackingPage(),
           },
         );
       },

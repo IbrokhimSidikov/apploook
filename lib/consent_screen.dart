@@ -49,10 +49,29 @@ class ConsentScreen extends StatelessWidget {
                   SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await prefs.setBool('accepted_privacy_policy', true);
-                      onAccept();
+                      try {
+                        // Make sure to properly save the preference
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('accepted_privacy_policy', true);
+                        
+                        // Force a sync to ensure the preference is saved
+                        await prefs.reload();
+                        
+                        // Verify the preference was saved
+                        final saved = prefs.getBool('accepted_privacy_policy');
+                        print('Privacy policy acceptance saved: $saved');
+                        
+                        if (saved != true) {
+                          print('WARNING: Privacy policy acceptance was not saved properly!');
+                        }
+                        
+                        // Call the onAccept callback
+                        onAccept();
+                      } catch (e) {
+                        print('Error saving privacy policy acceptance: $e');
+                        // Still call onAccept even if there was an error
+                        onAccept();
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFFFECC00),

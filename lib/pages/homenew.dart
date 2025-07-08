@@ -324,7 +324,8 @@ class _HomeNewState extends State<HomeNew>
                         onPressed: _loadingOrderMode == null
                             ? () {
                                 setDialogState(() {
-                                  _loadingOrderMode = OrderMode.deliveryTakeaway;
+                                  _loadingOrderMode =
+                                      OrderMode.deliveryTakeaway;
                                 });
                                 _setOrderMode(OrderMode.deliveryTakeaway);
                               }
