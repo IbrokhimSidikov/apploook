@@ -152,6 +152,7 @@ class _HomeNewState extends State<HomeNew>
 
   ValueNotifier<int?> selectedCategoryId = ValueNotifier<int?>(null);
   ScrollController _scrollController = ScrollController();
+  bool _isScrolling = false;
 
   Future<void> _getBanners() async {
     try {
@@ -171,12 +172,16 @@ class _HomeNewState extends State<HomeNew>
   @override
   void initState() {
     super.initState();
-    // Register observer for app lifecycle changes
+    _scrollController = ScrollController();
+    
+    // Defer initialization to after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAndLoadData();
+      _checkPendingPaymePayments();
+      _initializeOrderMode();
+    });
+    
     WidgetsBinding.instance.addObserver(this);
-    // Initialize everything in the proper sequence
-    _initializeAndLoadData();
-    // Check for pending Payme payments
-    _checkPendingPaymePayments();
   }
 
   // Lifecycle observer methods are integrated into the existing dispose method below
@@ -209,22 +214,22 @@ class _HomeNewState extends State<HomeNew>
       _getBanners();
 
       // Finally load menu data after order mode is initialized
-      print(
-          'HomeNew: Loading menu data for order mode: ${_orderModeService.currentMode}');
+      // print(
+      //     'HomeNew: Loading menu data for order mode: ${_orderModeService.currentMode}');
       await loadData();
 
       // If we're using an initialOrderMode, force a refresh of the data
       if (widget.initialOrderMode != null) {
-        print(
-            'HomeNew: Forcing data refresh for initialOrderMode: ${widget.initialOrderMode}');
+        // print(
+        //     'HomeNew: Forcing data refresh for initialOrderMode: ${widget.initialOrderMode}');
         await refreshData();
       }
 
       // Debug print to verify the order mode
-      print(
-          'HomeNew: Initialization complete with order mode: ${_orderModeService.currentMode}');
+      // print(
+      //     'HomeNew: Initialization complete with order mode: ${_orderModeService.currentMode}');
     } catch (e) {
-      print('HomeNew: Error during initialization: $e');
+      // print('HomeNew: Error during initialization: $e');
       // Still try to load data even if there was an error
       await loadData();
     }
@@ -237,8 +242,8 @@ class _HomeNewState extends State<HomeNew>
 
     // Check if we have an initialOrderMode from the onboard page
     if (widget.initialOrderMode != null) {
-      print(
-          'HomeNew: Using initialOrderMode from onboard page: ${widget.initialOrderMode}');
+      // print(
+      //     'HomeNew: Using initialOrderMode from onboard page: ${widget.initialOrderMode}');
       // Set the order mode directly from the parameter
       await _orderModeService.setOrderMode(widget.initialOrderMode!);
 
@@ -246,13 +251,13 @@ class _HomeNewState extends State<HomeNew>
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('order_mode', widget.initialOrderMode!.index);
       await prefs.setBool('has_user_selected_order_mode', true);
-      print(
-          'HomeNew: Explicitly saved order mode to SharedPreferences: ${widget.initialOrderMode}');
+      // print(
+      //     'HomeNew: Explicitly saved order mode to SharedPreferences: ${widget.initialOrderMode}');
     }
 
     // Debug print to verify the order mode was loaded correctly
-    print(
-        'HomeNew: Order mode initialized to: ${_orderModeService.currentMode}');
+    // print(
+    //     'HomeNew: Order mode initialized to: ${_orderModeService.currentMode}');
 
     // Store the current mode for reference
     _currentOrderMode = _orderModeService.currentMode;
@@ -262,35 +267,91 @@ class _HomeNewState extends State<HomeNew>
   void _showOrderModeSelectionDialog() {
     showDialog(
       context: context,
-      barrierDismissible: false, // User must make a selection
+      barrierDismissible: true, // Allow closing by tapping outside
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Select Order Mode'),
-          content: const Text('Please select how you would like to order'),
-          actions: <Widget>[
-            // Delivery/Takeaway button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-              ),
-              onPressed: () => _setOrderMode(OrderMode.deliveryTakeaway),
-              child: Text(
-                'Delivery/Takeaway',
-                style: const TextStyle(color: Colors.white),
-              ),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Close button in top-right corner
+                Align(
+                  alignment: Alignment.topRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                // Title
+                Text(
+                  AppLocalizations.of(context).orderModeTitle,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                // Description
+                Text(
+                  AppLocalizations.of(context).orderModeSubtitle,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24.0),
+                // Delivery/Takeaway button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    onPressed: () => _setOrderMode(OrderMode.deliveryTakeaway),
+                    child: Text(
+                      AppLocalizations.of(context).deliveryTakeaway,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12.0),
+                // Carhop button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    onPressed: () => _setOrderMode(OrderMode.carhop),
+                    child: Text(
+                      AppLocalizations.of(context).carhop,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // Carhop button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-              ),
-              onPressed: () => _setOrderMode(OrderMode.carhop),
-              child: Text(
-                'Carhop',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
+          ),
         );
       },
     );
@@ -346,7 +407,7 @@ class _HomeNewState extends State<HomeNew>
       });
     } catch (e) {
       print('Error loading data: $e');
-      await fetchData(); // Fallback to direct fetching if service fails
+      await fetchData();
     }
   }
 
@@ -427,15 +488,15 @@ class _HomeNewState extends State<HomeNew>
             // Only create controllers for valid category IDs
             _categoryScrollControllers[category.id] = ScrollController();
           } else {
-            print(
-                'Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
+            // print(
+            //     'Warning: Skipping scroll controller for category with invalid ID: ${category.id}');
           }
         }
 
         _isLoading = false;
       });
     } catch (e) {
-      print('Error refreshing data: $e');
+      // print('Error refreshing data: $e');
       setState(() {
         _isLoading = false;
       });
@@ -559,12 +620,22 @@ class _HomeNewState extends State<HomeNew>
                         ),
                       ),
                       const PopupMenuItem(
-                        value: 'eng',
+                        value: 'en',
                         child: Row(
                           children: [
                             Text('🇬🇧', style: TextStyle(fontSize: 20)),
                             SizedBox(width: 8),
                             Text('English'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'ru',
+                        child: Row(
+                          children: [
+                            Text('🇷🇺', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 8),
+                            Text('Русский'),
                           ],
                         ),
                       ),
@@ -1087,11 +1158,12 @@ class _HomeNewState extends State<HomeNew>
   }
 
   void _scrollToCategory(int categoryId) {
-    // Safety check - if categories are empty, do nothing
-    if (categories.isEmpty) {
-      print('Cannot scroll to category: categories list is empty');
-      return;
-    }
+    if (categories.isEmpty) return;
+    
+    // Throttle scroll events
+    if (_isScrolling) return;
+    _isScrolling = true;
+    Future.delayed(const Duration(milliseconds: 200), () => _isScrolling = false);
 
     // Deselect all categories
     for (var category in categories) {
@@ -1139,12 +1211,10 @@ class _HomeNewState extends State<HomeNew>
       print('Category with ID $categoryId not found');
     }
 
-    // Update the selected category ID
     selectedCategoryId.value = categoryId;
   }
 
   void _scrollToCategoryBuy(int? categoryId) {
-    // Safety check - if categories are empty or categoryId is null, do nothing
     if (categoryId == null || categories.isEmpty) {
       return;
     }

@@ -129,6 +129,14 @@ class AppLocalizations {
       'trackOrderMessage': 'You can track your order status in the order tracking page',
       'closeButton': 'Close',
       'trackOrderButton': 'Track Order',
+      'paymeNotAvailable': 'Payme is not available for self-pickup orders',
+      'alreadyArrived': 'Arrived',
+      'arrivedSuccessfully': 'Successfully marked as arrived',
+      'arrivedError': 'Failed to mark as arrived',
+      'orderModeTitle':'Select Order mode',
+      'orderModeSubtitle':'Please select how you would like to order',
+      'deliveryTakeaway':'Delivery or Takeaway',
+      'carhop':'Carhop'
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -251,105 +259,142 @@ class AppLocalizations {
       'trackOrderMessage': 'Buyurtma holatini buyurtma kuzatuvi sahifasida kuzatishingiz mumkin',
       'closeButton': 'Yopish',
       'trackOrderButton': 'Buyurtmani kuzatish',
-    }
-    // 'ru': {
-    //   'whatsNew': 'Что нового',
-    //   'hello': 'Привет',
-    //   'welcome': 'Добро пожаловать',
-    //   'settings': 'Настройки',
-    //   'language': 'Язык',
-    //   'notification': 'Уведомления',
-    //   'noNotifications': 'Нет уведомлений',
-
-    //   // Profile page
-    //   'logout': 'Выйти',
-    //   'deleteAccount': 'Удалить аккаунт',
-    //   'confirmDelete': 'Вы уверены, что хотите удалить свой аккаунт?',
-    //   'confirmDialog': 'Вы уверены, что хотите удалить свой аккаунт?',
-    //   'cancel': 'Bekor qilish',
-    //   'delete': 'Удалить',
-    //   // Details page
-    //   'totalPrice': 'Итоговая стоимость',
-    //   'addToCart': 'Добавить в корзину',
-    //   // Cart page
-    //   'cart': 'Корзина',
-    //   'items': 'предметы',
-    //   'proceedToCheckout': 'Перейти к оплате',
-    //   // Sign-in page
-    //   'signIn': 'Войти',
-    //   'signInToYourProfile': 'Войти в профиль',
-    //   'underTitle': 'Для заказа войдите в профиль',
-    //   'phoneNumberButton': 'Введите свой номер',
-    //   'privacyPolicy': 'Maxfiylik siyosati',
-    //   'accept': 'Принять',
-    //   'decline': 'Отклонить',
-    //   'privacyPolicyContent':
-    //       'Kirish\n\nBizning maxfiylik siyosatimiz Loook-da qanday ma\'lumotlarni to\'plashimiz, Loook ulardan qanday foydalanishi va sizda qanday tanlovlar borligini tushunishga yordam beradi.\nLoook Loook ilovasini bepul ilova sifatida yaratdi. Ushbu XIZMAT Loook tomonidan bepul taqdim etiladi va mavjud bo\'lganicha foydalanish uchun mo\'ljallangan.\nAgar siz bizning Xizmatimizdan foydalanishni tanlasangiz, u holda siz ushbu siyosatga muvofiq ma\'lumotlarni to\'plash va ulardan foydalanishga rozilik bildirasiz.\nBiz to\'playdigan shaxsiy ma\'lumotlar Xizmatni taqdim etish va takomillashtirish uchun ishlatiladi.\nBiz sizning ma\'lumotlaringizni ushbu Maxfiylik siyosatida tavsiflangan holatlardan tashqari hech kim bilan almashmaymiz yoki baham ko\'rmaymiz.\n\n\nAloqa ma\'lumotlari:\nEmail: loook.uz.tech@gmail.com',
-    //   // Authorization page
-    //   'authorization': 'Авторизация',
-    //   'authorizationTitle': 'Войти в приложение\nвведите свои данные',
-    //   'firstNameHintText': 'Введите свое имя',
-    //   'numberHintText': 'Ваш номер',
-    //   'continueButton': 'Продолжить',
-    //   'phoneNumberTranslation': 'Номер телефона',
-    //   'nameTranslation': 'Имя',
-    //   // Checkout page
-    //   'checkout': 'Оформление заказа',
-    //   'chooseOrderType': 'Выберите тип заказа',
-    //   'delivery': 'Доставка',
-    //   'selfPickup': 'Самовывоз',
-    //   'selfPickupTitle': 'Выберите филиал для самовывоза',
-    //   'yourDeliveryLocation': 'Ваш адрес доставки!',
-    //   'chooseYourLocation': 'Выберите местоположение -->',
-    //   'chooseBranchToPick': 'Выберите филиал для самовывоза',
-    //   'selectBranch': 'Филиал выбор',
-    //   'orderPrice': 'Стоимость заказа',
-    //   'deliveryPrice': 'Стоимость доставки',
-    //   'unknown': 'Noma\'lum',
-    //   'paymentMethod': 'Оплата метод',
-    //   'cash': 'Наличные',
-    //   'card': 'Карта',
-    //   'additionalNumber': 'Дополнительный номер',
-    //   'comments': 'Комментарии',
-    //   'order': 'Заказ',
-    //   'orderSuccess': 'Заказ принят',
-    //   'orderSuccessSubTitle': 'Ваш заказ принят!',
-    //   'carhopService': 'LOOOK Carhop филиалыни танланг:',
-    //   'carhopServiceBranchInfo':
-    //       'Avtomobilizingizni quyidagi hududga qo\'ying:',
-    //   'carDetails': 'Avtomobilingiz tafsilotlari:',
-    //   'selectRegion': 'Shaxar tanlang',
-    //   'openingHours': 'Ishlash vaqti',
-    //   'viewInMap': 'Xaritadan ko\'rish',
-    //   'carDetailsHint': 'e.g: 01|A712AA Qora Chevrolet Gentra',
-    //   'carDetailsInputHint':
-    //       'Iltimos - Avtomobil raqami, rangi, rusumini kiriting',
-    //   // Notifications
-    //   'notifications': 'Xabarnoma',
-    //   'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
-    //   'arrivalNotificationSent': 'Arrival notification sent',
-    //   // Notifications view
-    //   'orderNumber': 'Заказ #',
-    //   'arrived': 'Прибыл',
-    //   'totalAmount': 'Общая сумма',
-    //   'currency': 'UZS',
-    //   'updating': 'Обновление',
-    //   // Map Screen
-    //   'confirmAddress': 'Вы уверены, что хотите подтвердить свой адрес?',
-    //   'confirm': 'Подтвердить',
-    //   'save': 'Сохранить',
-    //   'yourLocation': 'Ваш адрес',
-    //   'selectedAddress': 'Выбранный адрес',
-    //   // Verification screen
-    //   'verification': 'Подтверждение',
-    //   'verificationTitle':
-    //       'Введите 4-значный код\nдля подтверждения номера телефона',
-    //   'invalidCodeMessage': 'Неверный код',
-    //   'validCodeMessage': 'Подтверждено',
-    //   'arrivedButtonHint':
-    //       'Нажмите, чтобы уведомить ресторан, когда вы припаркуетесь на стоянке',
-    //   'arrivedButtonTooltip': 'Сообщить ресторану о вашем прибытии!',
-    // }
+      'paymeNotAvailable': 'O\'zi olib ketish uchun Payme to\'lov usuli mavjud emas',
+      'orderModeTitle':'Buyurtma turini tanlang',
+      'orderModeSubtitle':'Qanday buyurtma qilmoqchisiz?',
+      'deliveryTakeaway':'Yetkazib berish / Olib ketish',
+      'carhop':'Carhop',
+      'alreadyArrived':'Yetib Keldim',
+      'arrivedSuccessfully':'Successfully marked as arrived',
+    },
+    'ru': {
+      'whatsNew': 'ЧТО НОВОГО',
+      'hello': 'Привет',
+      'welcome': 'Добро пожаловать',
+      'settings': 'Настройки',
+      'language': 'Язык',
+      'notification': 'Уведомления',
+      'noNotifications': 'Нет уведомлений',
+      'noOrdersYet': 'Нет заказов',
+      // Profile page
+      'logout': 'Выйти',
+      'deleteAccount': 'Удалить аккаунт',
+      'confirmDelete': 'Подтвердите удаление',
+      'confirmDialog': 'Вы уверены, что хотите удалить свой аккаунт?',
+      'cancel': 'Отменить',
+      'delete': 'Удалить',
+      'logoutConfirmation': 'Вы уверены, что хотите выйти?',
+      'loggingOut': 'Выход...',
+      // Details page
+      'totalPrice': 'Общая стоимость',
+      'addToCart': 'Добавить в корзину',
+      // Cart page
+      'cart': 'Корзина',
+      'items': 'элементы',
+      'proceedToCheckout': 'Перейти к оформлению',
+      // Sign-in page
+      'signIn': 'Войти',
+      'signInToYourProfile': 'Войти в профиль',
+      'underTitle': 'Для оформления заказа сначала выполните авторизацию',
+      'phoneNumberButton': 'Введите номер телефона',
+      'privacyPolicy': 'Политика конфиденциальности',
+      'accept': 'Принять',
+      'decline': 'Отклонить',
+      'privacyPolicyContent':
+          'Introduction\n\nOur privacy policy will help you understand what information we collect at Loook, how Loook uses it, and what choices you have.\nLoook built the Loook app as a free app. This SERVICE is provided by Loook at no cost and is intended for use as is.\nIf you choose to use our Service, then you agree to the collection and use of information in relation with this policy.\nThe Personal Information that we collect are used for providing and improving the Service.\nWe will not use or share your information with anyone except as described in this Privacy Policy.\n\n\nContact Information:\nEmail: loook.uz.tech@gmail.com',
+      // Authorization page
+      'authorization': 'Авторизация',
+      'authorizationTitle':
+          'Пожалуйста, введите свои данные\nчтобы войти в приложение',
+      'firstNameHintText': 'Введите свое имя',
+      'numberHintText': 'Введите номер телефона',
+      'continueButton': 'Продолжить',
+      'phoneNumberTranslation': 'Номер телефона',
+      'nameTranslation': 'Имя',
+      // Checkout page
+      'checkout': 'Оформление',
+      'chooseOrderType': 'Выберите тип заказа',
+      'delivery': 'Доставка',
+      'selfPickup': 'Самовывоз',
+      'selfPickupTitle': 'Какой магазин вы хотите выбрать?',
+      'yourDeliveryLocation': 'Ваш адрес доставки!',
+      'chooseYourLocation': 'Выберите ваш адрес -->',
+      'chooseBranchToPick': 'Выберите магазин для самовывоза',
+      'selectBranch': 'Выберите магазин',
+      'orderPrice': 'Стоимость заказа',
+      'deliveryPrice': 'Стоимость доставки',
+      'unknown': 'Неизвестно',
+      'paymentMethod': 'Метод оплаты',
+      'cash': 'Наличные',
+      'card': 'Карта',
+      'additionalNumber': 'Дополнительный номер',
+      'comments': 'Комментарии',
+      'order': 'Заказ',
+      'orderSuccess': 'Заказ успешно оформлен',
+      'orderSuccessSubTitle': 'Ваш заказ успешно оформлен!',
+      'carhopService': 'Пожалуйста, выберите ваш LOOOK Carhop магазин:',
+      'carhopServiceBranchInfo': 'Парковка автомобиля в районе:',
+      'carDetails': 'Ваши данные автомобиля:',
+      'selectRegion': 'Выберите Регион',
+      'openingHours': 'Открытие часов',
+      'viewInMap': 'Просмотр на карте',
+      'carDetailsHint': 'Например: 01|A712AA Black Chevrolet Gentra',
+      'carDetailsInputHint': 'Пожалуйста, поделитесь - ваш номер автомобиля, цвет и модель',
+      // Notifications
+      'notifications': 'Уведомления',
+      'notificationsPlaceholder': 'Уведомления появятся здесь',
+      'arrivalNotificationSent': 'Уведомление о прибытии отправлено',
+      'clearAll': 'Очистить все',
+      // Notifications view
+      'orderNumber': 'Номер заказа #',
+      'arrived': 'Прибыл',
+      'totalAmount': 'Общая сумма',
+      'currency': 'UZS',
+      'updating': 'Обновление',
+      'orderHistory': 'История заказов',
+      // Map Screen
+      'confirmAddress': 'Подтвердите ваш адрес?',
+      'confirm': 'Подтвердить',
+      'save': 'Сохранить',
+      'yourLocation': 'Ваше местоположение',
+      'selectedAddress': 'Ваш выбранный адрес',
+      // Verification screen
+      'verification': 'Подтверждение',
+      'verificationTitle':
+          'Пожалуйста, введите 4-значный код\nдля подтверждения вашего номера телефона',
+      'invalidCodeMessage': 'Неверный код подтверждения',
+      'validCodeMessage': 'Подтверждение успешно',
+      'arrivedButtonHint':
+          'Нажмите, когда вы прибыли в зону парковки автомобиля, чтобы уведомить ресторан',
+      'arrivedButtonTooltip': 'Пусть ресторан узнает, что вы здесь!',
+      // Order tracking
+      'orderTracking': 'Отслеживание заказа',
+      'deliveryOrders': 'Заказы доставки',
+      'carhopOrders': 'Заказы Carhop',
+      'noDeliveryOrders': 'Нет заказов доставки',
+      'noCarhopOrders': 'Нет заказов Carhop',
+      'placeOrderToSee': 'Пожалуйста, оформите заказ, чтобы увидеть его здесь',
+      'refreshStatus': 'Обновить статус',
+      'orderSummary': 'Сводка заказа',
+      'subtotal': 'Подытог',
+      'deliveryFee': 'Стоимость доставки',
+      'total': 'Итого',
+      'orderStatus': 'Статус заказа',
+      'orderPlacedSuccess': 'Заказ оформлен успешно',
+      'yourOrderText': 'Ваш заказ',
+      'hasBeenPlaced': 'успешно оформлен',
+      'trackOrderMessage': 'Вы можете отслеживать статус заказа на странице отслеживания заказа',
+      'closeButton': 'Закрыть',
+      'trackOrderButton': 'Отслеживание заказа',
+      'paymeNotAvailable': 'Payme недоступен для самовывоза',
+      'orderModeTitle':'Выберите тип заказа',
+      'orderModeSubtitle':'Пожалуйста, выберите, как вы хотите сделать заказ',
+      'deliveryTakeaway':'Доставка / самовывоз',
+      'carhop':'Carhop',
+      'alreadyArrived':'Уже прибыл',
+      'arrivedSuccessfully':'Успешно отмечен как прибыл',
+      
+    },
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
   String get hello => _localizedValues[locale.languageCode]!['hello']!;
@@ -551,4 +596,28 @@ class AppLocalizations {
       
   String get trackOrderButton =>
       _localizedValues[locale.languageCode]!['trackOrderButton']!;
+      
+  String get paymeNotAvailable =>
+      _localizedValues[locale.languageCode]!['paymeNotAvailable']!;
+
+  String get alreadyArrived =>
+      _localizedValues[locale.languageCode]!['alreadyArrived']!;
+
+  String get arrivedSuccessfully =>
+      _localizedValues[locale.languageCode]!['arrivedSuccessfully']!;
+
+  String get arrivedError =>
+      _localizedValues[locale.languageCode]!['arrivedError']!;
+
+      String get orderModeTitle =>
+      _localizedValues[locale.languageCode]!['orderModeTitle']!;
+
+  String get orderModeSubtitle =>
+      _localizedValues[locale.languageCode]!['orderModeSubtitle']!;
+
+  String get deliveryTakeaway =>
+      _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
+
+  String get carhop =>
+      _localizedValues[locale.languageCode]!['carhop']!;
 }

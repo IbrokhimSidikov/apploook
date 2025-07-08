@@ -20,6 +20,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
   List<Map<String, dynamic>> _deliveryOrders = [];
   List<Map<String, dynamic>> _carhopOrders = [];
   String? _updatingOrderId;
+  Set<String> _arrivedOrders = {};
   
   late TabController _tabController;
 
@@ -151,6 +152,18 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
   }
   
   Future<void> updateCarhopOrderStatus(String orderId) async {
+    // If already arrived, show a message and return
+    if (_arrivedOrders.contains(orderId)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).alreadyArrived),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _updatingOrderId = orderId;
     });
@@ -178,12 +191,39 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       );
 
       if (response.statusCode == 200) {
-        print("Order status updated successfully!");
+        if (mounted) {
+          setState(() {
+            _arrivedOrders.add(orderId);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).arrivedSuccessfully),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       } else {
-        print("Failed to update order status: ${response.body}");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).arrivedError),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
-      print("Error updating order status: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).arrivedError),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } finally {
       if (mounted) {
         setState(() {
@@ -279,36 +319,74 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                               children: [
                                 // Order Header
                                 Container(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                    color: Theme.of(context).cardColor,
                                     borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(12),
-                                      topRight: Radius.circular(12),
+                                      topLeft: Radius.circular(16),
+                                      topRight: Radius.circular(16),
                                     ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.05),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Order #${order['id']}',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
+                                      Expanded(
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                                borderRadius: BorderRadius.circular(12),
+                                              ),
+                                              child: Icon(
+                                                Icons.receipt_outlined,
+                                                color: Theme.of(context).primaryColor,
+                                                size: 24,
+                                              ),
                                             ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            formattedDate,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey[600],
+                                            const SizedBox(width: 16),
+                                            Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Order #${order['id']}',
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w600,
+                                                    letterSpacing: -0.5,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.access_time_rounded,
+                                                      size: 14,
+                                                      color: Colors.grey[600],
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      formattedDate,
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        color: Colors.grey[600],
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                       GestureDetector(
                                         onTap: () {
@@ -318,20 +396,30 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                           message: localizations.arrivedButtonTooltip,
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 6,
+                                              horizontal: 16,
+                                              vertical: 10,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: const Color(0xFFFEC700),
-                                              borderRadius: BorderRadius.circular(20),
+                                              color: _arrivedOrders.contains(order['id'].toString())
+                                                  ? Colors.grey[300]
+                                                  : const Color(0xFFFEC700),
+                                              borderRadius: BorderRadius.circular(12),
+                                              boxShadow: [
+                                                if (!_arrivedOrders.contains(order['id'].toString()))
+                                                  BoxShadow(
+                                                    color: const Color(0xFFFEC700).withOpacity(0.3),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                              ],
                                             ),
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 if (_updatingOrderId == order['id'].toString())
                                                   const SizedBox(
-                                                    width: 18,
-                                                    height: 18,
+                                                    width: 20,
+                                                    height: 20,
                                                     child: CircularProgressIndicator(
                                                       strokeWidth: 2,
                                                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -341,17 +429,22 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                                   )
                                                 else
                                                   const Icon(
-                                                    Icons.directions_car,
-                                                    size: 18,
+                                                    Icons.directions_car_rounded,
+                                                    size: 20,
                                                     color: Colors.black,
                                                   ),
-                                                const SizedBox(width: 6),
+                                                const SizedBox(width: 8),
                                                 Text(
-                                                  localizations.arrived,
-                                                  style: const TextStyle(
-                                                    color: Colors.black,
+                                                  _arrivedOrders.contains(order['id'].toString())
+                                                      ? localizations.alreadyArrived
+                                                      : localizations.arrived,
+                                                  style: TextStyle(
+                                                    color: _arrivedOrders.contains(order['id'].toString())
+                                                        ? Colors.grey[600]
+                                                        : Colors.black,
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.w600,
+                                                    letterSpacing: 0.2,
                                                   ),
                                                 ),
                                               ],

@@ -219,7 +219,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
 
   Widget _buildStatusIndicator(String status) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: _getStatusColor(status).withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
@@ -237,11 +237,14 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             ),
           ),
           const SizedBox(width: 6),
-          Text(
-            _getStatusText(status),
-            style: TextStyle(
-              color: _getStatusColor(status),
-              fontWeight: FontWeight.bold,
+          Flexible(
+            child: Text(
+              _getStatusText(status),
+              style: TextStyle(
+                color: _getStatusColor(status),
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

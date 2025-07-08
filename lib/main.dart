@@ -50,7 +50,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _acceptedPrivacyPolicy = prefs.getBool('accepted_privacy_policy');
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
-    PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 100;
+    PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
 
     // Initialize notification service with provider
     notificationService.setProvider(notificationProvider);
@@ -99,23 +99,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<LocaleProvider>(
-      builder: (context, localeProvider, child) {
+      builder: (context, localeProvider, _) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'LOOOK MOBILE',
           theme: ThemeData(
             fontFamily: 'Poppins',
-            textTheme: TextTheme(
+            useMaterial3: true,
+            textTheme: const TextTheme(
               bodyLarge: TextStyle(fontFamily: 'Poppins'),
               bodyMedium: TextStyle(fontFamily: 'Poppins'),
               displayLarge: TextStyle(fontFamily: 'Poppins'),
               displayMedium: TextStyle(fontFamily: 'Poppins'),
             ),
-          ),
+          ).copyWith(platform: TargetPlatform.android),
           locale: localeProvider.locale,
           supportedLocales: const [
             Locale('en'),
             Locale('uz'),
+            Locale('ru'),
           ],
           localizationsDelegates: const [
             AppLocalizationsDelegate(),
@@ -125,14 +127,14 @@ class MyApp extends StatelessWidget {
           ],
           initialRoute: '/onboard',
           routes: {
-            '/homeNew': (context) => HomeNew(),
-            '/signin': (context) => SignIn(),
-            '/cart': (context) => Cart(),
+            '/homeNew': (context) => const HomeNew(),
+            '/signin': (context) => const SignIn(),
+            '/cart': (context) => const Cart(),
             '/checkout': (context) => Checkout(),
-            '/onboard': (context) => Onboard(),
-            '/notificationsView': (context) => NotificationsView(),
-            '/notification': (context) => NotificationPage(),
-            '/simpleMenu': (context) => SimpleMenuPage(),
+            '/onboard': (context) => const Onboard(),
+            '/notificationsView': (context) => const NotificationsView(),
+            '/notification': (context) => const NotificationPage(),
+            '/simpleMenu': (context) => const SimpleMenuPage(),
             '/orderTracking': (context) => const OrderTrackingPage(),
             '/unifiedOrderTracking': (context) => const UnifiedOrderTrackingPage(),
           },

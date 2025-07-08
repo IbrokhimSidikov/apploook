@@ -89,6 +89,13 @@ class _CheckoutState extends State<Checkout> {
     required double deliveryFee,
     required String? branchName,
   }) async {
+    // Don't allow Payme for self-pickup orders
+    if (_selectedIndex == 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context).paymeNotAvailable)),
+      );
+      return;
+    }
     try {
       setState(() {
         _isProcessing = true;
@@ -992,8 +999,7 @@ class _CheckoutState extends State<Checkout> {
                             Align(
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
-                                AppLocalizations.of(context)
-                                    .carhopServiceBranchInfo,
+                                AppLocalizations.of(context).carhopServiceBranchInfo,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 14),
                               ),
@@ -1230,7 +1236,7 @@ class _CheckoutState extends State<Checkout> {
                             style: const TextStyle(fontSize: 16),
                           ),
                           _selectedIndex == 0 && _isCalculatingDistance
-                              ? SizedBox(
+                              ? const SizedBox(
                                   width: 20,
                                   height: 20,
                                   child: CircularProgressIndicator(
@@ -1249,14 +1255,14 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(15.0),
+                    const Padding(
+                      padding: EdgeInsets.all(15.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             'Bag price :',
-                            style: const TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16),
                           ),
                           Text('2000 UZS'),
                         ],
@@ -1317,13 +1323,13 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
-                  DropdownMenuItem<String>(
+                  const DropdownMenuItem<String>(
                     value: 'Payme',
                     child: Row(
                       children: [
-                        const Icon(Icons.payment, color: Colors.purple),
-                        const SizedBox(width: 10),
-                        const Text('Payme'),
+                        Icon(Icons.payment, color: Colors.purple),
+                        SizedBox(width: 10),
+                        Text('Payme'),
                       ],
                     ),
                   ),
@@ -1362,9 +1368,9 @@ class _CheckoutState extends State<Checkout> {
                     child: Row(
                       children: [
                         // Country code section
-                        Container(
+                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             border: Border(
                               right: BorderSide(
                                 color: Colors.black26,
@@ -1724,22 +1730,22 @@ class _CheckoutState extends State<Checkout> {
                               Center(
                                 child: TextButton(
                                   onPressed: () {
-                                    Navigator.pop(context); // Close the dialog
+                                    Navigator.pop(context);
                                     Navigator.pushNamed(context, '/homeNew');
                                   },
                                   style: TextButton.styleFrom(
                                     backgroundColor:
-                                        Colors.green, // Green background
+                                        Colors.green,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
-                                          25), // Circular border
+                                          25),
                                     ),
                                   ),
                                   child: const Text(
                                     'OK',
                                     style: TextStyle(
                                         color:
-                                            Colors.white), // White font color
+                                            Colors.white),
                                   ),
                                 ),
                               ),
@@ -1763,7 +1769,7 @@ class _CheckoutState extends State<Checkout> {
                             actions: [
                               TextButton(
                                 onPressed: () {
-                                  Navigator.pop(context); // Close the dialog
+                                  Navigator.pop(context);
                                 },
                                 child: const Text('OK'),
                               ),
@@ -1772,11 +1778,11 @@ class _CheckoutState extends State<Checkout> {
                         );
                       } finally {
                         setState(() {
-                          _isProcessing = false; // Stop processing
+                          _isProcessing = false; 
                         });
                       }
                     }
-                  : null, // Disable button if address is not selected
+                  : null,
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all<Color>(
                   (_selectedIndex == 0 &&
@@ -1880,6 +1886,45 @@ class _CheckoutState extends State<Checkout> {
       CartProvider cartProvider,
       {double deliveryFee = 0}) async {
     try {
+      // For self-pickup orders, use Telegram API instead of Delever API
+      if (_selectedIndex == 1) {
+        try {
+          List<String> orderItems = cartProvider.cartItems.map((item) {
+            return '${item.product.name}\n ${item.quantity} x ${NumberFormat('#,##0').format(item.product.price)} = ${NumberFormat('#,##0').format(item.quantity * item.product.price)} сум\n';
+          }).toList();
+
+          await sendOrderToTelegram(
+            null, // No address for self-pickup
+            selectedBranch ?? '',
+            name,
+            phone,
+            paymentType,
+            comment,
+            orderItems,
+            total,
+            latitude,
+            longitude,
+            'Self-Pickup',
+            '', // No car details for self-pickup
+            cartProvider,
+          );
+
+          // Clear the cart after successful order
+          cartProvider.clearCart();
+
+          // Show success dialog
+          if (mounted) {
+            _showOrderSuccessDialog('self-pickup-${DateTime.now().millisecondsSinceEpoch}');
+          }
+
+          return true;
+        } catch (e) {
+          print('Error sending self-pickup order to Telegram: $e');
+          return false;
+        }
+      }
+
+      // For delivery orders, continue with the Delever API
       // Get API service with client credentials
       final remoteConfig = FirebaseRemoteConfig.instance;
       final clientId = remoteConfig.getString('api_client_id');
@@ -2062,7 +2107,7 @@ class _CheckoutState extends State<Checkout> {
       // Create new order object
       Map<String, dynamic> orderDetails = {
         'id': orderId,
-        'status': 'pending', // Initial status
+        'status': 'pending',
         'timestamp': DateTime.now().toIso8601String(),
         'address': address,
         'paymentType': paymentType,

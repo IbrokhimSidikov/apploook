@@ -204,7 +204,7 @@ class _ProfileState extends State<Profile> {
                 // ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushNamed(context, '/notificationsView');
+                    Navigator.pushNamed(context, '/unifiedOrderTracking');
                   },
                   child: Row(
                     children: [
@@ -212,7 +212,7 @@ class _ProfileState extends State<Profile> {
                       const SizedBox(width: 10),
                       Text(
                         AppLocalizations.of(context).orderHistory,
-                        style: TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ],
                   ),
