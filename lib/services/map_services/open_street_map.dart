@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-const int baseDeliveryFee = 0;
+const int baseDeliveryFee = 12000;
 
 final List<Map<String, dynamic>> deliveryFeeRules = [
   {'from': 2, 'to': 3, 'fee': 14000},
@@ -35,7 +35,6 @@ int calculateDeliveryFee(double distanceKm) {
 
   // If distance is beyond our rules, use the highest fee + extra
   if (distanceKm >= 18) {
-    // Add 2000 for each km beyond 18
     int extraKm = (distanceKm - 18).ceil();
     return 44000 + (extraKm * 2000);
   }

@@ -127,7 +127,8 @@ class PaymeService {
       // Check if we have a pending payment for this order ID
       final pendingPayment = await getPendingPayment();
       if (pendingPayment == null || pendingPayment['order_id'] != orderId) {
-        print('⚠️ No pending payment found in local storage for order: $orderId');
+        print(
+            '⚠️ No pending payment found in local storage for order: $orderId');
         print('⚠️ Will still check with API to show response');
         // Continue with API call anyway to see the response
       }
@@ -136,7 +137,7 @@ class PaymeService {
       final url =
           'https://api.sievesapp.com/v1/public/check-payme-transaction?order_id=$orderId';
       print('🔄 Checking Payme transaction status: $url');
-      
+
       final response = await http.get(Uri.parse(url));
       print('📥 Payme API response status: ${response.statusCode}');
       print('📥 Payme API response body: ${response.body}');
@@ -191,15 +192,17 @@ class PaymeService {
   }
 
   // Test function to directly check transaction status without pending payment check
-  static Future<Map<String, dynamic>> testCheckTransaction(String orderId) async {
+  static Future<Map<String, dynamic>> testCheckTransaction(
+      String orderId) async {
     try {
-      print('🧪 TEST: Directly checking transaction status for order: $orderId');
-      
+      print(
+          '🧪 TEST: Directly checking transaction status for order: $orderId');
+
       // Make API call to check transaction status
       final url =
           'https://api.sievesapp.com/v1/public/check-payme-transaction?order_id=$orderId';
       print('🔄 TEST: API URL: $url');
-      
+
       final response = await http.get(Uri.parse(url));
       print('📥 TEST: API response status: ${response.statusCode}');
       print('📥 TEST: API response body: ${response.body}');

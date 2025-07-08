@@ -126,17 +126,19 @@ class AppLocalizations {
       'orderPlacedSuccess': 'Order Placed Successfully',
       'yourOrderText': 'Your order',
       'hasBeenPlaced': 'has been placed successfully',
-      'trackOrderMessage': 'You can track your order status in the order tracking page',
+      'trackOrderMessage':
+          'You can track your order status in the order tracking page',
       'closeButton': 'Close',
       'trackOrderButton': 'Track Order',
       'paymeNotAvailable': 'Payme is not available for self-pickup orders',
       'alreadyArrived': 'Arrived',
       'arrivedSuccessfully': 'Successfully marked as arrived',
       'arrivedError': 'Failed to mark as arrived',
-      'orderModeTitle':'Select Order mode',
-      'orderModeSubtitle':'Please select how you would like to order',
-      'deliveryTakeaway':'Delivery or Takeaway',
-      'carhop':'Carhop'
+      'orderModeTitle': 'Select Order mode',
+      'orderModeSubtitle': 'Please select how you would like to order',
+      'deliveryTakeaway': 'Delivery or Takeaway',
+      'carhop': 'Carhop',
+      'bagPrice': 'Bag Price',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -256,16 +258,19 @@ class AppLocalizations {
       'orderPlacedSuccess': 'Buyurtma muvaffaqiyatli joylashtirildi',
       'yourOrderText': 'Sizning buyurtmangiz',
       'hasBeenPlaced': 'muvaffaqiyatli joylashtirildi',
-      'trackOrderMessage': 'Buyurtma holatini buyurtma kuzatuvi sahifasida kuzatishingiz mumkin',
+      'trackOrderMessage':
+          'Buyurtma holatini buyurtma kuzatuvi sahifasida kuzatishingiz mumkin',
       'closeButton': 'Yopish',
       'trackOrderButton': 'Buyurtmani kuzatish',
-      'paymeNotAvailable': 'O\'zi olib ketish uchun Payme to\'lov usuli mavjud emas',
-      'orderModeTitle':'Buyurtma turini tanlang',
-      'orderModeSubtitle':'Qanday buyurtma qilmoqchisiz?',
-      'deliveryTakeaway':'Yetkazib berish / Olib ketish',
-      'carhop':'Carhop',
-      'alreadyArrived':'Yetib Keldim',
-      'arrivedSuccessfully':'Successfully marked as arrived',
+      'paymeNotAvailable':
+          'O\'zi olib ketish uchun Payme to\'lov usuli mavjud emas',
+      'orderModeTitle': 'Buyurtma turini tanlang',
+      'orderModeSubtitle': 'Qanday buyurtma qilmoqchisiz?',
+      'deliveryTakeaway': 'Yetkazib berish / Olib ketish',
+      'carhop': 'Carhop',
+      'alreadyArrived': 'Yetib Keldim',
+      'arrivedSuccessfully': 'Habar yetkazildi',
+      'bagPrice': 'Xalta narxi',
     },
     'ru': {
       'whatsNew': 'ЧТО НОВОГО',
@@ -339,7 +344,8 @@ class AppLocalizations {
       'openingHours': 'Открытие часов',
       'viewInMap': 'Просмотр на карте',
       'carDetailsHint': 'Например: 01|A712AA Black Chevrolet Gentra',
-      'carDetailsInputHint': 'Пожалуйста, поделитесь - ваш номер автомобиля, цвет и модель',
+      'carDetailsInputHint':
+          'Пожалуйста, поделитесь - ваш номер автомобиля, цвет и модель',
       // Notifications
       'notifications': 'Уведомления',
       'notificationsPlaceholder': 'Уведомления появятся здесь',
@@ -383,17 +389,18 @@ class AppLocalizations {
       'orderPlacedSuccess': 'Заказ оформлен успешно',
       'yourOrderText': 'Ваш заказ',
       'hasBeenPlaced': 'успешно оформлен',
-      'trackOrderMessage': 'Вы можете отслеживать статус заказа на странице отслеживания заказа',
+      'trackOrderMessage':
+          'Вы можете отслеживать статус заказа на странице отслеживания заказа',
       'closeButton': 'Закрыть',
       'trackOrderButton': 'Отслеживание заказа',
       'paymeNotAvailable': 'Payme недоступен для самовывоза',
-      'orderModeTitle':'Выберите тип заказа',
-      'orderModeSubtitle':'Пожалуйста, выберите, как вы хотите сделать заказ',
-      'deliveryTakeaway':'Доставка / самовывоз',
-      'carhop':'Carhop',
-      'alreadyArrived':'Уже прибыл',
-      'arrivedSuccessfully':'Успешно отмечен как прибыл',
-      
+      'orderModeTitle': 'Выберите тип заказа',
+      'orderModeSubtitle': 'Пожалуйста, выберите, как вы хотите сделать заказ',
+      'deliveryTakeaway': 'Доставка / самовывоз',
+      'carhop': 'Carhop',
+      'alreadyArrived': 'Уже прибыл',
+      'arrivedSuccessfully': 'Успешно отмечен как прибыл',
+      'bagPrice': 'Стоимость пакета',
     },
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -572,31 +579,30 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['refreshStatus']!;
   String get orderSummary =>
       _localizedValues[locale.languageCode]!['orderSummary']!;
-  String get subtotal =>
-      _localizedValues[locale.languageCode]!['subtotal']!;
+  String get subtotal => _localizedValues[locale.languageCode]!['subtotal']!;
   String get deliveryFee =>
       _localizedValues[locale.languageCode]!['deliveryFee']!;
   String get orderStatus =>
       _localizedValues[locale.languageCode]!['orderStatus']!;
-      
+
   String get orderPlacedSuccess =>
       _localizedValues[locale.languageCode]!['orderPlacedSuccess']!;
-      
+
   String get yourOrderText =>
       _localizedValues[locale.languageCode]!['yourOrderText']!;
-      
+
   String get hasBeenPlaced =>
       _localizedValues[locale.languageCode]!['hasBeenPlaced']!;
-      
+
   String get trackOrderMessage =>
       _localizedValues[locale.languageCode]!['trackOrderMessage']!;
-      
+
   String get closeButton =>
       _localizedValues[locale.languageCode]!['closeButton']!;
-      
+
   String get trackOrderButton =>
       _localizedValues[locale.languageCode]!['trackOrderButton']!;
-      
+
   String get paymeNotAvailable =>
       _localizedValues[locale.languageCode]!['paymeNotAvailable']!;
 
@@ -609,7 +615,7 @@ class AppLocalizations {
   String get arrivedError =>
       _localizedValues[locale.languageCode]!['arrivedError']!;
 
-      String get orderModeTitle =>
+  String get orderModeTitle =>
       _localizedValues[locale.languageCode]!['orderModeTitle']!;
 
   String get orderModeSubtitle =>
@@ -618,6 +624,7 @@ class AppLocalizations {
   String get deliveryTakeaway =>
       _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
 
-  String get carhop =>
-      _localizedValues[locale.languageCode]!['carhop']!;
+  String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
+
+  String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
 }

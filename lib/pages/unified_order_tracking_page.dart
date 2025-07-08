@@ -11,35 +11,37 @@ class UnifiedOrderTrackingPage extends StatefulWidget {
   const UnifiedOrderTrackingPage({Key? key}) : super(key: key);
 
   @override
-  State<UnifiedOrderTrackingPage> createState() => _UnifiedOrderTrackingPageState();
+  State<UnifiedOrderTrackingPage> createState() =>
+      _UnifiedOrderTrackingPageState();
 }
 
-class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> with SingleTickerProviderStateMixin {
+class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
+    with SingleTickerProviderStateMixin {
   final OrderTrackingService _trackingService = OrderTrackingService();
   bool _isLoading = true;
   List<Map<String, dynamic>> _deliveryOrders = [];
   List<Map<String, dynamic>> _carhopOrders = [];
   String? _updatingOrderId;
   Set<String> _arrivedOrders = {};
-  
+
   // Track new orders for each tab
   int _newDeliveryOrders = 0;
   int _newCarhopOrders = 0;
-  
+
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    
+
     // Add listener to clear notification for the active tab
     _tabController.addListener(_handleTabChange);
-    
+
     // Load both types of orders
     _loadOrders();
   }
-  
+
   void _handleTabChange() {
     if (_tabController.indexIsChanging) {
       setState(() {
@@ -68,40 +70,42 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       // Get previous counts to calculate new orders
       final prevDeliveryCount = _deliveryOrders.length;
       final prevCarhopCount = _carhopOrders.length;
-      
+
       // Load delivery orders
       final deliveryOrders = await _trackingService.getSavedDeliveryOrders();
-      
+
       // Load carhop orders
       final prefs = await SharedPreferences.getInstance();
       final savedCarhopOrders = prefs.getStringList('carhop_orders') ?? [];
       final carhopOrders = savedCarhopOrders
           .map((order) => jsonDecode(order) as Map<String, dynamic>)
           .toList();
-      
+
       // Sort orders by timestamp (newest first)
       deliveryOrders.sort((a, b) {
         final aTime = DateTime.parse(a['timestamp'] ?? '');
         final bTime = DateTime.parse(b['timestamp'] ?? '');
         return bTime.compareTo(aTime);
       });
-      
+
       carhopOrders.sort((a, b) {
         final aTime = DateTime.parse(a['timestamp'] ?? '');
         final bTime = DateTime.parse(b['timestamp'] ?? '');
         return bTime.compareTo(aTime);
       });
-      
+
       // Calculate new orders (only if there are more orders than before)
-      final newDeliveryOrders = deliveryOrders.length > prevDeliveryCount ? 
-          deliveryOrders.length - prevDeliveryCount : 0;
-      final newCarhopOrders = carhopOrders.length > prevCarhopCount ? 
-          carhopOrders.length - prevCarhopCount : 0;
-      
+      final newDeliveryOrders = deliveryOrders.length > prevDeliveryCount
+          ? deliveryOrders.length - prevDeliveryCount
+          : 0;
+      final newCarhopOrders = carhopOrders.length > prevCarhopCount
+          ? carhopOrders.length - prevCarhopCount
+          : 0;
+
       setState(() {
         _deliveryOrders = deliveryOrders;
         _carhopOrders = carhopOrders;
-        
+
         // Update notification counts (don't reset the current tab)
         if (_tabController.index != 0) {
           _newDeliveryOrders += newDeliveryOrders;
@@ -109,10 +113,10 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
         if (_tabController.index != 1) {
           _newCarhopOrders += newCarhopOrders;
         }
-        
+
         _isLoading = false;
       });
-      
+
       // Mark orders as read in the tracking service
       _trackingService.markOrdersAsRead();
     } catch (e) {
@@ -122,38 +126,39 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       });
     }
   }
-  
+
   // Show confirmation dialog before clearing all orders
   Future<void> _showClearConfirmationDialog(bool isDelivery) async {
     final localizations = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(localizations.clearAll),
-        content: Text(isDelivery 
-            ? 'Are you sure you want to clear all delivery order history? This action cannot be undone.'
-            : 'Are you sure you want to clear all carhop order history? This action cannot be undone.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(localizations.cancel),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(localizations.clearAll),
+            content: Text(isDelivery
+                ? 'Are you sure you want to clear all delivery order history? This action cannot be undone.'
+                : 'Are you sure you want to clear all carhop order history? This action cannot be undone.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(localizations.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(
+                  localizations.delete,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              localizations.delete,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (confirmed && mounted) {
       setState(() {
         _isLoading = true;
       });
-      
+
       try {
         if (isDelivery) {
           // Clear delivery orders
@@ -173,7 +178,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
             );
           }
         }
-        
+
         // Reload orders
         _loadOrders();
       } catch (e) {
@@ -189,7 +194,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       }
     }
   }
-  
+
   Future<void> updateCarhopOrderStatus(String orderId) async {
     // If already arrived, show a message and return
     if (_arrivedOrders.contains(orderId)) {
@@ -207,7 +212,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       _updatingOrderId = orderId;
     });
 
-    final String url = 'https://app.sievesapp.com/v1/order/$orderId?isDelever=1';
+    final String url =
+        'https://app.sievesapp.com/v1/order/$orderId?isDelever=1';
 
     final Map<String, dynamic> requestBody = {
       "id": orderId,
@@ -215,8 +221,10 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       "is_sync": 0,
     };
 
-    const String bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZWFyZXIiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.fo1-6HkjCqoQ_m4cCO6laUgHHBBqktz0SAgmOi6axqQ";
-    const String xApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk4ODkiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.twqu6OB88osWslaoMr6UDH8RNuSX095LlEf0OVdDglY";
+    const String bearerToken =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiZWFyZXIiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.fo1-6HkjCqoQ_m4cCO6laUgHHBBqktz0SAgmOi6axqQ";
+    const String xApiKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk4ODkiLCJuYW1lIjoiZGVsZXZlciIsImlhdCI6ODg5ODg5fQ.twqu6OB88osWslaoMr6UDH8RNuSX095LlEf0OVdDglY";
 
     try {
       final response = await http.put(
@@ -275,23 +283,34 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.orderTracking),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(70),
+          child: TabBar(
+            controller: _tabController,
+            labelPadding: const EdgeInsets.symmetric(vertical: 12),
+            tabs: [
             Tab(
+              height: 60,
               child: Stack(
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.delivery_dining),
-                      const SizedBox(height: 4),
-                      Text(localizations.deliveryOrders),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.delivery_dining),
+                        const SizedBox(height: 2),
+                        Text(
+                          localizations.deliveryOrders,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                   if (_newDeliveryOrders > 0)
                     Positioned(
@@ -322,15 +341,23 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
               ),
             ),
             Tab(
+              height: 60,
               child: Stack(
                 children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.directions_car),
-                      const SizedBox(height: 4),
-                      Text(localizations.carhopOrders),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.directions_car),
+                        const SizedBox(height: 2),
+                        Text(
+                          localizations.carhopOrders,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                   if (_newCarhopOrders > 0)
                     Positioned(
@@ -361,6 +388,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
               ),
             ),
           ],
+          ),
         ),
         actions: [
           IconButton(
@@ -402,7 +430,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                         },
                       ),
                     ),
-          
+
           // Carhop Orders Tab
           _isLoading
               ? const Center(child: CircularProgressIndicator())
@@ -416,8 +444,9 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                         itemBuilder: (context, index) {
                           final order = _carhopOrders[index];
                           final timestamp = DateTime.parse(order['timestamp']);
-                          final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
-                          
+                          final formattedDate =
+                              DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+
                           return Card(
                             margin: const EdgeInsets.only(bottom: 16),
                             elevation: 2,
@@ -428,7 +457,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                               children: [
                                 // Order Header
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 16),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).cardColor,
                                     borderRadius: const BorderRadius.only(
@@ -444,7 +474,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                     ],
                                   ),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Row(
@@ -452,18 +483,23 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                             Container(
                                               padding: const EdgeInsets.all(10),
                                               decoration: BoxDecoration(
-                                                color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(12),
+                                                color: Theme.of(context)
+                                                    .primaryColor
+                                                    .withOpacity(0.1),
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
                                               ),
                                               child: Icon(
                                                 Icons.receipt_outlined,
-                                                color: Theme.of(context).primaryColor,
+                                                color: Theme.of(context)
+                                                    .primaryColor,
                                                 size: 24,
                                               ),
                                             ),
                                             const SizedBox(width: 16),
                                             Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   'Order #${order['id']}',
@@ -487,7 +523,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                                       style: TextStyle(
                                                         fontSize: 13,
                                                         color: Colors.grey[600],
-                                                        fontWeight: FontWeight.w500,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
                                                   ],
@@ -499,24 +536,31 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                       ),
                                       GestureDetector(
                                         onTap: () {
-                                          updateCarhopOrderStatus(order['id'].toString());
+                                          updateCarhopOrderStatus(
+                                              order['id'].toString());
                                         },
                                         child: Tooltip(
-                                          message: localizations.arrivedButtonTooltip,
+                                          message: localizations
+                                              .arrivedButtonTooltip,
                                           child: Container(
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 16,
                                               vertical: 10,
                                             ),
                                             decoration: BoxDecoration(
-                                              color: _arrivedOrders.contains(order['id'].toString())
+                                              color: _arrivedOrders.contains(
+                                                      order['id'].toString())
                                                   ? Colors.grey[300]
                                                   : const Color(0xFFFEC700),
-                                              borderRadius: BorderRadius.circular(12),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                               boxShadow: [
-                                                if (!_arrivedOrders.contains(order['id'].toString()))
+                                                if (!_arrivedOrders.contains(
+                                                    order['id'].toString()))
                                                   BoxShadow(
-                                                    color: const Color(0xFFFEC700).withOpacity(0.3),
+                                                    color:
+                                                        const Color(0xFFFEC700)
+                                                            .withOpacity(0.3),
                                                     blurRadius: 8,
                                                     offset: const Offset(0, 2),
                                                   ),
@@ -525,32 +569,43 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                             child: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                if (_updatingOrderId == order['id'].toString())
+                                                if (_updatingOrderId ==
+                                                    order['id'].toString())
                                                   const SizedBox(
                                                     width: 20,
                                                     height: 20,
-                                                    child: CircularProgressIndicator(
+                                                    child:
+                                                        CircularProgressIndicator(
                                                       strokeWidth: 2,
-                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                      valueColor:
+                                                          AlwaysStoppedAnimation<
+                                                              Color>(
                                                         Colors.black,
                                                       ),
                                                     ),
                                                   )
                                                 else
                                                   const Icon(
-                                                    Icons.directions_car_rounded,
+                                                    Icons
+                                                        .directions_car_rounded,
                                                     size: 20,
                                                     color: Colors.black,
                                                   ),
                                                 const SizedBox(width: 8),
                                                 Text(
-                                                  _arrivedOrders.contains(order['id'].toString())
-                                                      ? localizations.alreadyArrived
+                                                  _arrivedOrders.contains(
+                                                          order['id']
+                                                              .toString())
+                                                      ? localizations
+                                                          .alreadyArrived
                                                       : localizations.arrived,
                                                   style: TextStyle(
-                                                    color: _arrivedOrders.contains(order['id'].toString())
-                                                        ? Colors.grey[600]
-                                                        : Colors.black,
+                                                    color:
+                                                        _arrivedOrders.contains(
+                                                                order['id']
+                                                                    .toString())
+                                                            ? Colors.grey[600]
+                                                            : Colors.black,
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.w600,
                                                     letterSpacing: 0.2,
@@ -571,48 +626,69 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                     child: Column(
                                       children: [
                                         ...List<Widget>.from(
-                                          (order['orderItems'] as List).map((item) => Padding(
-                                                padding: const EdgeInsets.only(bottom: 12),
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      width: 24,
-                                                      height: 24,
-                                                      decoration: BoxDecoration(
-                                                        color: Theme.of(context).primaryColor.withOpacity(0.1),
-                                                        borderRadius: BorderRadius.circular(6),
-                                                      ),
-                                                      child: Center(
-                                                        child: Text(
-                                                          '${item['quantity']}x',
-                                                          style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight: FontWeight.bold,
-                                                            color: Theme.of(context).primaryColor,
+                                          (order['orderItems'] as List)
+                                              .map((item) => Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            bottom: 12),
+                                                    child: Row(
+                                                      children: [
+                                                        Container(
+                                                          width: 24,
+                                                          height: 24,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withOpacity(
+                                                                    0.1),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6),
+                                                          ),
+                                                          child: Center(
+                                                            child: Text(
+                                                              '${item['quantity']}x',
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColor,
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 12),
-                                                    Expanded(
-                                                      child: Text(
-                                                        '${item['name']}',
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
+                                                        const SizedBox(
+                                                            width: 12),
+                                                        Expanded(
+                                                          child: Text(
+                                                            '${item['name']}',
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 14,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ),
+                                                        Text(
+                                                          '${(item['price'] * item['quantity']).toStringAsFixed(0)} UZS',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    Text(
-                                                      '${(item['price'] * item['quantity']).toStringAsFixed(0)} UZS',
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight: FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )),
+                                                  )),
                                         ),
                                       ],
                                     ),
@@ -627,7 +703,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                       ),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           localizations.totalAmount,
@@ -641,7 +718,8 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).primaryColor,
+                                            color:
+                                                Theme.of(context).primaryColor,
                                           ),
                                         ),
                                       ],
@@ -658,10 +736,10 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
       ),
     );
   }
-  
+
   Widget _buildEmptyState(bool isDelivery) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -673,7 +751,9 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage> wit
           ),
           const SizedBox(height: 16),
           Text(
-            isDelivery ? localizations.noDeliveryOrders : localizations.noCarhopOrders,
+            isDelivery
+                ? localizations.noDeliveryOrders
+                : localizations.noCarhopOrders,
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[600],

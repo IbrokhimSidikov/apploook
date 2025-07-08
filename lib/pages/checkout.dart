@@ -247,7 +247,7 @@ class _CheckoutState extends State<Checkout> {
           {
             "account_id": 1,
             "amount": total,
-            "payment_type_id": 3, // 3 for Payme
+            "payment_type_id": 4, // 4 for Payme
             "type": "deposit"
           }
         ],
@@ -1310,16 +1310,16 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(15.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Bag price :',
-                            style: TextStyle(fontSize: 16),
+                            AppLocalizations.of(context).bagPrice,
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          Text('2000 UZS'),
+                          const Text('2000 UZS'),
                         ],
                       ),
                     ),

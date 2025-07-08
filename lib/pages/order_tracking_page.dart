@@ -18,7 +18,6 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
   @override
   void initState() {
     super.initState();
-    // Mark orders as read when the page is opened
     _trackingService.markOrdersAsRead();
     _loadDeliveryOrders();
   }
@@ -31,7 +30,6 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     try {
       final orders = await _trackingService.getSavedDeliveryOrders();
 
-      // Sort orders by timestamp (newest first)
       orders.sort((a, b) {
         final aTime = DateTime.parse(a['timestamp'] ?? '');
         final bTime = DateTime.parse(b['timestamp'] ?? '');
@@ -50,14 +48,13 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
     }
   }
 
-  // Show confirmation dialog before clearing all orders
   Future<void> _showClearConfirmationDialog() async {
     final localizations = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text(localizations.clearAll),
-            content: Text(
+            content: const Text(
                 'Are you sure you want to clear all order history? This action cannot be undone.'),
             actions: [
               TextButton(
@@ -85,7 +82,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
         final success = await _trackingService.clearAllOrders();
         if (success && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('All orders cleared')),
+            const SnackBar(content: Text('All orders cleared')),
           );
           _loadDeliveryOrders(); // Refresh the list (which will now be empty)
         }
@@ -96,7 +93,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
             _isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error clearing orders')),
+            const SnackBar(content: Text('Error clearing orders')),
           );
         }
       }
@@ -158,7 +155,7 @@ class _OrderTrackingPageState extends State<OrderTrackingPage> {
               : RefreshIndicator(
                   onRefresh: _loadDeliveryOrders,
                   child: ListView.builder(
-                    padding: const EdgeInsets.only(top: 8, bottom: 24),
+                    padding: const EdgeInsets.only(top: 8, bottom: 30),
                     itemCount: _deliveryOrders.length,
                     itemBuilder: (context, index) {
                       return OrderTrackingCard(

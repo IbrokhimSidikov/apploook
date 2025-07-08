@@ -173,14 +173,14 @@ class _HomeNewState extends State<HomeNew>
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    
+
     // Defer initialization to after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeAndLoadData();
       _checkPendingPaymePayments();
       _initializeOrderMode();
     });
-    
+
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -293,8 +293,8 @@ class _HomeNewState extends State<HomeNew>
                 Text(
                   AppLocalizations.of(context).orderModeTitle,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
                 const SizedBox(height: 16.0),
                 // Description
@@ -1168,11 +1168,12 @@ class _HomeNewState extends State<HomeNew>
 
   void _scrollToCategory(int categoryId) {
     if (categories.isEmpty) return;
-    
+
     // Throttle scroll events
     if (_isScrolling) return;
     _isScrolling = true;
-    Future.delayed(const Duration(milliseconds: 200), () => _isScrolling = false);
+    Future.delayed(
+        const Duration(milliseconds: 200), () => _isScrolling = false);
 
     // Deselect all categories
     for (var category in categories) {
