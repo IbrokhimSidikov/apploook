@@ -255,57 +255,66 @@ class ApiService {
   Future<Map<String, dynamic>> getOrderStatus(String orderId) async {
     try {
       print('ORDER TRACKING: ApiService: Fetching status for order: $orderId');
-      
+
       // Construct the status endpoint URL
       final statusEndpoint = '/order/$orderId/status';
       print('ORDER TRACKING: ApiService: Using endpoint: $statusEndpoint');
-      
+
       // Log the request details
       print('ORDER TRACKING: ApiService: Making authenticated GET request');
-      print('ORDER TRACKING: ApiService: Full URL: ${_baseUrl + statusEndpoint}');
-      
+      print(
+          'ORDER TRACKING: ApiService: Full URL: ${_baseUrl + statusEndpoint}');
+
       // Log auth token being used
       final token = await getToken();
-      print('ORDER TRACKING: ApiService: Using auth token: ${token.substring(0, 10)}...');
-      
+      print(
+          'ORDER TRACKING: ApiService: Using auth token: ${token.substring(0, 10)}...');
+
       // Make an authenticated GET request to the status endpoint
       final response = await _authenticatedRequest(
         statusEndpoint,
         method: 'GET',
       );
-      
+
       // Log the complete response
       print('ORDER TRACKING: ApiService: Order status raw response: $response');
-      
+
       // Log specific fields in the response
       if (response is Map<String, dynamic>) {
         print('ORDER TRACKING: ApiService: Response type: Map');
-        print('ORDER TRACKING: ApiService: Response keys: ${response.keys.toList()}');
-        
+        print(
+            'ORDER TRACKING: ApiService: Response keys: ${response.keys.toList()}');
+
         if (response.containsKey('status')) {
-          print('ORDER TRACKING: ApiService: Status field found: ${response['status']}');
+          print(
+              'ORDER TRACKING: ApiService: Status field found: ${response['status']}');
         }
-        
+
         if (response.containsKey('orderStatus')) {
-          print('ORDER TRACKING: ApiService: OrderStatus field found: ${response['orderStatus']}');
+          print(
+              'ORDER TRACKING: ApiService: OrderStatus field found: ${response['orderStatus']}');
         }
-        
+
         if (response.containsKey('error')) {
-          print('ORDER TRACKING: ApiService: Error field found: ${response['error']}');
+          print(
+              'ORDER TRACKING: ApiService: Error field found: ${response['error']}');
         }
-        
+
         // Additional fields that might contain status information
         if (response.containsKey('state')) {
-          print('ORDER TRACKING: ApiService: State field found: ${response['state']}');
+          print(
+              'ORDER TRACKING: ApiService: State field found: ${response['state']}');
         }
-        
+
         if (response.containsKey('deliveryStatus')) {
-          print('ORDER TRACKING: ApiService: DeliveryStatus field found: ${response['deliveryStatus']}');
+          print(
+              'ORDER TRACKING: ApiService: DeliveryStatus field found: ${response['deliveryStatus']}');
         }
       } else {
-        print('ORDER TRACKING: ApiService: Response is not a Map: ${response.runtimeType}');
+        print(
+            'ORDER TRACKING: ApiService: Response is not a Map: ${response.runtimeType}');
       }
-      
+
       return response;
     } catch (e) {
       print('ORDER TRACKING: ApiService: Error fetching order status: $e');
@@ -346,11 +355,9 @@ class ApiService {
               .toString();
       String orderId = '$datePrefix-$randomPart';
 
-      // Determine the payment type based on Payme verification
       String finalPaymentType =
           await _determinePaymentType(paymentType, paymeOrderId);
 
-      // Create the order payload according to the new API format
       final Map<String, dynamic> orderPayload = {
         "platform": "YE",
         "discriminator": "marketplace",
@@ -360,17 +367,15 @@ class ApiService {
           "clientName": clientName,
           "phoneNumber": phoneNumber,
           "additionalPhoneNumbers": [phoneNumber],
-          "deliveryDate":
-              "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
+          "deliveryDate": "1937-01-01T12:00:27.870000+00:20",
           "deliveryAddress": {
             "full": address,
             "latitude": latitude.toString(),
             "longitude": longitude.toString(),
           },
-          "courierArrivementDate":
-              "1937-01-01T12:00:27.870000+00:20", // Using fixed date format that works
+          "courierArrivementDate": "1937-01-01T12:00:27.870000+00:20",
           "realPhoneNumber": formattedPhone,
-          "pickupCode": 123, // Adding this as it's in the successful example
+          "pickupCode": 123,
         },
         "paymentInfo": {
           "itemsCost": totalCost.round(),
@@ -384,12 +389,12 @@ class ApiService {
                   "name": item["name"],
                   "quantity": item["quantity"],
                   "price": item["price"],
-                  // Remove any extra fields that might be causing issues
                 })
             .toList(),
-        "persons": 2, // Fixed to match the successful example
-        "comment": comment ??
-            "Дополнительная информация о заказе: ..." // Use provided comment if available
+        "persons": 2,
+        "comment": (comment != null && comment.isNotEmpty)
+            ? "способ оплаты: $finalPaymentType\n\nIZOH: $comment"
+            : "способ оплаты: $finalPaymentType\nДополнительная информация о заказе: ..."
       };
 
       print('Order payload: ${json.encode(orderPayload)}');
@@ -426,7 +431,6 @@ class ApiService {
       }
     }
 
-    // Map the payment types to what the API expects
     switch (originalPaymentType.toLowerCase()) {
       case 'card':
         return 'card';
