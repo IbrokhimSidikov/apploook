@@ -32,13 +32,13 @@ class _SignInState extends State<SignIn> {
           Center(
             child: Text(
               AppLocalizations.of(context).signInToYourProfile,
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
           ),
           Center(
             child: Text(
               AppLocalizations.of(context).underTitle,
-              style: TextStyle(fontWeight: FontWeight.w200),
+              style: const TextStyle(fontWeight: FontWeight.w200),
             ),
           ),
           const SizedBox(
