@@ -195,7 +195,7 @@ class AppLocalizations {
       'chooseYourLocation': 'Xaritadan tanlang -->',
       'chooseBranchToPick': 'Olib ketish uchun',
       'selectBranch': 'Filial tanlang',
-      'orderPrice': 'Buyurtma qiymati',
+      'orderPrice': 'Buyurtma narxi',
       'deliveryPrice': 'Yetkazib berish narxi',
       'unknown': 'Noma\'lum',
       'paymentMethod': 'To\'lov usuli',

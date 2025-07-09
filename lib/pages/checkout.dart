@@ -549,7 +549,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Chilanzar',
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
-    'Test'
+    'Loook Yangiyol'
   ];
   List<String> city = [
     'Tashkent',
@@ -2277,7 +2277,7 @@ class _CheckoutState extends State<Checkout> {
           ],
           "value": total,
           "note":
-              "$comment\nCar Details: $carDetails\nPayment Method: $paymentType",
+              "$comment\nCar Details: $carDetails\npayment_type:${paymentType.toLowerCase()}",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,

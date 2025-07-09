@@ -393,8 +393,8 @@ class ApiService {
             .toList(),
         "persons": 2,
         "comment": (comment != null && comment.isNotEmpty)
-            ? "способ оплаты: $finalPaymentType\n\nIZOH: $comment"
-            : "способ оплаты: $finalPaymentType\nДополнительная информация о заказе: ..."
+            ? "mobile_payment_type:${finalPaymentType.toLowerCase()}\n\n$comment"
+            : "mobile_payment_type:${finalPaymentType.toLowerCase()}"
       };
 
       print('Order payload: ${json.encode(orderPayload)}');
