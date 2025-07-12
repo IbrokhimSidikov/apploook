@@ -139,6 +139,7 @@ class AppLocalizations {
       'deliveryTakeaway': 'Delivery or Takeaway',
       'carhop': 'Carhop',
       'bagPrice': 'Bag Price',
+      'deliveryFeeSpinner':'Please wait for delivery fee calculation to complete'
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -271,6 +272,7 @@ class AppLocalizations {
       'alreadyArrived': 'Yetib Keldim',
       'arrivedSuccessfully': 'Habar yetkazildi',
       'bagPrice': 'Paket narxi:',
+      'deliveryFeeSpinner':'Yetkazib berish puli hisoblanmoqda'
     },
     'ru': {
       'whatsNew': 'ЧТО НОВОГО',
@@ -401,6 +403,7 @@ class AppLocalizations {
       'alreadyArrived': 'Уже прибыл',
       'arrivedSuccessfully': 'Успешно отмечен как прибыл',
       'bagPrice': 'Стоимость пакета',
+      'deliveryFeeSpinner':'Пожалуйста, дождитесь завершения расчета стоимости доставки'
     },
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -627,4 +630,7 @@ class AppLocalizations {
   String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
 
   String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
+
+  String get deliveryFeeSpinner =>
+      _localizedValues[locale.languageCode]!['deliveryFeeSpinner']!;
 }

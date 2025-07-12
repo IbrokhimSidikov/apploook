@@ -52,25 +52,31 @@ class PaymeService {
       final url = createPaymeCheckoutUrl(merchantId, orderId, amount);
 
       // Try to launch with payme:// scheme first for mobile app
-      final paymeAppUrl =
-          'payme://payment?payload=${Uri.encodeComponent(url.substring(url.lastIndexOf('/') + 1))}';
+      final base64Params = url.substring(url.lastIndexOf('/') + 1);
+      final paymeAppUrl = 'payme://payment?payload=$base64Params';
 
       bool launched = false;
 
       // Try to launch the Payme mobile app first
-      if (await canLaunchUrlString(paymeAppUrl)) {
+      try {
         launched = await launchUrlString(
           paymeAppUrl,
-          mode: LaunchMode.externalApplication,
+          mode: LaunchMode.externalNonBrowserApplication,
         );
+      } catch (e) {
+        print('Error launching Payme app: $e');
       }
 
       // If Payme app launch failed, try web URL as fallback
-      if (!launched && await canLaunchUrlString(url)) {
-        launched = await launchUrlString(
-          url,
-          mode: LaunchMode.externalApplication,
-        );
+      if (!launched) {
+        try {
+          launched = await launchUrlString(
+            url,
+            mode: LaunchMode.externalApplication,
+          );
+        } catch (e) {
+          print('Error launching browser URL: $e');
+        }
       }
 
       if (!launched) {
