@@ -1528,13 +1528,32 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             const SizedBox(
-              height: 50.0,
+              height: 20.0,
+            ),
+            // Show warning message when delivery fee is not calculated in delivery mode
+            _selectedIndex == 0 && deliveryFee <= 0
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Text(
+                      AppLocalizations.of(context).deliveryFeeSpinner,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : const SizedBox.shrink(),
+            const SizedBox(
+              height: 20.0,
             ),
             ElevatedButton(
               onPressed: (_selectedIndex == 0
                       ? selectedAddress != null &&
                           selectedOption != null &&
-                          !_isProcessing
+                          !_isProcessing &&
+                          deliveryFee > 0
                       : _selectedIndex == 1
                           ? selectedBranch != null &&
                               selectedOption != null &&
@@ -1855,7 +1874,8 @@ class _CheckoutState extends State<Checkout> {
                 backgroundColor: WidgetStateProperty.all<Color>(
                   (_selectedIndex == 0 &&
                               selectedAddress != null &&
-                              selectedOption != null) ||
+                              selectedOption != null &&
+                              deliveryFee > 0) ||
                           (_selectedIndex == 1 &&
                               selectedBranch != null &&
                               selectedOption != null) ||
