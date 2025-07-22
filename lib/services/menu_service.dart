@@ -43,7 +43,7 @@ class MenuService {
     );
     _orderModeService = OrderModeService();
   }
-  
+
   // Set the nearest branch deliver ID to be used for API requests
   void setNearestBranchDeliverId(String deliverId) {
     _nearestBranchDeliverId = deliverId;
@@ -168,11 +168,13 @@ class MenuService {
         'MenuService: Starting refreshData for mode: ${_orderModeService.currentMode}');
     try {
       // Set the restaurant ID if we have a nearest branch deliver ID
-      if (_nearestBranchDeliverId != null && _nearestBranchDeliverId!.isNotEmpty) {
-        print('MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
+      if (_nearestBranchDeliverId != null &&
+          _nearestBranchDeliverId!.isNotEmpty) {
+        print(
+            'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
         ApiService.setRestaurantId(_nearestBranchDeliverId!);
       }
-      
+
       // Use different APIs based on the order mode
       if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
         // Fetch from the new API for delivery/takeaway
@@ -203,25 +205,25 @@ class MenuService {
         final response = await http.get(Uri.parse(_oldApiEndpoint));
 
         // Log the full response body for testing
-        print('MenuService: OLD API RESPONSE FULL BODY:');
-        print(response.body);
+        // print('MenuService: OLD API RESPONSE FULL BODY:');
+        // print(response.body);
 
         if (response.statusCode == 200) {
           // Based on the original code, the response is a List<dynamic> directly, not a Map
           final List<dynamic> categoryData = json.decode(response.body);
-          print('MenuService: Received data from old API');
-          print(
-              'MenuService: Old API returned ${categoryData.length} categories');
-          if (categoryData.isNotEmpty) {
-            print(
-                'MenuService: First category sample: ${json.encode(categoryData[0])}');
-            // Check if the first item has products
-            if (categoryData[0]['products'] != null &&
-                categoryData[0]['products'] is List) {
-              print(
-                  'MenuService: First category has ${(categoryData[0]['products'] as List).length} products');
-            }
-          }
+          // print('MenuService: Received data from old API');
+          // print(
+          //     'MenuService: Old API returned ${categoryData.length} categories');
+          // if (categoryData.isNotEmpty) {
+          //   print(
+          //       'MenuService: First category sample: ${json.encode(categoryData[0])}');
+          //   // Check if the first item has products
+          //   if (categoryData[0]['products'] != null &&
+          //       categoryData[0]['products'] is List) {
+          //     print(
+          //         'MenuService: First category has ${(categoryData[0]['products'] as List).length} products');
+          //   }
+          // }
 
           // Process data from the old API in the List format
           await _processOldApiCategoryList(categoryData);
@@ -415,10 +417,10 @@ class MenuService {
       // Check if categories exist in data
       if (data['categories'] != null && data['categories'] is List) {
         List<dynamic> categoryData = data['categories'];
-        print(
-            'MenuService: Found ${categoryData.length} categories in old API data');
-        print(
-            'MenuService: First category sample: ${categoryData.isNotEmpty ? json.encode(categoryData.first) : "none"}');
+        // print(
+        //     'MenuService: Found ${categoryData.length} categories in old API data');
+        // print(
+        //     'MenuService: First category sample: ${categoryData.isNotEmpty ? json.encode(categoryData.first) : "none"}');
 
         // Create a map to group items by category ID
         Map<int, List<Map<String, dynamic>>> itemsByCategory = {};

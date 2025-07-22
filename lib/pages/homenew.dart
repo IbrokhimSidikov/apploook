@@ -1178,32 +1178,88 @@ class _HomeNewState extends State<HomeNew>
             bottom: 50.0,
             left: 25.0,
             child: cartProvider.showQuantity() > 0
-                ? GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/cart');
+                ? TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: 0.8, end: 1.0),
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.elasticOut,
+                    builder: (context, value, child) {
+                      return Transform.scale(
+                        scale: value,
+                        child: child,
+                      );
                     },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 12.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.shopping_bag_outlined,
-                              color: Colors.black),
-                          const SizedBox(width: 8.0),
-                          Text(
-                            '${cartProvider.showQuantity()}',
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/cart');
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEC700),
+                          borderRadius: BorderRadius.circular(50.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40.0, vertical: 16.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.shopping_bag_outlined,
+                                  color: Colors.black,
+                                  size: 28.0,
+                                ),
+                                Positioned(
+                                  right: -4,
+                                  top: -4,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 18,
+                                      minHeight: 18,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        '${cartProvider.showQuantity()}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 12.0),
+                            Text(
+                              AppLocalizations.of(context).cart,
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )
