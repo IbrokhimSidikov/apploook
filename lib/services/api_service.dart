@@ -433,11 +433,11 @@ class ApiService {
 
     switch (originalPaymentType.toLowerCase()) {
       case 'card':
-        return 'card';
+        return 'cash';
       case 'cash':
         return 'cash';
       case 'payme':
-        return 'payme';
+        return 'card';
       default:
         return originalPaymentType;
     }

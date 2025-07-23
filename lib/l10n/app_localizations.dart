@@ -213,7 +213,7 @@ class AppLocalizations {
       'selectRegion': 'Shaxar tanlang',
       'openingHours': 'Ishlash vaqti',
       'viewInMap': 'Xaritadan ko\'rish',
-      'carDetailsHint': 'e.g: 01|A712AA Qora Chevrolet Gentra',
+      'carDetailsHint': 'Masalan: 01|A712AA Qora Chevrolet Gentra',
       'carDetailsInputHint':
           'Iltimos - Avtomobil raqami, rangi, rusumini kiriting',
       // Notifications
