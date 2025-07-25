@@ -139,7 +139,7 @@ class AppLocalizations {
       'deliveryTakeaway': 'Delivery or Takeaway',
       'carhop': 'Carhop',
       'bagPrice': 'Bag Price',
-      'deliveryFeeSpinner':'Please wait for delivery fee calculation to complete'
+      'deliveryFeeSpinner': 'Delivery fee is being calculated..',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -213,7 +213,7 @@ class AppLocalizations {
       'selectRegion': 'Shaxar tanlang',
       'openingHours': 'Ishlash vaqti',
       'viewInMap': 'Xaritadan ko\'rish',
-      'carDetailsHint': 'e.g: 01|A712AA Qora Chevrolet Gentra',
+      'carDetailsHint': 'Masalan: 01|A712AA Qora Chevrolet Gentra',
       'carDetailsInputHint':
           'Iltimos - Avtomobil raqami, rangi, rusumini kiriting',
       // Notifications
@@ -272,7 +272,7 @@ class AppLocalizations {
       'alreadyArrived': 'Yetib Keldim',
       'arrivedSuccessfully': 'Habar yetkazildi',
       'bagPrice': 'Paket narxi:',
-      'deliveryFeeSpinner':'Yetkazib berish puli hisoblanmoqda'
+      'deliveryFeeSpinner': 'Yetkazib berish narxi hisoblanmoqda..',
     },
     'ru': {
       'whatsNew': 'ЧТО НОВОГО',
@@ -403,7 +403,7 @@ class AppLocalizations {
       'alreadyArrived': 'Уже прибыл',
       'arrivedSuccessfully': 'Успешно отмечен как прибыл',
       'bagPrice': 'Стоимость пакета',
-      'deliveryFeeSpinner':'Пожалуйста, дождитесь завершения расчета стоимости доставки'
+      'deliveryFeeSpinner': 'Стоимость доставки вычисляется...',
     },
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;

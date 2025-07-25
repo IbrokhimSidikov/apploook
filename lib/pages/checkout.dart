@@ -1200,13 +1200,13 @@ class _CheckoutState extends State<Checkout> {
                             const SizedBox(
                               height: 5,
                             ),
-                            Text(
-                              AppLocalizations.of(context).carDetailsHint,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Color(0xFFB0B0B0)),
-                            ),
+                            // Text(
+                            //   AppLocalizations.of(context).carDetailsHint,
+                            //   style: const TextStyle(
+                            //       fontSize: 12, color: Color(0xFFB0B0B0)),
+                            // ),
                             const SizedBox(
-                              height: 15.0,
+                              height: 5.0,
                             ),
                             Container(
                               width: 390,
@@ -1228,7 +1228,7 @@ class _CheckoutState extends State<Checkout> {
                                     autocorrect: false,
                                     decoration: InputDecoration(
                                       hintText: AppLocalizations.of(context)
-                                          .carDetailsInputHint,
+                                          .carDetailsHint,
                                       hintStyle: const TextStyle(fontSize: 12),
                                       border: InputBorder.none,
                                       contentPadding:
@@ -1385,16 +1385,16 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
-                  DropdownMenuItem<String>(
-                    value: 'Card',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.credit_card, color: Colors.blue),
-                        const SizedBox(width: 10),
-                        Text(AppLocalizations.of(context).card),
-                      ],
-                    ),
-                  ),
+                  // DropdownMenuItem<String>(
+                  //   value: 'Card',
+                  //   child: Row(
+                  //     children: [
+                  //       const Icon(Icons.credit_card, color: Colors.blue),
+                  //       const SizedBox(width: 10),
+                  //       Text(AppLocalizations.of(context).card),
+                  //     ],
+                  //   ),
+                  // ),
                   const DropdownMenuItem<String>(
                     value: 'Payme',
                     child: Row(
@@ -1875,7 +1875,7 @@ class _CheckoutState extends State<Checkout> {
                   (_selectedIndex == 0 &&
                               selectedAddress != null &&
                               selectedOption != null &&
-                              deliveryFee > 0) || // Ensure delivery fee is calculated
+                              deliveryFee > 0) ||
                           (_selectedIndex == 1 &&
                               selectedBranch != null &&
                               selectedOption != null) ||

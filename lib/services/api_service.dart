@@ -427,13 +427,13 @@ class ApiService {
       if (isVerified) {
         print(
             'Payme payment verified as successful, setting payment type to card');
-        return 'card';
+        return 'payme';
       }
     }
 
     switch (originalPaymentType.toLowerCase()) {
       case 'card':
-        return 'card';
+        return 'cash';
       case 'cash':
         return 'cash';
       case 'payme':
