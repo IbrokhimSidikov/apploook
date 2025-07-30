@@ -140,6 +140,12 @@ class AppLocalizations {
       'carhop': 'Carhop',
       'bagPrice': 'Bag Price',
       'deliveryFeeSpinner': 'Delivery fee is being calculated..',
+      'transactionInProgress': 'Transaction in progress',
+      'waitingForPaymentApproval': 'Waiting for payment approval...',
+      'orderID': 'Order ID:',
+      'completePayment': 'Please complete the payment in the Payme app',
+      'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
+      'paymentVerificationCancelled': 'Payment verification cancelled',
     },
     'uz': {
       'whatsNew': 'YANGILIKLAR',
@@ -273,6 +279,13 @@ class AppLocalizations {
       'arrivedSuccessfully': 'Habar yetkazildi',
       'bagPrice': 'Paket narxi:',
       'deliveryFeeSpinner': 'Yetkazib berish narxi hisoblanmoqda..',
+      'transactionInProgress': 'Transaksiya amalga oshirilmoqda',
+      'waitingForPaymentApproval': 'To\'lovni tasdiqlash kutilmoqda...',
+      'orderID': 'Buyurtma ID:',
+      'completePayment': 'To\'lovni Payme ilovasi orqali amalga oshiring',
+      'doNotCloseScreen':
+          'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
+      'paymentVerificationCancelled': 'To\'lov bekor qilindi',
     },
     'ru': {
       'whatsNew': 'ЧТО НОВОГО',
@@ -404,6 +417,12 @@ class AppLocalizations {
       'arrivedSuccessfully': 'Успешно отмечен как прибыл',
       'bagPrice': 'Стоимость пакета',
       'deliveryFeeSpinner': 'Стоимость доставки вычисляется...',
+      'transactionInProgress': 'Транзакция выполняется...',
+      'waitingForPaymentApproval': 'Ожидание подтверждения оплаты...',
+      'orderID': 'ID заказа:',
+      'completePayment': 'Завершите оплату в приложении Payme',
+      'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
+      'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
     },
   };
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
@@ -633,4 +652,21 @@ class AppLocalizations {
 
   String get deliveryFeeSpinner =>
       _localizedValues[locale.languageCode]!['deliveryFeeSpinner']!;
+
+  String get transactionInProgress =>
+      _localizedValues[locale.languageCode]!['transactionInProgress']!;
+
+  String get waitingForPaymentApproval =>
+      _localizedValues[locale.languageCode]!['waitingForPaymentApproval']!;
+
+  String get orderID => _localizedValues[locale.languageCode]!['orderID']!;
+
+  String get completePayment =>
+      _localizedValues[locale.languageCode]!['completePayment']!;
+
+  String get doNotCloseScreen =>
+      _localizedValues[locale.languageCode]!['doNotCloseScreen']!;
+
+  String get paymentVerificationCancelled =>
+      _localizedValues[locale.languageCode]!['paymentVerificationCancelled']!;
 }

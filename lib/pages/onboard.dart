@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:vibration/vibration.dart';
+import 'dart:async';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/menu_service.dart';
@@ -25,6 +28,20 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   bool _isMenuLoaded = false;
   bool _isLoading = false;
 
+  // Vibration control variables
+  Timer? _vibrationTimer;
+  bool _vibrationEnabled = true;
+  bool _hasVibrationSupport = false;
+  int _vibrationPatternIndex = 0;
+
+  // Define rhythmical vibration patterns (in milliseconds)
+  final List<List<int>> _vibrationPatterns = [
+    [120, 100, 50, 100, 30, 1650],
+    // strong (120ms), short break (100ms)
+    // medium (50ms), short break (100ms)
+    // light (30ms), then pause (1650ms) to complete ~2s cycle
+  ];
+
   // Order mode selection
   final OrderModeService _orderModeService = OrderModeService();
   final MenuService _menuService = MenuService();
@@ -39,6 +56,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     _loadLanguagePreference();
     _initializeOrderMode();
     _findNearestBranch(); // Find the nearest branch before initializing video
+    _initializeVibration(); // Initialize vibration support
     _initializeVideo(); // This will call _preloadMenuData() after video starts
     _animationController = AnimationController(
       vsync: this,
@@ -46,15 +64,133 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     );
     print('Onboard initState: Order mode initialized to $_selectedOrderMode');
   }
-  
+
+  // Initialize vibration support
+  Future<void> _initializeVibration() async {
+    try {
+      // Try to check if device has vibrator
+      _hasVibrationSupport = await Vibration.hasVibrator() ?? false;
+      print('✅ Vibration support detected: $_hasVibrationSupport');
+
+      // Test a quick vibration to ensure it works
+      if (_hasVibrationSupport) {
+        await Vibration.vibrate(duration: 50);
+        print('✅ Vibration test successful');
+      }
+    } catch (e) {
+      print('⚠️ Vibration plugin error: $e');
+      print('🔄 Falling back to HapticFeedback');
+      _hasVibrationSupport = false;
+    }
+  }
+
+  // Start rhythmical vibration pattern
+  void _startRhythmicalVibration() {
+    if (!_vibrationEnabled || !_hasVibrationSupport) return;
+
+    _stopVibration(); // Stop any existing vibration
+
+    // Get current pattern
+    final pattern =
+        _vibrationPatterns[_vibrationPatternIndex % _vibrationPatterns.length];
+
+    // Start the vibration pattern
+    _executeVibrationPattern(pattern);
+  }
+
+  // Execute a specific vibration pattern
+  void _executeVibrationPattern(List<int> pattern) {
+    if (!_vibrationEnabled) return;
+
+    int patternIndex = 0;
+
+    void executeNextStep() {
+      if (patternIndex >= pattern.length) {
+        // Pattern completed, start over for continuous rhythm
+        patternIndex = 0;
+      }
+
+      if (patternIndex % 2 == 0) {
+        // Even index = vibration duration
+        final duration = pattern[patternIndex];
+
+        // Try vibration plugin first, fallback to haptic feedback
+        if (_hasVibrationSupport) {
+          try {
+            Vibration.vibrate(duration: duration);
+          } catch (e) {
+            print('🔄 Vibration failed, using haptic feedback: $e');
+            HapticFeedback.mediumImpact();
+          }
+        } else {
+          // Use haptic feedback as fallback
+          HapticFeedback.mediumImpact();
+        }
+
+        _vibrationTimer = Timer(Duration(milliseconds: duration), () {
+          patternIndex++;
+          executeNextStep();
+        });
+      } else {
+        // Odd index = pause duration
+        final pauseDuration = pattern[patternIndex];
+
+        _vibrationTimer = Timer(Duration(milliseconds: pauseDuration), () {
+          patternIndex++;
+          executeNextStep();
+        });
+      }
+    }
+
+    executeNextStep();
+  }
+
+  // Stop vibration
+  void _stopVibration() {
+    _vibrationTimer?.cancel();
+    _vibrationTimer = null;
+
+    // Try to cancel vibration if supported
+    if (_hasVibrationSupport) {
+      try {
+        Vibration.cancel();
+      } catch (e) {
+        print('🔄 Error stopping vibration: $e');
+      }
+    }
+  }
+
+  // Cycle through vibration patterns
+  void _nextVibrationPattern() {
+    _vibrationPatternIndex =
+        (_vibrationPatternIndex + 1) % _vibrationPatterns.length;
+    if (_vibrationEnabled && _hasVibrationSupport) {
+      _startRhythmicalVibration();
+    }
+  }
+
+  // Toggle vibration on/off
+  void _toggleVibration() {
+    setState(() {
+      _vibrationEnabled = !_vibrationEnabled;
+    });
+
+    if (_vibrationEnabled) {
+      _startRhythmicalVibration();
+    } else {
+      _stopVibration();
+    }
+  }
+
   // Find the nearest branch based on user's location
   Future<void> _findNearestBranch() async {
     try {
       // Find the nearest branch
       await _nearestBranchService.findNearestBranch();
-      
+
       // Get the deliver ID for the nearest branch
-      _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+      _nearestBranchDeliverId =
+          await _nearestBranchService.getSavedNearestBranchDeliverId();
       print('Nearest branch deliver ID: $_nearestBranchDeliverId');
     } catch (e) {
       print('Error finding nearest branch: $e');
@@ -79,6 +215,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     setState(() {});
     _videoController?.play();
 
+    // Start rhythmical vibrations when video begins
+    _startRhythmicalVibration();
+
     // Start preloading menu data as soon as video starts playing
     _preloadMenuData();
 
@@ -88,6 +227,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       if (controller != null &&
           controller.value.position >= controller.value.duration) {
         if (!_showContent && mounted) {
+          // Stop vibrations when video ends
+          _stopVibration();
           setState(() => _showContent = true);
           _animationController.forward();
         }
@@ -112,8 +253,10 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       }
 
       // Set the nearest branch deliver ID in the menu service if available
-      if (_nearestBranchDeliverId != null && _nearestBranchDeliverId!.isNotEmpty) {
-        print('Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
+      if (_nearestBranchDeliverId != null &&
+          _nearestBranchDeliverId!.isNotEmpty) {
+        print(
+            'Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
         _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
       }
 
@@ -139,6 +282,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    _stopVibration(); // Stop any ongoing vibrations
     _videoController?.dispose();
     _animationController.dispose();
     super.dispose();
@@ -252,6 +396,44 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: Colors.black87,
+      floatingActionButton: _showContent
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Vibration toggle button (show for all devices, use haptic feedback as fallback)
+                FloatingActionButton(
+                  mini: true,
+                  backgroundColor:
+                      _vibrationEnabled ? Colors.orange : Colors.grey,
+                  onPressed: _toggleVibration,
+                  child: Icon(
+                    _vibrationEnabled
+                        ? (_hasVibrationSupport
+                            ? Icons.vibration
+                            : Icons.touch_app)
+                        : Icons.mobile_off,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Pattern cycle button
+                if (_vibrationEnabled)
+                  FloatingActionButton(
+                    mini: true,
+                    backgroundColor: Colors.deepOrange,
+                    onPressed: _nextVibrationPattern,
+                    child: Text(
+                      '${_vibrationPatternIndex + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            )
+          : null,
       body: Stack(
         children: [
           // Video Loader

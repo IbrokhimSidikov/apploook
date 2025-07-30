@@ -427,7 +427,7 @@ class ApiService {
       if (isVerified) {
         print(
             'Payme payment verified as successful, setting payment type to card');
-        return 'card';
+        return 'payme';
       }
     }
 
@@ -437,7 +437,7 @@ class ApiService {
       case 'cash':
         return 'cash';
       case 'payme':
-        return 'card';
+        return 'payme';
       default:
         return originalPaymentType;
     }
