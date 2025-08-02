@@ -11,6 +11,16 @@ class AppLocalizations {
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Order Now \nNot Only Chicken',
+      'suitableForEveryone': 'Suitable For \nEveryone',
+      'promosOfferDeals': 'Promos \nOffer & Deals',
+      'easyOrdering': 'Easy \nOrdering',
+      'selectOrderMode': 'Select Order Mode',
+      'deliveryTakeaway': 'Delivery or Takeaway',
+      'carhop': 'Carhop',
+
+      // HomeNew Page
       'whatsNew': 'WHAT\'S NEW',
       'hello': 'Hello',
       'welcome': 'Welcome to our app',
@@ -148,6 +158,16 @@ class AppLocalizations {
       'paymentVerificationCancelled': 'Payment verification cancelled',
     },
     'uz': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Buyurtma bering \nNafaqat tovuqlar',
+      'suitableForEveryone': 'Hammaga \nuchun mos',
+      'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
+      'easyOrdering': 'Oson \nBuyurtma',
+      'selectOrderMode': 'Buyurtma usulini tanlang',
+      'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
+      'carhop': 'Avtomobilda xizmat',
+
+      // HomeNew Page
       'whatsNew': 'YANGILIKLAR',
       'hello': 'Salom',
       'welcome': 'Ilovamizga xush kelibsiz',
@@ -288,6 +308,16 @@ class AppLocalizations {
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
     },
     'ru': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Закажите сейчас \nНе только курицу',
+      'suitableForEveryone': 'Подходит \nДля всех',
+      'promosOfferDeals': 'Акции \nСкидки и предложения',
+      'easyOrdering': 'Лёгкий \nЗаказ',
+      'selectOrderMode': 'Выберите способ заказа',
+      'deliveryTakeaway': 'Доставка или самовывоз',
+      'carhop': 'Обслуживание в авто',
+
+      // HomeNew Page
       'whatsNew': 'ЧТО НОВОГО',
       'hello': 'Привет',
       'welcome': 'Добро пожаловать',
@@ -425,6 +455,23 @@ class AppLocalizations {
       'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
     },
   };
+
+  // Onboard Page
+  String get orderNowNotOnlyChicken =>
+      _localizedValues[locale.languageCode]!['orderNowNotOnlyChicken']!;
+  String get suitableForEveryone =>
+      _localizedValues[locale.languageCode]!['suitableForEveryone']!;
+  String get promosOfferDeals =>
+      _localizedValues[locale.languageCode]!['promosOfferDeals']!;
+  String get easyOrdering =>
+      _localizedValues[locale.languageCode]!['easyOrdering']!;
+  String get selectOrderMode =>
+      _localizedValues[locale.languageCode]!['selectOrderMode']!;
+  String get deliveryTakeaway =>
+      _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
+  String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
+
+  // HomeNew Page
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
   String get hello => _localizedValues[locale.languageCode]!['hello']!;
   String get welcome => _localizedValues[locale.languageCode]!['welcome']!;
@@ -642,11 +689,6 @@ class AppLocalizations {
 
   String get orderModeSubtitle =>
       _localizedValues[locale.languageCode]!['orderModeSubtitle']!;
-
-  String get deliveryTakeaway =>
-      _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
-
-  String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
 
   String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
 

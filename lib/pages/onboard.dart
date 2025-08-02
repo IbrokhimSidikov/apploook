@@ -1,16 +1,19 @@
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:vibration/vibration.dart';
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/pages/homenew.dart';
+
+enum HapticFeedbackType { light, medium, heavy, selection }
 
 class Onboard extends StatefulWidget {
   const Onboard({Key? key}) : super(key: key);
@@ -28,21 +31,32 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   bool _isMenuLoaded = false;
   bool _isLoading = false;
 
-  // Vibration control variables
-  Timer? _vibrationTimer;
-  bool _vibrationEnabled = true;
-  bool _hasVibrationSupport = false;
-  int _vibrationPatternIndex = 0;
+  Timer? _hapticTimer;
+  Timer? _videoSyncTimer;
+  bool _hapticEnabled = true;
+  int _hapticPatternIndex = 0;
+  bool _isIOS = false;
 
-  // Define rhythmical vibration patterns (in milliseconds)
-  final List<List<int>> _vibrationPatterns = [
-    [120, 100, 50, 100, 30, 1650],
-    // strong (120ms), short break (100ms)
-    // medium (50ms), short break (100ms)
-    // light (30ms), then pause (1650ms) to complete ~2s cycle
+  final List<int> _exactHapticTimings = [
+    1030, // 1.03 seconds
+    1180, // 1.18 seconds
+    2080, // 2.08 seconds
+    2240, // 2.24 seconds
   ];
 
-  // Order mode selection
+  final List<HapticFeedbackType> _hapticIntensities = [
+    HapticFeedbackType.light,
+    HapticFeedbackType.medium,
+    HapticFeedbackType.light,
+    HapticFeedbackType.heavy,
+    HapticFeedbackType.medium,
+  ];
+
+  final List<List<int>> _hapticPatterns = [
+    [120, 100, 50, 100, 30, 1650],
+    //vibrate, pause, vibrate, pause, vibrate, longer pause
+  ];
+
   final OrderModeService _orderModeService = OrderModeService();
   final MenuService _menuService = MenuService();
   final NearestBranchService _nearestBranchService = NearestBranchService();
@@ -55,140 +69,167 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     super.initState();
     _loadLanguagePreference();
     _initializeOrderMode();
-    _findNearestBranch(); // Find the nearest branch before initializing video
-    _initializeVibration(); // Initialize vibration support
-    _initializeVideo(); // This will call _preloadMenuData() after video starts
+    _findNearestBranch();
+    _initializeHapticFeedback();
+    _initializeVideo();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    print('Onboard initState: Order mode initialized to $_selectedOrderMode');
+    // print('Onboard initState: Order mode initialized to $_selectedOrderMode');
   }
 
-  // Initialize vibration support
-  Future<void> _initializeVibration() async {
-    try {
-      // Try to check if device has vibrator
-      _hasVibrationSupport = await Vibration.hasVibrator() ?? false;
-      print('✅ Vibration support detected: $_hasVibrationSupport');
+  void _initializeHapticFeedback() {
+    _isIOS = Platform.isIOS;
+    // print('✅ iOS device detected: $_isIOS');
+    _hapticEnabled = _isIOS;
 
-      // Test a quick vibration to ensure it works
-      if (_hasVibrationSupport) {
-        await Vibration.vibrate(duration: 50);
-        print('✅ Vibration test successful');
-      }
-    } catch (e) {
-      print('⚠️ Vibration plugin error: $e');
-      print('🔄 Falling back to HapticFeedback');
-      _hasVibrationSupport = false;
+    // if (_isIOS) {
+    //   HapticFeedback.lightImpact();
+    //   print('✅ Haptic feedback test successful');
+    // } else {
+    //   print('ℹ️ Haptic feedback is iOS-only and disabled on this device');
+    // }
+  }
+
+  void _executeHapticFeedback(HapticFeedbackType type) {
+    if (!_hapticEnabled || !_isIOS) return;
+
+    switch (type) {
+      case HapticFeedbackType.light:
+        HapticFeedback.lightImpact();
+        break;
+      case HapticFeedbackType.medium:
+        HapticFeedback.mediumImpact();
+        break;
+      case HapticFeedbackType.heavy:
+        HapticFeedback.heavyImpact();
+        break;
+      case HapticFeedbackType.selection:
+        HapticFeedback.selectionClick();
+        break;
     }
   }
 
-  // Start rhythmical vibration pattern
-  void _startRhythmicalVibration() {
-    if (!_vibrationEnabled || !_hasVibrationSupport) return;
+  void _startVideoSyncedHaptic() {
+    if (!_hapticEnabled || !_isIOS) return;
+    if (_videoController == null || !_videoController!.value.isInitialized)
+      return;
 
-    _stopVibration(); // Stop any existing vibration
+    _stopHaptic();
 
-    // Get current pattern
+    // print(
+    //     '🎬 Video duration: ${_videoController!.value.duration.inMilliseconds}ms');
+    // print('🎬 Haptic timings: $_exactHapticTimings');
+
+    for (int i = 0; i < _exactHapticTimings.length; i++) {
+      final timing = _exactHapticTimings[i];
+      final intensity = _hapticIntensities[i % _hapticIntensities.length];
+
+      Timer(Duration(milliseconds: timing), () {
+        if (_videoController == null || !_videoController!.value.isInitialized)
+          return;
+        if (!_hapticEnabled || !_isIOS) return;
+
+        print('🔊 HAPTIC TAP ${i + 1}: Executing at ${timing}ms');
+        _executeHapticFeedback(intensity);
+      });
+    }
+
+    _videoSyncTimer =
+        Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (_videoController == null || !_videoController!.value.isInitialized) {
+        timer.cancel();
+        return;
+      }
+      // Get video position in milliseconds
+      // final videoPositionMs = _videoController!.value.position.inMilliseconds;
+
+      // print('🎬 Video position: ${videoPositionMs}ms');
+    });
+  }
+
+  void _startRhythmicalHaptic() {
+    if (!_hapticEnabled || !_isIOS) return;
+
+    _stopHaptic();
+
     final pattern =
-        _vibrationPatterns[_vibrationPatternIndex % _vibrationPatterns.length];
+        _hapticPatterns[_hapticPatternIndex % _hapticPatterns.length];
 
-    // Start the vibration pattern
-    _executeVibrationPattern(pattern);
+    _executeHapticPattern(pattern);
   }
 
-  // Execute a specific vibration pattern
-  void _executeVibrationPattern(List<int> pattern) {
-    if (!_vibrationEnabled) return;
+  void _executeHapticPattern(List<int> pattern) {
+    if (!_hapticEnabled || !_isIOS) return;
 
-    int patternIndex = 0;
+    _hapticTimer?.cancel();
 
-    void executeNextStep() {
-      if (patternIndex >= pattern.length) {
-        // Pattern completed, start over for continuous rhythm
-        patternIndex = 0;
-      }
-
-      if (patternIndex % 2 == 0) {
-        // Even index = vibration duration
-        final duration = pattern[patternIndex];
-
-        // Try vibration plugin first, fallback to haptic feedback
-        if (_hasVibrationSupport) {
-          try {
-            Vibration.vibrate(duration: duration);
-          } catch (e) {
-            print('🔄 Vibration failed, using haptic feedback: $e');
-            HapticFeedback.mediumImpact();
-          }
-        } else {
-          // Use haptic feedback as fallback
-          HapticFeedback.mediumImpact();
-        }
-
-        _vibrationTimer = Timer(Duration(milliseconds: duration), () {
-          patternIndex++;
-          executeNextStep();
-        });
-      } else {
-        // Odd index = pause duration
-        final pauseDuration = pattern[patternIndex];
-
-        _vibrationTimer = Timer(Duration(milliseconds: pauseDuration), () {
-          patternIndex++;
-          executeNextStep();
-        });
-      }
-    }
-
-    executeNextStep();
-  }
-
-  // Stop vibration
-  void _stopVibration() {
-    _vibrationTimer?.cancel();
-    _vibrationTimer = null;
-
-    // Try to cancel vibration if supported
-    if (_hasVibrationSupport) {
-      try {
-        Vibration.cancel();
-      } catch (e) {
-        print('🔄 Error stopping vibration: $e');
-      }
-    }
-  }
-
-  // Cycle through vibration patterns
-  void _nextVibrationPattern() {
-    _vibrationPatternIndex =
-        (_vibrationPatternIndex + 1) % _vibrationPatterns.length;
-    if (_vibrationEnabled && _hasVibrationSupport) {
-      _startRhythmicalVibration();
-    }
-  }
-
-  // Toggle vibration on/off
-  void _toggleVibration() {
-    setState(() {
-      _vibrationEnabled = !_vibrationEnabled;
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!_hapticEnabled || !_isIOS) return;
+      HapticFeedback.lightImpact();
+      // print('🔊 HAPTIC TAP 1: Light impact at 200ms');
     });
 
-    if (_vibrationEnabled) {
-      _startRhythmicalVibration();
-    } else {
-      _stopVibration();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      if (!_hapticEnabled || !_isIOS) return;
+      HapticFeedback.mediumImpact();
+      // print('🔊 HAPTIC TAP 2: Medium impact at 1500ms');
+    });
+
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      if (!_hapticEnabled || !_isIOS) return;
+      HapticFeedback.selectionClick();
+      // print('🔊 HAPTIC TAP 3: Selection click at 3000ms');
+    });
+
+    Future.delayed(const Duration(milliseconds: 4500), () {
+      if (!_hapticEnabled || !_isIOS) return;
+      HapticFeedback.mediumImpact();
+      // print('🔊 HAPTIC TAP 4: Medium impact at 4500ms');
+    });
+
+    // For debugging
+    // print(
+    // '🔊 Starting haptic pattern with specific timings: 200ms, 1500ms, 3000ms, 4500ms');
+  }
+
+  // Stop haptic feedback
+  void _stopHaptic() {
+    _hapticTimer?.cancel();
+    _hapticTimer = null;
+
+    _videoSyncTimer?.cancel();
+    _videoSyncTimer = null;
+  }
+
+  void _nextHapticPattern() {
+    _hapticPatternIndex = (_hapticPatternIndex + 1) % _hapticPatterns.length;
+    if (_hapticEnabled && _isIOS) {
+      _startRhythmicalHaptic();
     }
   }
+  // Test qilish uchun ios only, haptic tap
+
+  // void _toggleHaptic() {
+  //   if (!_isIOS) return;
+
+  //   setState(() {
+  //     _hapticEnabled = !_hapticEnabled;
+  //   });
+
+  //   if (_hapticEnabled) {
+  //     _startRhythmicalHaptic();
+  //   } else {
+  //     _stopHaptic();
+  //   }
+  // }
 
   // Find the nearest branch based on user's location
   Future<void> _findNearestBranch() async {
     try {
-      // Find the nearest branch
       await _nearestBranchService.findNearestBranch();
 
-      // Get the deliver ID for the nearest branch
       _nearestBranchDeliverId =
           await _nearestBranchService.getSavedNearestBranchDeliverId();
       print('Nearest branch deliver ID: $_nearestBranchDeliverId');
@@ -212,23 +253,23 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     _videoController = VideoPlayerController.asset('assets/videos/loader.mp4');
     await _videoController?.initialize();
     if (!mounted) return;
+
+    // print(
+    //     '🎬 Video initialized: ${_videoController!.value.duration.inSeconds} seconds');
+
     setState(() {});
     _videoController?.play();
 
-    // Start rhythmical vibrations when video begins
-    _startRhythmicalVibration();
+    _startVideoSyncedHaptic();
 
-    // Start preloading menu data as soon as video starts playing
     _preloadMenuData();
 
-    // Wait for video to complete
     _videoController?.addListener(() {
       final controller = _videoController;
       if (controller != null &&
           controller.value.position >= controller.value.duration) {
         if (!_showContent && mounted) {
-          // Stop vibrations when video ends
-          _stopVibration();
+          _stopHaptic();
           setState(() => _showContent = true);
           _animationController.forward();
         }
@@ -237,34 +278,29 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _preloadMenuData({OrderMode? specificOrderMode}) async {
-    print('Onboard: Starting menu preloading during video playback');
+    // print('Onboard: Starting menu preloading during video playback');
 
     try {
-      // First, initialize the order mode service to ensure we have a valid order mode
       await _orderModeService.initialize();
 
-      // Use the specified order mode, current order mode, or default to delivery/takeaway
       OrderMode orderMode = specificOrderMode ?? _orderModeService.currentMode;
       print('Onboard: Preloading menu data for order mode: $orderMode');
 
-      // If a specific order mode is provided, set it in the service
       if (specificOrderMode != null) {
         await _orderModeService.setOrderMode(specificOrderMode);
       }
 
-      // Set the nearest branch deliver ID in the menu service if available
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
-        print(
-            'Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
+        // print(
+        //     'Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
         _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
       }
 
-      // Preload the menu data for the current order mode
       await _menuService.initialize();
-      await _menuService.refreshData(); // Use the correct method name
+      await _menuService.refreshData();
 
-      print('Onboard: Menu data preloading completed successfully');
+      // print('Onboard: Menu data preloading completed successfully');
 
       if (!mounted) return;
       setState(() {
@@ -272,7 +308,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       });
     } catch (e) {
       print('Onboard: Error preloading menu data: $e');
-      // Even if there's an error, we'll mark as loaded to not block the UI
+      // Even if there's an error, mark as loaded to not block the UI
       if (!mounted) return;
       setState(() {
         _isMenuLoaded = true;
@@ -282,7 +318,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
-    _stopVibration(); // Stop any ongoing vibrations
+    _stopHaptic();
     _videoController?.dispose();
     _animationController.dispose();
     super.dispose();
@@ -290,29 +326,27 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
 
   Future<void> _initializeOrderMode() async {
     await _orderModeService.initialize();
-    // Set the default order mode to what's in the service if available
     setState(() {
       _selectedOrderMode = _orderModeService.currentMode;
     });
-    print('OrderMode initialized from service: $_selectedOrderMode');
+    // print('OrderMode initialized from service: $_selectedOrderMode');
   }
 
   Future<void> _continue() async {
     if (!mounted) return;
 
-    // Set loading state
     setState(() {
       _isLoading = true;
     });
 
-    print('Continue button pressed');
-    print(
-        'Language selection: English=$isEnglishSelected, Uzbek=$isUzbekSelected');
-    print('Order mode selection: $_selectedOrderMode');
+    // print('Continue button pressed');
+    // print(
+    //     'Language selection: English=$isEnglishSelected, Uzbek=$isUzbekSelected');
+    // print('Order mode selection: $_selectedOrderMode');
 
     // Check if language is selected
     if (!isEnglishSelected && !isUzbekSelected) {
-      print('No language selected, showing error');
+      // print('No language selected, showing error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a language'),
@@ -326,9 +360,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       return;
     }
 
-    // Order mode should always have a default value now, but check just in case
     if (_selectedOrderMode == null) {
-      print('No order mode selected, showing error');
+      // print('No order mode selected, showing error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select an order mode'),
@@ -346,20 +379,17 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_language', selectedLocale);
-    print('Saved language: $selectedLocale');
+    // print('Saved language: $selectedLocale');
 
     if (!mounted) return;
     context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
 
-    // Save the selected order mode and reload menu data for this specific order mode
-    print('Saving order mode: $_selectedOrderMode');
+    // print('Saving order mode: $_selectedOrderMode');
 
-    // Reset menu loaded flag since we need to load for the specific order mode
     setState(() {
       _isMenuLoaded = false;
     });
 
-    // Preload menu data specifically for the selected order mode
     await _preloadMenuData(specificOrderMode: _selectedOrderMode);
 
     // Force a refresh of the SharedPreferences to ensure it's saved
@@ -367,12 +397,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('order_mode', OrderMode.carhop.index);
       await prefs.setBool('has_user_selected_order_mode', true);
-      print('Explicitly saved carhop mode to SharedPreferences');
+      // print('Explicitly saved carhop mode to SharedPreferences');
     }
 
     if (!mounted) return;
 
-    print('Menu loaded, navigating to HomeNew with mode: $_selectedOrderMode');
+    // print('Menu loaded, navigating to HomeNew with mode: $_selectedOrderMode');
     setState(() {
       _isLoading = false;
     });
@@ -397,40 +427,37 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     return Scaffold(
       backgroundColor: Colors.black87,
       floatingActionButton: _showContent
-          ? Column(
+          ? const Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                // Vibration toggle button (show for all devices, use haptic feedback as fallback)
-                FloatingActionButton(
-                  mini: true,
-                  backgroundColor:
-                      _vibrationEnabled ? Colors.orange : Colors.grey,
-                  onPressed: _toggleVibration,
-                  child: Icon(
-                    _vibrationEnabled
-                        ? (_hasVibrationSupport
-                            ? Icons.vibration
-                            : Icons.touch_app)
-                        : Icons.mobile_off,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Pattern cycle button
-                if (_vibrationEnabled)
-                  FloatingActionButton(
-                    mini: true,
-                    backgroundColor: Colors.deepOrange,
-                    onPressed: _nextVibrationPattern,
-                    child: Text(
-                      '${_vibrationPatternIndex + 1}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                // Haptic feedback toggle button (iOS only)
+                // if (_isIOS)
+                //   FloatingActionButton(
+                //     mini: true,
+                //     backgroundColor:
+                //         _hapticEnabled ? Colors.orange : Colors.grey,
+                //     onPressed: _toggleHaptic,
+                //   child: Icon(
+                //     _hapticEnabled ? Icons.touch_app : Icons.mobile_off,
+                //     color: Colors.white,
+                //     size: 20,
+                //   ),
+                // ),
+                // if (_isIOS) const SizedBox(height: 8),
+                // // Pattern cycle button (iOS only)
+                // if (_isIOS && _hapticEnabled)
+                //   FloatingActionButton(
+                //     mini: true,
+                //     backgroundColor: Colors.deepOrange,
+                //     onPressed: _nextHapticPattern,
+                //     child: Text(
+                //       '${_hapticPatternIndex + 1}',
+                //       style: const TextStyle(
+                //         color: Colors.white,
+                //         fontWeight: FontWeight.bold,
+                //       ),
+                //     ),
+                //   ),
               ],
             )
           : null,
@@ -478,8 +505,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                       ),
                       Column(
                         children: [
-                          const Spacer(
-                              flex: 70), // Adjust flex to control spacing
+                          const Spacer(flex: 70),
                           Center(
                             child: SvgPicture.asset(
                               'images/smile-loook.svg',
@@ -487,11 +513,10 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               height: 120,
                             ),
                           ),
-                          const Spacer(
-                              flex: 5), // Adjust flex to control spacing
-                          const Text(
-                            'Order Now \nNot Only Chicken',
-                            style: TextStyle(
+                          const Spacer(flex: 5),
+                          Text(
+                            AppLocalizations.of(context).orderNowNotOnlyChicken,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -499,8 +524,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const Spacer(
-                              flex: 10), // Adjust flex to control spacing
+                          const Spacer(flex: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -509,8 +533,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   SvgPicture.asset(
                                       'images/suitable-for-all-basket.svg'),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'Suitable For\nEveryone',
+                                  Text(
+                                    AppLocalizations.of(context)
+                                        .suitableForEveryone,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
@@ -522,8 +547,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   SvgPicture.asset(
                                       'images/solar--sale-linear.svg'),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'Promos\nOffer & Deals',
+                                  Text(
+                                    AppLocalizations.of(context)
+                                        .promosOfferDeals,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
@@ -535,8 +561,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   SvgPicture.asset(
                                       'images/heroicons--device-phone-mobile.svg'),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    'Easy\nOrdering',
+                                  Text(
+                                    AppLocalizations.of(context).easyOrdering,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
@@ -545,8 +571,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ],
                           ),
-                          const Spacer(
-                              flex: 5), // Adjust flex to control spacing
+                          const Spacer(flex: 5),
                           const Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
@@ -560,8 +585,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ),
                           ),
-                          const Spacer(
-                              flex: 2), // Adjust flex to control spacing
+                          const Spacer(flex: 2),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -661,15 +685,15 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           ),
                           const Spacer(flex: 2),
 
-                          // Order Mode Selection Section
+                          // Order Mode Selection
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Padding(
+                              Padding(
                                 padding: EdgeInsets.only(left: 16, bottom: 12),
                                 child: Text(
-                                  'Select Order Mode:',
-                                  style: TextStyle(
+                                  AppLocalizations.of(context).selectOrderMode,
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
@@ -680,17 +704,16 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  // Delivery/Takeaway Option
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        print(
-                                            'Delivery/Takeaway option tapped');
+                                        // print(
+                                        //     'Delivery/Takeaway option tapped');
                                         setState(() {
                                           _selectedOrderMode =
                                               OrderMode.deliveryTakeaway;
-                                          print(
-                                              'Selected order mode updated: $_selectedOrderMode');
+                                          // print(
+                                          //     'Selected order mode updated: $_selectedOrderMode');
                                         });
                                       },
                                       child: Container(
@@ -718,16 +741,17 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         ),
                                         child: Column(
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               Icons.delivery_dining,
                                               size: 32,
                                               color: Colors.black,
                                             ),
                                             const SizedBox(height: 8),
-                                            const Text(
-                                              'Delivery/Takeaway',
+                                            Text(
+                                              AppLocalizations.of(context)
+                                                  .deliveryTakeaway,
                                               textAlign: TextAlign.center,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
@@ -743,11 +767,11 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   Expanded(
                                     child: GestureDetector(
                                       onTap: () {
-                                        print('Carhop option tapped');
+                                        // print('Carhop option tapped');
                                         setState(() {
                                           _selectedOrderMode = OrderMode.carhop;
-                                          print(
-                                              'Selected order mode updated: $_selectedOrderMode');
+                                          // print(
+                                          //     'Selected order mode updated: $_selectedOrderMode');
                                         });
                                       },
                                       child: Container(
@@ -775,16 +799,17 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         ),
                                         child: Column(
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               Icons.directions_car,
                                               size: 32,
                                               color: Colors.black,
                                             ),
                                             const SizedBox(height: 8),
-                                            const Text(
-                                              'Carhop',
+                                            Text(
+                                              AppLocalizations.of(context)
+                                                  .carhop,
                                               textAlign: TextAlign.center,
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 color: Colors.black,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.w500,
@@ -835,10 +860,11 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                           ),
                                         ),
                                       )
-                                    : const Text(
-                                        "Continue",
+                                    : Text(
+                                        AppLocalizations.of(context)
+                                            .continueButton,
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: const TextStyle(
                                           color: Colors.black,
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.bold,
@@ -858,8 +884,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               fontFamily: 'Poppins',
                             ),
                           ),
-                          const Spacer(
-                              flex: 6), // Adjust flex to control spacing
+                          const Spacer(flex: 6),
                         ],
                       ),
                     ],

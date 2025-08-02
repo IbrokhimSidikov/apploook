@@ -40,11 +40,11 @@ class CachedProductImage extends StatelessWidget {
       }
 
       // Log the image dimensions for debugging
-      print(
-          'CachedProductImage: Mode=${orderMode}, Size=${imageWidth}x${imageHeight}');
+      // print(
+      //     'CachedProductImage: Mode=${orderMode}, Size=${imageWidth}x${imageHeight}');
     } catch (e) {
       // If order mode service fails, use default dimensions
-      print('CachedProductImage: Error getting order mode - $e');
+      // print('CachedProductImage: Error getting order mode - $e');
     }
 
     return ClipRRect(

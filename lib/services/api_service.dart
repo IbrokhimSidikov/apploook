@@ -389,6 +389,15 @@ class ApiService {
                   "name": item["name"],
                   "quantity": item["quantity"],
                   "price": item["price"],
+                  "modifications": item["selectedModifiers"] != null
+                      ? (item["selectedModifiers"] as List).map((modifier) => {
+                            "id": modifier["modifierId"],
+                            "group_id": modifier["modifierId"].toString().split('-').first + "-group",
+                            "name": modifier["modifierName"],
+                            "quantity": modifier["quantity"],
+                            "price": modifier["modifierPrice"],
+                          }).toList()
+                      : [],
                 })
             .toList(),
         "persons": 2,

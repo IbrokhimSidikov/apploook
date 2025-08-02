@@ -75,6 +75,41 @@ class _CheckoutState extends State<Checkout> {
     // Check for pending Payme transactions
     PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
+    
+    // Log cart data being passed to checkout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _logCartData();
+    });
+  }
+  
+  void _logCartData() {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    print('\n======== CART DATA PASSED TO CHECKOUT ========');
+    print('Total Items: ${cartProvider.cartItems.length}');
+    print('Total Price: ${cartProvider.getTotalPrice()}');
+    
+    for (int i = 0; i < cartProvider.cartItems.length; i++) {
+      final item = cartProvider.cartItems[i];
+      print('\nItem ${i + 1}:');
+      print('  Product ID: ${item.product.id}');
+      print('  Product Name: ${item.displayName}');
+      print('  Quantity: ${item.quantity}');
+      print('  Base Price: ${item.product.price}');
+      print('  Total Price: ${item.totalPrice}');
+      
+      if (item.selectedModifiers.isNotEmpty) {
+        print('  Selected Modifiers:');
+        for (final modifier in item.selectedModifiers) {
+          print('    - ID: ${modifier.modifier.id}');
+          print('      Name: ${modifier.modifier.name}');
+          print('      Price: ${modifier.modifier.price}');
+          print('      Quantity: ${modifier.quantity}');
+        }
+      } else {
+        print('  No modifiers selected');
+      }
+    }
+    print('============================================\n');
   }
 
   // Handle Payme payment for delivery orders
@@ -564,10 +599,10 @@ class _CheckoutState extends State<Checkout> {
     orderPrice = cartProvider.getTotalPrice();
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
-      var itemTotal = item.quantity * item.product.price;
+      var itemTotal = item.totalPrice; // Use totalPrice which includes modifiers
       total += itemTotal;
 
-      return '${item.product.name}\n ${item.quantity} x ${NumberFormat('#,##0').format(item.product.price)} = ${NumberFormat('#,##0').format(item.quantity * item.product.price)} сум\n';
+      return '${item.displayName}\n Total: ${NumberFormat('#,##0').format(item.totalPrice.toInt())} сум\n';
     }).toList();
 
     if (_selectedIndex == 0) {
@@ -1977,7 +2012,7 @@ class _CheckoutState extends State<Checkout> {
       if (_selectedIndex == 1) {
         try {
           List<String> orderItems = cartProvider.cartItems.map((item) {
-            return '${item.product.name}\n ${item.quantity} x ${NumberFormat('#,##0').format(item.product.price)} = ${NumberFormat('#,##0').format(item.quantity * item.product.price)} сум\n';
+            return '${item.displayName}\n Total: ${NumberFormat('#,##0').format(item.totalPrice.toInt())} сум\n';
           }).toList();
 
           await sendOrderToTelegram(
@@ -2028,10 +2063,16 @@ class _CheckoutState extends State<Checkout> {
           cartProvider.cartItems.map((item) {
         return {
           "id": item.product.uuid, // Use the UUID from the product model
-          "name": item.product.name,
+          "name": item.displayName, // Include modifier names
           "price": item.product.price,
           "quantity": item.quantity,
-          "totalPrice": item.product.price * item.quantity,
+          "totalPrice": item.totalPrice, // Use totalPrice which includes modifiers
+          "selectedModifiers": item.selectedModifiers.map((modifier) => {
+            "modifierId": modifier.modifier.id,
+            "modifierName": modifier.modifier.name,
+            "modifierPrice": modifier.modifier.price,
+            "quantity": modifier.quantity,
+          }).toList(),
         };
       }).toList();
 
@@ -2265,10 +2306,18 @@ class _CheckoutState extends State<Checkout> {
         final List<Map<String, dynamic>> formattedOrderItems =
             cartProvider.cartItems.map((item) {
           return {
-            "actual_price": item.product.price,
+            "actual_price": item.totalPrice / item.quantity, // Price per unit including modifiers
             "product_id": item.product.id.toString(),
             "quantity": item.quantity,
-            "note": null
+            "note": item.selectedModifiers.isNotEmpty 
+                ? "Modifiers: ${item.selectedModifiers.map((m) => m.modifier.name).join(", ")}"
+                : null,
+            "selectedModifiers": item.selectedModifiers.map((modifier) => {
+              "modifierId": modifier.modifier.id,
+              "modifierName": modifier.modifier.name,
+              "modifierPrice": modifier.modifier.price,
+              "quantity": modifier.quantity,
+            }).toList(),
           };
         }).toList();
 

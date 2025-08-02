@@ -17,7 +17,7 @@ import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 
 import 'dart:convert';
-
+import '../models/modifier_models.dart';
 import '../widget/banner_widget.dart';
 
 class Category {
@@ -37,6 +37,12 @@ class Product {
   final String? imagePath;
   final double price;
   final dynamic description;
+  final List<ModifierGroup> modifierGroups;
+  final String? measure;
+  final String? measureUnit;
+  final int? sortOrder;
+  final Map<String, dynamic>? serviceCodesUz;
+  final List<Map<String, dynamic>>? images;
 
   Product({
     required this.name,
@@ -47,6 +53,12 @@ class Product {
     this.imagePath,
     required this.price,
     required this.description,
+    this.modifierGroups = const [],
+    this.measure,
+    this.measureUnit,
+    this.sortOrder,
+    this.serviceCodesUz,
+    this.images,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -87,6 +99,20 @@ class Product {
       uuid = json['id'].toString();
     }
 
+    // Parse modifier groups
+    List<ModifierGroup> modifierGroups = [];
+    if (json['modifierGroups'] != null) {
+      modifierGroups = (json['modifierGroups'] as List)
+          .map((group) => ModifierGroup.fromJson(group))
+          .toList();
+    }
+
+    // Handle images array
+    List<Map<String, dynamic>>? images;
+    if (json['images'] != null) {
+      images = List<Map<String, dynamic>>.from(json['images']);
+    }
+
     return Product(
       name: json['name'] ?? '',
       id: json['id'] ?? 0,
@@ -96,6 +122,12 @@ class Product {
       imagePath: json['imagePath'], // Keep this nullable
       price: price,
       description: description ?? {},
+      modifierGroups: modifierGroups,
+      measure: json['measure']?.toString(),
+      measureUnit: json['measureUnit']?.toString(),
+      sortOrder: json['sortOrder'],
+      serviceCodesUz: json['serviceCodesUz'],
+      images: images,
     );
   }
 

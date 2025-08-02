@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -340,6 +341,9 @@ class MenuService {
     print('MenuService: Processing carhop category list');
 
     try {
+      // Create a list to store categories with their sort order
+      List<Map<String, dynamic>> categoriesWithSortOrder = [];
+
       for (var category in categoryData) {
         if (category is! Map<String, dynamic>) {
           print('MenuService: Invalid category format: $category');
@@ -365,8 +369,11 @@ class MenuService {
         print(
             'MenuService: Processing ${productData.length} products in $categoryName');
 
-        // Add category
-        _categories.add(Category(id: categoryId, name: categoryName));
+        // Store category with its sort order for later sorting
+        int sortOrder = category['sortOrder'] ?? categoryData.indexOf(category);
+
+        categoriesWithSortOrder.add(
+            {'id': categoryId, 'name': categoryName, 'sortOrder': sortOrder});
 
         for (var product in productData) {
           try {
@@ -397,6 +404,19 @@ class MenuService {
         }
       }
 
+      // Sort categories by sortOrder
+      print('MenuService: Sorting carhop categories by sortOrder');
+      categoriesWithSortOrder.sort((a, b) {
+        // Sort by sortOrder (ascending)
+        return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
+      });
+
+      // Add sorted categories to _categories list
+      for (var categoryData in categoriesWithSortOrder) {
+        _categories
+            .add(Category(id: categoryData['id'], name: categoryData['name']));
+      }
+
       print(
           'MenuService: Processed ${_categories.length} carhop categories and ${_allProducts.length} products');
     } catch (e) {
@@ -413,6 +433,9 @@ class MenuService {
       // Reset collections
       _categories = [];
       _allProducts = [];
+
+      // Create a list to store categories with their sort order
+      List<Map<String, dynamic>> categoriesWithSortOrder = [];
 
       // Check if categories exist in data
       if (data['categories'] != null && data['categories'] is List) {
@@ -485,9 +508,22 @@ class MenuService {
                 print(
                     'MenuService: Using unique category ID: $uniqueCategoryId for original ID: $categoryId');
 
-                // Create the category
-                _categories
-                    .add(Category(id: uniqueCategoryId, name: categoryName));
+                // Store category with its sort order for later sorting
+                // Extract sort order if available, default to category index if not
+                int sortOrder = 0;
+                if (category['sortOrder'] != null) {
+                  sortOrder = int.tryParse(category['sortOrder'].toString()) ??
+                      processedCategories;
+                } else {
+                  sortOrder = processedCategories;
+                }
+
+                categoriesWithSortOrder.add({
+                  'id': uniqueCategoryId,
+                  'name': categoryName,
+                  'sortOrder': sortOrder
+                });
+
                 processedCategories++;
 
                 // Process all items for this category
@@ -502,12 +538,72 @@ class MenuService {
             'MenuService: Successfully processed $processedCategories categories');
       } else {
         // If we don't have categories, create a default one and put all items there
-        _categories.add(Category(id: 1, name: 'All Items'));
+        categoriesWithSortOrder
+            .add({'id': 1, 'name': 'All Items', 'sortOrder': 0});
 
         final items = data['items'] as List<dynamic>? ?? [];
         for (var item in items) {
           _processOldApiItem(item, 1, 'All Items');
         }
+      }
+
+      // Custom sort for delivery/takeaway mode
+      if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
+        print(
+            'MenuService: Applying custom category order for old API delivery/takeaway mode');
+
+        // Define custom order priority map
+        final Map<String, int> customOrderPriority = {
+          'КОМБО': 1,
+          'АППЕТАЙЗЕРЫ': 2,
+          'КУРИЦА': 3,
+          'СПИННЕРЫ': 4,
+          'БУРГЕРЫ': 5,
+          'ПИЦЦА': 6,
+          'САЛАТЫ': 7,
+          'НАПИТКИ': 8,
+          'ГОРЯЧИЕ НАПИТКИ': 9,
+          'ДЕСЕРТЫ': 10,
+          'МОРОЖЕНОЕ И МИЛКШЕЙКИ': 11,
+          // Any other categories will be sorted after these by their original sortOrder
+        };
+
+        categoriesWithSortOrder.sort((a, b) {
+          String nameA = a['name'].toString().trim();
+          String nameB = b['name'].toString().trim();
+
+          // Get priority from map or use a high number as default
+          int priorityA = customOrderPriority[nameA] ?? 1000;
+          int priorityB = customOrderPriority[nameB] ?? 1000;
+
+          // If both are in the priority map, sort by priority
+          if (priorityA < 1000 && priorityB < 1000) {
+            return priorityA.compareTo(priorityB);
+          }
+          // If only one is in the priority map, it comes first
+          else if (priorityA < 1000) {
+            return -1;
+          } else if (priorityB < 1000) {
+            return 1;
+          }
+          // If neither is in the priority map, sort by original sortOrder
+          else {
+            return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
+          }
+        });
+
+        // Debug log the sorted categories
+        print('MenuService: Custom sorted old API categories:');
+        for (var category in categoriesWithSortOrder) {
+          print(
+              '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
+        }
+      }
+
+      // Add sorted categories to _categories list
+      for (var categoryData in categoriesWithSortOrder) {
+        _categories
+            .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
 
       _isInitialized = true;
@@ -775,6 +871,9 @@ class MenuService {
       _categories = [];
       _allProducts = [];
 
+      // Create a list to store categories with their sort order
+      List<Map<String, dynamic>> categoriesWithSortOrder = [];
+
       // Create a map to store category ID strings to int IDs for reference
       Map<String, int> categoryIdMap = {};
 
@@ -796,14 +895,15 @@ class MenuService {
           categoryIdMap[originalCategoryId] = categoryId;
 
           final categoryName = category['name'] ?? 'Unknown Category';
-          // Capture sortOrder but we don't need to use it right now
-          // final sortOrder = category['sortOrder'] ?? 0;
+          // Capture sortOrder for category sorting
+          final sortOrder = category['sortOrder'] ?? 0;
 
           print(
-              'MenuService: Processing category: $categoryName (ID: $categoryId)');
+              'MenuService: Processing category: $categoryName (ID: $categoryId), sortOrder: $sortOrder');
 
-          // Add to categories list with a guaranteed non-zero ID
-          _categories.add(Category(id: categoryId, name: categoryName));
+          // Store category with its sort order for later sorting
+          categoriesWithSortOrder.add(
+              {'id': categoryId, 'name': categoryName, 'sortOrder': sortOrder});
         } catch (e) {
           print('MenuService: Error processing category: $e');
           print('MenuService: Category data: $category');
@@ -864,6 +964,65 @@ class MenuService {
             print('MenuService: Item data: $item');
           }
         }
+      }
+
+      // Custom sort for delivery/takeaway mode
+      if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
+        print(
+            'MenuService: Applying custom category order for delivery/takeaway mode');
+
+        // Define custom order priority map
+        final Map<String, int> customOrderPriority = {
+          'КОМБО': 1,
+          'АППЕТАЙЗЕРЫ': 2,
+          'КУРИЦА': 3,
+          'СПИННЕРЫ': 4,
+          'БУРГЕРЫ': 5,
+          'ПИЦЦА': 6,
+          'САЛАТЫ': 7,
+          'НАПИТКИ': 8,
+          'ГОРЯЧИЕ НАПИТКИ': 9,
+          'ДЕСЕРТЫ': 10,
+          'МОРОЖЕНОЕ И МИЛКШЕЙКИ': 11,
+          // Any other categories will be sorted after these by their original sortOrder
+        };
+
+        categoriesWithSortOrder.sort((a, b) {
+          String nameA = a['name'].toString().trim();
+          String nameB = b['name'].toString().trim();
+
+          // Get priority from map or use a high number as default
+          int priorityA = customOrderPriority[nameA] ?? 1000;
+          int priorityB = customOrderPriority[nameB] ?? 1000;
+
+          // If both are in the priority map, sort by priority
+          if (priorityA < 1000 && priorityB < 1000) {
+            return priorityA.compareTo(priorityB);
+          }
+          // If only one is in the priority map, it comes first
+          else if (priorityA < 1000) {
+            return -1;
+          } else if (priorityB < 1000) {
+            return 1;
+          }
+          // If neither is in the priority map, sort by original sortOrder
+          else {
+            return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
+          }
+        });
+
+        // Debug log the sorted categories
+        print('MenuService: Custom sorted categories:');
+        for (var category in categoriesWithSortOrder) {
+          print(
+              '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
+        }
+      }
+
+      // Add sorted categories to _categories list
+      for (var categoryData in categoriesWithSortOrder) {
+        _categories
+            .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
 
       // If we still don't have any categories or products, create a default one
@@ -1035,16 +1194,47 @@ class MenuService {
       }
       print('MenuService: Original item UUID: $uuid');
 
+      // Parse modifier groups if present
+      List<ModifierGroup> modifierGroups = [];
+      if (item['modifierGroups'] != null) {
+        try {
+          modifierGroups = (item['modifierGroups'] as List)
+              .map((group) => ModifierGroup.fromJson(group))
+              .toList();
+          print(
+              'MenuService: Found ${modifierGroups.length} modifier groups for item: $name');
+        } catch (e) {
+          print('MenuService: Error parsing modifier groups for $name: $e');
+        }
+      }
+
+      // Handle images array
+      List<Map<String, dynamic>>? images;
+      if (item['images'] != null) {
+        try {
+          images = List<Map<String, dynamic>>.from(item['images']);
+          print('MenuService: Found ${images.length} images for item: $name');
+        } catch (e) {
+          print('MenuService: Error parsing images for $name: $e');
+        }
+      }
+
       // Create the product
       final product = Product(
         id: id,
-        uuid: uuid, // Include the original UUID
+        uuid: uuid,
         name: name,
         categoryId: categoryId,
         categoryTitle: categoryName,
         price: price,
         imagePath: imagePath,
         description: description,
+        modifierGroups: modifierGroups,
+        measure: item['measure']?.toString(),
+        measureUnit: item['measureUnit']?.toString(),
+        sortOrder: item['sortOrder'],
+        serviceCodesUz: item['serviceCodesUz'],
+        images: images,
       );
 
       print(
