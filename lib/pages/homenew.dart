@@ -63,16 +63,13 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     dynamic description = json['description'];
-    print('Description type: ${description.runtimeType}, value: $description');
+    // print('Description type: ${description.runtimeType}, value: $description');
 
-    // Handle description parsing safely
     if (description is String && description.isNotEmpty) {
       try {
-        // Try to parse the description JSON string into a map if it's a string
         description = jsonDecode(description);
       } catch (e) {
         print('Error parsing description JSON: $e');
-        // If parsing fails, keep it as a string
       }
     }
 
@@ -218,13 +215,9 @@ class _HomeNewState extends State<HomeNew>
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // Lifecycle observer methods are integrated into the existing dispose method below
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When app resumes from background (like returning from Payme app)
     if (state == AppLifecycleState.resumed) {
-      // Check for pending Payme payments
       _checkPendingPaymePayments();
     }
   }

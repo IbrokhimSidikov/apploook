@@ -131,7 +131,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
           return;
         if (!_hapticEnabled || !_isIOS) return;
 
-        print('🔊 HAPTIC TAP ${i + 1}: Executing at ${timing}ms');
+        // print('🔊 HAPTIC TAP ${i + 1}: Executing at ${timing}ms');
         _executeHapticFeedback(intensity);
       });
     }
@@ -284,7 +284,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       await _orderModeService.initialize();
 
       OrderMode orderMode = specificOrderMode ?? _orderModeService.currentMode;
-      print('Onboard: Preloading menu data for order mode: $orderMode');
+      // print('Onboard: Preloading menu data for order mode: $orderMode');
 
       if (specificOrderMode != null) {
         await _orderModeService.setOrderMode(specificOrderMode);
@@ -536,7 +536,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   Text(
                                     AppLocalizations.of(context)
                                         .suitableForEveryone,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
                                   ),
@@ -550,7 +550,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   Text(
                                     AppLocalizations.of(context)
                                         .promosOfferDeals,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
                                   ),
@@ -563,7 +563,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                   const SizedBox(width: 4),
                                   Text(
                                     AppLocalizations.of(context).easyOrdering,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         color: Colors.white, fontSize: 12),
                                     textAlign: TextAlign.left,
                                   ),
@@ -690,7 +690,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Padding(
-                                padding: EdgeInsets.only(left: 16, bottom: 12),
+                                padding:
+                                    const EdgeInsets.only(left: 16, bottom: 12),
                                 child: Text(
                                   AppLocalizations.of(context).selectOrderMode,
                                   style: const TextStyle(

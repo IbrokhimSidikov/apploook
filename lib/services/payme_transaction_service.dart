@@ -144,14 +144,15 @@ class PaymeTransactionService {
               const SizedBox(height: 16),
               Text(AppLocalizations.of(context).waitingForPaymentApproval),
               const SizedBox(height: 8),
-              Text('Order ID: $orderId', style: TextStyle(fontSize: 12)),
+              Text('Order ID: $orderId', style: const TextStyle(fontSize: 12)),
               const SizedBox(height: 16),
               Text(AppLocalizations.of(context).completePayment,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 8),
               Text(AppLocalizations.of(context).doNotCloseScreen,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
           actions: [

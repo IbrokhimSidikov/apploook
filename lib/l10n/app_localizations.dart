@@ -17,8 +17,8 @@ class AppLocalizations {
       'promosOfferDeals': 'Promos \nOffer & Deals',
       'easyOrdering': 'Easy \nOrdering',
       'selectOrderMode': 'Select Order Mode',
-      'deliveryTakeaway': 'Delivery or Takeaway',
-      'carhop': 'Carhop',
+      // 'deliveryTakeaway': 'Delivery or Takeaway',
+      // 'carhop': 'Carhop',
 
       // HomeNew Page
       'whatsNew': 'WHAT\'S NEW',
@@ -164,8 +164,8 @@ class AppLocalizations {
       'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
       'easyOrdering': 'Oson \nBuyurtma',
       'selectOrderMode': 'Buyurtma usulini tanlang',
-      'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
-      'carhop': 'Avtomobilda xizmat',
+      // 'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
+      // 'carhop': 'Avtomobilda xizmat',
 
       // HomeNew Page
       'whatsNew': 'YANGILIKLAR',
@@ -314,8 +314,8 @@ class AppLocalizations {
       'promosOfferDeals': 'Акции \nСкидки и предложения',
       'easyOrdering': 'Лёгкий \nЗаказ',
       'selectOrderMode': 'Выберите способ заказа',
-      'deliveryTakeaway': 'Доставка или самовывоз',
-      'carhop': 'Обслуживание в авто',
+      // 'deliveryTakeaway': 'Доставка или самовывоз',
+      // 'carhop': 'Обслуживание в авто',
 
       // HomeNew Page
       'whatsNew': 'ЧТО НОВОГО',
