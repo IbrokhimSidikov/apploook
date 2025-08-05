@@ -33,7 +33,7 @@ class BranchConfigs {
       sievesApiToken: '62a4d1be-d92e-4df4-98ea-837f14959f9c',
       employeeId: 423,
       merchantId: '685bcb1804711a17e505cfdb',
-      deleverId: 'a96eb53e-b865-415f-b4d1-5d06c06f3fb1',
+      deleverId: 'b6780176-358c-4d55-a8bc-0bdb8e3aee6a',
     ),
     'Loook Beruniy': const BranchConfig(
       branchId: 4,
