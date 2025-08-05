@@ -12,6 +12,7 @@ import 'package:apploook/pages/unified_order_tracking_page.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/simple_menu.dart';
 import 'package:apploook/services/notification_service.dart';
+import 'package:apploook/services/remote_config_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,9 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
+
+    // Initialize Firebase Remote Config service
+    await RemoteConfigService().initialize();
 
     // Initialize notification service with provider
     notificationService.setProvider(notificationProvider);

@@ -4,9 +4,11 @@ import 'package:apploook/models/category-model.dart';
 import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/providers/locale_provider.dart';
+import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/widget/widget_support.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'dart:convert';
 
@@ -150,11 +152,16 @@ class _DetailsState extends State<Details> {
     return selection.any((selected) => selected.modifier.id == modifierId);
   }
 
-  // Check if current time is before the ordering cutoff time (11:45 PM)
+  // Check if current time is before the ordering cutoff time (configurable via Firebase Remote Config)
   bool _isOrderingTimeAllowed() {
     final now = DateTime.now();
-    final cutoffHour = 23;
-    final cutoffMinute = 45;
+    final remoteConfig = RemoteConfigService();
+    final cutoffHour = remoteConfig.orderCutoffHour;
+    final cutoffMinute = remoteConfig.orderCutoffMinute;
+
+    // Log the values fetched from Firebase Remote Config
+    print('Firebase Remote Config - Order Cutoff Time: $cutoffHour:$cutoffMinute');
+    print('Current Time: ${now.hour}:${now.minute}');
 
     // Check if current time is before cutoff
     if (now.hour < cutoffHour) {
@@ -162,8 +169,27 @@ class _DetailsState extends State<Details> {
     } else if (now.hour == cutoffHour && now.minute < cutoffMinute) {
       return true;
     }
-
+    
     return false;
+  }
+  
+  // Force refresh Remote Config values
+  Future<void> _refreshRemoteConfig() async {
+    final remoteConfig = RemoteConfigService();
+    final updated = await remoteConfig.forceUpdate();
+    
+    // Show a snackbar with the result
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Remote Config ${updated ? 'updated' : 'not updated'}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+      // Force UI update
+      setState(() {});
+    }
   }
 
   List<Widget> _buildModifierGroups() {
@@ -387,16 +413,30 @@ class _DetailsState extends State<Details> {
                 children: [
                   // Show warning message when ordering is not allowed
                   if (!_isOrderingTimeAllowed())
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
-                      child: Text(
-                        AppLocalizations.of(context).orderHoursValidation,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14.0,
+                    Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            AppLocalizations.of(context).orderHoursValidation,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
+                        // Debug button to refresh Remote Config (only in debug mode)
+                        if (kDebugMode)
+                          TextButton.icon(
+                            onPressed: _refreshRemoteConfig,
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Refresh Config'),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.blue,
+                            ),
+                          ),
+                      ],
                     ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
