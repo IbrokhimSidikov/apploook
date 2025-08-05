@@ -55,7 +55,8 @@ class _CartState extends State<Cart> {
     double getTotalPrice(CartProvider cartProvider) {
       double totalPrice = 0;
       for (var cartItem in cartProvider.cartItems) {
-        totalPrice += cartItem.totalPrice; // Use the totalPrice that includes modifiers
+        totalPrice +=
+            cartItem.totalPrice; // Use the totalPrice that includes modifiers
       }
       return totalPrice;
     }
@@ -130,7 +131,7 @@ class _CartState extends State<Cart> {
                           fit: BoxFit.cover,
                         ),
                         title: Text(
-                          cartItem.displayName, // Use displayName which includes modifiers
+                          cartItem.displayName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

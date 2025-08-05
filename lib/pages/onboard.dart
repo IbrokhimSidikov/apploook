@@ -683,148 +683,148 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ],
                           ),
-                          const Spacer(flex: 2),
+                          // const Spacer(flex: 2),
 
                           // Order Mode Selection
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 16, bottom: 12),
-                                child: Text(
-                                  AppLocalizations.of(context).selectOrderMode,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        // print(
-                                        //     'Delivery/Takeaway option tapped');
-                                        setState(() {
-                                          _selectedOrderMode =
-                                              OrderMode.deliveryTakeaway;
-                                          // print(
-                                          //     'Selected order mode updated: $_selectedOrderMode');
-                                        });
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 16),
-                                        decoration: BoxDecoration(
-                                          color: _selectedOrderMode ==
-                                                  OrderMode.deliveryTakeaway
-                                              ? const Color.fromARGB(
-                                                  255, 255, 210, 57)
-                                              : Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.2),
-                                              spreadRadius: 1,
-                                              blurRadius: 3,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            const Icon(
-                                              Icons.delivery_dining,
-                                              size: 32,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              AppLocalizations.of(context)
-                                                  .deliveryTakeaway,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
+                          // Column(
+                          //   crossAxisAlignment: CrossAxisAlignment.start,
+                          //   children: [
+                          //     Padding(
+                          //       padding:
+                          //           const EdgeInsets.only(left: 16, bottom: 12),
+                          //       child: Text(
+                          //         AppLocalizations.of(context).selectOrderMode,
+                          //         style: const TextStyle(
+                          //           color: Colors.white,
+                          //           fontSize: 16,
+                          //           fontWeight: FontWeight.w500,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //     Row(
+                          //       mainAxisAlignment:
+                          //           MainAxisAlignment.spaceEvenly,
+                          //       children: [
+                          //         Expanded(
+                          //           child: GestureDetector(
+                          //             onTap: () {
+                          //               // print(
+                          //               //     'Delivery/Takeaway option tapped');
+                          //               setState(() {
+                          //                 _selectedOrderMode =
+                          //                     OrderMode.deliveryTakeaway;
+                          //                 // print(
+                          //                 //     'Selected order mode updated: $_selectedOrderMode');
+                          //               });
+                          //             },
+                          //             child: Container(
+                          //               margin: const EdgeInsets.symmetric(
+                          //                   horizontal: 8),
+                          //               padding: const EdgeInsets.symmetric(
+                          //                   vertical: 16),
+                          //               decoration: BoxDecoration(
+                          //                 color: _selectedOrderMode ==
+                          //                         OrderMode.deliveryTakeaway
+                          //                     ? const Color.fromARGB(
+                          //                         255, 255, 210, 57)
+                          //                     : Colors.white,
+                          //                 borderRadius:
+                          //                     BorderRadius.circular(10),
+                          //                 boxShadow: [
+                          //                   BoxShadow(
+                          //                     color:
+                          //                         Colors.black.withOpacity(0.2),
+                          //                     spreadRadius: 1,
+                          //                     blurRadius: 3,
+                          //                     offset: const Offset(0, 2),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //               child: Column(
+                          //                 children: [
+                          //                   const Icon(
+                          //                     Icons.delivery_dining,
+                          //                     size: 32,
+                          //                     color: Colors.black,
+                          //                   ),
+                          //                   const SizedBox(height: 8),
+                          //                   Text(
+                          //                     AppLocalizations.of(context)
+                          //                         .deliveryTakeaway,
+                          //                     textAlign: TextAlign.center,
+                          //                     style: const TextStyle(
+                          //                       color: Colors.black,
+                          //                       fontSize: 14,
+                          //                       fontWeight: FontWeight.w500,
+                          //                     ),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ),
 
-                                  // Carhop Option
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        // print('Carhop option tapped');
-                                        setState(() {
-                                          _selectedOrderMode = OrderMode.carhop;
-                                          // print(
-                                          //     'Selected order mode updated: $_selectedOrderMode');
-                                        });
-                                      },
-                                      child: Container(
-                                        margin: const EdgeInsets.symmetric(
-                                            horizontal: 8),
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 16),
-                                        decoration: BoxDecoration(
-                                          color: _selectedOrderMode ==
-                                                  OrderMode.carhop
-                                              ? const Color.fromARGB(
-                                                  255, 255, 210, 57)
-                                              : Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color:
-                                                  Colors.black.withOpacity(0.2),
-                                              spreadRadius: 1,
-                                              blurRadius: 3,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            const Icon(
-                                              Icons.directions_car,
-                                              size: 32,
-                                              color: Colors.black,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              AppLocalizations.of(context)
-                                                  .carhop,
-                                              textAlign: TextAlign.center,
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                          //         // Carhop Option
+                          //         Expanded(
+                          //           child: GestureDetector(
+                          //             onTap: () {
+                          //               // print('Carhop option tapped');
+                          //               setState(() {
+                          //                 _selectedOrderMode = OrderMode.carhop;
+                          //                 // print(
+                          //                 //     'Selected order mode updated: $_selectedOrderMode');
+                          //               });
+                          //             },
+                          //             child: Container(
+                          //               margin: const EdgeInsets.symmetric(
+                          //                   horizontal: 8),
+                          //               padding: const EdgeInsets.symmetric(
+                          //                   vertical: 16),
+                          //               decoration: BoxDecoration(
+                          //                 color: _selectedOrderMode ==
+                          //                         OrderMode.carhop
+                          //                     ? const Color.fromARGB(
+                          //                         255, 255, 210, 57)
+                          //                     : Colors.white,
+                          //                 borderRadius:
+                          //                     BorderRadius.circular(10),
+                          //                 boxShadow: [
+                          //                   BoxShadow(
+                          //                     color:
+                          //                         Colors.black.withOpacity(0.2),
+                          //                     spreadRadius: 1,
+                          //                     blurRadius: 3,
+                          //                     offset: const Offset(0, 2),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //               child: Column(
+                          //                 children: [
+                          //                   const Icon(
+                          //                     Icons.directions_car,
+                          //                     size: 32,
+                          //                     color: Colors.black,
+                          //                   ),
+                          //                   const SizedBox(height: 8),
+                          //                   Text(
+                          //                     AppLocalizations.of(context)
+                          //                         .carhop,
+                          //                     textAlign: TextAlign.center,
+                          //                     style: const TextStyle(
+                          //                       color: Colors.black,
+                          //                       fontSize: 14,
+                          //                       fontWeight: FontWeight.w500,
+                          //                     ),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ),
+                          //       ],
+                          //     ),
+                          //   ],
+                          // ),
 
                           const Spacer(flex: 4),
                           TextButton(

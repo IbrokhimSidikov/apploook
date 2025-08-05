@@ -89,7 +89,7 @@ class BranchConfigs {
       sievesApiToken: '8c4492755f4a0f0ee466ffb10c721335',
       employeeId: 423,
       merchantId: '6863885274755eccf65a0f6e',
-      deleverId: 'a96eb53e-b865-415f-b4d1-5d06c06f3fb1',
+      deleverId: '',
     ),
   };
 

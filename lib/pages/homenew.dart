@@ -496,16 +496,13 @@ class _HomeNewState extends State<HomeNew>
 
   Future<void> fetchData() async {
     try {
-      // Use the MenuService to fetch data
       final menuService = MenuService();
       await menuService.initialize();
 
       setState(() {
-        // Get categories and products from the service
         categories = menuService.categories;
         allProducts = menuService.allProducts;
 
-        // Dispose existing controllers first
         for (var controller in _categoryScrollControllers.values) {
           if (controller.hasClients) {
             controller.dispose();
@@ -632,20 +629,20 @@ class _HomeNewState extends State<HomeNew>
                 ),
                 actions: [
                   // Order mode selection icon
-                  IconButton(
-                    icon: Icon(
-                      _orderModeService.currentMode ==
-                              OrderMode.deliveryTakeaway
-                          ? Icons.delivery_dining
-                          : Icons.directions_car,
-                      color: Colors.black,
-                    ),
-                    tooltip: 'Select Order Mode',
-                    onPressed: () async {
-                      // Show the order mode selection dialog
-                      _showOrderModeSelectionDialog();
-                    },
-                  ),
+                  // IconButton(
+                  //   icon: Icon(
+                  //     _orderModeService.currentMode ==
+                  //             OrderMode.deliveryTakeaway
+                  //         ? Icons.delivery_dining
+                  //         : Icons.directions_car,
+                  //     color: Colors.black,
+                  //   ),
+                  //   tooltip: 'Select Order Mode',
+                  //   onPressed: () async {
+                  //     // Show the order mode selection dialog
+                  //     _showOrderModeSelectionDialog();
+                  //   },
+                  // ),
                   // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),
