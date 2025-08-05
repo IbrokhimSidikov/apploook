@@ -156,7 +156,7 @@ class AppLocalizations {
       'completePayment': 'Please complete the payment in the Payme app',
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
-      'orderHoursValidation': 'Orders not accepted after 23:45 PM'
+      'orderHoursValidation': 'Orders not accepted after 23:30 PM'
     },
     'uz': {
       // Onboard Page
@@ -307,7 +307,7 @@ class AppLocalizations {
       'doNotCloseScreen':
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
-      'orderHoursValidation': '23:45 dan keyin buyurtmalar qabul qilinmaydi',
+      'orderHoursValidation': '23:30 dan keyin buyurtmalar qabul qilinmaydi',
     },
     'ru': {
       // Onboard Page
@@ -455,7 +455,7 @@ class AppLocalizations {
       'completePayment': 'Завершите оплату в приложении Payme',
       'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
       'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
-      'orderHoursValidation': 'Заказы не принимаются после 23:45',
+      'orderHoursValidation': 'Заказы не принимаются после 23:30',
     },
   };
 
