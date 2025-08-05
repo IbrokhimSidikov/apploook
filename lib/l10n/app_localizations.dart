@@ -156,6 +156,7 @@ class AppLocalizations {
       'completePayment': 'Please complete the payment in the Payme app',
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
+      'orderHoursValidation': 'Orders not accepted after 23:45 PM'
     },
     'uz': {
       // Onboard Page
@@ -306,6 +307,7 @@ class AppLocalizations {
       'doNotCloseScreen':
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
+      'orderHoursValidation': '23:45 dan keyin buyurtmalar qabul qilinmaydi',
     },
     'ru': {
       // Onboard Page
@@ -453,6 +455,7 @@ class AppLocalizations {
       'completePayment': 'Завершите оплату в приложении Payme',
       'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
       'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
+      'orderHoursValidation': 'Заказы не принимаются после 23:45',
     },
   };
 
@@ -711,4 +714,7 @@ class AppLocalizations {
 
   String get paymentVerificationCancelled =>
       _localizedValues[locale.languageCode]!['paymentVerificationCancelled']!;
+
+  String get orderHoursValidation =>
+      _localizedValues[locale.languageCode]!['orderHoursValidation']!;
 }
