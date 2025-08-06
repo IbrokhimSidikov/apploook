@@ -11,6 +11,7 @@ import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
+import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/pages/homenew.dart';
 
 enum HapticFeedbackType { light, medium, heavy, selection }
@@ -60,6 +61,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   final OrderModeService _orderModeService = OrderModeService();
   final MenuService _menuService = MenuService();
   final NearestBranchService _nearestBranchService = NearestBranchService();
+  final VersionCheckerService _versionChecker = VersionCheckerService();
   OrderMode? _selectedOrderMode =
       OrderMode.deliveryTakeaway; // Default selection
   String? _nearestBranchDeliverId;
@@ -339,14 +341,23 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       _isLoading = true;
     });
 
-    // print('Continue button pressed');
-    // print(
-    //     'Language selection: English=$isEnglishSelected, Uzbek=$isUzbekSelected');
-    // print('Order mode selection: $_selectedOrderMode');
+    // Check for app updates first
+    print('Checking for app updates before proceeding...');
+    final bool updateRequired = await _versionChecker.checkForUpdates(context);
+    
+    // If update is required, the dialog will be shown and we should not proceed
+    if (updateRequired) {
+      print('Update required, blocking navigation to HomeNew');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+    
+    print('No update required, continuing with app flow');
 
     // Check if language is selected
     if (!isEnglishSelected && !isUzbekSelected) {
-      // print('No language selected, showing error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a language'),
@@ -361,7 +372,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     }
 
     if (_selectedOrderMode == null) {
-      // print('No order mode selected, showing error');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select an order mode'),
@@ -379,12 +389,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_language', selectedLocale);
-    // print('Saved language: $selectedLocale');
 
     if (!mounted) return;
     context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
-
-    // print('Saving order mode: $_selectedOrderMode');
 
     setState(() {
       _isMenuLoaded = false;
@@ -397,12 +404,10 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('order_mode', OrderMode.carhop.index);
       await prefs.setBool('has_user_selected_order_mode', true);
-      // print('Explicitly saved carhop mode to SharedPreferences');
     }
 
     if (!mounted) return;
 
-    // print('Menu loaded, navigating to HomeNew with mode: $_selectedOrderMode');
     setState(() {
       _isLoading = false;
     });

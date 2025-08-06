@@ -13,6 +13,7 @@ import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/simple_menu.dart';
 import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/services/remote_config_service.dart';
+import 'package:apploook/services/version_checker_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
 import 'providers/notification_provider.dart';
+
+// Global navigator key to access context from anywhere
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -142,14 +146,36 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final VersionCheckerService _versionChecker = VersionCheckerService();
+  
+  @override
+  void initState() {
+    super.initState();
+    // Check for updates after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates();
+    });
+  }
+  
+  Future<void> _checkForUpdates() async {
+    // Check if an update is required
+    await _versionChecker.checkForUpdates(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, _) {
         return MaterialApp(
+          navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'LOOOK MOBILE',
           theme: ThemeData(

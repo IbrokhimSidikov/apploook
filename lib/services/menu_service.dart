@@ -432,8 +432,8 @@ class MenuService {
   void _processItem(
       Map<dynamic, dynamic> item, int categoryId, String categoryName) {
     try {
-      print(
-          'MenuService: Processing item: ${item['name'] ?? item['title'] ?? 'Unknown'}');
+      // print(
+      //     'MenuService: Processing item: ${item['name'] ?? item['title'] ?? 'Unknown'}');
 
       // Extract basic product information
       int originalId = item['id'] is int
@@ -441,30 +441,30 @@ class MenuService {
           : int.tryParse(item['id'].toString()) ?? 0;
       // Generate a unique ID if the original is 0 or duplicate
       final id = _getUniqueProductId(originalId);
-      print(
-          'MenuService: Item original ID: $originalId, assigned unique ID: $id');
+      // print(
+      //     'MenuService: Item original ID: $originalId, assigned unique ID: $id');
 
       final name = item['name'] ?? item['title'] ?? 'Unknown';
-      print('MenuService: Item name: $name');
+      // print('MenuService: Item name: $name');
 
       // Handle different price formats
       double price = 0.0;
       if (item['price'] != null) {
-        print('MenuService: Item has price field: ${item['price']}');
+        // print('MenuService: Item has price field: ${item['price']}');
         price = item['price'] is double
             ? item['price']
             : double.tryParse(item['price'].toString()) ?? 0.0;
       } else if (item['priceList'] != null &&
           item['priceList']['price'] != null) {
-        print(
-            'MenuService: Item has priceList field: ${item['priceList']['price']}');
+        // print(
+        //     'MenuService: Item has priceList field: ${item['priceList']['price']}');
         price = item['priceList']['price'] is double
             ? item['priceList']['price']
             : double.tryParse(item['priceList']['price'].toString()) ?? 0.0;
       } else {
-        print('MenuService: Item has no price field, using default 0.0');
+        // print('MenuService: Item has no price field, using default 0.0');
       }
-      print('MenuService: Final price: $price');
+      // print('MenuService: Final price: $price');
 
       // Handle different image formats
       String? imagePath;
@@ -473,51 +473,51 @@ class MenuService {
       if (item['images'] != null &&
           item['images'] is List &&
           (item['images'] as List).isNotEmpty) {
-        print(
-            'MenuService: Item has images array with ${(item['images'] as List).length} images');
+        // print(
+        //     'MenuService: Item has images array with ${(item['images'] as List).length} images');
         var firstImage = (item['images'] as List).first;
         if (firstImage is Map && firstImage['url'] != null) {
           imagePath = firstImage['url'].toString();
-          print(
-              'MenuService: Using first image URL from images array: $imagePath');
+          // print(
+          //     'MenuService: Using first image URL from images array: $imagePath');
         }
       }
       // Fall back to image field
       else if (item['image'] != null) {
-        print('MenuService: Item has image field: ${item['image']}');
+        // print('MenuService: Item has image field: ${item['image']}');
         imagePath = item['image'].toString();
       }
       // Fall back to photo field
       else if (item['photo'] != null) {
-        print('MenuService: Item has photo field');
+        // print('MenuService: Item has photo field');
         var photo = item['photo'];
         if (photo['url'] != null) {
           imagePath = photo['url'].toString();
-          print('MenuService: Using photo URL: $imagePath');
+          // print('MenuService: Using photo URL: $imagePath');
         } else if (photo['path'] != null &&
             photo['name'] != null &&
             photo['format'] != null) {
           imagePath =
               'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${photo['path']}/${photo['name']}.${photo['format']}';
-          print('MenuService: Constructed image path: $imagePath');
+          // print('MenuService: Constructed image path: $imagePath');
         } else {
-          print('MenuService: Photo field missing required attributes');
+          // print('MenuService: Photo field missing required attributes');
         }
       } else {
-        print('MenuService: Item has no images, image, or photo field');
+        // print('MenuService: Item has no images, image, or photo field');
       }
 
       // Get description
       final description = item['description'] ?? '';
-      print(
-          'MenuService: Item description length: ${description.toString().length}');
+      // print(
+      //     'MenuService: Item description length: ${description.toString().length}');
 
       // Store the original UUID from the API
       String uuid = '';
       if (item['id'] != null) {
         uuid = item['id'].toString();
       }
-      print('MenuService: Original item UUID: $uuid');
+      // print('MenuService: Original item UUID: $uuid');
 
       // Parse modifier groups if present
       List<ModifierGroup> modifierGroups = [];
@@ -526,10 +526,10 @@ class MenuService {
           modifierGroups = (item['modifierGroups'] as List)
               .map((group) => ModifierGroup.fromJson(group))
               .toList();
-          print(
-              'MenuService: Found ${modifierGroups.length} modifier groups for item: $name');
+          // print(
+          //     'MenuService: Found ${modifierGroups.length} modifier groups for item: $name');
         } catch (e) {
-          print('MenuService: Error parsing modifier groups for $name: $e');
+          // print('MenuService: Error parsing modifier groups for $name: $e');
         }
       }
 
@@ -538,9 +538,9 @@ class MenuService {
       if (item['images'] != null) {
         try {
           images = List<Map<String, dynamic>>.from(item['images']);
-          print('MenuService: Found ${images.length} images for item: $name');
+          // print('MenuService: Found ${images.length} images for item: $name');
         } catch (e) {
-          print('MenuService: Error parsing images for $name: $e');
+          // print('MenuService: Error parsing images for $name: $e');
         }
       }
 
@@ -562,15 +562,15 @@ class MenuService {
         images: images,
       );
 
-      print(
-          'MenuService: Created product: ${product.name} (ID: ${product.id})');
+      // print(
+      //     'MenuService: Created product: ${product.name} (ID: ${product.id})');
       _allProducts.add(product);
-      print(
-          'MenuService: Added product to allProducts list, new count: ${_allProducts.length}');
+      // print(
+      //     'MenuService: Added product to allProducts list, new count: ${_allProducts.length}');
     } catch (e, stackTrace) {
-      print('MenuService: Error processing item: $e');
-      print('MenuService: Item data: $item');
-      print('MenuService: Stack trace: $stackTrace');
+      // print('MenuService: Error processing item: $e');
+      // print('MenuService: Item data: $item');
+      // print('MenuService: Stack trace: $stackTrace');
     }
   }
 
@@ -602,8 +602,8 @@ class MenuService {
     ));
 
     _isInitialized = true;
-    print(
-        'MenuService: Created default data with ${_categories.length} categories and ${_allProducts.length} products');
+    // print(
+    //     'MenuService: Created default data with ${_categories.length} categories and ${_allProducts.length} products');
   }
 
   // Update the cache with the latest data
@@ -617,9 +617,9 @@ class MenuService {
       await prefs.setString(_cacheKey, jsonData);
       await prefs.setInt(_cacheTimestampKey, currentTime);
 
-      print('MenuService: Updated cache');
+      // print('MenuService: Updated cache');
     } catch (e) {
-      print('MenuService: Error updating cache: $e');
+      // print('MenuService: Error updating cache: $e');
     }
   }
 

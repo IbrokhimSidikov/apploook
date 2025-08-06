@@ -98,6 +98,12 @@ class AppLocalizations {
       'notificationsPlaceholder': 'Notifications will appear here',
       'arrivalNotificationSent': 'Arrival notification sent',
       'clearAll': 'Clear All',
+      // Update Required Dialog
+      'updateRequired': 'Update Required',
+      'updateRequiredDescription': 'A new version of the app is available and required to continue using the app. Please update to the latest version.',
+      'currentVersion': 'Current Version',
+      'requiredVersion': 'Required Version',
+      'updateNow': 'Update Now',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
@@ -247,7 +253,13 @@ class AppLocalizations {
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
       'arrivalNotificationSent': 'Arrival notification sent',
-      'clearAll': 'Barchasini o\'chirish',
+      'clearAll': 'Hammasi',
+      // Update Required Dialog
+      'updateRequired': 'Yangilash talab qilinadi',
+      'updateRequiredDescription': 'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun talab qilinadi. Iltimos, eng songgi versiyaga yangilang.',
+      'currentVersion': 'Joriy versiya',
+      'requiredVersion': 'Talab qilingan versiya',
+      'updateNow': 'Hozir yangilash',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
@@ -717,4 +729,20 @@ class AppLocalizations {
 
   String get orderHoursValidation =>
       _localizedValues[locale.languageCode]!['orderHoursValidation']!;
+      
+  // Update Required Dialog getters
+  String get updateRequired =>
+      _localizedValues[locale.languageCode]!['updateRequired']!;
+      
+  String get updateRequiredDescription =>
+      _localizedValues[locale.languageCode]!['updateRequiredDescription']!;
+      
+  String get currentVersion =>
+      _localizedValues[locale.languageCode]!['currentVersion']!;
+      
+  String get requiredVersion =>
+      _localizedValues[locale.languageCode]!['requiredVersion']!;
+      
+  String get updateNow =>
+      _localizedValues[locale.languageCode]!['updateNow']!;
 }

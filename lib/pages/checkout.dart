@@ -585,7 +585,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
     'Loook Yangiyol',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
