@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:apploook/services/version_checker_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -11,6 +12,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   late AnimationController _animationController;
   late Animation<double> _pulseAnimation;
 
+  final VersionCheckerService _versionChecker = VersionCheckerService();
+  bool _updateChecked = false;
+  
   @override
   void initState() {
     super.initState();
@@ -25,12 +29,35 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       ),
     );
     _animationController.repeat(reverse: true);
+    
+    // Check for updates after the splash screen is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates();
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+  
+  /// Check for updates and show dialog if needed
+  Future<void> _checkForUpdates() async {
+    if (_updateChecked) return; // Prevent multiple checks
+    
+    _updateChecked = true;
+    // Wait for a short delay to show splash screen
+    await Future.delayed(const Duration(seconds: 2));
+    
+    // Check if an update is required
+    final bool updateRequired = await _versionChecker.checkForUpdates(context);
+    
+    // If no update is required, continue to the app
+    if (!updateRequired && mounted) {
+      // Continue with normal app flow
+      // The update dialog will block the app if an update is required
+    }
   }
 
   @override

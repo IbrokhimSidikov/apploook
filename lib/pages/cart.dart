@@ -55,7 +55,8 @@ class _CartState extends State<Cart> {
     double getTotalPrice(CartProvider cartProvider) {
       double totalPrice = 0;
       for (var cartItem in cartProvider.cartItems) {
-        totalPrice += cartItem.quantity * cartItem.product.price;
+        totalPrice +=
+            cartItem.totalPrice; // Use the totalPrice that includes modifiers
       }
       return totalPrice;
     }
@@ -130,7 +131,7 @@ class _CartState extends State<Cart> {
                           fit: BoxFit.cover,
                         ),
                         title: Text(
-                          cartItem.product.name,
+                          cartItem.displayName,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -189,7 +190,7 @@ class _CartState extends State<Cart> {
                           ],
                         ),
                         subtitle: Text(
-                          'Total: ${NumberFormat('#,##0').format((cartItem.quantity * cartItem.product.price))} UZS',
+                          'Total: ${NumberFormat('#,##0').format(cartItem.totalPrice.toInt())} UZS',
                         ),
                       );
                     },

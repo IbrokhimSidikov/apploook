@@ -1,5 +1,4 @@
 import 'package:apploook/l10n/app_localizations.dart';
-import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/pages/verification_screen.dart';
 import 'package:apploook/services/auth_service.dart';
 import 'package:flutter/material.dart';

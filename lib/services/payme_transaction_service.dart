@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,22 +136,23 @@ class PaymeTransactionService {
       builder: (context) => WillPopScope(
         onWillPop: () async => false, // Prevent back button
         child: AlertDialog(
-          title: const Text('Transaction in Progress'),
+          title: Text(AppLocalizations.of(context).transactionInProgress),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const CircularProgressIndicator(),
               const SizedBox(height: 16),
-              const Text('Waiting for payment approval...'),
+              Text(AppLocalizations.of(context).waitingForPaymentApproval),
               const SizedBox(height: 8),
               Text('Order ID: $orderId', style: const TextStyle(fontSize: 12)),
               const SizedBox(height: 16),
-              const Text('Please complete the payment in the Payme app',
+              Text(AppLocalizations.of(context).completePayment,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey)),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey)),
               const SizedBox(height: 8),
-              const Text('Do not close this screen unless you want to cancel',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              Text(AppLocalizations.of(context).doNotCloseScreen,
+                  style: const TextStyle(
+                      fontSize: 12, fontWeight: FontWeight.bold)),
             ],
           ),
           actions: [
@@ -171,8 +173,9 @@ class PaymeTransactionService {
 
                 // Show cancellation message
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Payment verification cancelled'),
+                  SnackBar(
+                    content: Text(AppLocalizations.of(context)
+                        .paymentVerificationCancelled),
                     backgroundColor: Colors.orange,
                   ),
                 );
@@ -377,25 +380,28 @@ class PaymeTransactionService {
           } else {
             // Fallback to the Payme order ID if no ID is found in the response
             apiOrderId = orderId;
-            print('No order ID found in response, using Payme order ID: $apiOrderId');
+            print(
+                'No order ID found in response, using Payme order ID: $apiOrderId');
           }
 
           // Log the order status endpoint that will be used for tracking
-          print('ORDER TRACKING: Order submitted successfully with ID: $apiOrderId');
-          print('ORDER TRACKING: Status endpoint will be: https://integrator.api.delever.uz/v1/order/$apiOrderId/status');
+          print(
+              'ORDER TRACKING: Order submitted successfully with ID: $apiOrderId');
+          print(
+              'ORDER TRACKING: Status endpoint will be: https://integrator.api.delever.uz/v1/order/$apiOrderId/status');
 
           // Save order to tracking system for display in order tracking UI
-          print('ORDER TRACKING: Saving Payme order to tracking system: $apiOrderId');
+          print(
+              'ORDER TRACKING: Saving Payme order to tracking system: $apiOrderId');
           await _saveDeliveryOrderToPrefs(
-            orderId: apiOrderId,
-            address: address ?? 'No address provided',
-            paymentType: 'Payme',
-            items: items,
-            total: total,
-            deliveryFee: deliveryFee,
-            latitude: latitude,
-            longitude: longitude
-          );
+              orderId: apiOrderId,
+              address: address ?? 'No address provided',
+              paymentType: 'Payme',
+              items: items,
+              total: total,
+              deliveryFee: deliveryFee,
+              latitude: latitude,
+              longitude: longitude);
 
           // Clear pending order data
           await clearPendingOrder();
@@ -414,7 +420,8 @@ class PaymeTransactionService {
           try {
             // Extract data from carhopOrderData
             final String paymeOrderId = carhopOrderData['order_id'];
-            final Map<String, dynamic> requestBody = carhopOrderData['request_body'];
+            final Map<String, dynamic> requestBody =
+                carhopOrderData['request_body'];
             final branchConfigData = carhopOrderData['branch_config'];
 
             print(
@@ -434,17 +441,18 @@ class PaymeTransactionService {
 
             if (response.statusCode == 200 || response.statusCode == 201) {
               print('Carhop order submitted successfully: ${response.body}');
-              
+
               // Parse the response and save order details
               final responseData = jsonDecode(response.body);
               final prefs = await SharedPreferences.getInstance();
-              
+
               // Get existing orders or initialize empty list
-              List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
-              
+              List<String> savedOrders =
+                  prefs.getStringList('carhop_orders') ?? [];
+
               // Get cart items from the saved carhop order data
               final cartItems = carhopOrderData['cart_items'] ?? [];
-              
+
               // Create new order object
               Map<String, dynamic> orderDetails = {
                 'id': responseData['id'],
@@ -452,31 +460,32 @@ class PaymeTransactionService {
                 'timestamp': DateTime.now().toIso8601String(),
                 'orderItems': cartItems,
               };
-              
+
               // Add new order to the list
               savedOrders.add(jsonEncode(orderDetails));
-              
+
               // Keep only the last 5 orders to prevent memory issues
               if (savedOrders.length > 5) {
                 savedOrders = savedOrders.sublist(savedOrders.length - 5);
               }
-              
+
               // Save updated list
               await prefs.setStringList('carhop_orders', savedOrders);
-              
+
               // Mark payment as completed to prevent duplicate processing
               await _markPaymentAsCompleted(paymeOrderId);
-              
+
               // Add notification if context is available
               if (context.mounted) {
-                final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
+                final notificationProvider =
+                    Provider.of<NotificationProvider>(context, listen: false);
                 await notificationProvider.addOrderNotification(
                   title: "New Car-hop Order",
                   body: "Your car-hop order has been placed successfully!",
                   messageId: responseData['id'].toString(),
                 );
               }
-              
+
               // Update order tracking notification indicator
               final orderTrackingService = OrderTrackingService();
               orderTrackingService.markNewOrderAdded();
@@ -571,7 +580,7 @@ class PaymeTransactionService {
       print('Error marking payment as completed: $e');
     }
   }
-  
+
   /// Save delivery order to SharedPreferences for order tracking
   static Future<void> _saveDeliveryOrderToPrefs({
     required String orderId,
@@ -584,12 +593,14 @@ class PaymeTransactionService {
     required double longitude,
   }) async {
     try {
-      print('ORDER TRACKING: Saving Payme delivery order to SharedPreferences: $orderId');
+      print(
+          'ORDER TRACKING: Saving Payme delivery order to SharedPreferences: $orderId');
       final prefs = await SharedPreferences.getInstance();
 
       // Get existing orders or initialize empty list
       final savedOrders = prefs.getStringList('delivery_orders') ?? [];
-      print('ORDER TRACKING: Found ${savedOrders.length} existing saved orders');
+      print(
+          'ORDER TRACKING: Found ${savedOrders.length} existing saved orders');
 
       // Create new order object
       final Map<String, dynamic> orderData = {
@@ -607,20 +618,20 @@ class PaymeTransactionService {
 
       // Add new order to the beginning of the list
       savedOrders.insert(0, jsonEncode(orderData));
-      
+
       // Keep only the 10 most recent orders
       if (savedOrders.length > 10) {
         savedOrders.removeRange(10, savedOrders.length);
       }
-      
+
       // Mark that we have a new order for notification
       OrderTrackingService().markNewOrderAdded();
-      
+
       // Save updated list back to SharedPreferences
       await prefs.setStringList('delivery_orders', savedOrders);
       print('ORDER TRACKING: Saved Payme order to tracking system: $orderId');
       print('ORDER TRACKING: Total orders in tracking: ${savedOrders.length}');
-      
+
       // Create OrderTrackingService and update the order status
       final orderTrackingService = OrderTrackingService();
       await orderTrackingService.updateOrderStatus(orderId);

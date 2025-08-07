@@ -17,7 +17,7 @@ import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 
 import 'dart:convert';
-
+import '../models/modifier_models.dart';
 import '../widget/banner_widget.dart';
 
 class Category {
@@ -37,6 +37,12 @@ class Product {
   final String? imagePath;
   final double price;
   final dynamic description;
+  final List<ModifierGroup> modifierGroups;
+  final String? measure;
+  final String? measureUnit;
+  final int? sortOrder;
+  final Map<String, dynamic>? serviceCodesUz;
+  final List<Map<String, dynamic>>? images;
 
   Product({
     required this.name,
@@ -47,20 +53,23 @@ class Product {
     this.imagePath,
     required this.price,
     required this.description,
+    this.modifierGroups = const [],
+    this.measure,
+    this.measureUnit,
+    this.sortOrder,
+    this.serviceCodesUz,
+    this.images,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     dynamic description = json['description'];
-    print('Description type: ${description.runtimeType}, value: $description');
+    // print('Description type: ${description.runtimeType}, value: $description');
 
-    // Handle description parsing safely
     if (description is String && description.isNotEmpty) {
       try {
-        // Try to parse the description JSON string into a map if it's a string
         description = jsonDecode(description);
       } catch (e) {
         print('Error parsing description JSON: $e');
-        // If parsing fails, keep it as a string
       }
     }
 
@@ -87,6 +96,20 @@ class Product {
       uuid = json['id'].toString();
     }
 
+    // Parse modifier groups
+    List<ModifierGroup> modifierGroups = [];
+    if (json['modifierGroups'] != null) {
+      modifierGroups = (json['modifierGroups'] as List)
+          .map((group) => ModifierGroup.fromJson(group))
+          .toList();
+    }
+
+    // Handle images array
+    List<Map<String, dynamic>>? images;
+    if (json['images'] != null) {
+      images = List<Map<String, dynamic>>.from(json['images']);
+    }
+
     return Product(
       name: json['name'] ?? '',
       id: json['id'] ?? 0,
@@ -96,6 +119,12 @@ class Product {
       imagePath: json['imagePath'], // Keep this nullable
       price: price,
       description: description ?? {},
+      modifierGroups: modifierGroups,
+      measure: json['measure']?.toString(),
+      measureUnit: json['measureUnit']?.toString(),
+      sortOrder: json['sortOrder'],
+      serviceCodesUz: json['serviceCodesUz'],
+      images: images,
     );
   }
 
@@ -115,7 +144,7 @@ class Product {
         Map<String, dynamic> descriptionMap = json.decode(description);
         return descriptionMap[languageCode]?.toString();
       } catch (e) {
-        print('Error parsing description in getDescriptionInLanguage: $e');
+        // print('Error parsing description in getDescriptionInLanguage: $e');
         // If it's not valid JSON, just return the string itself
         return description;
       }
@@ -186,13 +215,9 @@ class _HomeNewState extends State<HomeNew>
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // Lifecycle observer methods are integrated into the existing dispose method below
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When app resumes from background (like returning from Payme app)
     if (state == AppLifecycleState.resumed) {
-      // Check for pending Payme payments
       _checkPendingPaymePayments();
     }
   }
@@ -471,16 +496,13 @@ class _HomeNewState extends State<HomeNew>
 
   Future<void> fetchData() async {
     try {
-      // Use the MenuService to fetch data
       final menuService = MenuService();
       await menuService.initialize();
 
       setState(() {
-        // Get categories and products from the service
         categories = menuService.categories;
         allProducts = menuService.allProducts;
 
-        // Dispose existing controllers first
         for (var controller in _categoryScrollControllers.values) {
           if (controller.hasClients) {
             controller.dispose();
@@ -607,20 +629,20 @@ class _HomeNewState extends State<HomeNew>
                 ),
                 actions: [
                   // Order mode selection icon
-                  IconButton(
-                    icon: Icon(
-                      _orderModeService.currentMode ==
-                              OrderMode.deliveryTakeaway
-                          ? Icons.delivery_dining
-                          : Icons.directions_car,
-                      color: Colors.black,
-                    ),
-                    tooltip: 'Select Order Mode',
-                    onPressed: () async {
-                      // Show the order mode selection dialog
-                      _showOrderModeSelectionDialog();
-                    },
-                  ),
+                  // IconButton(
+                  //   icon: Icon(
+                  //     _orderModeService.currentMode ==
+                  //             OrderMode.deliveryTakeaway
+                  //         ? Icons.delivery_dining
+                  //         : Icons.directions_car,
+                  //     color: Colors.black,
+                  //   ),
+                  //   tooltip: 'Select Order Mode',
+                  //   onPressed: () async {
+                  //     // Show the order mode selection dialog
+                  //     _showOrderModeSelectionDialog();
+                  //   },
+                  // ),
                   // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),

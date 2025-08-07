@@ -11,6 +11,16 @@ class AppLocalizations {
 
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Order Now \nNot Only Chicken',
+      'suitableForEveryone': 'Suitable For \nEveryone',
+      'promosOfferDeals': 'Promos \nOffer & Deals',
+      'easyOrdering': 'Easy \nOrdering',
+      'selectOrderMode': 'Select Order Mode',
+      // 'deliveryTakeaway': 'Delivery or Takeaway',
+      // 'carhop': 'Carhop',
+
+      // HomeNew Page
       'whatsNew': 'WHAT\'S NEW',
       'hello': 'Hello',
       'welcome': 'Welcome to our app',
@@ -88,6 +98,12 @@ class AppLocalizations {
       'notificationsPlaceholder': 'Notifications will appear here',
       'arrivalNotificationSent': 'Arrival notification sent',
       'clearAll': 'Clear All',
+      // Update Required Dialog
+      'updateRequired': 'Update Required',
+      'updateRequiredDescription': 'A new version of the app is available and required to continue using the app. Please update to the latest version.',
+      'currentVersion': 'Current Version',
+      'requiredVersion': 'Required Version',
+      'updateNow': 'Update Now',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
@@ -140,8 +156,25 @@ class AppLocalizations {
       'carhop': 'Carhop',
       'bagPrice': 'Bag Price',
       'deliveryFeeSpinner': 'Delivery fee is being calculated..',
+      'transactionInProgress': 'Transaction in progress',
+      'waitingForPaymentApproval': 'Waiting for payment approval...',
+      'orderID': 'Order ID:',
+      'completePayment': 'Please complete the payment in the Payme app',
+      'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
+      'paymentVerificationCancelled': 'Payment verification cancelled',
+      'orderHoursValidation': 'Orders not accepted after 23:30 PM'
     },
     'uz': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Buyurtma bering \nNafaqat tovuqlar',
+      'suitableForEveryone': 'Hammaga \nuchun mos',
+      'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
+      'easyOrdering': 'Oson \nBuyurtma',
+      'selectOrderMode': 'Buyurtma usulini tanlang',
+      // 'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
+      // 'carhop': 'Avtomobilda xizmat',
+
+      // HomeNew Page
       'whatsNew': 'YANGILIKLAR',
       'hello': 'Salom',
       'welcome': 'Ilovamizga xush kelibsiz',
@@ -220,7 +253,13 @@ class AppLocalizations {
       'notifications': 'Xabarnoma',
       'notificationsPlaceholder': 'Xabarlaringiz shu yerda ko\'rinadi',
       'arrivalNotificationSent': 'Arrival notification sent',
-      'clearAll': 'Barchasini o\'chirish',
+      'clearAll': 'Hammasi',
+      // Update Required Dialog
+      'updateRequired': 'Yangilash talab qilinadi',
+      'updateRequiredDescription': 'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun talab qilinadi. Iltimos, eng songgi versiyaga yangilang.',
+      'currentVersion': 'Joriy versiya',
+      'requiredVersion': 'Talab qilingan versiya',
+      'updateNow': 'Hozir yangilash',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
@@ -273,8 +312,26 @@ class AppLocalizations {
       'arrivedSuccessfully': 'Habar yetkazildi',
       'bagPrice': 'Paket narxi:',
       'deliveryFeeSpinner': 'Yetkazib berish narxi hisoblanmoqda..',
+      'transactionInProgress': 'Transaksiya amalga oshirilmoqda',
+      'waitingForPaymentApproval': 'To\'lovni tasdiqlash kutilmoqda...',
+      'orderID': 'Buyurtma ID:',
+      'completePayment': 'To\'lovni Payme ilovasi orqali amalga oshiring',
+      'doNotCloseScreen':
+          'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
+      'paymentVerificationCancelled': 'To\'lov bekor qilindi',
+      'orderHoursValidation': '23:30 dan keyin buyurtmalar qabul qilinmaydi',
     },
     'ru': {
+      // Onboard Page
+      'orderNowNotOnlyChicken': 'Закажите сейчас \nНе только курицу',
+      'suitableForEveryone': 'Подходит \nДля всех',
+      'promosOfferDeals': 'Акции \nСкидки и предложения',
+      'easyOrdering': 'Лёгкий \nЗаказ',
+      'selectOrderMode': 'Выберите способ заказа',
+      // 'deliveryTakeaway': 'Доставка или самовывоз',
+      // 'carhop': 'Обслуживание в авто',
+
+      // HomeNew Page
       'whatsNew': 'ЧТО НОВОГО',
       'hello': 'Привет',
       'welcome': 'Добро пожаловать',
@@ -404,8 +461,32 @@ class AppLocalizations {
       'arrivedSuccessfully': 'Успешно отмечен как прибыл',
       'bagPrice': 'Стоимость пакета',
       'deliveryFeeSpinner': 'Стоимость доставки вычисляется...',
+      'transactionInProgress': 'Транзакция выполняется...',
+      'waitingForPaymentApproval': 'Ожидание подтверждения оплаты...',
+      'orderID': 'ID заказа:',
+      'completePayment': 'Завершите оплату в приложении Payme',
+      'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
+      'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
+      'orderHoursValidation': 'Заказы не принимаются после 23:30',
     },
   };
+
+  // Onboard Page
+  String get orderNowNotOnlyChicken =>
+      _localizedValues[locale.languageCode]!['orderNowNotOnlyChicken']!;
+  String get suitableForEveryone =>
+      _localizedValues[locale.languageCode]!['suitableForEveryone']!;
+  String get promosOfferDeals =>
+      _localizedValues[locale.languageCode]!['promosOfferDeals']!;
+  String get easyOrdering =>
+      _localizedValues[locale.languageCode]!['easyOrdering']!;
+  String get selectOrderMode =>
+      _localizedValues[locale.languageCode]!['selectOrderMode']!;
+  String get deliveryTakeaway =>
+      _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
+  String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
+
+  // HomeNew Page
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
   String get hello => _localizedValues[locale.languageCode]!['hello']!;
   String get welcome => _localizedValues[locale.languageCode]!['welcome']!;
@@ -624,13 +705,44 @@ class AppLocalizations {
   String get orderModeSubtitle =>
       _localizedValues[locale.languageCode]!['orderModeSubtitle']!;
 
-  String get deliveryTakeaway =>
-      _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
-
-  String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
-
   String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
 
   String get deliveryFeeSpinner =>
       _localizedValues[locale.languageCode]!['deliveryFeeSpinner']!;
+
+  String get transactionInProgress =>
+      _localizedValues[locale.languageCode]!['transactionInProgress']!;
+
+  String get waitingForPaymentApproval =>
+      _localizedValues[locale.languageCode]!['waitingForPaymentApproval']!;
+
+  String get orderID => _localizedValues[locale.languageCode]!['orderID']!;
+
+  String get completePayment =>
+      _localizedValues[locale.languageCode]!['completePayment']!;
+
+  String get doNotCloseScreen =>
+      _localizedValues[locale.languageCode]!['doNotCloseScreen']!;
+
+  String get paymentVerificationCancelled =>
+      _localizedValues[locale.languageCode]!['paymentVerificationCancelled']!;
+
+  String get orderHoursValidation =>
+      _localizedValues[locale.languageCode]!['orderHoursValidation']!;
+      
+  // Update Required Dialog getters
+  String get updateRequired =>
+      _localizedValues[locale.languageCode]!['updateRequired']!;
+      
+  String get updateRequiredDescription =>
+      _localizedValues[locale.languageCode]!['updateRequiredDescription']!;
+      
+  String get currentVersion =>
+      _localizedValues[locale.languageCode]!['currentVersion']!;
+      
+  String get requiredVersion =>
+      _localizedValues[locale.languageCode]!['requiredVersion']!;
+      
+  String get updateNow =>
+      _localizedValues[locale.languageCode]!['updateNow']!;
 }
