@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
 class PaymeService {
@@ -39,6 +40,42 @@ class PaymeService {
     double amount,
   ) async {
     try {
+      print('🚀 Starting Payme checkout launch process...');
+      print('📋 Parameters: merchantId=$merchantId, orderId=$orderId, amount=$amount');
+      
+      // Create the URL first to get the app URL
+      final url = createPaymeCheckoutUrl(merchantId, orderId, amount);
+      final base64Params = url.substring(url.lastIndexOf('/') + 1);
+      final paymeAppUrl = 'payme://payment?payload=$base64Params';
+      
+      // Check if Payme app can be launched with different schemes
+      print('🔍 Checking if Payme app can be launched...');
+      List<String> testUrls = [
+        paymeAppUrl,
+        'payme://checkout?payload=$base64Params',
+        'payme://pay?payload=$base64Params',
+        'uz.dida.payme://payment?payload=$base64Params',
+        'uz.dida.payme://checkout?payload=$base64Params',
+      ];
+      
+      for (String testUrl in testUrls) {
+        try {
+          bool canLaunch = await canLaunchUrl(Uri.parse(testUrl));
+          print('📱 Can launch $testUrl: $canLaunch');
+        } catch (e) {
+          print('❌ Error checking $testUrl: $e');
+        }
+      }
+      
+      // Also check if we can launch the web URL
+      bool canLaunchWebUrl = false;
+      try {
+        canLaunchWebUrl = await canLaunchUrl(Uri.parse(url));
+        print('🌐 Can launch web URL: $canLaunchWebUrl');
+      } catch (e) {
+        print('❌ Error checking if web URL can be launched: $e');
+      }
+      
       // Save the order ID to SharedPreferences for later verification
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('payme_pending_order_id', orderId);
@@ -47,45 +84,99 @@ class PaymeService {
       await prefs.setBool('payme_payment_pending', true);
       await prefs.setInt(
           'payme_payment_timestamp', DateTime.now().millisecondsSinceEpoch);
+      print('💾 Saved payment details to SharedPreferences');
 
-      // Create the URL
-      final url = createPaymeCheckoutUrl(merchantId, orderId, amount);
-
-      // Try to launch with payme:// scheme first for mobile app
-      final base64Params = url.substring(url.lastIndexOf('/') + 1);
-      final paymeAppUrl = 'payme://payment?payload=$base64Params';
+      print('🔗 Generated web URL: $url');
+      print('📱 Generated app URL: $paymeAppUrl');
 
       bool launched = false;
 
-      // Try to launch the Payme mobile app first
-      try {
-        launched = await launchUrlString(
-          paymeAppUrl,
-          mode: LaunchMode.externalNonBrowserApplication,
-        );
-      } catch (e) {
-        print('Error launching Payme app: $e');
-      }
-
-      // If Payme app launch failed, try web URL as fallback
-      if (!launched) {
+      // Since user confirmed the web URL works externally, try it first with different modes
+      print('🌐 Trying web URL first (user confirmed this works externally)...');
+      
+      // Try different launch modes for the web URL
+      List<LaunchMode> launchModes = [
+        LaunchMode.externalApplication, // This should trigger app if available
+        LaunchMode.platformDefault,     // Let platform decide
+        LaunchMode.externalNonBrowserApplication, // Force app over browser
+      ];
+      
+      for (LaunchMode mode in launchModes) {
+        if (launched) break;
         try {
+          print('🎯 Trying web URL with mode: $mode');
           launched = await launchUrlString(
             url,
-            mode: LaunchMode.externalApplication,
+            mode: mode,
           );
+          print('✅ Web URL launch result with $mode: $launched');
         } catch (e) {
-          print('Error launching browser URL: $e');
+          print('❌ Error launching web URL with $mode: $e');
+        }
+      }
+      
+      // If web URL failed, try custom app schemes as fallback
+      if (!launched) {
+        print('📱 Web URL failed, trying custom app schemes as fallback...');
+        
+        List<String> paymeUrls = [
+          paymeAppUrl, // payme://payment?payload=...
+          'payme://checkout?payload=$base64Params', // Alternative scheme
+          'payme://pay?payload=$base64Params', // Alternative scheme
+          'uz.dida.payme://payment?payload=$base64Params', // Package-based scheme
+          'uz.dida.payme://checkout?payload=$base64Params', // Package-based scheme
+        ];
+        
+        for (String testUrl in paymeUrls) {
+          if (launched) break;
+          print('🔍 Trying URL scheme: $testUrl');
+          try {
+            bool canLaunch = await canLaunchUrl(Uri.parse(testUrl));
+            print('📱 Can launch $testUrl: $canLaunch');
+            
+            if (canLaunch) {
+              launched = await launchUrlString(
+                testUrl,
+                mode: LaunchMode.externalNonBrowserApplication,
+              );
+              print('✅ Launch result for $testUrl: $launched');
+            }
+          } catch (e) {
+            print('❌ Error with $testUrl: $e');
+          }
         }
       }
 
       if (!launched) {
-        throw 'Could not launch Payme URL';
+        print('💥 Both launch attempts failed!');
+        
+        // Try alternative launch modes
+        print('🔄 Trying alternative launch modes...');
+        
+        // Try one more approach: launch web URL in browser mode
+        if (!launched) {
+          try {
+            print('🎯 Final attempt: Launching web URL in browser mode...');
+            launched = await launchUrlString(
+              url,
+              mode: LaunchMode.inAppBrowserView,
+            );
+            print('✅ Browser mode launch result: $launched');
+          } catch (e) {
+            print('❌ Browser mode launch error: $e');
+          }
+        }
+        
+        if (!launched) {
+          throw 'Could not launch Payme URL with any method';
+        }
       }
 
+      print('🎉 Payme checkout launched successfully!');
       return true;
     } catch (e) {
-      print('Error launching Payme checkout: $e');
+      print('💥 Fatal error launching Payme checkout: $e');
+      print('📝 Error type: ${e.runtimeType}');
       return false;
     }
   }
