@@ -793,7 +793,7 @@ class _CheckoutState extends State<Checkout> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
