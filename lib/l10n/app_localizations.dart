@@ -256,7 +256,7 @@ class AppLocalizations {
       'clearAll': 'Hammasi',
       // Update Required Dialog
       'updateRequired': 'Yangilash talab qilinadi',
-      'updateRequiredDescription': 'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun talab qilinadi. Iltimos, eng songgi versiyaga yangilang.',
+      'updateRequiredDescription': 'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun eng songgi versiyaga yangilang.',
       'currentVersion': 'Joriy versiya',
       'requiredVersion': 'Talab qilingan versiya',
       'updateNow': 'Hozir yangilash',
