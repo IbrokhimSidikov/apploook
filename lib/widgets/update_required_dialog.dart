@@ -26,13 +26,17 @@ class UpdateRequiredDialog extends StatelessWidget {
     }
 
     // Fallback strings if localizations are not available
-    final String updateRequiredTitle = localizations?.updateRequired ?? 'Update Required';
-    final String updateRequiredDesc = localizations?.updateRequiredDescription ?? 
+    final String updateRequiredTitle =
+        localizations?.updateRequired ?? 'Update Required';
+    final String updateRequiredDesc = localizations
+            ?.updateRequiredDescription ??
         'A new version of the app is available and required to continue using the app. Please update to the latest version.';
-    final String currentVersionText = localizations?.currentVersion ?? 'Current Version';
-    final String requiredVersionText = localizations?.requiredVersion ?? 'Required Version';
+    final String currentVersionText =
+        localizations?.currentVersion ?? 'Current Version';
+    final String requiredVersionText =
+        localizations?.requiredVersion ?? 'Required Version';
     final String updateButtonText = localizations?.updateNow ?? 'Update Now';
-    
+
     // Use platform-specific dialog style
     if (Platform.isIOS) {
       return _buildIOSStyleDialog(
@@ -54,7 +58,7 @@ class UpdateRequiredDialog extends StatelessWidget {
       );
     }
   }
-  
+
   Widget _buildIOSStyleDialog(
     BuildContext context,
     String title,
@@ -114,7 +118,8 @@ class UpdateRequiredDialog extends StatelessWidget {
                       children: [
                         Text(
                           '$currentVersionText: ',
-                          style: const TextStyle(color: CupertinoColors.systemGrey),
+                          style: const TextStyle(
+                              color: CupertinoColors.systemGrey),
                         ),
                         Text(
                           currentVersion,
@@ -128,7 +133,8 @@ class UpdateRequiredDialog extends StatelessWidget {
                       children: [
                         Text(
                           '$requiredVersionText: ',
-                          style: const TextStyle(color: CupertinoColors.systemGrey),
+                          style: const TextStyle(
+                              color: CupertinoColors.systemGrey),
                         ),
                         Text(
                           requiredVersion,
@@ -160,7 +166,7 @@ class UpdateRequiredDialog extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMaterialDialog(
     BuildContext context,
     String title,
@@ -262,9 +268,10 @@ class UpdateRequiredDialog extends StatelessWidget {
       ),
     );
   }
+
   Future<void> _launchAppStore() async {
     // URLs for app stores - use the correct package name for your app
-    const String appStoreUrl = 'https://apps.apple.com/app/loook/id1234567890';
+    const String appStoreUrl = 'https://apps.apple.com/app/loook/id6514299263';
     const String playStoreUrl =
         'https://play.google.com/store/apps/details?id=com.loook.v1';
 
@@ -272,7 +279,7 @@ class UpdateRequiredDialog extends StatelessWidget {
       // Determine the platform and launch the appropriate URL
       final url = Platform.isIOS ? appStoreUrl : playStoreUrl;
       final uri = Uri.parse(url);
-      
+
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {

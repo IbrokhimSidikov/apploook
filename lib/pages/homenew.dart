@@ -144,7 +144,7 @@ class Product {
         Map<String, dynamic> descriptionMap = json.decode(description);
         return descriptionMap[languageCode]?.toString();
       } catch (e) {
-        print('Error parsing description in getDescriptionInLanguage: $e');
+        // print('Error parsing description in getDescriptionInLanguage: $e');
         // If it's not valid JSON, just return the string itself
         return description;
       }
