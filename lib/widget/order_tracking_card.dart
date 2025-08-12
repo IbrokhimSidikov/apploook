@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:apploook/services/order_tracking_service.dart';
+import 'package:apploook/l10n/app_localizations.dart';
 
 class OrderTrackingCard extends StatefulWidget {
   final Map<String, dynamic> orderData;
@@ -11,7 +12,8 @@ class OrderTrackingCard extends StatefulWidget {
   const OrderTrackingCard({
     Key? key,
     required this.orderData,
-    this.autoRefresh = false, // Default to false since we don't auto-refresh anymore
+    this.autoRefresh =
+        false, // Default to false since we don't auto-refresh anymore
   }) : super(key: key);
 
   @override
@@ -27,7 +29,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
   void initState() {
     super.initState();
     _orderData = widget.orderData;
-    
+
     // No initial status update or auto-refresh
     // Status will only update when refresh button is clicked
   }
@@ -44,32 +46,39 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
     });
     try {
       final orderId = _orderData['id'];
-      print('ORDER TRACKING: OrderTrackingCard: Refreshing status for order ID: $orderId');
-      print('ORDER TRACKING: OrderTrackingCard: Current status before refresh: ${_orderData['status']}');
-      
+      print(
+          'ORDER TRACKING: OrderTrackingCard: Refreshing status for order ID: $orderId');
+      print(
+          'ORDER TRACKING: OrderTrackingCard: Current status before refresh: ${_orderData['status']}');
+
       // Log the full URL that will be used for the status request
-      print('ORDER TRACKING: OrderTrackingCard: Will request status from: https://integrator.api.delever.uz/v1/order/$orderId/status');
-      
+      print(
+          'ORDER TRACKING: OrderTrackingCard: Will request status from: https://integrator.api.delever.uz/v1/order/$orderId/status');
+
       final updatedStatus = await _trackingService.updateOrderStatus(orderId);
-      print('ORDER TRACKING: OrderTrackingCard: API response for order $orderId: $updatedStatus');
-      
+      print(
+          'ORDER TRACKING: OrderTrackingCard: API response for order $orderId: $updatedStatus');
+
       // Log the status and any error information
       if (updatedStatus.containsKey('status')) {
-        print('ORDER TRACKING: OrderTrackingCard: Status field: ${updatedStatus['status']}');
+        print(
+            'ORDER TRACKING: OrderTrackingCard: Status field: ${updatedStatus['status']}');
       }
       if (updatedStatus.containsKey('statusDetails')) {
-        print('ORDER TRACKING: OrderTrackingCard: Status details: ${updatedStatus['statusDetails']}');
+        print(
+            'ORDER TRACKING: OrderTrackingCard: Status details: ${updatedStatus['statusDetails']}');
       }
       if (updatedStatus.containsKey('error')) {
-        print('ORDER TRACKING: OrderTrackingCard: Error: ${updatedStatus['error']}');
+        print(
+            'ORDER TRACKING: OrderTrackingCard: Error: ${updatedStatus['error']}');
       }
-      
+
       // Log all fields in the response
       print('ORDER TRACKING: OrderTrackingCard: All response fields:');
       updatedStatus.forEach((key, value) {
         print('ORDER TRACKING: OrderTrackingCard: Field $key = $value');
       });
-      
+
       if (mounted) {
         setState(() {
           _orderData = {
@@ -79,13 +88,17 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
           };
           _isLoading = false;
         });
-        print('ORDER TRACKING: OrderTrackingCard: UI updated with new status: ${_orderData['status']}');
-        print('ORDER TRACKING: OrderTrackingCard: Status change: ${_orderData['status'] != updatedStatus['status'] ? 'CHANGED' : 'UNCHANGED'}');
+        print(
+            'ORDER TRACKING: OrderTrackingCard: UI updated with new status: ${_orderData['status']}');
+        print(
+            'ORDER TRACKING: OrderTrackingCard: Status change: ${_orderData['status'] != updatedStatus['status'] ? 'CHANGED' : 'UNCHANGED'}');
       }
     } catch (e) {
-      print('ORDER TRACKING: OrderTrackingCard: Error updating order status: $e');
+      print(
+          'ORDER TRACKING: OrderTrackingCard: Error updating order status: $e');
       print('ORDER TRACKING: OrderTrackingCard: Error type: ${e.runtimeType}');
-      print('ORDER TRACKING: OrderTrackingCard: Stack trace: ${StackTrace.current}');
+      print(
+          'ORDER TRACKING: OrderTrackingCard: Stack trace: ${StackTrace.current}');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -102,7 +115,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
       return 'Unknown time';
     }
   }
-  
+
   String _formatDateOnly(String isoString) {
     try {
       final dateTime = DateTime.parse(isoString);
@@ -113,63 +126,64 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
   }
 
   String _getStatusText(String status) {
-  // Convert to lowercase for case-insensitive comparison
-  final statusLower = status.toLowerCase();
-  
-  // Log the status being processed
-  print('ORDER TRACKING: Processing status: $status (lowercase: $statusLower)');
-  
-  switch (statusLower) {
-    // New order statuses from API
-    case 'new':
-      return 'Pending';
-    case 'accepted_by_restaurant':
-      return 'Confirmed';
-    case 'cooking':
-      return 'Preparing';
-    case 'ready':
-      return 'Ready for delivery';
-    case 'taken_by_courier':
-      return 'On the way';
-    case 'delivered':
-      return 'Delivered';
-    case 'cancelled':
-      return 'Cancelled';
-      
-    // Legacy status mappings
-    case 'pending':
-      return 'Pending';
-    case 'confirmed':
-    case 'accepted':
-      return 'Confirmed';
-    case 'preparing':
-    case 'in_progress':
-    case 'inprogress':
-      return 'Preparing';
-    case 'ready_for_delivery':
-      return 'Ready for delivery';
-    case 'delivering':
-    case 'on_the_way':
-    case 'ontheway':
-    case 'in_delivery':
-      return 'On the way';
-    case 'completed':
-    case 'complete':
-      return 'Delivered';
-    case 'canceled':
-    case 'rejected':
-      return 'Cancelled';
-    case 'error':
-      return 'Error';
-    default:
-      print('ORDER TRACKING: Unrecognized status: $status');
-      return 'Processing';
+    // Convert to lowercase for case-insensitive comparison
+    final statusLower = status.toLowerCase();
+
+    // Log the status being processed
+    print(
+        'ORDER TRACKING: Processing status: $status (lowercase: $statusLower)');
+
+    switch (statusLower) {
+      // New order statuses from API
+      case 'new':
+        return 'Pending';
+      case 'accepted_by_restaurant':
+        return 'Confirmed';
+      case 'cooking':
+        return 'Preparing';
+      case 'ready':
+        return 'Ready for delivery';
+      case 'taken_by_courier':
+        return 'On the way';
+      case 'delivered':
+        return 'Delivered';
+      case 'cancelled':
+        return 'Cancelled';
+
+      // Legacy status mappings
+      case 'pending':
+        return 'Pending';
+      case 'confirmed':
+      case 'accepted':
+        return 'Confirmed';
+      case 'preparing':
+      case 'in_progress':
+      case 'inprogress':
+        return 'Preparing';
+      case 'ready_for_delivery':
+        return 'Ready for delivery';
+      case 'delivering':
+      case 'on_the_way':
+      case 'ontheway':
+      case 'in_delivery':
+        return 'On the way';
+      case 'completed':
+      case 'complete':
+        return 'Delivered';
+      case 'canceled':
+      case 'rejected':
+        return 'Cancelled';
+      case 'error':
+        return 'Error';
+      default:
+        print('ORDER TRACKING: Unrecognized status: $status');
+        return 'Processing';
+    }
   }
-}
 
   Color _getStatusColor(String status) {
     final statusLower = status.toLowerCase();
-    
+
     switch (statusLower) {
       // New order statuses from API
       case 'new':
@@ -186,7 +200,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
         return Colors.green;
       case 'cancelled':
         return Colors.red;
-        
+
       // Legacy status mappings
       case 'pending':
         return Colors.orange;
@@ -262,7 +276,8 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
     final total = _orderData['total'] ?? 0.0;
     final deliveryFee = _orderData['deliveryFee'] ?? 0.0;
     final items = _orderData['items'] as List<dynamic>? ?? [];
-    
+    final paketPrice = 2000;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 4,
@@ -283,14 +298,18 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                       // Show a snackbar with the full order ID when tapped
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('Order ID: ${_orderData['id']}'),
+                          content: Text(
+                              '${AppLocalizations.of(context).orderID} : ${_orderData['id']}'),
                           duration: const Duration(seconds: 3),
                           action: SnackBarAction(
                             label: 'Copy',
                             onPressed: () {
-                              Clipboard.setData(ClipboardData(text: _orderData['id'].toString()));
+                              Clipboard.setData(ClipboardData(
+                                  text: _orderData['id'].toString()));
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Order ID copied to clipboard')),
+                                const SnackBar(
+                                    content:
+                                        Text('Order ID copied to clipboard')),
                               );
                             },
                           ),
@@ -298,7 +317,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                       );
                     },
                     child: Text(
-                      'Order from ${_formatDateOnly(timestamp)}',
+                      '${AppLocalizations.of(context).orderCardTitle} ${_formatDateOnly(timestamp)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -340,7 +359,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             ),
             const Divider(height: 24),
             Text(
-              'Order Summary',
+              AppLocalizations.of(context).orderSummary,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).primaryColor,
@@ -369,15 +388,15 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Subtotal'),
-                Text('${NumberFormat('#,##0').format(total - deliveryFee)} sum'),
+                Text(AppLocalizations.of(context).bagPrice),
+                Text('${NumberFormat('#,##0').format(paketPrice)} sum'),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Delivery Fee'),
+                Text(AppLocalizations.of(context).deliveryFee),
                 Text('${NumberFormat('#,##0').format(deliveryFee)} sum'),
               ],
             ),
@@ -385,12 +404,12 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Total',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).totalTitle,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${NumberFormat('#,##0').format(total)} sum',
+                  '${NumberFormat('#,##0').format(total + deliveryFee + paketPrice)} sum',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
@@ -427,7 +446,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Refresh Status'),
+                      : Text(AppLocalizations.of(context).refreshStatus),
                 ),
               ],
             ),
