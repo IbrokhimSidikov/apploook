@@ -350,7 +350,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.directions_car),
+                        const Icon(Icons.local_parking),
                         const SizedBox(height: 2),
                         Text(
                           localizations.carhopOrders,

@@ -100,7 +100,8 @@ class AppLocalizations {
       'clearAll': 'Clear All',
       // Update Required Dialog
       'updateRequired': 'Update Required',
-      'updateRequiredDescription': 'A new version of the app is available and required to continue using the app. Please update to the latest version.',
+      'updateRequiredDescription':
+          'A new version of the app is available and required to continue using the app. Please update to the latest version.',
       'currentVersion': 'Current Version',
       'requiredVersion': 'Required Version',
       'updateNow': 'Update Now',
@@ -162,7 +163,13 @@ class AppLocalizations {
       'completePayment': 'Please complete the payment in the Payme app',
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
-      'orderHoursValidation': 'Orders not accepted after 23:30 PM'
+      'orderHoursValidation': 'Orders not accepted after 23:30 PM',
+      // Order card
+      'orderCardTitle': 'Order from',
+      'orderSummaryTitle': 'Order Summary',
+      'bagPriceTitle': 'Bag price',
+      'deliveryFeeTitle': 'Delivery fee',
+      'totalTitle': 'Total',
     },
     'uz': {
       // Onboard Page
@@ -256,7 +263,8 @@ class AppLocalizations {
       'clearAll': 'Hammasi',
       // Update Required Dialog
       'updateRequired': 'Yangilash talab qilinadi',
-      'updateRequiredDescription': 'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun eng songgi versiyaga yangilang.',
+      'updateRequiredDescription':
+          'Ilovaning yangi versiyasi mavjud va ilovadan foydalanishni davom ettirish uchun talab qilinadi. Iltimos, eng songgi versiyaga yangilang.',
       'currentVersion': 'Joriy versiya',
       'requiredVersion': 'Talab qilingan versiya',
       'updateNow': 'Hozir yangilash',
@@ -320,6 +328,12 @@ class AppLocalizations {
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
       'orderHoursValidation': '23:30 dan keyin buyurtmalar qabul qilinmaydi',
+      // Order card
+      'orderCardTitle': 'Buyurtma sanasi',
+      'orderSummaryTitle': 'Buyurtma tafsilotlari',
+      'bagPriceTitle': 'Paket narxi',
+      'deliveryFeeTitle': 'Yetkazib berish narxi',
+      'totalTitle': 'Ja\'mi',
     },
     'ru': {
       // Onboard Page
@@ -468,6 +482,12 @@ class AppLocalizations {
       'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
       'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
       'orderHoursValidation': 'Заказы не принимаются после 23:30',
+      // Order card
+      'orderCardTitle': 'Заказ от',
+      'orderSummaryTitle': 'Заказ',
+      'bagPriceTitle': 'Стоимость пакета',
+      'deliveryFeeTitle': 'Стоимость доставки',
+      'totalTitle': 'Итого',
     },
   };
 
@@ -729,20 +749,31 @@ class AppLocalizations {
 
   String get orderHoursValidation =>
       _localizedValues[locale.languageCode]!['orderHoursValidation']!;
-      
+
   // Update Required Dialog getters
   String get updateRequired =>
       _localizedValues[locale.languageCode]!['updateRequired']!;
-      
+
   String get updateRequiredDescription =>
       _localizedValues[locale.languageCode]!['updateRequiredDescription']!;
-      
+
   String get currentVersion =>
       _localizedValues[locale.languageCode]!['currentVersion']!;
-      
+
   String get requiredVersion =>
       _localizedValues[locale.languageCode]!['requiredVersion']!;
-      
-  String get updateNow =>
-      _localizedValues[locale.languageCode]!['updateNow']!;
+
+  String get updateNow => _localizedValues[locale.languageCode]!['updateNow']!;
+
+  // Order card getters
+  String get orderCardTitle =>
+      _localizedValues[locale.languageCode]!['orderCardTitle']!;
+  String get orderSummaryTitle =>
+      _localizedValues[locale.languageCode]!['orderSummaryTitle']!;
+  String get bagPriceTitle =>
+      _localizedValues[locale.languageCode]!['bagPriceTitle']!;
+  String get deliveryFeeTitle =>
+      _localizedValues[locale.languageCode]!['deliveryFeeTitle']!;
+  String get totalTitle =>
+      _localizedValues[locale.languageCode]!['totalTitle']!;
 }
