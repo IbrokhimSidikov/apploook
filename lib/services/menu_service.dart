@@ -4,7 +4,6 @@ import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// http import removed as it's no longer needed
 
 class MenuService {
   static final MenuService _instance = MenuService._internal();
@@ -17,14 +16,10 @@ class MenuService {
   bool _isInitialized = false;
   String? _nearestBranchDeliverId;
 
-  // Cache constants
   static const String _cacheKey = 'cachedCategoryData';
   static const String _cacheTimestampKey = 'lastCacheUpdateTime';
   static const Duration _cacheValidityDuration = Duration(hours: 6);
 
-  // We no longer use the old API endpoint for carhop
-
-  // Getters
   List<Category> get categories => _categories;
   List<Product> get allProducts => _allProducts;
   bool get isInitialized => _isInitialized;
@@ -40,55 +35,54 @@ class MenuService {
     _orderModeService = OrderModeService();
   }
 
-  // Set the nearest branch deliver ID to be used for API requests
   void setNearestBranchDeliverId(String deliverId) {
     _nearestBranchDeliverId = deliverId;
-    print('MenuService: Set nearest branch deliver ID: $deliverId');
+    // print('MenuService: Set nearest branch deliver ID: $deliverId');
   }
 
   Future<void> initialize() async {
-    print('MenuService: Initializing...');
+    // print('MenuService: Initializing...');
     if (_isInitialized) {
-      print('MenuService: Already initialized, returning');
+      // print('MenuService: Already initialized, returning');
       return;
     }
 
     await _orderModeService.initialize();
-    print(
-        'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
+    // print(
+    //     'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
 
     try {
-      print('MenuService: Checking cache validity');
+      // print('MenuService: Checking cache validity');
       bool isCacheValid = await _isCacheValid();
-      print('MenuService: Cache valid: $isCacheValid');
+      // print('MenuService: Cache valid: $isCacheValid');
 
       if (isCacheValid) {
-        print('MenuService: Loading from cache');
+        // print('MenuService: Loading from cache');
         final loaded = await _loadFromCache();
         if (loaded) {
           _isInitialized = true;
-          print(
-              'MenuService: Initialized from cache, refreshing data in background');
+          // print(
+          //     'MenuService: Initialized from cache, refreshing data in background');
 
           refreshData().catchError((e) {
-            print('MenuService: Background refresh error: $e');
+            // print('MenuService: Background refresh error: $e');
           });
         } else {
-          print('MenuService: Cache is valid but data is null');
+          // print('MenuService: Cache is valid but data is null');
         }
       } else {
-        print('MenuService: Cache is not valid or missing');
+        // print('MenuService: Cache is not valid or missing');
       }
 
       if (!_isInitialized) {
-        print('MenuService: Not initialized from cache, fetching fresh data');
+        // print('MenuService: Not initialized from cache, fetching fresh data');
         await refreshData();
       }
     } catch (e, stackTrace) {
-      print('MenuService: Error initializing: $e');
-      print('MenuService: Stack trace: $stackTrace');
+      // print('MenuService: Error initializing: $e');
+      // print('MenuService: Stack trace: $stackTrace');
       if (!_isInitialized) {
-        print('MenuService: Not initialized, throwing exception');
+        // print('MenuService: Not initialized, throwing exception');
         throw Exception('Failed to initialize menu data: $e');
       }
     }
@@ -118,7 +112,7 @@ class MenuService {
       _processCategoryData(decodedData);
       return true;
     } catch (e) {
-      print('MenuService: Error loading from cache: $e');
+      // print('MenuService: Error loading from cache: $e');
       return false;
     }
   }
@@ -137,37 +131,37 @@ class MenuService {
         List<dynamic> items = data['items'] ?? [];
         _processNewApiData([], items, data);
       } else {
-        print('MenuService: Unknown data format, creating default data');
+        // print('MenuService: Unknown data format, creating default data');
         _createDefaultData();
       }
     } catch (e) {
-      print('MenuService: Error processing category data: $e');
+      // print('MenuService: Error processing category data: $e');
       _createDefaultData();
     }
   }
 
   Future<void> refreshData() async {
-    print('MenuService: Starting refreshData');
+    // print('MenuService: Starting refreshData');
     try {
       // Set the restaurant ID if we have a nearest branch deliver ID
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
-        print(
-            'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
+        // print(
+        // 'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
         ApiService.setRestaurantId(_nearestBranchDeliverId!);
       }
 
       // Always fetch from the new API regardless of order mode
-      print('MenuService: Fetching menu items from API service');
+      // print('MenuService: Fetching menu items from API service');
       final menuItems = await _apiService.getMenuItems();
-      print(
-          'MenuService: Received menu items from API, count: ${menuItems.length}');
+      // print(
+      //     'MenuService: Received menu items from API, count: ${menuItems.length}');
 
       // Extract the data from the response
       final apiData = menuItems.isNotEmpty && menuItems[0] is Map
           ? menuItems[0]
           : {'categories': [], 'items': []};
-      print('MenuService: API data structure: ${apiData.keys.toList()}');
+      // print('MenuService: API data structure: ${apiData.keys.toList()}');
 
       // Based on the logs, we can see the API returns both categories and items
       List<dynamic> categories = apiData['categories'] ?? [];
@@ -186,13 +180,9 @@ class MenuService {
     }
   }
 
-  // Old API processing methods removed as they're no longer needed
-
-  // Process data from the new API format
   Future<void> _processNewApiData(List<dynamic> categories,
       List<dynamic> directItems, Map<String, dynamic> apiData) async {
     try {
-      // Reset collections
       _categories = [];
       _allProducts = [];
 
@@ -574,11 +564,6 @@ class MenuService {
     }
   }
 
-  // This method has been integrated directly into refreshData
-
-  // Format category names to proper display format - removed as it's no longer used
-
-  // Create default data when API fails or returns empty data
   void _createDefaultData() {
     print('MenuService: Creating default data');
 

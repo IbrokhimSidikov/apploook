@@ -17,13 +17,14 @@ class MenuCategory {
     List<MenuItem> items = [];
     if (json['products'] != null) {
       items = List<MenuItem>.from(
-        json['products'].map((item) => MenuItem.fromJson(item, json['id'], json['name'])),
+        json['products']
+            .map((item) => MenuItem.fromJson(item, json['id'], json['name'])),
       );
     }
 
     return MenuCategory(
       id: json['id'],
-      name: json['name'].toString().split('_')[0], // Get only the first part of the category name
+      name: json['name'].toString().split('_')[0],
       items: items,
     );
   }
@@ -48,36 +49,36 @@ class MenuItem {
     required this.description,
   });
 
-  factory MenuItem.fromJson(Map<String, dynamic> json, int categoryId, String categoryTitle) {
+  factory MenuItem.fromJson(
+      Map<String, dynamic> json, int categoryId, String categoryTitle) {
     dynamic description = json['description'];
     if (description is String) {
       try {
-        // Parse the description JSON string into a map if it's a string
         description = jsonDecode(description);
       } catch (e) {
-        // If parsing fails, keep it as a string
         print('Error parsing description: $e');
       }
     }
 
-    // Handle image path based on the API response structure
     String? imagePath;
     if (json['photo'] != null) {
-      imagePath = 'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${json['photo']['path']}/${json['photo']['name']}.${json['photo']['format']}';
+      imagePath =
+          'https://sieveserp.ams3.cdn.digitaloceanspaces.com/${json['photo']['path']}/${json['photo']['name']}.${json['photo']['format']}';
     }
 
     return MenuItem(
       id: json['id'],
       name: json['name'],
       categoryId: categoryId,
-      categoryTitle: categoryTitle.split('_')[0], // Get only the first part of the category name
+      categoryTitle: categoryTitle.split('_')[0],
       imagePath: imagePath,
-      price: json['priceList'] != null ? json['priceList']['price'].toDouble() : 0.0,
+      price: json['priceList'] != null
+          ? json['priceList']['price'].toDouble()
+          : 0.0,
       description: description,
     );
   }
 
-  // For compatibility with the existing Product class
   String? getDescriptionInLanguage(String languageCode) {
     if (description != null && description is Map<String, dynamic>) {
       return description[languageCode];
@@ -93,11 +94,10 @@ class MenuItem {
   }
 }
 
-// Adapter class to convert between different API formats
 class MenuAdapter {
   static List<MenuCategory> convertToCategories(List<dynamic> apiResponse) {
     return apiResponse
-        .where((category) => 
+        .where((category) =>
             !category['name'].toString().toLowerCase().contains('ava'))
         .map((category) => MenuCategory.fromJson(category))
         .toList();
