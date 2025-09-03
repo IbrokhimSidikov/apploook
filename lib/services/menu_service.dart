@@ -193,7 +193,7 @@ class MenuService {
       Map<String, int> categoryIdMap = {};
 
       // Process categories first
-      print('MenuService: Processing categories');
+      // print('MenuService: Processing categories');
       for (var category in categories) {
         try {
           // Extract the original category ID (which is now a string UUID)
@@ -203,8 +203,8 @@ class MenuService {
           // Generate a unique integer ID for internal use
           int categoryId =
               _getUniqueCategoryId(categories.indexOf(category) + 1);
-          print(
-              'MenuService: Original category ID: $originalCategoryId, assigned unique ID: $categoryId');
+          // print(
+          //     'MenuService: Original category ID: $originalCategoryId, assigned unique ID: $categoryId');
 
           // Store the mapping from string ID to int ID
           categoryIdMap[originalCategoryId] = categoryId;
@@ -213,15 +213,15 @@ class MenuService {
           // Capture sortOrder for category sorting
           final sortOrder = category['sortOrder'] ?? 0;
 
-          print(
-              'MenuService: Processing category: $categoryName (ID: $categoryId), sortOrder: $sortOrder');
+          // print(
+          //     'MenuService: Processing category: $categoryName (ID: $categoryId), sortOrder: $sortOrder');
 
           // Store category with its sort order for later sorting
           categoriesWithSortOrder.add(
               {'id': categoryId, 'name': categoryName, 'sortOrder': sortOrder});
         } catch (e) {
-          print('MenuService: Error processing category: $e');
-          print('MenuService: Category data: $category');
+          // print('MenuService: Error processing category: $e');
+          // print('MenuService: Category data: $category');
         }
       }
 
@@ -283,8 +283,8 @@ class MenuService {
 
       // Custom sort for delivery/takeaway mode
       if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
-        print(
-            'MenuService: Applying custom category order for delivery/takeaway mode');
+        // print(
+        //     'MenuService: Applying custom category order for delivery/takeaway mode');
 
         // Define custom order priority map
         final Map<String, int> customOrderPriority = {
@@ -327,7 +327,7 @@ class MenuService {
         });
 
         // Debug log the sorted categories
-        print('MenuService: Custom sorted categories:');
+        // print('MenuService: Custom sorted categories:');
         for (var category in categoriesWithSortOrder) {
           print(
               '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
@@ -339,6 +339,9 @@ class MenuService {
         _categories
             .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
+
+      // Apply custom sorting to products within each category
+      _applyCategoryProductSorting();
 
       // If we still don't have any categories or products, create a default one
       if (_categories.isEmpty) {
@@ -589,6 +592,196 @@ class MenuService {
     _isInitialized = true;
     // print(
     //     'MenuService: Created default data with ${_categories.length} categories and ${_allProducts.length} products');
+  }
+
+  // Apply custom sorting to products within each category
+  void _applyCategoryProductSorting() {
+    // print('MenuService: Applying custom product sorting within categories');
+
+    // Define custom product sorting rules for specific categories
+    final Map<String, Map<String, int>> categoryProductSorting = {
+      'КОМБО': {
+        // Example: Define specific product order for COMBO category
+        // Add your specific product names and their desired order
+      },
+      'АППЕТАЙЗЕРЫ': {
+        // Example: Define specific product order for CHICKEN category
+        // 'Куриные крылышки': 1,
+        // 'Куриные ножки': 2,
+        // 'Куриная грудка': 3,
+      },
+      ' КУРИЦА': {
+        '12 куриных сетов не острый':1,
+        '12 куриных сетов острый':2,
+        '12 куриных сетов микс':3,
+        'Диннер мил острый':4,
+        'Диннер меал не острый':5,
+        'Диннер меал (2 не острый, 1 острый)':6,
+        'Диннер меал  (2 не острый, 1 острый)':7,
+        'Снек меал острый':8,
+        'Снек меал не острый':9,
+        'Снек меал':10,
+        'Микс меал':11,
+        'Микс меал острый':12,
+        'острый чикен':13,
+        'Чикен не острый':14
+      },
+      'СПИННЕРЫ': {
+        'Дует Мастер':1,
+        'Смайл бокс':2,
+        'Хрустящий ролл':3,
+        'Хрустящий куриный ролл':4,
+        'Хрустящий ролл микс':5,
+        'Спиннер Тако':6,
+        'Спиннер Super Charged':7,
+        'Спиннер сальса':8,
+        'спиннер снек':9,
+        'спиннер без соуса':10
+        },
+      'БУРГЕРЫ':{
+        'Биггер':1,
+        'Лонгер':2,
+        'Джуниор бургер':3,
+        'Чики бургер':4,
+        'Твинс бургер курийный':5,
+        'Чиз бургер':6,
+        'Бееф Лонгер':7,
+        'Чили Лонгер':8,
+        'Твинс бургер говяжий':9,
+        'Пакет':10,
+      },
+      'ПИЦЦА':{
+
+      },
+      'САЛАТЫ': {
+
+      },
+      'НАПИТКИ':{
+        'Coca Cola':1,
+        'Coca-Cola  разлив':2,
+        'Фанта':3,
+        'Fanta разлив':4,
+        'Sprite':5,
+        'Sprite разлив':6,
+        'Минеральная вода без газа':7,
+        'Минеральная вода с газом':8,
+        'Апельсиновый сок Tip-Top':9,
+        'Абрикосовый сок Tip-Top':10,
+        'Ананасовый сок Tip-Top':11,
+        'Dinay':12,
+        'Айс ти':13,
+      },
+      'ГОРЯЧИЕ НАПИТКИ':{
+
+      },
+      'ДЕСЕРТЫ':{
+
+      },
+      'МОРОЖЕНОЕ И МИЛКШЕЙКИ':{
+        'Loook мороженое с бинго':1,
+        'Loook мороженое с вафли':2,
+        'Клубничное мороженое':3,
+        'Шоколадное мороженое':4,
+        'мороженое (500гр)':5,
+        'Банановый милкшейк':6,
+        'Молочный коктейль  шоколадный':7,
+        'Молочный коктейль клубничный':8
+      },
+      'ДЕТСКОЕ БЛЮДО':{
+
+      },
+      'СОУСЫ':{
+
+      },
+      'GENERAL':{
+
+      },
+    };
+
+    // Sort products within each category
+    for (var category in _categories) {
+      // Get all products for this category
+      List<Product> categoryProducts = _allProducts
+          .where((product) => product.categoryId == category.id)
+          .toList();
+
+      if (categoryProducts.isEmpty) continue;
+
+      // Log all products in this category for easy reference
+      // print('MenuService: === ${category.name} CATEGORY (${categoryProducts.length} products) ===');
+      for (int i = 0; i < categoryProducts.length; i++) {
+        var product = categoryProducts[i];
+        print('  ${i + 1}. "${product.name}" (ID: ${product.id}, sortOrder: ${product.sortOrder ?? 'null'}, price: ${product.price})');
+      }
+      // print('MenuService: === End of ${category.name} products ===\n');
+
+      // Check if we have custom sorting rules for this category
+      Map<String, int>? customOrder = categoryProductSorting[category.name];
+
+      if (customOrder != null && customOrder.isNotEmpty) {
+        // print('MenuService: Found custom sorting rules for ${category.name} category');
+        // print('MenuService: Custom order map has ${customOrder.length} entries');
+        
+        // Debug: Check which products have custom priorities
+        for (var product in categoryProducts) {
+          int priority = customOrder[product.name] ?? 9999;
+          // print('  Product "${product.name}" -> priority: $priority ${priority < 9999 ? "(CUSTOM)" : "(DEFAULT)"}');
+        }
+        
+        // Apply custom sorting based on product names
+        categoryProducts.sort((a, b) {
+          int priorityA = customOrder[a.name] ?? 9999;
+          int priorityB = customOrder[b.name] ?? 9999;
+
+          // If both products have custom priority, sort by priority
+          if (priorityA < 9999 && priorityB < 9999) {
+            return priorityA.compareTo(priorityB);
+          }
+          // If only one has custom priority, it comes first
+          else if (priorityA < 9999) {
+            return -1;
+          } else if (priorityB < 9999) {
+            return 1;
+          }
+          // If neither has custom priority, fall back to sortOrder or name
+          else {
+            // First try to sort by sortOrder if available
+            if (a.sortOrder != null && b.sortOrder != null) {
+              return a.sortOrder!.compareTo(b.sortOrder!);
+            }
+            // If sortOrder is not available, sort alphabetically
+            return a.name.compareTo(b.name);
+          }
+        });
+
+        // print('MenuService: Applied custom sorting to ${category.name} category (${categoryProducts.length} products)');
+        // print('MenuService: Products after custom sorting:');
+        for (int i = 0; i < categoryProducts.length; i++) {
+          print('  ${i + 1}. "${categoryProducts[i].name}"');
+        }
+      } else {
+        // Apply default sorting (by sortOrder, then by name)
+        categoryProducts.sort((a, b) {
+          // First try to sort by sortOrder if available
+          if (a.sortOrder != null && b.sortOrder != null) {
+            int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
+            if (sortComparison != 0) return sortComparison;
+          }
+          // If sortOrder is the same or not available, sort alphabetically
+          return a.name.compareTo(b.name);
+        });
+
+        // print('MenuService: Applied default sorting to ${category.name} category (${categoryProducts.length} products)');
+      }
+
+      // Update the products in _allProducts with the sorted order
+      // Remove old products for this category
+      _allProducts.removeWhere((product) => product.categoryId == category.id);
+      // Add back the sorted products
+      _allProducts.addAll(categoryProducts);
+    }
+
+    print('MenuService: Product sorting completed for all categories');
   }
 
   // Update the cache with the latest data
