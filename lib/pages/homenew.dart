@@ -1217,6 +1217,7 @@ class _HomeNewState extends State<HomeNew>
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEC700),
                           borderRadius: BorderRadius.circular(50.0),
+                          border: Border.all(color: Colors.white),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -1226,7 +1227,7 @@ class _HomeNewState extends State<HomeNew>
                           ],
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 40.0, vertical: 16.0),
+                            horizontal: 20.0, vertical: 10.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
