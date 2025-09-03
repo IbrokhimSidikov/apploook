@@ -1150,8 +1150,7 @@ class _HomeNewState extends State<HomeNew>
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               20.0),
-                                                      color: const Color(
-                                                          0xFFF1F2F7),
+                                                      color: const Color(0xFFFEC700),
                                                     ),
                                                     child: Text(
                                                       '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
@@ -1160,7 +1159,7 @@ class _HomeNewState extends State<HomeNew>
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         color: Color.fromARGB(
-                                                            255, 0, 0, 0),
+                                                            255, 11, 11, 11),
                                                       ),
                                                     ),
                                                   ),
@@ -1218,6 +1217,7 @@ class _HomeNewState extends State<HomeNew>
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEC700),
                           borderRadius: BorderRadius.circular(50.0),
+                          border: Border.all(color: Colors.white),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -1227,7 +1227,7 @@ class _HomeNewState extends State<HomeNew>
                           ],
                         ),
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 40.0, vertical: 16.0),
+                            horizontal: 20.0, vertical: 10.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

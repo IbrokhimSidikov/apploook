@@ -4,7 +4,6 @@ import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/order_mode_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-// http import removed as it's no longer needed
 
 class MenuService {
   static final MenuService _instance = MenuService._internal();
@@ -17,14 +16,10 @@ class MenuService {
   bool _isInitialized = false;
   String? _nearestBranchDeliverId;
 
-  // Cache constants
   static const String _cacheKey = 'cachedCategoryData';
   static const String _cacheTimestampKey = 'lastCacheUpdateTime';
   static const Duration _cacheValidityDuration = Duration(hours: 6);
 
-  // We no longer use the old API endpoint for carhop
-
-  // Getters
   List<Category> get categories => _categories;
   List<Product> get allProducts => _allProducts;
   bool get isInitialized => _isInitialized;
@@ -40,55 +35,54 @@ class MenuService {
     _orderModeService = OrderModeService();
   }
 
-  // Set the nearest branch deliver ID to be used for API requests
   void setNearestBranchDeliverId(String deliverId) {
     _nearestBranchDeliverId = deliverId;
-    print('MenuService: Set nearest branch deliver ID: $deliverId');
+    // print('MenuService: Set nearest branch deliver ID: $deliverId');
   }
 
   Future<void> initialize() async {
-    print('MenuService: Initializing...');
+    // print('MenuService: Initializing...');
     if (_isInitialized) {
-      print('MenuService: Already initialized, returning');
+      // print('MenuService: Already initialized, returning');
       return;
     }
 
     await _orderModeService.initialize();
-    print(
-        'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
+    // print(
+    //     'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
 
     try {
-      print('MenuService: Checking cache validity');
+      // print('MenuService: Checking cache validity');
       bool isCacheValid = await _isCacheValid();
-      print('MenuService: Cache valid: $isCacheValid');
+      // print('MenuService: Cache valid: $isCacheValid');
 
       if (isCacheValid) {
-        print('MenuService: Loading from cache');
+        // print('MenuService: Loading from cache');
         final loaded = await _loadFromCache();
         if (loaded) {
           _isInitialized = true;
-          print(
-              'MenuService: Initialized from cache, refreshing data in background');
+          // print(
+          //     'MenuService: Initialized from cache, refreshing data in background');
 
           refreshData().catchError((e) {
-            print('MenuService: Background refresh error: $e');
+            // print('MenuService: Background refresh error: $e');
           });
         } else {
-          print('MenuService: Cache is valid but data is null');
+          // print('MenuService: Cache is valid but data is null');
         }
       } else {
-        print('MenuService: Cache is not valid or missing');
+        // print('MenuService: Cache is not valid or missing');
       }
 
       if (!_isInitialized) {
-        print('MenuService: Not initialized from cache, fetching fresh data');
+        // print('MenuService: Not initialized from cache, fetching fresh data');
         await refreshData();
       }
     } catch (e, stackTrace) {
-      print('MenuService: Error initializing: $e');
-      print('MenuService: Stack trace: $stackTrace');
+      // print('MenuService: Error initializing: $e');
+      // print('MenuService: Stack trace: $stackTrace');
       if (!_isInitialized) {
-        print('MenuService: Not initialized, throwing exception');
+        // print('MenuService: Not initialized, throwing exception');
         throw Exception('Failed to initialize menu data: $e');
       }
     }
@@ -118,7 +112,7 @@ class MenuService {
       _processCategoryData(decodedData);
       return true;
     } catch (e) {
-      print('MenuService: Error loading from cache: $e');
+      // print('MenuService: Error loading from cache: $e');
       return false;
     }
   }
@@ -137,37 +131,37 @@ class MenuService {
         List<dynamic> items = data['items'] ?? [];
         _processNewApiData([], items, data);
       } else {
-        print('MenuService: Unknown data format, creating default data');
+        // print('MenuService: Unknown data format, creating default data');
         _createDefaultData();
       }
     } catch (e) {
-      print('MenuService: Error processing category data: $e');
+      // print('MenuService: Error processing category data: $e');
       _createDefaultData();
     }
   }
 
   Future<void> refreshData() async {
-    print('MenuService: Starting refreshData');
+    // print('MenuService: Starting refreshData');
     try {
       // Set the restaurant ID if we have a nearest branch deliver ID
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
-        print(
-            'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
+        // print(
+        // 'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
         ApiService.setRestaurantId(_nearestBranchDeliverId!);
       }
 
       // Always fetch from the new API regardless of order mode
-      print('MenuService: Fetching menu items from API service');
+      // print('MenuService: Fetching menu items from API service');
       final menuItems = await _apiService.getMenuItems();
-      print(
-          'MenuService: Received menu items from API, count: ${menuItems.length}');
+      // print(
+      //     'MenuService: Received menu items from API, count: ${menuItems.length}');
 
       // Extract the data from the response
       final apiData = menuItems.isNotEmpty && menuItems[0] is Map
           ? menuItems[0]
           : {'categories': [], 'items': []};
-      print('MenuService: API data structure: ${apiData.keys.toList()}');
+      // print('MenuService: API data structure: ${apiData.keys.toList()}');
 
       // Based on the logs, we can see the API returns both categories and items
       List<dynamic> categories = apiData['categories'] ?? [];
@@ -186,13 +180,9 @@ class MenuService {
     }
   }
 
-  // Old API processing methods removed as they're no longer needed
-
-  // Process data from the new API format
   Future<void> _processNewApiData(List<dynamic> categories,
       List<dynamic> directItems, Map<String, dynamic> apiData) async {
     try {
-      // Reset collections
       _categories = [];
       _allProducts = [];
 
@@ -203,7 +193,7 @@ class MenuService {
       Map<String, int> categoryIdMap = {};
 
       // Process categories first
-      print('MenuService: Processing categories');
+      // print('MenuService: Processing categories');
       for (var category in categories) {
         try {
           // Extract the original category ID (which is now a string UUID)
@@ -213,8 +203,8 @@ class MenuService {
           // Generate a unique integer ID for internal use
           int categoryId =
               _getUniqueCategoryId(categories.indexOf(category) + 1);
-          print(
-              'MenuService: Original category ID: $originalCategoryId, assigned unique ID: $categoryId');
+          // print(
+          //     'MenuService: Original category ID: $originalCategoryId, assigned unique ID: $categoryId');
 
           // Store the mapping from string ID to int ID
           categoryIdMap[originalCategoryId] = categoryId;
@@ -223,15 +213,15 @@ class MenuService {
           // Capture sortOrder for category sorting
           final sortOrder = category['sortOrder'] ?? 0;
 
-          print(
-              'MenuService: Processing category: $categoryName (ID: $categoryId), sortOrder: $sortOrder');
+          // print(
+          //     'MenuService: Processing category: $categoryName (ID: $categoryId), sortOrder: $sortOrder');
 
           // Store category with its sort order for later sorting
           categoriesWithSortOrder.add(
               {'id': categoryId, 'name': categoryName, 'sortOrder': sortOrder});
         } catch (e) {
-          print('MenuService: Error processing category: $e');
-          print('MenuService: Category data: $category');
+          // print('MenuService: Error processing category: $e');
+          // print('MenuService: Category data: $category');
         }
       }
 
@@ -293,8 +283,8 @@ class MenuService {
 
       // Custom sort for delivery/takeaway mode
       if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
-        print(
-            'MenuService: Applying custom category order for delivery/takeaway mode');
+        // print(
+        //     'MenuService: Applying custom category order for delivery/takeaway mode');
 
         // Define custom order priority map
         final Map<String, int> customOrderPriority = {
@@ -337,7 +327,7 @@ class MenuService {
         });
 
         // Debug log the sorted categories
-        print('MenuService: Custom sorted categories:');
+        // print('MenuService: Custom sorted categories:');
         for (var category in categoriesWithSortOrder) {
           print(
               '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
@@ -349,6 +339,9 @@ class MenuService {
         _categories
             .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
+
+      // Apply custom sorting to products within each category
+      _applyCategoryProductSorting();
 
       // If we still don't have any categories or products, create a default one
       if (_categories.isEmpty) {
@@ -574,11 +567,6 @@ class MenuService {
     }
   }
 
-  // This method has been integrated directly into refreshData
-
-  // Format category names to proper display format - removed as it's no longer used
-
-  // Create default data when API fails or returns empty data
   void _createDefaultData() {
     print('MenuService: Creating default data');
 
@@ -604,6 +592,196 @@ class MenuService {
     _isInitialized = true;
     // print(
     //     'MenuService: Created default data with ${_categories.length} categories and ${_allProducts.length} products');
+  }
+
+  // Apply custom sorting to products within each category
+  void _applyCategoryProductSorting() {
+    // print('MenuService: Applying custom product sorting within categories');
+
+    // Define custom product sorting rules for specific categories
+    final Map<String, Map<String, int>> categoryProductSorting = {
+      'КОМБО': {
+        // Example: Define specific product order for COMBO category
+        // Add your specific product names and their desired order
+      },
+      'АППЕТАЙЗЕРЫ': {
+        // Example: Define specific product order for CHICKEN category
+        // 'Куриные крылышки': 1,
+        // 'Куриные ножки': 2,
+        // 'Куриная грудка': 3,
+      },
+      ' КУРИЦА': {
+        '12 куриных сетов не острый':1,
+        '12 куриных сетов острый':2,
+        '12 куриных сетов микс':3,
+        'Диннер мил острый':4,
+        'Диннер меал не острый':5,
+        'Диннер меал (2 не острый, 1 острый)':6,
+        'Диннер меал  (2 не острый, 1 острый)':7,
+        'Снек меал острый':8,
+        'Снек меал не острый':9,
+        'Снек меал':10,
+        'Микс меал':11,
+        'Микс меал острый':12,
+        'острый чикен':13,
+        'Чикен не острый':14
+      },
+      'СПИННЕРЫ': {
+        'Дует Мастер':1,
+        'Смайл бокс':2,
+        'Хрустящий ролл':3,
+        'Хрустящий куриный ролл':4,
+        'Хрустящий ролл микс':5,
+        'Спиннер Тако':6,
+        'Спиннер Super Charged':7,
+        'Спиннер сальса':8,
+        'спиннер снек':9,
+        'спиннер без соуса':10
+        },
+      'БУРГЕРЫ':{
+        'Биггер':1,
+        'Лонгер':2,
+        'Джуниор бургер':3,
+        'Чики бургер':4,
+        'Твинс бургер курийный':5,
+        'Чиз бургер':6,
+        'Бееф Лонгер':7,
+        'Чили Лонгер':8,
+        'Твинс бургер говяжий':9,
+        'Пакет':10,
+      },
+      'ПИЦЦА':{
+
+      },
+      'САЛАТЫ': {
+
+      },
+      'НАПИТКИ':{
+        'Coca Cola':1,
+        'Coca-Cola  разлив':2,
+        'Фанта':3,
+        'Fanta разлив':4,
+        'Sprite':5,
+        'Sprite разлив':6,
+        'Минеральная вода без газа':7,
+        'Минеральная вода с газом':8,
+        'Апельсиновый сок Tip-Top':9,
+        'Абрикосовый сок Tip-Top':10,
+        'Ананасовый сок Tip-Top':11,
+        'Dinay':12,
+        'Айс ти':13,
+      },
+      'ГОРЯЧИЕ НАПИТКИ':{
+
+      },
+      'ДЕСЕРТЫ':{
+
+      },
+      'МОРОЖЕНОЕ И МИЛКШЕЙКИ':{
+        'Loook мороженое с бинго':1,
+        'Loook мороженое с вафли':2,
+        'Клубничное мороженое':3,
+        'Шоколадное мороженое':4,
+        'мороженое (500гр)':5,
+        'Банановый милкшейк':6,
+        'Молочный коктейль  шоколадный':7,
+        'Молочный коктейль клубничный':8
+      },
+      'ДЕТСКОЕ БЛЮДО':{
+
+      },
+      'СОУСЫ':{
+
+      },
+      'GENERAL':{
+
+      },
+    };
+
+    // Sort products within each category
+    for (var category in _categories) {
+      // Get all products for this category
+      List<Product> categoryProducts = _allProducts
+          .where((product) => product.categoryId == category.id)
+          .toList();
+
+      if (categoryProducts.isEmpty) continue;
+
+      // Log all products in this category for easy reference
+      // print('MenuService: === ${category.name} CATEGORY (${categoryProducts.length} products) ===');
+      for (int i = 0; i < categoryProducts.length; i++) {
+        var product = categoryProducts[i];
+        print('  ${i + 1}. "${product.name}" (ID: ${product.id}, sortOrder: ${product.sortOrder ?? 'null'}, price: ${product.price})');
+      }
+      // print('MenuService: === End of ${category.name} products ===\n');
+
+      // Check if we have custom sorting rules for this category
+      Map<String, int>? customOrder = categoryProductSorting[category.name];
+
+      if (customOrder != null && customOrder.isNotEmpty) {
+        // print('MenuService: Found custom sorting rules for ${category.name} category');
+        // print('MenuService: Custom order map has ${customOrder.length} entries');
+        
+        // Debug: Check which products have custom priorities
+        for (var product in categoryProducts) {
+          int priority = customOrder[product.name] ?? 9999;
+          // print('  Product "${product.name}" -> priority: $priority ${priority < 9999 ? "(CUSTOM)" : "(DEFAULT)"}');
+        }
+        
+        // Apply custom sorting based on product names
+        categoryProducts.sort((a, b) {
+          int priorityA = customOrder[a.name] ?? 9999;
+          int priorityB = customOrder[b.name] ?? 9999;
+
+          // If both products have custom priority, sort by priority
+          if (priorityA < 9999 && priorityB < 9999) {
+            return priorityA.compareTo(priorityB);
+          }
+          // If only one has custom priority, it comes first
+          else if (priorityA < 9999) {
+            return -1;
+          } else if (priorityB < 9999) {
+            return 1;
+          }
+          // If neither has custom priority, fall back to sortOrder or name
+          else {
+            // First try to sort by sortOrder if available
+            if (a.sortOrder != null && b.sortOrder != null) {
+              return a.sortOrder!.compareTo(b.sortOrder!);
+            }
+            // If sortOrder is not available, sort alphabetically
+            return a.name.compareTo(b.name);
+          }
+        });
+
+        // print('MenuService: Applied custom sorting to ${category.name} category (${categoryProducts.length} products)');
+        // print('MenuService: Products after custom sorting:');
+        for (int i = 0; i < categoryProducts.length; i++) {
+          print('  ${i + 1}. "${categoryProducts[i].name}"');
+        }
+      } else {
+        // Apply default sorting (by sortOrder, then by name)
+        categoryProducts.sort((a, b) {
+          // First try to sort by sortOrder if available
+          if (a.sortOrder != null && b.sortOrder != null) {
+            int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
+            if (sortComparison != 0) return sortComparison;
+          }
+          // If sortOrder is the same or not available, sort alphabetically
+          return a.name.compareTo(b.name);
+        });
+
+        // print('MenuService: Applied default sorting to ${category.name} category (${categoryProducts.length} products)');
+      }
+
+      // Update the products in _allProducts with the sorted order
+      // Remove old products for this category
+      _allProducts.removeWhere((product) => product.categoryId == category.id);
+      // Add back the sorted products
+      _allProducts.addAll(categoryProducts);
+    }
+
+    print('MenuService: Product sorting completed for all categories');
   }
 
   // Update the cache with the latest data
