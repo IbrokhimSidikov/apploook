@@ -196,7 +196,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // '🔊 Starting haptic pattern with specific timings: 200ms, 1500ms, 3000ms, 4500ms');
   }
 
-  // Stop haptic feedback
   void _stopHaptic() {
     _hapticTimer?.cancel();
     _hapticTimer = null;
@@ -577,13 +576,13 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ],
                           ),
                           const Spacer(flex: 5),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: EdgeInsets.only(left: 30.0),
+                              padding: const EdgeInsets.only(left: 30.0),
                               child: Text(
-                                'Choose Language',
-                                style: TextStyle(
+                                AppLocalizations.of(context).chooseLanguage,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
                                 ),
