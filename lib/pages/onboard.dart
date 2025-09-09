@@ -344,7 +344,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // Check for app updates first
     print('Checking for app updates before proceeding...');
     final bool updateRequired = await _versionChecker.checkForUpdates(context);
-    
+
     // If update is required, the dialog will be shown and we should not proceed
     if (updateRequired) {
       print('Update required, blocking navigation to HomeNew');
@@ -353,7 +353,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       });
       return;
     }
-    
+
     print('No update required, continuing with app flow');
 
     // Check if language is selected
@@ -577,13 +577,13 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ],
                           ),
                           const Spacer(flex: 5),
-                          const Align(
+                          Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: EdgeInsets.only(left: 30.0),
+                              padding: const EdgeInsets.only(left: 30.0),
                               child: Text(
-                                'Choose Language',
-                                style: TextStyle(
+                                AppLocalizations.of(context).chooseLanguage,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
                                 ),

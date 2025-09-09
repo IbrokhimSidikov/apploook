@@ -17,6 +17,7 @@ class AppLocalizations {
       'promosOfferDeals': 'Promos \nOffer & Deals',
       'easyOrdering': 'Easy \nOrdering',
       'selectOrderMode': 'Select Order Mode',
+      'chooseLanguage': 'Choose Language',
       // 'deliveryTakeaway': 'Delivery or Takeaway',
       // 'carhop': 'Carhop',
 
@@ -174,10 +175,12 @@ class AppLocalizations {
     'uz': {
       // Onboard Page
       'orderNowNotOnlyChicken': 'Buyurtma bering \nNafaqat tovuqlar',
-      'suitableForEveryone': 'Hammaga \nuchun mos',
+      'suitableForEveryone': 'Hamma \nuchun mos',
       'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
       'easyOrdering': 'Oson \nBuyurtma',
       'selectOrderMode': 'Buyurtma usulini tanlang',
+      'chooseLanguage': 'Tilni tanlang',
+
       // 'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
       // 'carhop': 'Avtomobilda xizmat',
 
@@ -342,6 +345,8 @@ class AppLocalizations {
       'promosOfferDeals': 'Акции \nСкидки и предложения',
       'easyOrdering': 'Лёгкий \nЗаказ',
       'selectOrderMode': 'Выберите способ заказа',
+      'chooseLanguage': 'Выберите язык',
+
       // 'deliveryTakeaway': 'Доставка или самовывоз',
       // 'carhop': 'Обслуживание в авто',
 
@@ -505,6 +510,8 @@ class AppLocalizations {
   String get deliveryTakeaway =>
       _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
   String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
+  String get chooseLanguage =>
+      _localizedValues[locale.languageCode]!['chooseLanguage']!;
 
   // HomeNew Page
   String get whatsNew => _localizedValues[locale.languageCode]!['whatsNew']!;
