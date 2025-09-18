@@ -50,33 +50,31 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.loook.v1"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 21
         targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         ndk {
-        abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
+            abiFilters 'armeabi-v7a','arm64-v8a','x86_64'
         }
     }
 
     signingConfigs {
         release {
-        storeFile file(keystoreProperties['storeFile'])
-        storePassword keystoreProperties['storePassword']
-        keyAlias keystoreProperties['keyAlias']
-        keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
         }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
@@ -90,6 +88,18 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:32.7.1')
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-auth'
+
+    // ✅ Use only the new Play Core libraries
     implementation "com.google.android.play:app-update:2.1.0"
     implementation "com.google.android.play:review:2.0.1"
+}
+
+// ✅ Exclude the OLD play-core everywhere
+configurations.all {
+    exclude group: 'com.google.android.play', module: 'core'
+    resolutionStrategy {
+        force 'com.google.android.play:app-update:2.1.0'
+        force 'com.google.android.play:core-common:2.0.3'
+        force 'com.google.android.play:review:2.0.1'
+    }
 }

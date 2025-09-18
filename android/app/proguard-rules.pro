@@ -1,25 +1,42 @@
+# ------------------------
 # Keep all classes in androidx.media3
+# ------------------------
 -keep class androidx.media3.** { *; }
 -keep interface androidx.media3.** { *; }
 -dontwarn androidx.media3.**
 
-# Keep required classes for XML parsing
+# ------------------------
+# XML parsing
+# ------------------------
 -keep class org.xmlpull.** { *; }
 -dontwarn org.xmlpull.**
 
-# Keep common Android classes
+# ------------------------
+# Common Android / AndroidX
+# ------------------------
 -keep class android.** { *; }
 -keep class androidx.** { *; }
 
-# Firebase
+# ------------------------
+# Firebase + Google Play Services
+# ------------------------
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 
+# ------------------------
 # Flutter
+# ------------------------
 -keep class io.flutter.** { *; }
 -keep class io.flutter.plugins.** { *; }
 -keep class io.flutter.plugin.** { *; }
 -keep class io.flutter.view.** { *; }
 
-# Keep your application classes
--keep class com.example.apploook.** { *; }
+# ------------------------
+# Your app package
+# ------------------------
+-keep class com.loook.v1.** { *; }
+
+# ------------------------
+# Ignore Play Core warnings (we don't use deferred components)
+# ------------------------
+-dontwarn com.google.android.play.core.**
