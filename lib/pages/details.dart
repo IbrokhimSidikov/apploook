@@ -85,14 +85,11 @@ class _DetailsState extends State<Details> {
       hasModifiers = true;
       for (ModifierGroup group in widget.product.modifierGroups) {
         selectedModifiersByGroup[group.id] = [];
-        // Pre-select required modifiers with minimum selection
-        if (group.minSelectedModifiers > 0 && group.modifiers.isNotEmpty) {
-          for (int i = 0;
-              i < group.minSelectedModifiers && i < group.modifiers.length;
-              i++) {
-            selectedModifiersByGroup[group.id]!.add(
-                SelectedModifier(modifier: group.modifiers[i], quantity: 1));
-          }
+
+        // Always select the first modifier in each group by default
+        if (group.modifiers.isNotEmpty) {
+          selectedModifiersByGroup[group.id]!
+              .add(SelectedModifier(modifier: group.modifiers[0], quantity: 1));
         }
       }
       _calculateTotalPrice();
@@ -120,26 +117,15 @@ class _DetailsState extends State<Details> {
           .indexWhere((selected) => selected.modifier.id == modifier.id);
 
       if (existingIndex >= 0) {
-        // Remove if already selected (deselect)
-        currentSelection.removeAt(existingIndex);
-      } else {
-        // For single selection groups (maxSelectedModifiers = 1), clear all and add new
-        if (group.maxSelectedModifiers == 1) {
-          currentSelection.clear();
-          currentSelection
-              .add(SelectedModifier(modifier: modifier, quantity: 1));
-        } else {
-          // For multiple selection groups, check max limit
-          if (currentSelection.length < group.maxSelectedModifiers) {
-            currentSelection
-                .add(SelectedModifier(modifier: modifier, quantity: 1));
-          } else {
-            // If at max limit, replace the first selected item with the new one
-            currentSelection.removeAt(0);
-            currentSelection
-                .add(SelectedModifier(modifier: modifier, quantity: 1));
-          }
+        // If this is the only selected item, don't allow deselection
+        // to ensure one option is always selected
+        if (currentSelection.length > 1) {
+          currentSelection.removeAt(existingIndex);
         }
+      } else {
+        // Always treat as radio button behavior - clear all and add new
+        currentSelection.clear();
+        currentSelection.add(SelectedModifier(modifier: modifier, quantity: 1));
       }
 
       selectedModifiersByGroup[group.id] = currentSelection;
@@ -160,8 +146,8 @@ class _DetailsState extends State<Details> {
     final cutoffMinute = remoteConfig.orderCutoffMinute;
 
     // Log the values fetched from Firebase Remote Config
-    print('Firebase Remote Config - Order Cutoff Time: $cutoffHour:$cutoffMinute');
-    print('Current Time: ${now.hour}:${now.minute}');
+    // print('Firebase Remote Config - Order Cutoff Time: $cutoffHour:$cutoffMinute');
+    // print('Current Time: ${now.hour}:${now.minute}');
 
     // Check if current time is before cutoff
     if (now.hour < cutoffHour) {
@@ -169,15 +155,15 @@ class _DetailsState extends State<Details> {
     } else if (now.hour == cutoffHour && now.minute < cutoffMinute) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   // Force refresh Remote Config values
   Future<void> _refreshRemoteConfig() async {
     final remoteConfig = RemoteConfigService();
     final updated = await remoteConfig.forceUpdate();
-    
+
     // Show a snackbar with the result
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +172,7 @@ class _DetailsState extends State<Details> {
           duration: const Duration(seconds: 2),
         ),
       );
-      
+
       // Force UI update
       setState(() {});
     }

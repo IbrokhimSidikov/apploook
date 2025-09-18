@@ -37,7 +37,9 @@ class MenuService {
 
   void setNearestBranchDeliverId(String deliverId) {
     _nearestBranchDeliverId = deliverId;
-    // print('MenuService: Set nearest branch deliver ID: $deliverId');
+    print('\n======== NEAREST BRANCH INFORMATION ========');
+    print('MenuService: Set nearest branch deliver ID: $deliverId');
+    print('======== END NEAREST BRANCH INFORMATION ========\n');
   }
 
   Future<void> initialize() async {
@@ -141,27 +143,28 @@ class MenuService {
   }
 
   Future<void> refreshData() async {
-    // print('MenuService: Starting refreshData');
+    print('\n======== MENU SERVICE REFRESH DATA ========');
+    print('MenuService: Starting refreshData');
     try {
       // Set the restaurant ID if we have a nearest branch deliver ID
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
-        // print(
-        // 'MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
+        print('MenuService: Using nearest branch deliver ID: $_nearestBranchDeliverId');
         ApiService.setRestaurantId(_nearestBranchDeliverId!);
+      } else {
+        print('MenuService: No nearest branch deliver ID set, using default restaurant ID');
       }
 
       // Always fetch from the new API regardless of order mode
-      // print('MenuService: Fetching menu items from API service');
+      print('MenuService: Fetching menu items from API service');
       final menuItems = await _apiService.getMenuItems();
-      // print(
-      //     'MenuService: Received menu items from API, count: ${menuItems.length}');
+      print('MenuService: Received menu items from API, count: ${menuItems.length}');
 
       // Extract the data from the response
       final apiData = menuItems.isNotEmpty && menuItems[0] is Map
           ? menuItems[0]
           : {'categories': [], 'items': []};
-      // print('MenuService: API data structure: ${apiData.keys.toList()}');
+      print('MenuService: API data structure: ${apiData.keys.toList()}');
 
       // Based on the logs, we can see the API returns both categories and items
       List<dynamic> categories = apiData['categories'] ?? [];
