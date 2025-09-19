@@ -172,16 +172,26 @@ class ApiService {
     final endpoint = '/menu/$_restaurantId/composition';
 
     try {
+      print('\n======== MENU API REQUEST ========');
+      print('Restaurant ID: $_restaurantId');
+      print('Endpoint: $_baseUrl$endpoint');
+      print('======== END MENU API REQUEST ========\n');
+
       final data = await _authenticatedRequest(endpoint);
 
-      // Print the raw response data for testing
-      print('\n==== RAW API RESPONSE DATA ====');
+      // Print the full raw response data for debugging
+      print('\n======== FULL RAW API RESPONSE DATA ========');
       print('Response data type: ${data.runtimeType}');
       print('Response data keys: ${data.keys.toList()}');
-      print('==== END RAW API RESPONSE ====\n');
+      
+      // Log the complete JSON response
+      print('\nFULL JSON RESPONSE:');
+      final prettyJson = const JsonEncoder.withIndent('  ').convert(data);
+      print(prettyJson);
+      print('\n======== END FULL RAW API RESPONSE ========\n');
 
       // Extract and display menu items for testing
-      print('\n==== EXTRACTED MENU ITEMS ====');
+      print('\n======== EXTRACTED MENU ITEMS ========');
 
       // Try different possible structures
       if (data['categories'] != null) {
@@ -191,6 +201,9 @@ class ApiService {
 
         for (var category in categories) {
           print('\nCategory: ${category['title'] ?? category['name']}');
+          print('Category ID: ${category['id']}');
+          print('Category sortOrder: ${category['sortOrder']}');
+          
           final items = category['items'] ?? category['products'] ?? [];
           print('Items count: ${items.length}');
 
@@ -214,7 +227,8 @@ class ApiService {
           final name = item['name'] ?? item['title'] ?? 'N/A';
           final price = item['price'] ??
               (item['priceList'] != null ? item['priceList']['price'] : 'N/A');
-          print('  - ID: $id, Name: $name, Price: $price');
+          final categoryId = item['categoryId'] ?? 'N/A';
+          print('  - ID: $id, Name: $name, Price: $price, CategoryID: $categoryId');
         }
       } else {
         // Try to find any lists in the response
@@ -238,7 +252,21 @@ class ApiService {
         }
       }
 
-      print('==== END EXTRACTED MENU ITEMS ====\n');
+      // Log branch information if available
+      if (data['branch'] != null) {
+        print('\n======== BRANCH INFORMATION ========');
+        print('Branch data: ${data['branch']}');
+        print('======== END BRANCH INFORMATION ========');
+      }
+
+      // Log restaurant information if available
+      if (data['restaurant'] != null) {
+        print('\n======== RESTAURANT INFORMATION ========');
+        print('Restaurant data: ${data['restaurant']}');
+        print('======== END RESTAURANT INFORMATION ========');
+      }
+
+      print('\n======== END EXTRACTED MENU ITEMS ========\n');
 
       // Always return the complete response data wrapped in a list
       // This ensures MenuService gets the full structure with both categories and items

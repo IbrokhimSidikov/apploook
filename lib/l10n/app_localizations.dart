@@ -18,6 +18,7 @@ class AppLocalizations {
       'easyOrdering': 'Easy \nOrdering',
       'selectOrderMode': 'Select Order Mode',
       'chooseLanguage': 'Choose Language',
+      // 'chooseLanguage': 'Choose Language',
       // 'deliveryTakeaway': 'Delivery or Takeaway',
       // 'carhop': 'Carhop',
 
@@ -39,6 +40,7 @@ class AppLocalizations {
       'delete': 'Delete',
       'logoutConfirmation': 'Are you sure you want to log out?',
       'loggingOut': 'Logging out...',
+      'branches': 'Branches',
       // Details page
       'totalPrice': 'Total Price',
       'addToCart': 'Add to cart',
@@ -175,7 +177,7 @@ class AppLocalizations {
     'uz': {
       // Onboard Page
       'orderNowNotOnlyChicken': 'Buyurtma bering \nNafaqat tovuqlar',
-      'suitableForEveryone': 'Hammaga \nuchun mos',
+      'suitableForEveryone': 'Hamma \nuchun mos',
       'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
       'easyOrdering': 'Oson \nBuyurtma',
       'selectOrderMode': 'Buyurtma usulini tanlang',
@@ -202,6 +204,7 @@ class AppLocalizations {
       'delete': 'O\'chirish',
       'logoutConfirmation': 'Ilovadan chiqmoqchimisiz?',
       'loggingOut': 'Chiqish...',
+      'branches': 'Filiallar',
       // Details page
       'totalPrice': 'Umumiy',
       'addToCart': 'Qo\'shish',
@@ -366,6 +369,7 @@ class AppLocalizations {
       'delete': 'Удалить',
       'logoutConfirmation': 'Вы уверены, что хотите выйти?',
       'loggingOut': 'Выход...',
+      'branches': 'Филиалы',
       // Details page
       'totalPrice': 'Общая стоимость',
       'addToCart': 'Добавить в корзину',
@@ -536,6 +540,7 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['logoutConfirmation']!;
   String get loggingOut =>
       _localizedValues[locale.languageCode]!['loggingOut']!;
+  String get branches => _localizedValues[locale.languageCode]!['branches']!;
 
   // Details page
   String get totalPrice =>

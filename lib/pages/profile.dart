@@ -219,6 +219,22 @@ class _ProfileState extends State<Profile> {
                 ),
                 const SizedBox(height: 40.0),
                 GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/branches');
+                  },
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 24),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.of(context).branches,
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 40.0),
+                GestureDetector(
                   onTap: () async {
                     bool? confirmLogout = await showDialog<bool>(
                       context: context,

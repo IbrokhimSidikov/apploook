@@ -343,7 +343,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // Check for app updates first
     print('Checking for app updates before proceeding...');
     final bool updateRequired = await _versionChecker.checkForUpdates(context);
-    
+
     // If update is required, the dialog will be shown and we should not proceed
     if (updateRequired) {
       print('Update required, blocking navigation to HomeNew');
@@ -352,7 +352,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       });
       return;
     }
-    
+
     print('No update required, continuing with app flow');
 
     // Check if language is selected
