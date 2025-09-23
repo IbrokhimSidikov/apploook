@@ -1,6 +1,7 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
+import 'package:apploook/pages/branches.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/splash_screen.dart';
@@ -213,6 +214,7 @@ class _MyAppState extends State<MyApp> {
             '/orderTracking': (context) => const OrderTrackingPage(),
             '/unifiedOrderTracking': (context) =>
                 const UnifiedOrderTrackingPage(),
+            '/branches': (context) => const Branches(),
           },
         );
       },

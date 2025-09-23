@@ -196,7 +196,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // '🔊 Starting haptic pattern with specific timings: 200ms, 1500ms, 3000ms, 4500ms');
   }
 
-  // Stop haptic feedback
   void _stopHaptic() {
     _hapticTimer?.cancel();
     _hapticTimer = null;
@@ -480,7 +479,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                 ),
               ),
             ),
-
           // Main Content
           FadeTransition(
             opacity: _animationController,

@@ -1229,10 +1229,11 @@ class _HomeNewState extends State<HomeNew>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20.0, vertical: 10.0),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          // mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Stack(
-                              alignment: Alignment.center,
+                              alignment: Alignment.topLeft,
                               children: [
                                 const Icon(
                                   Icons.shopping_bag_outlined,
@@ -1240,8 +1241,8 @@ class _HomeNewState extends State<HomeNew>
                                   size: 28.0,
                                 ),
                                 Positioned(
-                                  right: -4,
-                                  top: -4,
+                                  right: 0,
+                                  top: -2,
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
@@ -1252,10 +1253,10 @@ class _HomeNewState extends State<HomeNew>
                                         width: 1.5,
                                       ),
                                     ),
-                                    constraints: const BoxConstraints(
-                                      minWidth: 18,
-                                      minHeight: 18,
-                                    ),
+                                    // constraints: const BoxConstraints(
+                                    //   minWidth: 15,
+                                    //   minHeight: 15,
+                                    // ),
                                     child: Center(
                                       child: Text(
                                         '${cartProvider.showQuantity()}',
