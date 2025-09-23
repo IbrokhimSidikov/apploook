@@ -1305,16 +1305,7 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
-                  DropdownMenuItem<String>(
-                    value: 'Card',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.credit_card, color: Colors.blue),
-                        const SizedBox(width: 10),
-                        Text(AppLocalizations.of(context).card),
-                      ],
-                    ),
-                  ),
+                  
                   DropdownMenuItem<String>(
                     value: 'Payme',
                     child: Row(

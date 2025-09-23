@@ -793,7 +793,7 @@ class _CheckoutState extends State<Checkout> {
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
@@ -1560,7 +1560,7 @@ class _CheckoutState extends State<Checkout> {
                       ? selectedAddress != null &&
                           selectedOption != null &&
                           !_isProcessing &&
-                          deliveryFee > 0
+                          deliveryFee > 0 // Ensure delivery fee is calculated
                       : _selectedIndex == 1
                           ? selectedBranch != null &&
                               selectedOption != null &&
