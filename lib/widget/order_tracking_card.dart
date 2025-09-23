@@ -370,12 +370,17 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${item['quantity']}x ${item['name']}',
-                      style: const TextStyle(fontSize: 14),
+                    Expanded(
+                      child: Text(
+                        '${item['quantity']}x ${item['name']}',
+                        style: const TextStyle(fontSize: 14),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
                     ),
+                    const SizedBox(width: 8),
                     Text(
                       '${NumberFormat('#,##0').format(item['totalPrice'])} sum',
                       style: const TextStyle(fontSize: 14),
