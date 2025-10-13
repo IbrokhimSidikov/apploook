@@ -8,7 +8,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'dart:io' show Platform;
 import 'package:apploook/providers/locale_provider.dart';
-import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
@@ -58,19 +57,15 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     //vibrate, pause, vibrate, pause, vibrate, longer pause
   ];
 
-  final OrderModeService _orderModeService = OrderModeService();
   final MenuService _menuService = MenuService();
   final NearestBranchService _nearestBranchService = NearestBranchService();
   final VersionCheckerService _versionChecker = VersionCheckerService();
-  OrderMode? _selectedOrderMode =
-      OrderMode.deliveryTakeaway; // Default selection
   String? _nearestBranchDeliverId;
 
   @override
   void initState() {
     super.initState();
     _loadLanguagePreference();
-    _initializeOrderMode();
     _findNearestBranch();
     _initializeHapticFeedback();
     _initializeVideo();
@@ -78,7 +73,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1000),
     );
-    // print('Onboard initState: Order mode initialized to $_selectedOrderMode');
   }
 
   void _initializeHapticFeedback() {
@@ -278,18 +272,10 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     });
   }
 
-  Future<void> _preloadMenuData({OrderMode? specificOrderMode}) async {
+  Future<void> _preloadMenuData() async {
     // print('Onboard: Starting menu preloading during video playback');
 
     try {
-      await _orderModeService.initialize();
-
-      OrderMode orderMode = specificOrderMode ?? _orderModeService.currentMode;
-      // print('Onboard: Preloading menu data for order mode: $orderMode');
-
-      if (specificOrderMode != null) {
-        await _orderModeService.setOrderMode(specificOrderMode);
-      }
 
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
@@ -325,13 +311,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _initializeOrderMode() async {
-    await _orderModeService.initialize();
-    setState(() {
-      _selectedOrderMode = _orderModeService.currentMode;
-    });
-    // print('OrderMode initialized from service: $_selectedOrderMode');
-  }
 
   Future<void> _continue() async {
     if (!mounted) return;
@@ -370,22 +349,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       return;
     }
 
-    if (_selectedOrderMode == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select an order mode'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
-
     // Save the selected language
-    final selectedLocale = isEnglishSelected ? 'eng' : 'uz';
+    final selectedLocale = isEnglishSelected ? 'en' : 'uz';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_language', selectedLocale);
 
@@ -396,14 +361,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       _isMenuLoaded = false;
     });
 
-    await _preloadMenuData(specificOrderMode: _selectedOrderMode);
-
-    // Force a refresh of the SharedPreferences to ensure it's saved
-    if (_selectedOrderMode == OrderMode.carhop) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('order_mode', OrderMode.carhop.index);
-      await prefs.setBool('has_user_selected_order_mode', true);
-    }
+    await _preloadMenuData();
 
     if (!mounted) return;
 
@@ -414,7 +372,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HomeNew(initialOrderMode: _selectedOrderMode),
+        builder: (context) => const HomeNew(),
       ),
     );
   }

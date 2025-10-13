@@ -13,7 +13,6 @@ import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
-import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 
 import 'dart:convert';
@@ -156,9 +155,7 @@ class Product {
 }
 
 class HomeNew extends StatefulWidget {
-  final OrderMode? initialOrderMode;
-
-  const HomeNew({super.key, this.initialOrderMode});
+  const HomeNew({super.key});
 
   @override
   State<HomeNew> createState() => _HomeNewState();
@@ -169,10 +166,6 @@ class _HomeNewState extends State<HomeNew>
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
-  final OrderModeService _orderModeService = OrderModeService();
-
-  // Track current order mode to detect changes
-  OrderMode? _currentOrderMode;
 
   List<Category> categories = [];
   List<Product> allProducts = [];
@@ -183,7 +176,6 @@ class _HomeNewState extends State<HomeNew>
   ScrollController _scrollController = ScrollController();
   bool _isScrolling = false;
 
-  OrderMode? _loadingOrderMode; // Track which order mode button is loading
 
   Future<void> _getBanners() async {
     try {
@@ -209,7 +201,6 @@ class _HomeNewState extends State<HomeNew>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeAndLoadData();
       _checkPendingPaymePayments();
-      _initializeOrderMode();
     });
 
     WidgetsBinding.instance.addObserver(this);
@@ -234,217 +225,19 @@ class _HomeNewState extends State<HomeNew>
 
   Future<void> _initializeAndLoadData() async {
     try {
-      // First initialize order mode (this will use initialOrderMode if provided)
-      await _initializeOrderMode();
-
-      // Then get banners (non-blocking)
+      // Get banners (non-blocking)
       _getBanners();
 
-      // Finally load menu data after order mode is initialized
-      // print(
-      //     'HomeNew: Loading menu data for order mode: ${_orderModeService.currentMode}');
+      // Load menu data
       await loadData();
-
-      // If we're using an initialOrderMode, force a refresh of the data
-      if (widget.initialOrderMode != null) {
-        // print(
-        //     'HomeNew: Forcing data refresh for initialOrderMode: ${widget.initialOrderMode}');
-        await refreshData();
-      }
-
-      // Debug print to verify the order mode
-      // print(
-      //     'HomeNew: Initialization complete with order mode: ${_orderModeService.currentMode}');
     } catch (e) {
-      // print('HomeNew: Error during initialization: $e');
       // Still try to load data even if there was an error
       await loadData();
     }
   }
 
-  // Initialize order mode and show selection dialog if needed
-  Future<void> _initializeOrderMode() async {
-    // First initialize the order mode service
-    await _orderModeService.initialize();
 
-    // Check if we have an initialOrderMode from the onboard page
-    if (widget.initialOrderMode != null) {
-      // print(
-      //     'HomeNew: Using initialOrderMode from onboard page: ${widget.initialOrderMode}');
-      // Set the order mode directly from the parameter
-      await _orderModeService.setOrderMode(widget.initialOrderMode!);
 
-      // Force a refresh of SharedPreferences to ensure it's saved
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('order_mode', widget.initialOrderMode!.index);
-      await prefs.setBool('has_user_selected_order_mode', true);
-      // print(
-      //     'HomeNew: Explicitly saved order mode to SharedPreferences: ${widget.initialOrderMode}');
-    }
-
-    // Debug print to verify the order mode was loaded correctly
-    // print(
-    //     'HomeNew: Order mode initialized to: ${_orderModeService.currentMode}');
-
-    // Store the current mode for reference
-    _currentOrderMode = _orderModeService.currentMode;
-  }
-
-  // Show order mode selection dialog
-  void _showOrderModeSelectionDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true, // Allow closing by tapping outside
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Close button in top-right corner
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: _loadingOrderMode == null
-                            ? () => Navigator.of(context).pop()
-                            : null, // Disable close button while loading
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                      ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    // Title
-                    Text(
-                      AppLocalizations.of(context).orderModeTitle,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    // Description
-                    Text(
-                      AppLocalizations.of(context).orderModeSubtitle,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24.0),
-                    // Delivery/Takeaway button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        onPressed: _loadingOrderMode == null
-                            ? () {
-                                setDialogState(() {
-                                  _loadingOrderMode =
-                                      OrderMode.deliveryTakeaway;
-                                });
-                                _setOrderMode(OrderMode.deliveryTakeaway);
-                              }
-                            : null, // Disable button while loading
-                        child: _loadingOrderMode == OrderMode.deliveryTakeaway
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.0,
-                                ),
-                              )
-                            : Text(
-                                AppLocalizations.of(context).deliveryTakeaway,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                    ),
-                    const SizedBox(height: 12.0),
-                    // Carhop button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        onPressed: _loadingOrderMode == null
-                            ? () {
-                                setDialogState(() {
-                                  _loadingOrderMode = OrderMode.carhop;
-                                });
-                                _setOrderMode(OrderMode.carhop);
-                              }
-                            : null, // Disable button while loading
-                        child: _loadingOrderMode == OrderMode.carhop
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2.0,
-                                ),
-                              )
-                            : Text(
-                                AppLocalizations.of(context).carhop,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Set the order mode and refresh data
-  void _setOrderMode(OrderMode mode) async {
-    // Set the order mode
-    await _orderModeService.setOrderMode(mode);
-
-    // Clear the cart
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    cartProvider.clearCart();
-
-    // Refresh the menu data based on the new order mode
-    await refreshData();
-
-    // Reset loading state
-    setState(() {
-      _loadingOrderMode = null;
-    });
-
-    // Close the dialog if it's still open
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
-  }
 
   Future<void> loadData() async {
     try {

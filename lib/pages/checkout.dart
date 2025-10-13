@@ -10,7 +10,6 @@ import 'package:apploook/services/order_tracking_service.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
-import 'package:apploook/services/order_mode_service.dart';
 import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/config/branch_config.dart';
@@ -38,8 +37,6 @@ class Checkout extends StatefulWidget {
 }
 
 class _CheckoutState extends State<Checkout> {
-  // Order mode service to check current mode
-  final OrderModeService _orderModeService = OrderModeService();
   int _selectedIndex = 0;
   late double orderPrice = 0;
   double deliveryFee = 0;
@@ -71,7 +68,6 @@ class _CheckoutState extends State<Checkout> {
     _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
-    _initializeOrderMode();
     // Check for pending Payme transactions
     PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
@@ -448,19 +444,6 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
-  // Initialize order mode and set initial tab selection accordingly
-  Future<void> _initializeOrderMode() async {
-    await _orderModeService.initialize();
-    setState(() {
-      // If in carhop mode, select the carhop tab (index 2) by default
-      if (_orderModeService.currentMode == OrderMode.carhop) {
-        _selectedIndex = 2;
-      } else {
-        // Otherwise default to delivery tab (index 0)
-        _selectedIndex = 0;
-      }
-    });
-  }
 
   // Function to calculate distance to the nearest branch
   Future<void> _calculateDistanceToNearestBranch() async {
@@ -642,121 +625,65 @@ class _CheckoutState extends State<Checkout> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Delivery button - disabled in carhop mode
-                _orderModeService.currentMode == OrderMode.carhop
-                    ? ElevatedButton(
-                        onPressed: null, // Disabled in carhop mode
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            const Color(
-                                0xffE0E0E0), // Gray color for disabled state
-                          ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delivery_dining_outlined,
-                                color: Colors.black),
-                            const SizedBox(width: 5),
-                            Text(
-                              AppLocalizations.of(context).delivery,
-                              style: const TextStyle(
-                                  color: Color(0xFF9E9E9E),
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ElevatedButton(
-                        onPressed: () => setState(() => _selectedIndex = 0),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            _selectedIndex == 0
-                                ? const Color(0xffFEC700)
-                                : const Color(0xffF1F2F7),
-                          ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delivery_dining_outlined,
-                                color: Colors.black),
-                            const SizedBox(width: 5),
-                            Text(
-                              AppLocalizations.of(context).delivery,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
+                // Delivery button
+                ElevatedButton(
+                  onPressed: () => setState(() => _selectedIndex = 0),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      _selectedIndex == 0
+                          ? const Color(0xffFEC700)
+                          : const Color(0xffF1F2F7),
+                    ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.delivery_dining_outlined,
+                          color: Colors.black),
+                      const SizedBox(width: 5),
+                      Text(
+                        AppLocalizations.of(context).delivery,
+                        style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
 
-                // Self-pickup button - disabled in carhop mode
-                _orderModeService.currentMode == OrderMode.carhop
-                    ? ElevatedButton(
-                        onPressed: null, // Disabled in carhop mode
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            const Color(
-                                0xffE0E0E0), // Gray color for disabled state
-                          ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.shopping_bag_outlined,
-                                color: Colors.black),
-                            const SizedBox(width: 10),
-                            Text(
-                              AppLocalizations.of(context).selfPickup,
-                              style: const TextStyle(
-                                  color: Color(0xFF9E9E9E),
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ElevatedButton(
-                        onPressed: () => setState(() => _selectedIndex = 1),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                            _selectedIndex == 1
-                                ? const Color(0xffFEC700)
-                                : const Color(0xffF1F2F7),
-                          ),
-                          shape: WidgetStateProperty.all(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.shopping_bag_outlined,
-                                color: Colors.black),
-                            const SizedBox(width: 5),
-                            Text(
-                              AppLocalizations.of(context).selfPickup,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
-                        ),
+                // Self-pickup button
+                ElevatedButton(
+                  onPressed: () => setState(() => _selectedIndex = 1),
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      _selectedIndex == 1
+                          ? const Color(0xffFEC700)
+                          : const Color(0xffF1F2F7),
+                    ),
+                    shape: WidgetStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.shopping_bag_outlined,
+                          color: Colors.black),
+                      const SizedBox(width: 5),
+                      Text(
+                        AppLocalizations.of(context).selfPickup,
+                        style: const TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
 
                 // Carhop button - enabled for testing regardless of mode
                 ElevatedButton(

@@ -16,7 +16,6 @@ class AppLocalizations {
       'suitableForEveryone': 'Suitable For \nEveryone',
       'promosOfferDeals': 'Promos \nOffer & Deals',
       'easyOrdering': 'Easy \nOrdering',
-      'selectOrderMode': 'Select Order Mode',
       'chooseLanguage': 'Choose Language',
       // 'chooseLanguage': 'Choose Language',
       // 'deliveryTakeaway': 'Delivery or Takeaway',
@@ -154,8 +153,6 @@ class AppLocalizations {
       'alreadyArrived': 'Arrived',
       'arrivedSuccessfully': 'Successfully marked as arrived',
       'arrivedError': 'Failed to mark as arrived',
-      'orderModeTitle': 'Select Order mode',
-      'orderModeSubtitle': 'Please select how you would like to order',
       'deliveryTakeaway': 'Delivery or Takeaway',
       'carhop': 'Carhop',
       'bagPrice': 'Bag Price',
@@ -180,7 +177,6 @@ class AppLocalizations {
       'suitableForEveryone': 'Hamma \nuchun mos',
       'promosOfferDeals': 'Aksiya va taklif \nChegirmalar',
       'easyOrdering': 'Oson \nBuyurtma',
-      'selectOrderMode': 'Buyurtma usulini tanlang',
       'chooseLanguage': 'Tilni tanlash',
       // 'deliveryTakeaway': 'Yetkazib berish yoki Olib ketish',
       // 'carhop': 'Avtomobilda xizmat',
@@ -317,8 +313,6 @@ class AppLocalizations {
       'trackOrderButton': 'Buyurtmani kuzatish',
       'paymeNotAvailable':
           'O\'zi olib ketish uchun Payme to\'lov usuli mavjud emas',
-      'orderModeTitle': 'Buyurtma turini tanlang',
-      'orderModeSubtitle': 'Qanday buyurtma qilmoqchisiz?',
       'deliveryTakeaway': 'Yetkazib berish / Olib ketish',
       'carhop': 'Carhop',
       'alreadyArrived': 'Yetib Keldim',
@@ -346,7 +340,6 @@ class AppLocalizations {
       'suitableForEveryone': 'Подходит \nДля всех',
       'promosOfferDeals': 'Акции \nСкидки и предложения',
       'easyOrdering': 'Лёгкий \nЗаказ',
-      'selectOrderMode': 'Выберите способ заказа',
       'chooseLanguage': 'Выберите язык',
       // 'deliveryTakeaway': 'Доставка или самовывоз',
       // 'carhop': 'Обслуживание в авто',
@@ -474,8 +467,6 @@ class AppLocalizations {
       'closeButton': 'Закрыть',
       'trackOrderButton': 'Отслеживание заказа',
       'paymeNotAvailable': 'Payme недоступен для самовывоза',
-      'orderModeTitle': 'Выберите тип заказа',
-      'orderModeSubtitle': 'Пожалуйста, выберите, как вы хотите сделать заказ',
       'deliveryTakeaway': 'Доставка / самовывоз',
       'carhop': 'Carhop',
       'alreadyArrived': 'Уже прибыл',
@@ -507,8 +498,6 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['promosOfferDeals']!;
   String get easyOrdering =>
       _localizedValues[locale.languageCode]!['easyOrdering']!;
-  String get selectOrderMode =>
-      _localizedValues[locale.languageCode]!['selectOrderMode']!;
   String get deliveryTakeaway =>
       _localizedValues[locale.languageCode]!['deliveryTakeaway']!;
   String get carhop => _localizedValues[locale.languageCode]!['carhop']!;
@@ -729,11 +718,6 @@ class AppLocalizations {
   String get arrivedError =>
       _localizedValues[locale.languageCode]!['arrivedError']!;
 
-  String get orderModeTitle =>
-      _localizedValues[locale.languageCode]!['orderModeTitle']!;
-
-  String get orderModeSubtitle =>
-      _localizedValues[locale.languageCode]!['orderModeSubtitle']!;
 
   String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
 

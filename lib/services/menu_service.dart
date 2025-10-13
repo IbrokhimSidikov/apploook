@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/services/api_service.dart';
-import 'package:apploook/services/order_mode_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MenuService {
@@ -10,7 +9,6 @@ class MenuService {
   factory MenuService() => _instance;
 
   late ApiService _apiService;
-  late OrderModeService _orderModeService;
   List<Category> _categories = [];
   List<Product> _allProducts = [];
   bool _isInitialized = false;
@@ -32,7 +30,6 @@ class MenuService {
       clientSecret: 'bW9iaWxlQXBwOm1vYmlsZUFwcEU1JCQ=', //Production
       // clientSecret: 'bG9vb2tBcHBBZ2dAMTpsb29va0FwcEFnZ0Ax', //Test
     );
-    _orderModeService = OrderModeService();
   }
 
   void setNearestBranchDeliverId(String deliverId) {
@@ -49,9 +46,6 @@ class MenuService {
       return;
     }
 
-    await _orderModeService.initialize();
-    // print(
-    //     'MenuService: Order mode initialized to: ${_orderModeService.currentMode}');
 
     try {
       // print('MenuService: Checking cache validity');
@@ -285,57 +279,52 @@ class MenuService {
       }
 
       // Custom sort for delivery/takeaway mode
-      if (_orderModeService.currentMode == OrderMode.deliveryTakeaway) {
-        // print(
-        //     'MenuService: Applying custom category order for delivery/takeaway mode');
+      // Define custom order priority map
+      final Map<String, int> customOrderPriority = {
+        'Комбо М':1,
+        'Комбо': 2,
+        'Аппетайзеры': 3,
+        'Курица': 4,
+        'Спиннеры': 5,
+        'Бургеры': 6,
+        'Пицца': 7,
+        'Салаты': 8,
+        'Напитки': 9,
+        'Горячие напитки': 10,
+        'Десерты': 11,
+        'Мороженое и милишайки': 12,
+        // Any other categories will be sorted after these by their original sortOrder
+      };
 
-        // Define custom order priority map
-        final Map<String, int> customOrderPriority = {
-          'Комбо М':1,
-          'Комбо': 2,
-          'Аппетайзеры': 3,
-          'Курица': 4,
-          'Спиннеры': 5,
-          'Бургеры': 6,
-          'Пицца': 7,
-          'Салаты': 8,
-          'Напитки': 9,
-          'Горячие напитки': 10,
-          'Десерты': 11,
-          'Мороженое и милишайки': 12,
-          // Any other categories will be sorted after these by their original sortOrder
-        };
+      categoriesWithSortOrder.sort((a, b) {
+        String nameA = a['name'].toString().trim();
+        String nameB = b['name'].toString().trim();
 
-        categoriesWithSortOrder.sort((a, b) {
-          String nameA = a['name'].toString().trim();
-          String nameB = b['name'].toString().trim();
+        // Get priority from map or use a high number as default
+        int priorityA = customOrderPriority[nameA] ?? 1000;
+        int priorityB = customOrderPriority[nameB] ?? 1000;
 
-          // Get priority from map or use a high number as default
-          int priorityA = customOrderPriority[nameA] ?? 1000;
-          int priorityB = customOrderPriority[nameB] ?? 1000;
-
-          // If both are in the priority map, sort by priority
-          if (priorityA < 1000 && priorityB < 1000) {
-            return priorityA.compareTo(priorityB);
-          }
-          // If only one is in the priority map, it comes first
-          else if (priorityA < 1000) {
-            return -1;
-          } else if (priorityB < 1000) {
-            return 1;
-          }
-          // If neither is in the priority map, sort by original sortOrder
-          else {
-            return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
-          }
-        });
-
-        // Debug log the sorted categories
-        // print('MenuService: Custom sorted categories:');
-        for (var category in categoriesWithSortOrder) {
-          print(
-              '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
+        // If both are in the priority map, sort by priority
+        if (priorityA < 1000 && priorityB < 1000) {
+          return priorityA.compareTo(priorityB);
         }
+        // If only one is in the priority map, it comes first
+        else if (priorityA < 1000) {
+          return -1;
+        } else if (priorityB < 1000) {
+          return 1;
+        }
+        // If neither is in the priority map, sort by original sortOrder
+        else {
+          return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
+        }
+      });
+
+      // Debug log the sorted categories
+      // print('MenuService: Custom sorted categories:');
+      for (var category in categoriesWithSortOrder) {
+        print(
+            '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
       }
 
       // Add sorted categories to _categories list
