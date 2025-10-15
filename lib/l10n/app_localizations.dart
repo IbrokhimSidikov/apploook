@@ -72,6 +72,8 @@ class AppLocalizations {
       'delivery': 'Delivery',
       'selfPickup': 'Self-Pickup',
       'selfPickupTitle': 'Which store would you like to pick from?',
+      'inRestaurant': 'In-Restaurant',
+      'inRestaurantTitle': 'Which restaurant would you like to dine in?',
       'yourDeliveryLocation': 'Your Delivery Location!',
       'chooseYourLocation': 'Choose your location -->',
       'chooseBranchToPick': 'Choose branch to pick up',
@@ -233,6 +235,8 @@ class AppLocalizations {
       'delivery': 'Yetkazish',
       'selfPickup': 'Olib ketish',
       'selfPickupTitle': 'Olib ketish uchun filial tanlang',
+      'inRestaurant': 'Restoranda',
+      'inRestaurantTitle': 'Qaysi restoranda ovqatlanmoqchisiz?',
       'yourDeliveryLocation': 'Yetkazish manzilingiz!',
       'chooseYourLocation': 'Xaritadan tanlang -->',
       'chooseBranchToPick': 'Olib ketish uchun',
@@ -395,6 +399,8 @@ class AppLocalizations {
       'delivery': 'Доставка',
       'selfPickup': 'Самовывоз',
       'selfPickupTitle': 'Какой магазин вы хотите выбрать?',
+      'inRestaurant': 'В ресторане',
+      'inRestaurantTitle': 'В каком ресторане вы хотите поесть?',
       'yourDeliveryLocation': 'Ваш адрес доставки!',
       'chooseYourLocation': 'Выберите ваш адрес -->',
       'chooseBranchToPick': 'Выберите магазин для самовывоза',
@@ -582,6 +588,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['selfPickup']!;
   String get selfPickupTitle =>
       _localizedValues[locale.languageCode]!['selfPickupTitle']!;
+  String get inRestaurant =>
+      _localizedValues[locale.languageCode]!['inRestaurant']!;
+  String get inRestaurantTitle =>
+      _localizedValues[locale.languageCode]!['inRestaurantTitle']!;
   String get yourDeliveryLocation =>
       _localizedValues[locale.languageCode]!['yourDeliveryLocation']!;
   String get chooseYourLocation =>

@@ -593,8 +593,10 @@ class _CheckoutState extends State<Checkout> {
       orderType = 'Delivery';
     } else if (_selectedIndex == 1) {
       orderType = 'Self-Pickup';
-    } else {
+    } else if (_selectedIndex == 2) {
       orderType = 'Carhop';
+    } else {
+      orderType = 'In-Restaurant';
     }
 
     return Scaffold(
@@ -621,97 +623,189 @@ class _CheckoutState extends State<Checkout> {
               ],
             ),
             const SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Delivery button
-                ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 0),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      _selectedIndex == 0
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: Row(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              child: Column(
+                children: [
+                  // First row - Delivery and Self-Pickup
+                  Row(
                     children: [
-                      const Icon(Icons.delivery_dining_outlined,
-                          color: Colors.black),
-                      const SizedBox(width: 5),
-                      Text(
-                        AppLocalizations.of(context).delivery,
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500),
+                      // Delivery button
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIndex = 0),
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _selectedIndex == 0
+                                  ? const Color(0xffFEC700)
+                                  : const Color(0xffF1F2F7),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: _selectedIndex == 0
+                                    ? const Color(0xffFEC700)
+                                    : Colors.grey.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.delivery_dining_outlined,
+                                  color: Colors.black,
+                                  size: 28,
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  AppLocalizations.of(context).delivery,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Self-pickup button
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIndex = 1),
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _selectedIndex == 1
+                                  ? const Color(0xffFEC700)
+                                  : const Color(0xffF1F2F7),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: _selectedIndex == 1
+                                    ? const Color(0xffFEC700)
+                                    : Colors.grey.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.shopping_bag_outlined,
+                                  color: Colors.black,
+                                  size: 28,
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  AppLocalizations.of(context).selfPickup,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-
-                // Self-pickup button
-                ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 1),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(
-                      _selectedIndex == 1
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: Row(
+                  const SizedBox(height: 10),
+                  // Second row - Carhop and In-Restaurant
+                  Row(
                     children: [
-                      const Icon(Icons.shopping_bag_outlined,
-                          color: Colors.black),
-                      const SizedBox(width: 5),
-                      Text(
-                        AppLocalizations.of(context).selfPickup,
-                        style: const TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w500),
+                      // Carhop button
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIndex = 2),
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _selectedIndex == 2
+                                  ? const Color(0xffFEC700)
+                                  : const Color(0xffF1F2F7),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: _selectedIndex == 2
+                                    ? const Color(0xffFEC700)
+                                    : Colors.grey.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.car_repair_outlined,
+                                  color: Colors.black,
+                                  size: 28,
+                                ),
+                                SizedBox(height: 5),
+                                Text(
+                                  'Carhop',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // In-Restaurant button
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _selectedIndex = 3),
+                          child: Container(
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: _selectedIndex == 3
+                                  ? const Color(0xffFEC700)
+                                  : const Color(0xffF1F2F7),
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(
+                                color: _selectedIndex == 3
+                                    ? const Color(0xffFEC700)
+                                    : Colors.grey.withOpacity(0.3),
+                                width: 2,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.restaurant,
+                                  color: Colors.black,
+                                  size: 28,
+                                ),
+                                const SizedBox(height: 5),
+                                Text(
+                                  AppLocalizations.of(context).inRestaurant,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-
-                // Carhop button - enabled for testing regardless of mode
-                ElevatedButton(
-                  onPressed: () => setState(() => _selectedIndex = 2),
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.all(
-                      _selectedIndex == 2
-                          ? const Color(0xffFEC700)
-                          : const Color(0xffF1F2F7),
-                    ),
-                    shape: WidgetStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.car_repair_outlined, color: Colors.black),
-                      SizedBox(width: 5),
-                      Text(
-                        'Carhop',
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             const SizedBox(
               height: 20.0,
@@ -728,7 +822,9 @@ class _CheckoutState extends State<Checkout> {
                             ? AppLocalizations.of(context).yourDeliveryLocation
                             : _selectedIndex == 1
                                 ? AppLocalizations.of(context).selfPickupTitle
-                                : AppLocalizations.of(context).carhopService,
+                                : _selectedIndex == 2
+                                    ? AppLocalizations.of(context).carhopService
+                                    : AppLocalizations.of(context).inRestaurantTitle,
                         style: const TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold),
                       ),
@@ -1181,6 +1277,60 @@ class _CheckoutState extends State<Checkout> {
                         ),
                       ),
                     ),
+
+                    // IN-RESTAURANT
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Container(
+                        height: 140,
+                        width: 390,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: const Color(0xFFF1F2F7),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                AppLocalizations.of(context).chooseBranchToPick,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 20),
+                              ),
+                              const SizedBox(height: 10),
+                              DropdownButton<String>(
+                                value: selectedBranch,
+                                hint: Text(
+                                  AppLocalizations.of(context).selectBranch,
+                                ),
+                                dropdownColor: const Color(0xFFF1F2F7),
+                                isExpanded: true,
+                                items: branches.map((String branch) {
+                                  return DropdownMenuItem<String>(
+                                    value: branch,
+                                    child: Text(branch),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedBranch = newValue;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -1491,13 +1641,19 @@ class _CheckoutState extends State<Checkout> {
                           ? selectedBranch != null &&
                               selectedOption != null &&
                               !_isProcessing
-                          : selectedCity !=
-                                  null && // Add check for selectedCity
-                              selectedBranch != null &&
-                              selectedOption != null &&
-                              carDetails != null &&
-                              carDetails!.trim().isNotEmpty &&
-                              !_isProcessing)
+                          : _selectedIndex == 2
+                              ? selectedCity !=
+                                      null && // Add check for selectedCity
+                                  selectedBranch != null &&
+                                  selectedOption != null &&
+                                  carDetails != null &&
+                                  carDetails!.trim().isNotEmpty &&
+                                  !_isProcessing
+                              : _selectedIndex == 3
+                                  ? selectedBranch != null &&
+                                      selectedOption != null &&
+                                      !_isProcessing
+                                  : false)
                   ? () async {
                       setState(() {
                         _isProcessing = true; // Start processing
@@ -1551,9 +1707,9 @@ class _CheckoutState extends State<Checkout> {
                               cartProvider: cartProvider,
                               orderType: 'carhop',
                             );
-                          } else {
-                            // Pickup order with Payme payment
-                            // For pickup, we'll use the same flow as delivery but with branch address
+                          } else if (_selectedIndex == 1 || _selectedIndex == 3) {
+                            // Pickup or In-Restaurant order with Payme payment
+                            // For pickup/in-restaurant, we'll use the same flow as delivery but with branch address
                             await _handlePaymePayment(
                               name: firstName,
                               phone: phoneNumber,
@@ -1723,6 +1879,18 @@ class _CheckoutState extends State<Checkout> {
                               carDetails,
                               cartProvider,
                             );
+                          } else if (_selectedIndex == 3) {
+                            // In-restaurant order - send to Sieves API (same as self-pickup)
+                            await sendSelfPickupOrderToSieves(
+                              branchName: selectedBranch!,
+                              name: firstName,
+                              phone: phoneNumber,
+                              paymentType: selectedOption!,
+                              comment: commented,
+                              total: orderPrice,
+                              cartProvider: cartProvider,
+                              isInRestaurant: true,
+                            );
                           }
                         }
 
@@ -1814,7 +1982,10 @@ class _CheckoutState extends State<Checkout> {
                               selectedBranch != null &&
                               selectedOption != null &&
                               carDetails != null &&
-                              carDetails!.trim().isNotEmpty)
+                              carDetails!.trim().isNotEmpty) ||
+                          (_selectedIndex == 3 &&
+                              selectedBranch != null &&
+                              selectedOption != null)
                       ? const Color(0xffFEC700) // Enabled state
                       : const Color(0xFFCCCCCC), // Disabled state
                 ),
@@ -2169,6 +2340,7 @@ class _CheckoutState extends State<Checkout> {
     required String comment,
     required double total,
     required CartProvider cartProvider,
+    bool isInRestaurant = false,
   }) async {
     try {
       if (branchName.isEmpty) {
@@ -2232,7 +2404,9 @@ class _CheckoutState extends State<Checkout> {
           }
         ],
         "value": total,
-        "note": comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой",
+        "note": isInRestaurant
+            ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
+            : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой"),
         "day_session_id": null,
         "pager_number": phone,
         "pos_id": null,
