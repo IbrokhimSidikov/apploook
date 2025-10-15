@@ -1881,13 +1881,23 @@ class _CheckoutState extends State<Checkout> {
                             );
                           } else if (_selectedIndex == 3) {
                             // In-restaurant order - send to Sieves API (same as self-pickup)
+                            // Calculate total excluding "Пакет" (package)
+                            final packageItem = cartProvider.cartItems.firstWhere(
+                              (item) => item.product.name == 'Пакет',
+                              orElse: () => cartProvider.cartItems.first, // fallback
+                            );
+                            final packagePrice = packageItem.product.name == 'Пакет' 
+                                ? packageItem.totalPrice 
+                                : 0.0;
+                            final adjustedTotal = orderPrice - packagePrice;
+                            
                             await sendSelfPickupOrderToSieves(
                               branchName: selectedBranch!,
                               name: firstName,
                               phone: phoneNumber,
                               paymentType: selectedOption!,
                               comment: commented,
-                              total: orderPrice,
+                              total: adjustedTotal,
                               cartProvider: cartProvider,
                               isInRestaurant: true,
                             );
@@ -2350,8 +2360,13 @@ class _CheckoutState extends State<Checkout> {
       final branchConfig = await BranchConfigs.getConfig(branchName);
       
       // Format order items for Sieves API
+      // Filter out "Пакет" (package) for in-restaurant orders
+      final itemsToProcess = isInRestaurant
+          ? cartProvider.cartItems.where((item) => item.product.name != 'Пакет').toList()
+          : cartProvider.cartItems;
+      
       final List<Map<String, dynamic>> formattedOrderItems =
-          cartProvider.cartItems.map((item) {
+          itemsToProcess.map((item) {
         final String? productUuid = item.product.uuid;
         if (productUuid == null || productUuid.isEmpty) {
           print(
