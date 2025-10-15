@@ -167,11 +167,10 @@ class _CheckoutState extends State<Checkout> {
       }).toList();
 
       // Calculate the final total including delivery fee and bag price (2000 UZS for delivery, 0 for pickup)
-      final double bagPrice = _selectedIndex == 0 ? 2000.0 : 0.0;
-      final double finalTotal = total + deliveryFee + bagPrice;
+      final double finalTotal = total + deliveryFee;
 
       print(
-          'Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Bag price: $bagPrice UZS, Final total: $finalTotal UZS');
+          'Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Final total: $finalTotal UZS');
 
       // Save the order details for later processing
       await PaymeTransactionService.savePendingOrder(
@@ -568,7 +567,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
     'Loook Yangiyol',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1193,7 +1192,7 @@ class _CheckoutState extends State<Checkout> {
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 230,
+                height: 200,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.0),
                   color: Colors.white,
@@ -1251,24 +1250,24 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(15.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            AppLocalizations.of(context).bagPrice,
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          Text(
-                            _selectedIndex == 0 ? '2000 UZS' : '0 UZS',
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
+                    // Padding(
+                    //   padding: EdgeInsets.all(15.0),
+                    //   child: Row(
+                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //     children: [
+                    //       Text(
+                    //         AppLocalizations.of(context).bagPrice,
+                    //         style: const TextStyle(fontSize: 16),
+                    //       ),
+                    //       Text(
+                    //         _selectedIndex == 0 ? '2000 UZS' : '0 UZS',
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // const SizedBox(
+                    //   height: 10.0,
+                    // ),
                     Padding(
                       padding: const EdgeInsets.all(15.0),
                       child: Row(
@@ -1283,8 +1282,8 @@ class _CheckoutState extends State<Checkout> {
                             _selectedIndex == 0
                                 ? (_nearestBranch != null &&
                                         _nearestBranch!['deliveryFee'] != null
-                                    ? '${NumberFormat('#,##0').format(orderPrice + 2000 + (_nearestBranch!['deliveryFee'] as num))} UZS'
-                                    : '${NumberFormat('#,##0').format(orderPrice + 2000)} UZS')
+                                    ? '${NumberFormat('#,##0').format(orderPrice + (_nearestBranch!['deliveryFee'] as num))} UZS'
+                                    : '${NumberFormat('#,##0').format(orderPrice)} UZS')
                                 : '${NumberFormat('#,##0').format(orderPrice)} UZS', // No bag price for self-pickup
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
@@ -1655,21 +1654,22 @@ class _CheckoutState extends State<Checkout> {
                                 deliveryFee:
                                     deliveryFee, // Add delivery fee from nearest branch
                               );
-                            } else if (_selectedIndex == 1) {
-                              // Pickup order
-                              apiSuccess = await sendOrderToApi(
-                                "Branch: $selectedBranch", // address with branch name
-                                firstName, // name
-                                phoneNumber, // phone
-                                selectedOption!, // paymentType
-                                commented, // comment
-                                orderPrice, // total
-                                41.313798749076454, // default latitude
-                                69.24407311805851, // default longitude
-                                cartProvider,
-                                // No delivery fee for pickup orders
-                              );
                             }
+                            // else if (_selectedIndex == 1) {
+                            //   // Pickup order
+                            //   apiSuccess = await sendOrderToApi(
+                            //     "Branch: $selectedBranch", // address with branch name
+                            //     firstName, // name
+                            //     phoneNumber, // phone
+                            //     selectedOption!, // paymentType
+                            //     commented, // comment
+                            //     orderPrice, // total
+                            //     41.313798749076454, // default latitude
+                            //     69.24407311805851, // default longitude
+                            //     cartProvider,
+                            //     // No delivery fee for pickup orders
+                            //   );
+                            // }
                           } catch (e) {
                             print(
                                 'Error with new API, falling back to old method: $e');
@@ -1708,7 +1708,7 @@ class _CheckoutState extends State<Checkout> {
                               orderPrice, // total
                               41.313798749076454, // latitude ,
                               69.24407311805851, // longitude
-                              orderType,
+                              "self-pickup", // Explicitly set to carhop for this order type
                               carDetails,
                               cartProvider,
                             );
@@ -1908,43 +1908,43 @@ class _CheckoutState extends State<Checkout> {
       {double deliveryFee = 0}) async {
     try {
       // For self-pickup orders, use Telegram API instead of Delever API
-      if (_selectedIndex == 1) {
-        try {
-          List<String> orderItems = cartProvider.cartItems.map((item) {
-            return '${item.displayName}\n Total: ${NumberFormat('#,##0').format(item.totalPrice.toInt())} сум\n';
-          }).toList();
-
-          await sendOrderToTelegram(
-            null, // No address for self-pickup
-            selectedBranch ?? '',
-            name,
-            phone,
-            paymentType,
-            comment,
-            orderItems,
-            total,
-            latitude,
-            longitude,
-            'Self-Pickup',
-            '', // No car details for self-pickup
-            cartProvider,
-          );
-
-          // Clear the cart after successful order
-          cartProvider.clearCart();
-
-          // Show success dialog
-          if (mounted) {
-            _showOrderSuccessDialog(
-                'self-pickup-${DateTime.now().millisecondsSinceEpoch}');
-          }
-
-          return true;
-        } catch (e) {
-          print('Error sending self-pickup order to Telegram: $e');
-          return false;
-        }
-      }
+      // if (_selectedIndex == 1) {
+      //   try {
+      //     List<String> orderItems = cartProvider.cartItems.map((item) {
+      //       return '${item.displayName}\n Total: ${NumberFormat('#,##0').format(item.totalPrice.toInt())} сум\n';
+      //     }).toList();
+      //
+      //     await sendOrderToTelegram(
+      //       null, // No address for self-pickup
+      //       selectedBranch ?? '',
+      //       name,
+      //       phone,
+      //       paymentType,
+      //       comment,
+      //       orderItems,
+      //       total,
+      //       latitude,
+      //       longitude,
+      //       'Self-Pickup',
+      //       '', // No car details for self-pickup
+      //       cartProvider,
+      //     );
+      //
+      //     // Clear the cart after successful order
+      //     cartProvider.clearCart();
+      //
+      //     // Show success dialog
+      //     if (mounted) {
+      //       _showOrderSuccessDialog(
+      //           'self-pickup-${DateTime.now().millisecondsSinceEpoch}');
+      //     }
+      //
+      //     return true;
+      //   } catch (e) {
+      //     print('Error sending self-pickup order to Telegram: $e');
+      //     return false;
+      //   }
+      // }
 
       // For delivery orders, continue with the Delever API
       // Get API service with client credentials

@@ -72,6 +72,7 @@ class CartProvider extends ChangeNotifier {
 
   void removeFromCart(CartItem item) {
     _cartItems.remove(item);
+    removeMandatoryPackageIfCartEmpty();
     notifyListeners();
   }
 
@@ -109,6 +110,7 @@ class CartProvider extends ChangeNotifier {
       cartItem.quantity = newQuantity;
       notifyListeners();
     }
+    removeMandatoryPackageIfCartEmpty();
   }
 
   void clearCart() {
@@ -139,5 +141,58 @@ class CartProvider extends ChangeNotifier {
       totalPrice += cartItem.totalPrice; // Use totalPrice which includes modifiers
     }
     return totalPrice;
+  }
+
+  // Check if the mandatory package product exists in cart
+  bool hasMandatoryPackage() {
+    return _cartItems.any((item) => item.product.name == 'Пакет');
+  }
+
+  // Add mandatory package product if cart has items and package is not already added
+  void ensureMandatoryPackage(List<Product> allProducts) {
+    // Only add package if cart has items (excluding the package itself)
+    final nonPackageItems = _cartItems.where((item) => item.product.name != 'Пакет').toList();
+    
+    if (nonPackageItems.isEmpty) {
+      // If cart only has package or is empty, remove the package
+      _cartItems.removeWhere((item) => item.product.name == 'Пакет');
+      notifyListeners();
+      return;
+    }
+
+    // Check if package already exists
+    if (hasMandatoryPackage()) {
+      return; // Package already in cart
+    }
+
+    // Find the package product from all products
+    final packageProduct = allProducts.firstWhere(
+      (product) => product.name == 'Пакет',
+      orElse: () => Product(
+        name: '',
+        id: 0,
+        uuid: '',
+        categoryId: 0,
+        categoryTitle: '',
+        price: 0,
+        description: {},
+      ),
+    );
+
+    // Add package if found
+    if (packageProduct.id != 0) {
+      _cartItems.add(CartItem(product: packageProduct, quantity: 1));
+      notifyListeners();
+    }
+  }
+
+  // Remove mandatory package when cart becomes empty
+  void removeMandatoryPackageIfCartEmpty() {
+    final nonPackageItems = _cartItems.where((item) => item.product.name != 'Пакет').toList();
+    
+    if (nonPackageItems.isEmpty) {
+      _cartItems.removeWhere((item) => item.product.name == 'Пакет');
+      notifyListeners();
+    }
   }
 }

@@ -2,6 +2,7 @@ import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/services/menu_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,26 @@ class _CartState extends State<Cart> {
   void initState() {
     super.initState();
     _getCategories();
+    // Add mandatory package after the first frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureMandatoryPackage();
+    });
+  }
+
+  void _ensureMandatoryPackage() async {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    
+    // Get all products from MenuService
+    try {
+      final menuService = MenuService();
+      await menuService.initialize();
+      final allProducts = menuService.allProducts;
+      
+      // Ensure mandatory package is added if cart has items
+      cartProvider.ensureMandatoryPackage(allProducts);
+    } catch (e) {
+      print('Error ensuring mandatory package: $e');
+    }
   }
 
   Future<bool> _isUserSignedIn() async {
@@ -123,6 +144,8 @@ class _CartState extends State<Cart> {
                     itemCount: cartProvider.cartItems.length,
                     itemBuilder: (context, index) {
                       final cartItem = cartProvider.cartItems[index];
+                      final isMandatoryPackage = cartItem.product.name == 'Пакет';
+                      
                       return ListTile(
                         leading: Image.network(
                           cartItem.product.imagePath,
@@ -130,63 +153,108 @@ class _CartState extends State<Cart> {
                           height: 70,
                           fit: BoxFit.cover,
                         ),
-                        title: Text(
-                          cartItem.displayName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                cartItem.displayName,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (isMandatoryPackage)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFEC700),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'Required',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[200],
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      if (cartItem.quantity > 1) {
-                                        cartProvider.updateQuantity(
-                                          cartItem,
-                                          cartItem.quantity - 1,
-                                        );
-                                      } else {
-                                        cartProvider.removeFromCart(cartItem);
-                                      }
-                                    },
-                                    child: const Icon(Icons.remove),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  Container(
-                                    width: 20,
-                                    height: 20,
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      cartItem.quantity.toString(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                            if (!isMandatoryPackage)
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[200],
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (cartItem.quantity > 1) {
+                                          cartProvider.updateQuantity(
+                                            cartItem,
+                                            cartItem.quantity - 1,
+                                          );
+                                        } else {
+                                          cartProvider.removeFromCart(cartItem);
+                                        }
+                                      },
+                                      child: const Icon(Icons.remove),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Container(
+                                      width: 20,
+                                      height: 20,
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        cartItem.quantity.toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
                                       ),
                                     ),
+                                    const SizedBox(width: 8.0),
+                                    GestureDetector(
+                                      onTap: () {
+                                        cartProvider.updateQuantity(
+                                          cartItem,
+                                          cartItem.quantity + 1,
+                                        );
+                                      },
+                                      child: const Icon(Icons.add),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              // For mandatory package, show fixed quantity
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0,
+                                  vertical: 8.0,
+                                ),
+                                child: Text(
+                                  '${cartItem.quantity}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
                                   ),
-                                  const SizedBox(width: 8.0),
-                                  GestureDetector(
-                                    onTap: () {
-                                      cartProvider.updateQuantity(
-                                        cartItem,
-                                        cartItem.quantity + 1,
-                                      );
-                                    },
-                                    child: const Icon(Icons.add),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
                           ],
                         ),
                         subtitle: Text(
