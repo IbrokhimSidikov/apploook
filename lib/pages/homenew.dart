@@ -15,6 +15,7 @@ import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
+import 'package:apploook/services/version_checker_service.dart';
 
 import 'dart:convert';
 import '../models/modifier_models.dart';
@@ -229,6 +230,9 @@ class _HomeNewState extends State<HomeNew>
       // Get banners (non-blocking)
       _getBanners();
 
+      // Check for app updates first
+      _checkForAppUpdates();
+
       // Check and update nearest branch (non-blocking, runs in background)
       _updateNearestBranch();
 
@@ -240,45 +244,46 @@ class _HomeNewState extends State<HomeNew>
     }
   }
 
+  // Check for app updates
+  Future<void> _checkForAppUpdates() async {
+    try {
+      // Add a small delay to ensure the context is ready
+      await Future.delayed(const Duration(milliseconds: 300));
+      
+      if (mounted) {
+        final versionChecker = VersionCheckerService();
+        await versionChecker.checkForUpdates(context);
+      }
+    } catch (e) {
+      print('HomeNew: Error checking for updates: $e');
+    }
+  }
+
   // Update nearest branch in background (non-blocking)
+  // This runs every time the app is relaunched to ensure menu is always for the nearest branch
   Future<void> _updateNearestBranch() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final lastBranchCheck = prefs.getInt('last_branch_check_timestamp');
-      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      print('HomeNew: Checking for nearest branch on app launch');
       
-      // Only check for nearest branch every 8 hours to avoid excessive location requests
-      const checkInterval = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+      final nearestBranchService = NearestBranchService();
+      await nearestBranchService.findNearestBranch();
       
-      if (lastBranchCheck == null || (currentTime - lastBranchCheck) > checkInterval) {
-        print('HomeNew: Checking for nearest branch (last check was more than 8h ago)');
+      final nearestBranchDeliverId = await nearestBranchService.getSavedNearestBranchDeliverId();
+      
+      if (nearestBranchDeliverId != null && nearestBranchDeliverId.isNotEmpty) {
+        print('HomeNew: Updated nearest branch deliver ID: $nearestBranchDeliverId');
         
-        // Import the service at the top if not already imported
-        final nearestBranchService = NearestBranchService();
-        await nearestBranchService.findNearestBranch();
+        // Update MenuService with new branch
+        final menuService = MenuService();
+        menuService.setNearestBranchDeliverId(nearestBranchDeliverId);
         
-        final nearestBranchDeliverId = await nearestBranchService.getSavedNearestBranchDeliverId();
+        // Refresh menu data with new branch
+        await menuService.refreshData();
         
-        if (nearestBranchDeliverId != null && nearestBranchDeliverId.isNotEmpty) {
-          print('HomeNew: Updated nearest branch deliver ID: $nearestBranchDeliverId');
-          
-          // Update MenuService with new branch
-          final menuService = MenuService();
-          menuService.setNearestBranchDeliverId(nearestBranchDeliverId);
-          
-          // Refresh menu data with new branch
-          await menuService.refreshData();
-          
-          // Reload UI with new menu
-          if (mounted) {
-            await loadData();
-          }
+        // Reload UI with new menu
+        if (mounted) {
+          await loadData();
         }
-        
-        // Save the timestamp of this check
-        await prefs.setInt('last_branch_check_timestamp', currentTime);
-      } else {
-        print('HomeNew: Skipping branch check (last check was recent)');
       }
     } catch (e) {
       print('HomeNew: Error updating nearest branch: $e');

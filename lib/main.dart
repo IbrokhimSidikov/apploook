@@ -167,10 +167,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _determineInitialRoute();
-    // Check for updates after the widget is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkForUpdates();
-    });
   }
   
   Future<void> _determineInitialRoute() async {
@@ -195,12 +191,22 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         _isCheckingRoute = false;
       });
+      
+      // Check for updates after the route is determined and UI is ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _checkForUpdates();
+      });
     }
   }
   
   Future<void> _checkForUpdates() async {
-    // Check if an update is required
-    await _versionChecker.checkForUpdates(context);
+    // Add a small delay to ensure the navigator is ready
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (mounted) {
+      // Check if an update is required
+      await _versionChecker.checkForUpdates(context);
+    }
   }
 
   @override
