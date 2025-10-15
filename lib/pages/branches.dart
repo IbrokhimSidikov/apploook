@@ -5,6 +5,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'dart:async';
+import 'dart:ui' as ui;
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class Branches extends StatefulWidget {
   const Branches({super.key});
@@ -17,6 +20,8 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
   late TabController _tabController;
   final Completer<YandexMapController> _mapController = Completer();
   List<PlacemarkMapObject> _placemarks = [];
+  int? _selectedBranchIndex;
+  final PageController _pageController = PageController(viewportFraction: 0.9);
   // Static branch data
   final List<Map<String, dynamic>> branches = [
     {
@@ -84,11 +89,35 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
     _initializePlacemarks();
   }
 
-  void _initializePlacemarks() {
+  // Convert SVG to BitmapDescriptor
+  Future<BitmapDescriptor> _getBitmapFromSvg(String assetPath, int width) async {
+    final pictureInfo = await vg.loadPicture(SvgAssetLoader(assetPath), null);
+    final devicePixelRatio = ui.window.devicePixelRatio;
+    final scaledWidth = (width * devicePixelRatio).toInt();
+    final scaledHeight = (scaledWidth * pictureInfo.size.height / pictureInfo.size.width).toInt();
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    
+    canvas.scale(scaledWidth / pictureInfo.size.width);
+    canvas.drawPicture(pictureInfo.picture);
+    
+    final image = await recorder.endRecording().toImage(scaledWidth, scaledHeight);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    final buffer = byteData!.buffer.asUint8List();
+    
+    return BitmapDescriptor.fromBytes(buffer);
+  }
+
+  Future<void> _initializePlacemarks() async {
     _placemarks = [];
     
+    // Load the SVG icon once
+    final markerIcon = await _getBitmapFromSvg('images/Map_pin_icon.svg', 60);
+    
     // Add placemarks for branches with coordinates
-    for (var branch in branches) {
+    for (int i = 0; i < branches.length; i++) {
+      final branch = branches[i];
       final coordinates = BranchLocations.getBranchCoordinates(branch['name']);
       if (coordinates != null) {
         final latLng = coordinates.split(', ');
@@ -99,15 +128,26 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
           if (lat != null && lng != null) {
             _placemarks.add(
               PlacemarkMapObject(
-                mapId: MapObjectId('branch_${branch['name']}'),
+                mapId: MapObjectId('branch_$i'),
                 point: Point(latitude: lat, longitude: lng),
                 icon: PlacemarkIcon.single(
                   PlacemarkIconStyle(
-                    image: BitmapDescriptor.fromAssetImage('images/point.png'),
-                    scale: 0.5,
+                    image: markerIcon,
+                    scale: 1.0,
+                    rotationType: RotationType.noRotation,
                   ),
                 ),
+                opacity: 1.0,
                 onTap: (PlacemarkMapObject placemark, Point point) {
+                  // Find the index and update the carousel
+                  setState(() {
+                    _selectedBranchIndex = i;
+                  });
+                  _pageController.animateToPage(
+                    i,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
                   _showBranchInfoFromMap(branch);
                 },
               ),
@@ -116,11 +156,16 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
         }
       }
     }
+    
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -182,20 +227,34 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
   }
 
   Widget _buildMapView() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // Header for map view
-          Container(
-            padding: EdgeInsets.all(20),
+    return Stack(
+      children: [
+        // Full-screen map
+        YandexMap(
+          onMapCreated: (YandexMapController controller) {
+            _mapController.complete(controller);
+            _moveToTashkent();
+          },
+          mapObjects: _placemarks,
+          onCameraPositionChanged: (CameraPosition position, CameraUpdateReason reason, bool finished) {
+            // Handle camera position changes if needed
+          },
+        ),
+        
+        // Top search/info bar
+        Positioned(
+          top: 16,
+          left: 16,
+          right: 16,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
-              color: Color(0xFFFEC700),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Color(0xFFFEC700).withOpacity(0.3),
-                  blurRadius: 10,
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
                   offset: Offset(0, 4),
                 ),
               ],
@@ -203,77 +262,264 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
             child: Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    color: Color(0xFFFEC700).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
-                    Icons.map,
-                    color: Colors.white,
-                    size: 28,
+                    Icons.location_on,
+                    color: Color(0xFFFEC700),
+                    size: 24,
                   ),
                 ),
-                SizedBox(width: 16),
+                SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Branch Locations',
+                        '${branches.length} Branches',
                         style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 4),
                       Text(
-                        'Find us on the map',
+                        'Tap a marker to view details',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
+                          fontSize: 12,
+                          color: Colors.grey[600],
                         ),
                       ),
                     ],
                   ),
                 ),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFEC700),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    Icons.my_location,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
               ],
             ),
           ),
-          SizedBox(height: 20),
-          // Yandex Map
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: YandexMap(
-                  onMapCreated: (YandexMapController controller) {
-                    _mapController.complete(controller);
-                    _moveToTashkent();
-                  },
-                  mapObjects: _placemarks,
-                  onCameraPositionChanged: (CameraPosition position, CameraUpdateReason reason, bool finished) {
-                    // Handle camera position changes if needed
-                  },
-                ),
-              ),
+        ),
+        
+        // Bottom carousel of branch cards
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            height: 200,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: branches.length,
+              onPageChanged: (index) {
+                setState(() {
+                  _selectedBranchIndex = index;
+                });
+                _animateToMarker(index);
+              },
+              itemBuilder: (context, index) {
+                return _buildMapBranchCard(branches[index], index);
+              },
             ),
+          ),
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildMapBranchCard(Map<String, dynamic> branch, int index) {
+    bool isSelected = _selectedBranchIndex == index;
+    
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 300),
+      margin: EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: isSelected ? 10 : 20,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isSelected 
+                ? Color(0xFFFEC700).withOpacity(0.3)
+                : Colors.black.withOpacity(0.1),
+            blurRadius: isSelected ? 20 : 10,
+            offset: Offset(0, isSelected ? 8 : 4),
           ),
         ],
       ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () => _showBranchInfoFromMap(branch),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFFFEC700).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.store,
+                        color: Color(0xFFFEC700),
+                        size: 24,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            branch['name'],
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4),
+                          _buildStatusBadge(branch['isOpen']),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: Colors.grey[600],
+                    ),
+                    SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        branch['address'],
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildCompactActionButton(
+                        icon: Icons.directions,
+                        label: 'Directions',
+                        onTap: () => _openMap(branch),
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: _buildCompactActionButton(
+                        icon: Icons.phone,
+                        label: 'Call',
+                        onTap: () => _callBranch(branch),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
+  }
+  
+  Widget _buildCompactActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Color(0xFFFEC700).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: Color(0xFFFEC700).withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: Color(0xFFFEC700),
+            ),
+            SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: Color(0xFFFEC700),
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Future<void> _animateToMarker(int index) async {
+    final branch = branches[index];
+    final coordinates = BranchLocations.getBranchCoordinates(branch['name']);
+    
+    if (coordinates != null) {
+      final latLng = coordinates.split(', ');
+      if (latLng.length == 2) {
+        final lat = double.tryParse(latLng[0].trim());
+        final lng = double.tryParse(latLng[1].trim());
+        
+        if (lat != null && lng != null) {
+          final controller = await _mapController.future;
+          await controller.moveCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: Point(latitude: lat, longitude: lng),
+                zoom: 14.0,
+              ),
+            ),
+            animation: MapAnimation(type: MapAnimationType.smooth, duration: 0.8),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _moveToTashkent() async {
