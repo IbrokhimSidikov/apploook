@@ -324,10 +324,10 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
           preferredSize: const Size.fromHeight(70),
           child: TabBar(
             controller: _tabController,
-            labelPadding: const EdgeInsets.symmetric(vertical: 12),
+            labelPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
             tabs: [
             Tab(
-              height: 60,
+              height: 66,
               child: Stack(
                 children: [
                   Padding(
@@ -374,7 +374,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
               ),
             ),
             Tab(
-              height: 60,
+              height: 66,
               child: Stack(
                 children: [
                   Padding(
@@ -421,7 +421,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
               ),
             ),
             Tab(
-              height: 60,
+              height: 66,
               child: Stack(
                 children: [
                   Padding(
