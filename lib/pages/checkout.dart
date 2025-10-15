@@ -1677,7 +1677,7 @@ class _CheckoutState extends State<Checkout> {
                           }
                         }
 
-                        // If the new API failed or it's a carhop order, use the old method
+                        // If the new API failed or it's a carhop/self-pickup order, use the old method
                         if (!apiSuccess) {
                           if (_selectedIndex == 0) {
                             // Send order to Telegram
@@ -1697,20 +1697,15 @@ class _CheckoutState extends State<Checkout> {
                               cartProvider,
                             );
                           } else if (_selectedIndex == 1) {
-                            await sendOrderToTelegram(
-                              "Неизвестно", // address
-                              selectedBranch!, // branchName
-                              firstName, // name
-                              phoneNumber, // phone
-                              selectedOption!, // paymentType
-                              commented,
-                              orderItems, // orderItems
-                              orderPrice, // total
-                              41.313798749076454, // latitude ,
-                              69.24407311805851, // longitude
-                              "self-pickup", // Explicitly set to carhop for this order type
-                              carDetails,
-                              cartProvider,
+                            // Self-pickup order - send to Sieves API
+                            await sendSelfPickupOrderToSieves(
+                              branchName: selectedBranch!,
+                              name: firstName,
+                              phone: phoneNumber,
+                              paymentType: selectedOption!,
+                              comment: commented,
+                              total: orderPrice,
+                              cartProvider: cartProvider,
                             );
                           } else if (_selectedIndex == 2) {
                             await sendOrderToTelegram(
@@ -2162,6 +2157,168 @@ class _CheckoutState extends State<Checkout> {
       print('Delivery order saved successfully: $orderId');
     } catch (e) {
       print('Error saving delivery order to SharedPreferences: $e');
+    }
+  }
+
+  // Send self-pickup order to Sieves API
+  Future<void> sendSelfPickupOrderToSieves({
+    required String branchName,
+    required String name,
+    required String phone,
+    required String paymentType,
+    required String comment,
+    required double total,
+    required CartProvider cartProvider,
+  }) async {
+    try {
+      if (branchName.isEmpty) {
+        throw Exception('Please select a branch first');
+      }
+
+      final branchConfig = await BranchConfigs.getConfig(branchName);
+      
+      // Format order items for Sieves API
+      final List<Map<String, dynamic>> formattedOrderItems =
+          cartProvider.cartItems.map((item) {
+        final String? productUuid = item.product.uuid;
+        if (productUuid == null || productUuid.isEmpty) {
+          print(
+              'WARNING: Missing UUID for product ${item.product.name} (ID: ${item.product.id})');
+        }
+        final String productIdentifier =
+            productUuid ?? item.product.id.toString();
+        print(
+            'Self-Pickup: Using product identifier: $productIdentifier for ${item.product.name}');
+
+        return {
+          "actual_price": item.totalPrice / item.quantity,
+          "product_id": productIdentifier,
+          "quantity": item.quantity,
+          "note": item.selectedModifiers.isNotEmpty
+              ? "Modifiers: ${item.selectedModifiers.map((m) => m.modifier.name).join(", ")}"
+              : null,
+          "selectedModifiers": item.selectedModifiers
+              .map((modifier) => {
+                    "modifierId": modifier.modifier.id,
+                    "modifierName": modifier.modifier.name,
+                    "modifierPrice": modifier.modifier.price,
+                    "quantity": modifier.quantity,
+                  })
+              .toList(),
+        };
+      }).toList();
+
+      // Prepare the request body for Sieves API
+      final Map<String, dynamic> requestBody = {
+        "customer_quantity": 1,
+        "customer_id": null,
+        "is_fast": 0,
+        "queue_type": "sync",
+        "start_time": "now",
+        "isSynchronous": "sync",
+        "delivery_employee_id": null,
+        "employee_id": branchConfig.employeeId,
+        "branch_id": branchConfig.branchId,
+        "order_type_id": 7, // 7 for self-pickup
+        "orderItems": formattedOrderItems,
+        "transactions": [
+          {
+            "account_id": 1,
+            "amount": total,
+            "payment_type_id": paymentType.toLowerCase() == 'card'
+                ? 1
+                : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
+            "type": "deposit"
+          }
+        ],
+        "value": total,
+        "note": comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой",
+        "day_session_id": null,
+        "pager_number": phone,
+        "pos_id": null,
+        "pos_session_id": null,
+        "delivery_amount": null
+      };
+
+      // Detailed debug logging
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      print('\n===== SELF-PICKUP ORDER REQUEST DETAILS =====');
+      print(
+          'URL: https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}');
+      print('Headers: ${{"Content-Type": "application/json", "Authorization": "Bearer ${branchConfig.sievesApiToken}", "Accept": "application/json"}}');
+      print('Request Body:\n${encoder.convert(requestBody)}');
+      print('Order Items Structure:\n${encoder.convert(formattedOrderItems)}');
+      print('================================\n');
+
+      final response = await http.post(
+        Uri.parse(
+            'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}&isCarhop=1'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode != 200) {
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to send self-pickup order');
+      } else {
+        print("Self-pickup order sent successfully! Response: ${response.body}");
+
+        // Parse the response and save order details
+        final responseData = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+
+        // Get existing orders or initialize empty list
+        List<String> savedOrders = prefs.getStringList('selfpickup_orders') ?? [];
+
+        // Create new order object
+        Map<String, dynamic> orderDetails = {
+          'id': responseData['id'],
+          'paid': responseData['paid'],
+          'timestamp': DateTime.now().toIso8601String(),
+          'branchName': branchName,
+          'orderItems': cartProvider.cartItems
+              .map((item) => {
+                    'name': item.product.name,
+                    'quantity': item.quantity,
+                    'price': item.product.price,
+                  })
+              .toList(),
+        };
+
+        // Add new order to the list
+        savedOrders.add(jsonEncode(orderDetails));
+
+        // Keep only the last 5 orders to prevent memory issues
+        if (savedOrders.length > 5) {
+          savedOrders = savedOrders.sublist(savedOrders.length - 5);
+        }
+
+        // Save updated list
+        await prefs.setStringList('selfpickup_orders', savedOrders);
+
+        // Add order notification
+        final notificationProvider =
+            Provider.of<NotificationProvider>(context, listen: false);
+        await notificationProvider.addOrderNotification(
+          title: "New Self-Pickup Order",
+          body: "Your self-pickup order has been placed successfully!",
+          messageId: responseData['id'].toString(),
+        );
+
+        // Update order tracking notification indicator
+        final orderTrackingService = OrderTrackingService();
+        orderTrackingService.markNewOrderAdded();
+
+        cartProvider.clearCart();
+      }
+    } catch (e) {
+      print('Error sending self-pickup order: $e');
+      rethrow;
     }
   }
 
