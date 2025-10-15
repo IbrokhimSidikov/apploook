@@ -46,6 +46,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   bool _isLoading = true; // Add loading state
   final notificationProvider = NotificationProvider();
   final notificationService = NotificationService();
+  final localeProvider = LocaleProvider();
 
   @override
   void initState() {
@@ -68,6 +69,9 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     
     // Update the state with the loaded preference
     _acceptedPrivacyPolicy = hasAccepted;
+    
+    // Initialize locale provider to load saved language
+    await localeProvider.initialize();
     
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
@@ -107,7 +111,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: notificationProvider),
       ],
       // Show elegant branded splash screen while initializing
@@ -135,7 +139,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
                     MultiProvider(
                       providers: [
                         ChangeNotifierProvider(create: (_) => CartProvider()),
-                        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+                        ChangeNotifierProvider.value(value: localeProvider),
                         ChangeNotifierProvider.value(value: notificationProvider),
                       ],
                       child: const MyApp(),
@@ -156,14 +160,42 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final VersionCheckerService _versionChecker = VersionCheckerService();
+  String? _initialRoute;
+  bool _isCheckingRoute = true;
   
   @override
   void initState() {
     super.initState();
+    _determineInitialRoute();
     // Check for updates after the widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkForUpdates();
     });
+  }
+  
+  Future<void> _determineInitialRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Check if onboarding has been completed
+    final hasCompletedOnboarding = prefs.getBool('onboarding_completed') ?? false;
+    
+    if (hasCompletedOnboarding) {
+      // Check if user is signed in
+      final phoneNumber = prefs.getString('phoneNumber');
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        _initialRoute = '/homeNew';
+      } else {
+        _initialRoute = '/signin';
+      }
+    } else {
+      _initialRoute = '/onboard';
+    }
+    
+    if (mounted) {
+      setState(() {
+        _isCheckingRoute = false;
+      });
+    }
   }
   
   Future<void> _checkForUpdates() async {
@@ -173,6 +205,18 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingRoute) {
+      // Show a simple loading indicator while determining route
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+    
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, _) {
         return MaterialApp(
@@ -201,7 +245,7 @@ class _MyAppState extends State<MyApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          initialRoute: '/onboard',
+          initialRoute: _initialRoute,
           routes: {
             '/homeNew': (context) => const HomeNew(),
             '/signin': (context) => const SignIn(),

@@ -353,9 +353,13 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     final selectedLocale = isEnglishSelected ? 'en' : 'uz';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_language', selectedLocale);
+    
+    // Mark onboarding as completed
+    await prefs.setBool('onboarding_completed', true);
+    print('Onboarding completed and saved to SharedPreferences');
 
     if (!mounted) return;
-    context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
+    await context.read<LocaleProvider>().setLocale(Locale(selectedLocale));
 
     setState(() {
       _isMenuLoaded = false;
