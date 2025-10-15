@@ -121,8 +121,8 @@ class _CheckoutState extends State<Checkout> {
     required double deliveryFee,
     required String? branchName,
   }) async {
-    // Don't allow Payme for self-pickup orders
-    if (_selectedIndex == 1) {
+    // Don't allow Payme for self-pickup and in-restaurant orders
+    if (_selectedIndex == 1 || _selectedIndex == 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).paymeNotAvailable)),
       );
@@ -633,7 +633,12 @@ class _CheckoutState extends State<Checkout> {
                       // Delivery button
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedIndex = 0),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 0;
+                              // Keep Payme selection for delivery
+                            });
+                          },
                           child: Container(
                             height: 80,
                             decoration: BoxDecoration(
@@ -675,7 +680,15 @@ class _CheckoutState extends State<Checkout> {
                       // Self-pickup button
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedIndex = 1),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 1;
+                              // Reset Payme selection if selected
+                              if (selectedOption == 'Payme') {
+                                selectedOption = null;
+                              }
+                            });
+                          },
                           child: Container(
                             height: 80,
                             decoration: BoxDecoration(
@@ -722,7 +735,12 @@ class _CheckoutState extends State<Checkout> {
                       // Carhop button
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedIndex = 2),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 2;
+                              // Keep Payme selection for carhop
+                            });
+                          },
                           child: Container(
                             height: 80,
                             decoration: BoxDecoration(
@@ -764,7 +782,15 @@ class _CheckoutState extends State<Checkout> {
                       // In-Restaurant button
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => setState(() => _selectedIndex = 3),
+                          onTap: () {
+                            setState(() {
+                              _selectedIndex = 3;
+                              // Reset Payme selection if selected
+                              if (selectedOption == 'Payme') {
+                                selectedOption = null;
+                              }
+                            });
+                          },
                           child: Container(
                             height: 80,
                             decoration: BoxDecoration(
@@ -1478,16 +1504,18 @@ class _CheckoutState extends State<Checkout> {
                   //     ],
                   //   ),
                   // ),
-                  const DropdownMenuItem<String>(
-                    value: 'Payme',
-                    child: Row(
-                      children: [
-                        Icon(Icons.payment, color: Colors.purple),
-                        SizedBox(width: 10),
-                        Text('Payme'),
-                      ],
+                  // Only show Payme for delivery (0) and carhop (2) orders
+                  if (_selectedIndex == 0 || _selectedIndex == 2)
+                    const DropdownMenuItem<String>(
+                      value: 'Payme',
+                      child: Row(
+                        children: [
+                          Icon(Icons.payment, color: Colors.purple),
+                          SizedBox(width: 10),
+                          Text('Payme'),
+                        ],
+                      ),
                     ),
-                  ),
                 ],
                 onChanged: (value) {
                   setState(() {
