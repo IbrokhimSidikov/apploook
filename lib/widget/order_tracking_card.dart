@@ -233,7 +233,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
 
   Widget _buildStatusIndicator(String status) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: _getStatusColor(status).withOpacity(0.2),
         borderRadius: BorderRadius.circular(16),
@@ -257,8 +257,10 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
               style: TextStyle(
                 color: _getStatusColor(status),
                 fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],
@@ -291,8 +293,10 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
+                  flex: 2,
                   child: GestureDetector(
                     onTap: () {
                       // Show a snackbar with the full order ID when tapped
@@ -323,12 +327,15 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                         fontSize: 16,
                       ),
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                      maxLines: 2,
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
-                _buildStatusIndicator(status),
+                Flexible(
+                  flex: 1,
+                  child: _buildStatusIndicator(status),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -423,22 +430,28 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      paymentType.toLowerCase() == 'card'
-                          ? Icons.credit_card
-                          : Icons.money,
-                      size: 16,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      paymentType,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      Icon(
+                        paymentType.toLowerCase() == 'card'
+                            ? Icons.credit_card
+                            : Icons.money,
+                        size: 16,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          paymentType,
+                          style: const TextStyle(color: Colors.grey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _updateOrderStatus,
                   style: ElevatedButton.styleFrom(
@@ -451,7 +464,10 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : Text(AppLocalizations.of(context).refreshStatus),
+                      : Text(
+                          AppLocalizations.of(context).refreshStatus,
+                          style: const TextStyle(fontSize: 13),
+                        ),
                 ),
               ],
             ),

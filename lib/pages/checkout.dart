@@ -2493,12 +2493,18 @@ class _CheckoutState extends State<Checkout> {
         List<String> savedOrders = prefs.getStringList('selfpickup_orders') ?? [];
 
         // Create new order object
+        // Filter out "Пакет" for in-restaurant orders in the saved order items
+        final orderItemsToSave = isInRestaurant
+            ? cartProvider.cartItems.where((item) => item.product.name != 'Пакет').toList()
+            : cartProvider.cartItems;
+        
         Map<String, dynamic> orderDetails = {
           'id': responseData['id'],
           'paid': responseData['paid'],
           'timestamp': DateTime.now().toIso8601String(),
           'branchName': branchName,
-          'orderItems': cartProvider.cartItems
+          'orderType': isInRestaurant ? 'In-Restaurant' : 'Self-Pickup',
+          'orderItems': orderItemsToSave
               .map((item) => {
                     'name': item.product.name,
                     'quantity': item.quantity,
