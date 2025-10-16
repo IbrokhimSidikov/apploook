@@ -33,16 +33,17 @@ if (flutterVersionName == null) {
 
 android {
     namespace "com.loook.v1"
-    compileSdkVersion 35
+    compileSdkVersion 36
     ndkVersion flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = '21'
     }
 
     sourceSets {
@@ -51,8 +52,8 @@ android {
 
     defaultConfig {
         applicationId "com.loook.v1"
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 35
+        minSdkVersion 26
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         ndk {
@@ -84,17 +85,18 @@ flutter {
 }
 
 dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
     implementation 'com.yandex.android:maps.mobile:4.5.1-full'
     implementation platform('com.google.firebase:firebase-bom:32.7.1')
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-auth'
 
-    // ✅ Use only the new Play Core libraries
+    // Use only the new Play Core libraries
     implementation "com.google.android.play:app-update:2.1.0"
     implementation "com.google.android.play:review:2.0.1"
 }
 
-// ✅ Exclude the OLD play-core everywhere
+// Exclude the OLD play-core everywhere
 configurations.all {
     exclude group: 'com.google.android.play', module: 'core'
     resolutionStrategy {
