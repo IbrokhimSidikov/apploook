@@ -113,7 +113,7 @@ class _BranchesState extends State<Branches> with SingleTickerProviderStateMixin
     _placemarks = [];
     
     // Load the SVG icon once
-    final markerIcon = await _getBitmapFromSvg('images/Map_pin_icon.svg', 60);
+    final markerIcon = await _getBitmapFromSvg('images/metkaa.svg', 60);
     
     // Add placemarks for branches with coordinates
     for (int i = 0; i < branches.length; i++) {
