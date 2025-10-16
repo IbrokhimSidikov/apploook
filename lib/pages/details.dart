@@ -138,25 +138,29 @@ class _DetailsState extends State<Details> {
     return selection.any((selected) => selected.modifier.id == modifierId);
   }
 
-  // Check if current time is before the ordering cutoff time (configurable via Firebase Remote Config)
+  // Check if current time is within allowed ordering hours
+  // Restaurant is CLOSED from 23:30 to 09:30 (overnight)
+  // Restaurant is OPEN from 09:30 to 23:30
   bool _isOrderingTimeAllowed() {
     final now = DateTime.now();
-    final remoteConfig = RemoteConfigService();
-    final cutoffHour = remoteConfig.orderCutoffHour;
-    final cutoffMinute = remoteConfig.orderCutoffMinute;
-
-    // Log the values fetched from Firebase Remote Config
-    // print('Firebase Remote Config - Order Cutoff Time: $cutoffHour:$cutoffMinute');
-    // print('Current Time: ${now.hour}:${now.minute}');
-
-    // Check if current time is before cutoff
-    if (now.hour < cutoffHour) {
-      return true;
-    } else if (now.hour == cutoffHour && now.minute < cutoffMinute) {
-      return true;
+    final currentHour = now.hour;
+    final currentMinute = now.minute;
+    
+    // Convert current time to minutes since midnight for easier comparison
+    final currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    // Define closing and opening times in minutes since midnight
+    const closingTime = 23 * 60 + 30; // 23:30 = 1410 minutes
+    const openingTime = 9 * 60 + 30;  // 09:30 = 570 minutes
+    
+    // Restaurant is CLOSED if:
+    // 1. Current time is >= 23:30 (from 23:30 to 23:59)
+    // 2. Current time is < 09:30 (from 00:00 to 09:29)
+    if (currentTimeInMinutes >= closingTime || currentTimeInMinutes < openingTime) {
+      return false; // Restaurant is closed
     }
-
-    return false;
+    
+    return true; // Restaurant is open (09:30 to 23:29)
   }
 
   // Force refresh Remote Config values
