@@ -374,24 +374,78 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
             ),
             const SizedBox(height: 8),
             ...items.map((item) {
+              // Get modifiers if they exist
+              final selectedModifiers = item['selectedModifiers'] as List<dynamic>? ?? [];
+              final hasModifiers = selectedModifiers.isNotEmpty;
+              
               return Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        '${item['quantity']}x ${item['name']}',
-                        style: const TextStyle(fontSize: 14),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            '${item['quantity']}x ${item['name']}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${NumberFormat('#,##0').format(item['totalPrice'] ?? item['price'] * item['quantity'])} sum',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                    // Display modifiers if they exist
+                    if (hasModifiers)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, top: 4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: selectedModifiers.map((modifier) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 2),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.add_circle_outline,
+                                    size: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      '${modifier['modifierName']}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '+${NumberFormat('#,##0').format(modifier['modifierPrice'])} sum',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${NumberFormat('#,##0').format(item['totalPrice'])} sum',
-                      style: const TextStyle(fontSize: 14),
-                    ),
                   ],
                 ),
               );

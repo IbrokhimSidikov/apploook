@@ -567,7 +567,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
     'Loook Yangiyol',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -2339,14 +2339,45 @@ class _CheckoutState extends State<Checkout> {
       // Get existing orders or initialize empty list
       List<String> savedOrders = prefs.getStringList('delivery_orders') ?? [];
 
-      // Create new order object
+      // Process items to ensure we have the correct total prices including modifiers
+      List<Map<String, dynamic>> processedItems = items.map((item) {
+        // Create a copy of the item to avoid modifying the original
+        Map<String, dynamic> processedItem = Map<String, dynamic>.from(item);
+        
+        // If the item has modifiers, ensure the totalPrice reflects the modified price
+        if (item.containsKey('selectedModifiers') && item['selectedModifiers'] is List) {
+          double basePrice = (item['price'] ?? 0.0).toDouble();
+          int quantity = (item['quantity'] ?? 1).toInt();
+          double modifiersTotal = 0.0;
+          
+          // Calculate total price from modifiers
+          if (item['selectedModifiers'] != null) {
+            for (var modifier in item['selectedModifiers']) {
+              if (modifier is Map && modifier['modifierPrice'] != null) {
+                double modifierPrice = (modifier['modifierPrice'] is int 
+                    ? (modifier['modifierPrice'] as int).toDouble() 
+                    : modifier['modifierPrice']) ?? 0.0;
+                int modifierQty = (modifier['quantity'] ?? 1).toInt();
+                modifiersTotal += modifierPrice * modifierQty;
+              }
+            }
+          }
+          
+          // Update the total price to include modifiers
+          processedItem['totalPrice'] = (basePrice + modifiersTotal) * quantity;
+        }
+        
+        return processedItem;
+      }).toList();
+
+      // Create new order object with processed items
       Map<String, dynamic> orderDetails = {
         'id': orderId,
         'status': 'pending',
         'timestamp': DateTime.now().toIso8601String(),
         'address': address,
         'paymentType': paymentType,
-        'items': items,
+        'items': processedItems, // Use the processed items with correct prices
         'total': total,
         'deliveryFee': deliveryFee,
         'latitude': latitude,
@@ -2509,6 +2540,15 @@ class _CheckoutState extends State<Checkout> {
                     'name': item.product.name,
                     'quantity': item.quantity,
                     'price': item.product.price,
+                    'totalPrice': item.totalPrice, // Include the actual total price with modifiers
+                    'selectedModifiers': item.selectedModifiers
+                        .map((modifier) => {
+                              'modifierId': modifier.modifier.id,
+                              'modifierName': modifier.modifier.name,
+                              'modifierPrice': modifier.modifier.price,
+                              'quantity': modifier.quantity,
+                            })
+                        .toList(),
                   })
               .toList(),
         };
@@ -2698,23 +2738,28 @@ class _CheckoutState extends State<Checkout> {
                       'name': item.product.name,
                       'quantity': item.quantity,
                       'price': item.product.price,
+                      'totalPrice': item.totalPrice, // Include the actual total price with modifiers
+                      'selectedModifiers': item.selectedModifiers
+                          .map((modifier) => {
+                                'modifierId': modifier.modifier.id,
+                                'modifierName': modifier.modifier.name,
+                                'modifierPrice': modifier.modifier.price,
+                                'quantity': modifier.quantity,
+                              })
+                          .toList(),
                       'carDetails': carDetails
                     })
                 .toList(),
           };
 
-          // Add new order to the list
           savedOrders.add(jsonEncode(orderDetails));
 
-          // Keep only the last 5 orders to prevent memory issues
           if (savedOrders.length > 5) {
             savedOrders = savedOrders.sublist(savedOrders.length - 5);
           }
 
-          // Save updated list
           await prefs.setStringList('carhop_orders', savedOrders);
 
-          // Add order notification
           final notificationProvider =
               Provider.of<NotificationProvider>(context, listen: false);
           await notificationProvider.addOrderNotification(

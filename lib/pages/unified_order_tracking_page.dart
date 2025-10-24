@@ -707,68 +707,102 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                                       children: [
                                         ...List<Widget>.from(
                                           (order['orderItems'] as List)
-                                              .map((item) => Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            bottom: 12),
-                                                    child: Row(
-                                                      children: [
-                                                        Container(
-                                                          width: 24,
-                                                          height: 24,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColor
-                                                                .withOpacity(
-                                                                    0.1),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6),
-                                                          ),
-                                                          child: Center(
-                                                            child: Text(
-                                                              '${item['quantity']}x',
-                                                              style: TextStyle(
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor,
-                                                              ),
-                                                            ),
-                                                          ),
+                                              .map((item) {
+                                            // Get modifiers if they exist
+                                            final selectedModifiers = item['selectedModifiers'] as List<dynamic>? ?? [];
+                                            final hasModifiers = selectedModifiers.isNotEmpty;
+                                            // Use totalPrice if available, otherwise calculate from price
+                                            final itemTotal = item['totalPrice'] ?? (item['price'] * item['quantity']);
+                                            
+                                            return Padding(
+                                              padding: const EdgeInsets.only(bottom: 12),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 24,
+                                                        height: 24,
+                                                        decoration: BoxDecoration(
+                                                          color: Theme.of(context)
+                                                              .primaryColor
+                                                              .withOpacity(0.1),
+                                                          borderRadius: BorderRadius.circular(6),
                                                         ),
-                                                        const SizedBox(
-                                                            width: 12),
-                                                        Expanded(
+                                                        child: Center(
                                                           child: Text(
-                                                            '${item['name']}',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
+                                                            '${item['quantity']}x',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Theme.of(context).primaryColor,
                                                             ),
                                                           ),
                                                         ),
-                                                        Text(
-                                                          '${(item['price'] * item['quantity']).toStringAsFixed(0)} UZS',
-                                                          style:
-                                                              const TextStyle(
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: Text(
+                                                          '${item['name']}',
+                                                          style: const TextStyle(
                                                             fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
+                                                            fontWeight: FontWeight.w500,
                                                           ),
                                                         ),
-                                                      ],
+                                                      ),
+                                                      Text(
+                                                        '${itemTotal.toStringAsFixed(0)} UZS',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  // Display modifiers if they exist
+                                                  if (hasModifiers)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(left: 36, top: 4),
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: selectedModifiers.map((modifier) {
+                                                          return Padding(
+                                                            padding: const EdgeInsets.only(bottom: 2),
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.add_circle_outline,
+                                                                  size: 12,
+                                                                  color: Colors.grey[600],
+                                                                ),
+                                                                const SizedBox(width: 4),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    '${modifier['modifierName']}',
+                                                                    style: TextStyle(
+                                                                      fontSize: 12,
+                                                                      color: Colors.grey[600],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  '+${NumberFormat('#,##0').format(modifier['modifierPrice'])} UZS',
+                                                                  style: TextStyle(
+                                                                    fontSize: 12,
+                                                                    color: Colors.grey[600],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
                                                     ),
-                                                  )),
+                                                ],
+                                              ),
+                                            );
+                                          }),
                                         ),
                                       ],
                                     ),
@@ -794,7 +828,17 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                                           ),
                                         ),
                                         Text(
-                                          '${order['paid']} UZS',
+                                          '${() {
+                                            // Calculate total from order items
+                                            double total = 0;
+                                            if (order['orderItems'] != null) {
+                                              for (var item in order['orderItems']) {
+                                                // Use totalPrice if available (includes modifiers), otherwise calculate from base price
+                                                total += (item['totalPrice'] ?? (item['price'] * item['quantity']));
+                                              }
+                                            }
+                                            return total.toStringAsFixed(0);
+                                          }()} UZS',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
@@ -975,68 +1019,102 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                                       children: [
                                         ...List<Widget>.from(
                                           (order['orderItems'] as List)
-                                              .map((item) => Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            bottom: 12),
-                                                    child: Row(
-                                                      children: [
-                                                        Container(
-                                                          width: 24,
-                                                          height: 24,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColor
-                                                                .withOpacity(
-                                                                    0.1),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6),
-                                                          ),
-                                                          child: Center(
-                                                            child: Text(
-                                                              '${item['quantity']}x',
-                                                              style: TextStyle(
-                                                                fontSize: 12,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor,
-                                                              ),
-                                                            ),
-                                                          ),
+                                              .map((item) {
+                                            // Get modifiers if they exist
+                                            final selectedModifiers = item['selectedModifiers'] as List<dynamic>? ?? [];
+                                            final hasModifiers = selectedModifiers.isNotEmpty;
+                                            // Use totalPrice if available, otherwise calculate from price
+                                            final itemTotal = item['totalPrice'] ?? (item['price'] * item['quantity']);
+                                            
+                                            return Padding(
+                                              padding: const EdgeInsets.only(bottom: 12),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Container(
+                                                        width: 24,
+                                                        height: 24,
+                                                        decoration: BoxDecoration(
+                                                          color: Theme.of(context)
+                                                              .primaryColor
+                                                              .withOpacity(0.1),
+                                                          borderRadius: BorderRadius.circular(6),
                                                         ),
-                                                        const SizedBox(
-                                                            width: 12),
-                                                        Expanded(
+                                                        child: Center(
                                                           child: Text(
-                                                            '${item['name']}',
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 14,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
+                                                            '${item['quantity']}x',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight: FontWeight.bold,
+                                                              color: Theme.of(context).primaryColor,
                                                             ),
                                                           ),
                                                         ),
-                                                        Text(
-                                                          '${(item['price'] * item['quantity']).toStringAsFixed(0)} UZS',
-                                                          style:
-                                                              const TextStyle(
+                                                      ),
+                                                      const SizedBox(width: 12),
+                                                      Expanded(
+                                                        child: Text(
+                                                          '${item['name']}',
+                                                          style: const TextStyle(
                                                             fontSize: 14,
-                                                            fontWeight:
-                                                                FontWeight.w500,
+                                                            fontWeight: FontWeight.w500,
                                                           ),
                                                         ),
-                                                      ],
+                                                      ),
+                                                      Text(
+                                                        '${itemTotal.toStringAsFixed(0)} UZS',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight: FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  // Display modifiers if they exist
+                                                  if (hasModifiers)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(left: 36, top: 4),
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: selectedModifiers.map((modifier) {
+                                                          return Padding(
+                                                            padding: const EdgeInsets.only(bottom: 2),
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(
+                                                                  Icons.add_circle_outline,
+                                                                  size: 12,
+                                                                  color: Colors.grey[600],
+                                                                ),
+                                                                const SizedBox(width: 4),
+                                                                Expanded(
+                                                                  child: Text(
+                                                                    '${modifier['modifierName']}',
+                                                                    style: TextStyle(
+                                                                      fontSize: 12,
+                                                                      color: Colors.grey[600],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  '+${NumberFormat('#,##0').format(modifier['modifierPrice'])} UZS',
+                                                                  style: TextStyle(
+                                                                    fontSize: 12,
+                                                                    color: Colors.grey[600],
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
                                                     ),
-                                                  )),
+                                                ],
+                                              ),
+                                            );
+                                          }),
                                         ),
                                       ],
                                     ),
@@ -1062,7 +1140,17 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                                           ),
                                         ),
                                         Text(
-                                          '${order['paid']} UZS',
+                                          '${() {
+                                            // Calculate total from order items
+                                            double total = 0;
+                                            if (order['orderItems'] != null) {
+                                              for (var item in order['orderItems']) {
+                                                // Use totalPrice if available (includes modifiers), otherwise calculate from base price
+                                                total += (item['totalPrice'] ?? (item['price'] * item['quantity']));
+                                              }
+                                            }
+                                            return total.toStringAsFixed(0);
+                                          }()} UZS',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,

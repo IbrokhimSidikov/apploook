@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 class CachedProductImage extends StatelessWidget {
   final String imageUrl;
@@ -42,13 +43,15 @@ class CachedProductImage extends StatelessWidget {
           imageUrl: imageUrl,
           fit: imageFit,
           alignment: Alignment.center,
-          placeholder: (context, url) => Center(
-            child: SizedBox(
-              width: 30,
-              height: 30,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.0,
-                color: Colors.grey[600],
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              width: imageWidth,
+              height: imageHeight,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(8.0),
               ),
             ),
           ),
