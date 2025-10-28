@@ -47,11 +47,11 @@
 		<true/>
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We need location data to enhance app functionality and provide location-based features.</string>
+	<string>LOOOK needs your location to show nearby restaurant branches on the map and help you find the closest location to place your order. For example, when you open the Branches screen, we'll display your position on the map so you can see which LOOOK restaurant is nearest to you.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to improve app features and functionality.</string>
+	<string>LOOOK needs your location to show nearby restaurant branches on the map and help you find the closest location to place your order. For example, when you open the Branches screen, we'll display your position on the map so you can see which LOOOK restaurant is nearest to you.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>We use motion data to improve app functionality and user experience.</string>
+	<string>LOOOK uses motion data to enhance your browsing experience and detect gestures while you navigate through our menu and restaurant locations.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
