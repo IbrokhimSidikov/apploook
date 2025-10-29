@@ -35,14 +35,6 @@ class MenuService {
     );
   }
 
-  /// Configuration map for product variation groups
-  /// Key: Group name (display name)
-  /// Value: List of product UUIDs that belong to this group
-  /// 
-  /// Example:
-  /// 'Hot Wings': ['uuid-3pcs', 'uuid-5pcs', 'uuid-7pcs']
-  /// 
-  /// Add your product UUIDs here to group variations together
   final Map<String, List<String>> productVariationGroups = {
     // TODO: Add your product variation groups here
     'Hot Wings': ['5208c67b-2ac6-4f43-88ab-65a83f7ebb81', '0c7b899f-d028-4570-8cb4-269672e0accb', '06cb14c5-0562-40b1-a626-9c7cca693277', '9ffac736-6889-4d2b-84ea-2cc42792eee5'],

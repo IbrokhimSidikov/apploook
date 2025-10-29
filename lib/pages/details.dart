@@ -506,7 +506,7 @@ class _DetailsState extends State<Details> {
                                   // Add to cart using the updated method
                                   cartProvider.addToCartWithModifiers(cartItem);
                                   cartProvider.logItems();
-                                  Navigator.pushNamed(context, '/homeNew');
+                                  Navigator.pop(context);
                                 }
                               : null, // Button will be disabled after cutoff time
                           style: ButtonStyle(
