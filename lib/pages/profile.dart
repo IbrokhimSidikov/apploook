@@ -52,7 +52,6 @@ class _ProfileState extends State<Profile> {
       clientFirstName = prefs.getString('firstName') ?? 'Anonymous';
     });
   }
-
   // void _showDeleteConfirmationDialog() {
   //   showDialog(
   //     context: context,
@@ -83,7 +82,6 @@ class _ProfileState extends State<Profile> {
   //     },
   //   );
   // }
-
   @override
   Widget build(BuildContext context) {
     var cartProvider = Provider.of<CartProvider>(context);
@@ -132,7 +130,6 @@ class _ProfileState extends State<Profile> {
             ),
           ),
           Positioned(
-            //menu list
             top: 200,
             left: 40,
             child: Column(
@@ -469,7 +466,6 @@ class _ProfileState extends State<Profile> {
                     ],
                   ),
                 ),
-
                 // GestureDetector(
                 //   onTap: () {
                 //     showDialog(

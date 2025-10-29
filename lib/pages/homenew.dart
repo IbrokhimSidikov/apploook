@@ -19,7 +19,9 @@ import 'package:apploook/services/version_checker_service.dart';
 
 import 'dart:convert';
 import '../models/modifier_models.dart';
+import '../models/product_group.dart';
 import '../widget/banner_widget.dart';
+import '../widget/variation_selector_sheet.dart';
 
 class Category {
   final int id;
@@ -863,10 +865,25 @@ class _HomeNewState extends State<HomeNew>
                         )
                       : Column(
                           children: categories.map((category) {
-                            List<Product> productsInCategory = allProducts
-                                .where((product) =>
-                                    product.categoryId == category.id)
-                                .toList();
+                            // Get MenuService instance
+                            final menuService = MenuService();
+                            
+                            // Get ungrouped products and product groups for this category
+                            List<Product> ungroupedProducts = menuService
+                                .getUngroupedProductsForCategory(category.id);
+                            List<ProductGroup> productGroups = menuService
+                                .getProductGroupsForCategory(category.id);
+                            
+                            // Combine groups and ungrouped products into a single list
+                            // We'll use a list of dynamic items (either Product or ProductGroup)
+                            List<dynamic> displayItems = [];
+                            
+                            // Add all product groups first (they should maintain their position)
+                            displayItems.addAll(productGroups);
+                            
+                            // Add ungrouped products
+                            displayItems.addAll(ungroupedProducts);
+                            
                             return Container(
                               key: ValueKey<int>(category.id),
                               child: ListView.builder(
@@ -875,150 +892,28 @@ class _HomeNewState extends State<HomeNew>
                                     _categoryScrollControllers[category.id],
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
-                                itemCount: productsInCategory.length,
-                                itemBuilder: (context, productIndex) {
-                                  Product product =
-                                      productsInCategory[productIndex];
-                                  return VisibilityDetector(
-                                    key: Key(
-                                        '${category.id}_${productIndex}_${product.id}'),
-                                    onVisibilityChanged: (visibilityInfo) {
-                                      if (visibilityInfo.visibleFraction == 1) {
-                                        selectedCategoryId.value =
-                                            product.categoryId;
-                                      }
-                                    },
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) {
-                                              if (productsInCategory
-                                                      .isNotEmpty &&
-                                                  productIndex <
-                                                      productsInCategory
-                                                          .length) {
-                                                return Details(
-                                                    product: product);
-                                              }
-                                              return Container();
-                                            },
-                                          ),
-                                        );
-                                      },
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 10.0,
-                                          horizontal: 15.0,
-                                        ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 10.0),
-                                              child: SizedBox(
-                                                width: 135.0,
-                                                child: AspectRatio(
-                                                  aspectRatio: 3 /
-                                                      2, // Exact 600x400 ratio (3:2)
-                                                  child: product.imagePath !=
-                                                          null
-                                                      ? CachedProductImage(
-                                                          imageUrl: product
-                                                              .imagePath!,
-                                                          width: 135.0,
-                                                          height: 90.0,
-                                                        )
-                                                      : Container(
-                                                          color:
-                                                              Colors.grey[200],
-                                                          child: const Center(
-                                                            child: Icon(
-                                                                Icons
-                                                                    .image_not_supported,
-                                                                size: 40,
-                                                                color: Colors
-                                                                    .grey),
-                                                          ),
-                                                        ),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    product.name,
-                                                    style: const TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 16.0,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 5.0),
-                                                  Consumer<LocaleProvider>(
-                                                    builder: (context,
-                                                        localeProvider, _) {
-                                                      final description = product
-                                                          .getDescriptionInLanguage(
-                                                              localeProvider
-                                                                  .locale
-                                                                  .languageCode);
-
-                                                      return Text(
-                                                        description != null &&
-                                                                description
-                                                                    .isNotEmpty
-                                                            ? description
-                                                            : 'No Description',
-                                                        style: const TextStyle(
-                                                          color: Colors.grey,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      );
-                                                    },
-                                                  ),
-                                                  const SizedBox(height: 5.0),
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 35.0,
-                                                      vertical: 5.0,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20.0),
-                                                      color: const Color(0xFFFEC700),
-                                                    ),
-                                                    child: Text(
-                                                      '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                                                      style: const TextStyle(
-                                                        fontSize: 12.0,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                        color: Color.fromARGB(
-                                                            255, 11, 11, 11),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                                itemCount: displayItems.length,
+                                itemBuilder: (context, itemIndex) {
+                                  final item = displayItems[itemIndex];
+                                  
+                                  // Check if this is a ProductGroup or a regular Product
+                                  if (item is ProductGroup) {
+                                    return _buildProductGroupCard(
+                                      context,
+                                      item,
+                                      category,
+                                      itemIndex,
+                                    );
+                                  } else if (item is Product) {
+                                    return _buildProductCard(
+                                      context,
+                                      item,
+                                      category,
+                                      itemIndex,
+                                    );
+                                  }
+                                  
+                                  return const SizedBox.shrink();
                                 },
                               ),
                             );
@@ -1197,6 +1092,283 @@ class _HomeNewState extends State<HomeNew>
     }
 
     selectedCategoryId.value = categoryId;
+  }
+
+  /// Build a card for a product group (with variations)
+  Widget _buildProductGroupCard(
+    BuildContext context,
+    ProductGroup productGroup,
+    Category category,
+    int itemIndex,
+  ) {
+    return VisibilityDetector(
+      key: Key('${category.id}_group_${itemIndex}_${productGroup.primaryVariation.id}'),
+      onVisibilityChanged: (visibilityInfo) {
+        if (visibilityInfo.visibleFraction == 1) {
+          selectedCategoryId.value = productGroup.categoryId;
+        }
+      },
+      child: GestureDetector(
+        onTap: () {
+          // Show variation selector bottom sheet
+          VariationSelectorSheet.show(context, productGroup);
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10.0,
+            horizontal: 15.0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Product image with variation badge
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: 135.0,
+                      child: AspectRatio(
+                        aspectRatio: 3 / 2,
+                        child: productGroup.imagePath != null
+                            ? CachedProductImage(
+                                imageUrl: productGroup.imagePath!,
+                                width: 135.0,
+                                height: 90.0,
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                    // Variation badge
+                    Positioned(
+                      top: 4,
+                      right: 4,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.list,
+                              size: 12,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${productGroup.variations.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            productGroup.groupName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 5.0),
+                    Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, _) {
+                        final description = productGroup.primaryVariation
+                            .getDescriptionInLanguage(
+                                localeProvider.locale.languageCode);
+
+                        return Text(
+                          description != null && description.isNotEmpty
+                              ? description
+                              : 'Multiple variations available',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 5.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 35.0,
+                        vertical: 5.0,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20.0),
+                        color: const Color(0xFFFEC700),
+                      ),
+                      child: Text(
+                        '${productGroup.getPriceRange().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                        style: const TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 11, 11, 11),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build a card for a regular product (no variations)
+  Widget _buildProductCard(
+    BuildContext context,
+    Product product,
+    Category category,
+    int itemIndex,
+  ) {
+    return VisibilityDetector(
+      key: Key('${category.id}_${itemIndex}_${product.id}'),
+      onVisibilityChanged: (visibilityInfo) {
+        if (visibilityInfo.visibleFraction == 1) {
+          selectedCategoryId.value = product.categoryId;
+        }
+      },
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Details(product: product),
+            ),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10.0,
+            horizontal: 15.0,
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 10.0),
+                child: SizedBox(
+                  width: 135.0,
+                  child: AspectRatio(
+                    aspectRatio: 3 / 2,
+                    child: product.imagePath != null
+                        ? CachedProductImage(
+                            imageUrl: product.imagePath!,
+                            width: 135.0,
+                            height: 90.0,
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                size: 40,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    const SizedBox(height: 5.0),
+                    Consumer<LocaleProvider>(
+                      builder: (context, localeProvider, _) {
+                        final description = product.getDescriptionInLanguage(
+                            localeProvider.locale.languageCode);
+
+                        return Text(
+                          description != null && description.isNotEmpty
+                              ? description
+                              : 'No Description',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 5.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 35.0,
+                        vertical: 5.0,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20.0),
+                        color: const Color(0xFFFEC700),
+                      ),
+                      child: Text(
+                        '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                        style: const TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                          color: Color.fromARGB(255, 11, 11, 11),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void _scrollToCategoryBuy(int? categoryId) {
