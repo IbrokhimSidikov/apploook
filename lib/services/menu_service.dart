@@ -51,7 +51,11 @@ class MenuService {
     'Donuts Choco':['aff2af4d-9963-48d3-9cf3-a1c38b8142c5', 'ef69e862-08cf-4f87-b3c7-d401cda63c12'],
     'Donuts Strawberry':['9b8dd673-72cb-488d-9d9a-6fa1839ae272','e58a54fc-cf44-45a7-afc7-9ff5d97b0576'],
     'Bucket 0.5kg':['ffee92e6-ae79-4d33-8996-5903c060edc6','eb297d99-8276-4d16-bce7-213213a4c726','eb028d52-cf82-456e-9727-65602becaa51'],
-    'Bucket 1kg':['4435699c-d08e-45e4-91b8-7998469c5b92','d4d7844e-6d2b-4c63-a8f0-5bc7a24b670f','3e09dabf-c3a1-4b9e-90b1-fe892a29ee75']
+    'Bucket 1kg':['4435699c-d08e-45e4-91b8-7998469c5b92','d4d7844e-6d2b-4c63-a8f0-5bc7a24b670f','3e09dabf-c3a1-4b9e-90b1-fe892a29ee75'],
+    '24+24':['e2609966-acc6-4b93-971d-b7dd17cd88eb', '11434b02-c4d7-4116-a479-8a924e04c353', '63ad6a59-bd48-4f40-aceb-8706d5f4fb10', '54e87b06-d27f-46a4-af4e-d43ce37648db','5f575cc6-b5b1-465e-a1dd-631ef3abc3af','f90ad28f-9948-49e3-984f-cede71ee32f5',],
+    '32+32':['aa8e310f-2a2a-4d34-8622-a83d5f654dca', '4e5e85a6-86f7-4e77-918f-2007b65b4228', '38032505-91de-4f02-912e-a551dbd8690b'],
+    'Sok TipTop':['f3ca491b-aae6-41db-ae91-76a6b323797e', '7f4f6fd3-1e1c-45a9-9a9c-f8dca93d3057','e33099c5-218e-4fdf-9e67-c07c1c28ba7e'],
+    'Sauce':['96a8d98f-fabd-4ecd-89cb-bd71a60716eb', 'f4e6fe5f-5b2b-431f-bc36-053655dac03d', '93ccb42f-a254-4e15-b3d6-c5292c73bc41', '73fa3cb2-c8c7-4f0e-a165-e412c259e7c0', 'bf057a06-7cc0-4f54-a6b1-d3335f0663c3', '08cdcb00-49c9-4146-a623-1e9a4319e32e', 'a4e74610-4fff-48df-b300-5fbb8f4a50aa'],
   };
 
   void setNearestBranchDeliverId(String deliverId) {
@@ -304,16 +308,18 @@ class MenuService {
       // Define custom order priority map
       final Map<String, int> customOrderPriority = {
         'Комбо М':1,
-        'Комбо': 2,
-        'Аппетайзеры': 3,
-        'Курица': 4,
-        'Спиннеры': 5,
-        'Бургеры': 6,
-        'Пицца': 7,
-        'Салаты': 8,
-        'Напитки': 9,
-        'Горячие напитки': 10,
-        'Десерты': 11,
+        'КОМБО': 2,
+        'АППЕТАЙЗЕРЫ (М)': 3,
+        'АППЕТАЙЗЕРЫ': 3,
+        'КУРИЦА': 4,
+        'СПИННЕРЫ': 5,
+        'БУРГЕРЫ': 6,
+        'ПИЦЦА': 7,
+        'САЛАТЫ': 8,
+        'НАПИТКИ': 9,
+        'ГОРЯЧИЕ НАПИТКИ': 10,
+        'ДЕСЕРТЫ': 11,
+        'ВАФЛИ':11,
         'Мороженое и милишайки': 12,
         // Any other categories will be sorted after these by their original sortOrder
       };
