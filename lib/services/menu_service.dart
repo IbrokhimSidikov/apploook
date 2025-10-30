@@ -66,8 +66,10 @@ class MenuService {
     'Bucket 1kg':['4435699c-d08e-45e4-91b8-7998469c5b92','d4d7844e-6d2b-4c63-a8f0-5bc7a24b670f','3e09dabf-c3a1-4b9e-90b1-fe892a29ee75'],
     '24+24':['e2609966-acc6-4b93-971d-b7dd17cd88eb', '11434b02-c4d7-4116-a479-8a924e04c353', '63ad6a59-bd48-4f40-aceb-8706d5f4fb10', '54e87b06-d27f-46a4-af4e-d43ce37648db','5f575cc6-b5b1-465e-a1dd-631ef3abc3af','f90ad28f-9948-49e3-984f-cede71ee32f5',],
     '32+32':['aa8e310f-2a2a-4d34-8622-a83d5f654dca', '4e5e85a6-86f7-4e77-918f-2007b65b4228', '38032505-91de-4f02-912e-a551dbd8690b'],
-    'Sok TipTop':['f3ca491b-aae6-41db-ae91-76a6b323797e', '7f4f6fd3-1e1c-45a9-9a9c-f8dca93d3057','e33099c5-218e-4fdf-9e67-c07c1c28ba7e'],
+    'Sok':['3e71755c-1fc5-4125-a53d-646bb88b9cda','6da73496-4fba-4dea-869a-984822c3275c','f3ca491b-aae6-41db-ae91-76a6b323797e', '7f4f6fd3-1e1c-45a9-9a9c-f8dca93d3057','e33099c5-218e-4fdf-9e67-c07c1c28ba7e'],
     'Sauce':['96a8d98f-fabd-4ecd-89cb-bd71a60716eb', 'f4e6fe5f-5b2b-431f-bc36-053655dac03d', '93ccb42f-a254-4e15-b3d6-c5292c73bc41', '73fa3cb2-c8c7-4f0e-a165-e412c259e7c0', 'bf057a06-7cc0-4f54-a6b1-d3335f0663c3', '08cdcb00-49c9-4146-a623-1e9a4319e32e', 'a4e74610-4fff-48df-b300-5fbb8f4a50aa'],
+    'Drinks 400ml/500ml':['b51e725e-902d-4f26-934b-9f30070a4a9f', '78f390a4-46e3-40bf-abd9-b27dadfe22a3', 'f4842842-30d3-4327-ae80-391ce5da4db7', 'b1552fc9-9384-4d4e-b202-10558e31bcb1','9471a051-9ad9-49c2-a391-8745a65d37ce', '84272c5c-6a74-41e0-a31f-55f9d819ac53'],
+    'Drinks 0.5l/1l/1.5l':['a6b36cbe-434d-474e-b691-280c829510ec','41a49528-0bd7-4916-a0c0-43c19e0f9d55','7af66c3f-662a-40b2-9144-bd49faf5c40f', '138ba514-54d5-46f5-b383-91592a7f0d24', 'daf628a0-2703-481d-aa6c-80f7480ead30', 'aa33df32-b1c6-485d-8228-d5711fe57ca3', 'd6082ef4-0e41-408e-9da2-3e0a7f2bd8a1', 'c4a19f0c-fc98-4e92-be95-29da300465c4', '2213ae97-1494-4406-9603-d9e289d6f38c', '5ad414ab-365d-43fb-ab3c-da9a7d5af397', '602e48f1-2faa-4ce0-a481-5f3b4d597c1e', 'bdc34b0e-7eb5-4c2d-9c71-5202a32e7646'],
   };
 
   void setNearestBranchDeliverId(String deliverId) {
@@ -328,6 +330,7 @@ class MenuService {
         'БУРГЕРЫ': 6,
         'ПИЦЦА': 7,
         'САЛАТЫ': 8,
+        'Напитки М':9,
         'НАПИТКИ': 9,
         'ГОРЯЧИЕ НАПИТКИ': 10,
         'ДЕСЕРТЫ': 11,
