@@ -46,6 +46,7 @@ class Product {
   final int? sortOrder;
   final Map<String, dynamic>? serviceCodesUz;
   final List<Map<String, dynamic>>? images;
+  final bool isPinned;
 
   Product({
     required this.name,
@@ -62,6 +63,7 @@ class Product {
     this.sortOrder,
     this.serviceCodesUz,
     this.images,
+    this.isPinned = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -128,6 +130,7 @@ class Product {
       sortOrder: json['sortOrder'],
       serviceCodesUz: json['serviceCodesUz'],
       images: images,
+      isPinned: json['isPinned'] ?? false,
     );
   }
 
@@ -878,11 +881,14 @@ class _HomeNewState extends State<HomeNew>
                             // We'll use a list of dynamic items (either Product or ProductGroup)
                             List<dynamic> displayItems = [];
                             
-                            // Add all product groups first (they should maintain their position)
-                            displayItems.addAll(productGroups);
+                            // Separate pinned and non-pinned products
+                            List<Product> pinnedProducts = ungroupedProducts.where((p) => p.isPinned).toList();
+                            List<Product> nonPinnedProducts = ungroupedProducts.where((p) => !p.isPinned).toList();
                             
-                            // Add ungrouped products
-                            displayItems.addAll(ungroupedProducts);
+                            // Add items in priority order: pinned products first, then groups, then other products
+                            displayItems.addAll(pinnedProducts);
+                            displayItems.addAll(productGroups);
+                            displayItems.addAll(nonPinnedProducts);
                             
                             return Container(
                               key: ValueKey<int>(category.id),
@@ -1289,27 +1295,56 @@ class _HomeNewState extends State<HomeNew>
             children: [
               Padding(
                 padding: const EdgeInsets.only(right: 10.0),
-                child: SizedBox(
-                  width: 135.0,
-                  child: AspectRatio(
-                    aspectRatio: 3 / 2,
-                    child: product.imagePath != null
-                        ? CachedProductImage(
-                            imageUrl: product.imagePath!,
-                            width: 135.0,
-                            height: 90.0,
-                          )
-                        : Container(
-                            color: Colors.grey[200],
-                            child: const Center(
-                              child: Icon(
-                                Icons.image_not_supported,
-                                size: 40,
-                                color: Colors.grey,
+                child: Stack(
+                  children: [
+                    SizedBox(
+                      width: 135.0,
+                      child: AspectRatio(
+                        aspectRatio: 3 / 2,
+                        child: product.imagePath != null
+                            ? CachedProductImage(
+                                imageUrl: product.imagePath!,
+                                width: 135.0,
+                                height: 90.0,
+                              )
+                            : Container(
+                                color: Colors.grey[200],
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.image_not_supported,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               ),
-                            ),
+                      ),
+                    ),
+                    // Pin badge for pinned products
+                    if (product.isPinned)
+                      Positioned(
+                        top: 4,
+                        left: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFEC700),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                  ),
+                          child: const Icon(
+                            Icons.push_pin,
+                            size: 14,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               Expanded(

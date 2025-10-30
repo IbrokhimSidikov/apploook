@@ -35,6 +35,18 @@ class MenuService {
     );
   }
 
+  // Configuration for pinned products (products that should appear at the top of their category)
+  // You can specify products by their UUID or name
+  final Map<String, List<String>> pinnedProductsByCategory = {
+    // Example: Pin specific products to the top of 'Комбо М' category
+    'Комбо М': ['APPMAX', 'Bigger 2=3'], // By product name
+    // Or use UUIDs:
+    // 'КОМБО': ['product-uuid-1', 'product-uuid-2'],
+    
+    // Add your pinned products here:
+    // 'Category Name': ['Product Name or UUID 1', 'Product Name or UUID 2'],
+  };
+
   final Map<String, List<String>> productVariationGroups = {
     // TODO: Add your product variation groups here
     'Hot Wings': ['5208c67b-2ac6-4f43-88ab-65a83f7ebb81', '0c7b899f-d028-4570-8cb4-269672e0accb', '06cb14c5-0562-40b1-a626-9c7cca693277', '9ffac736-6889-4d2b-84ea-2cc42792eee5'],
@@ -358,6 +370,8 @@ class MenuService {
             .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
 
+      _markPinnedProducts();
+
       _applyCategoryProductSorting();
 
       _groupProductVariations();
@@ -612,6 +626,62 @@ class MenuService {
     //     'MenuService: Created default data with ${_categories.length} categories and ${_allProducts.length} products');
   }
 
+  // Mark products as pinned based on the configuration
+  void _markPinnedProducts() {
+    print('MenuService: Marking pinned products');
+    
+    for (var entry in pinnedProductsByCategory.entries) {
+      String categoryName = entry.key;
+      List<String> pinnedIdentifiers = entry.value;
+      
+      // Find the category
+      var category = _categories.firstWhere(
+        (c) => c.name == categoryName,
+        orElse: () => Category(id: 0, name: ''),
+      );
+      
+      if (category.id == 0) {
+        print('MenuService: Category "$categoryName" not found for pinned products');
+        continue;
+      }
+      
+      // Mark products as pinned
+      for (var product in _allProducts) {
+        if (product.categoryId == category.id) {
+          // Check if product matches by name or UUID
+          if (pinnedIdentifiers.contains(product.name) || 
+              pinnedIdentifiers.contains(product.uuid)) {
+            // Create a new product instance with isPinned = true
+            final pinnedProduct = Product(
+              id: product.id,
+              uuid: product.uuid,
+              name: product.name,
+              categoryId: product.categoryId,
+              categoryTitle: product.categoryTitle,
+              price: product.price,
+              imagePath: product.imagePath,
+              description: product.description,
+              modifierGroups: product.modifierGroups,
+              measure: product.measure,
+              measureUnit: product.measureUnit,
+              sortOrder: product.sortOrder,
+              serviceCodesUz: product.serviceCodesUz,
+              images: product.images,
+              isPinned: true,
+            );
+            
+            // Replace the product in the list
+            int index = _allProducts.indexOf(product);
+            _allProducts[index] = pinnedProduct;
+            print('MenuService: Marked "${product.name}" as pinned in category "$categoryName"');
+          }
+        }
+      }
+    }
+    
+    print('MenuService: Finished marking pinned products');
+  }
+
   // Apply custom sorting to products within each category
   void _applyCategoryProductSorting() {
     // print('MenuService: Applying custom product sorting within categories');
@@ -752,6 +822,11 @@ class MenuService {
         
         // Apply custom sorting based on product names
         categoryProducts.sort((a, b) {
+          // First priority: Pinned products always come first
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          
+          // If both are pinned or both are not pinned, use custom order
           int priorityA = customOrder[a.name] ?? 9999;
           int priorityB = customOrder[b.name] ?? 9999;
 
@@ -784,6 +859,11 @@ class MenuService {
       } else {
         // Apply default sorting (by sortOrder, then by name)
         categoryProducts.sort((a, b) {
+          // First priority: Pinned products always come first
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          
+          // If both are pinned or both are not pinned, use default sorting
           // First try to sort by sortOrder if available
           if (a.sortOrder != null && b.sortOrder != null) {
             int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
