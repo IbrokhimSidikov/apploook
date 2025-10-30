@@ -53,7 +53,7 @@ class MenuService {
     'Strips': ['728d38c6-a045-46c2-9f43-05b565752320', 'fe87c6c4-3380-42a0-8037-2fa9fc7c7379', 'ac15b71b-5529-44e9-9dc2-100ce27a3b40', 'b65855ac-b4f1-4323-a706-872a72eb1732'],
     'Cheese Nuggets': ['9300d02a-3058-4b9f-a7c5-7adef6f7d591', '9f1c53f0-f61a-42b1-a27a-244369cc19e4'],
     'Dinner Meal': ['75c0da75-ecf7-431e-855b-87c97cf392f4', '1b61189a-6c50-47cc-baf2-3e7ab608f288', '974ae6b2-be27-4f7c-be95-76203edf8c29', '403cda4a-5d4b-418d-972f-d95d84d63cc6', '9282dcff-0e73-4ca3-91ad-2b17b2e64ef3'],
-    'Sneak Meal': ['aeefbdad-b759-4ef0-ba88-62589fb68127', 'f6ff8302-1af3-4308-978f-d15b0579465b', '2a3bef8f-5833-46b9-b233-fcb717813568'],
+    'Snack Meal': ['aeefbdad-b759-4ef0-ba88-62589fb68127', 'f6ff8302-1af3-4308-978f-d15b0579465b', '2a3bef8f-5833-46b9-b233-fcb717813568'],
     'Mix Meal':['fee1bf9f-27c6-40d6-81e0-02e63f9d4730', '5e0873ff-a9fa-4504-beca-3eda42ed886e'],
     'Chicken Set': ['cfb76795-f5fb-4ec6-9a90-6a165ca70563', '0f03c202-033c-4f70-9033-93808d8ac57a', 'ea379f61-4095-4d92-bfa3-f5eff88aed54'],
     'Kids Set':['c423c6e2-f6d8-464c-983c-895136a1f216', 'd67575af-326f-4a6d-a133-e68c73b8a557', '7fad3b0b-92b2-4836-af7c-d9304aac812d', '22d35b88-2346-494c-b815-b75c074a981f'],

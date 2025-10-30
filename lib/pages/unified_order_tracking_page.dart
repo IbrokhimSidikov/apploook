@@ -476,18 +476,19 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
             onPressed: _loadOrders,
             tooltip: 'Refresh',
           ),
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () {
-                  // Clear orders based on current tab
-                  _showClearConfirmationDialog(_tabController.index);
-                },
-                tooltip: 'Clear all orders',
-              );
-            },
-          ),
+          // Test uchun
+          // Builder(
+          //   builder: (context) {
+          //     return IconButton(
+          //       icon: const Icon(Icons.delete_outline),
+          //       onPressed: () {
+          //         // Clear orders based on current tab
+          //         _showClearConfirmationDialog(_tabController.index);
+          //       },
+          //       tooltip: 'Clear all orders',
+          //     );
+          //   },
+          // ),
         ],
       ),
       body: TabBarView(
