@@ -102,7 +102,7 @@ class MenuService {
       }
     } catch (e, stackTrace) {
       // print('MenuService: Error initializing: $e');
-      // print('MenuService: Stack trace: $stackTrace');
+      print('MenuService: Stack trace: $stackTrace');
       if (!_isInitialized) {
         // print('MenuService: Not initialized, throwing exception');
         throw Exception('Failed to initialize menu data: $e');
@@ -348,26 +348,20 @@ class MenuService {
         }
       });
 
-      // Debug log the sorted categories
-      // print('MenuService: Custom sorted categories:');
       for (var category in categoriesWithSortOrder) {
         print(
             '  - ${category['name']} (sortOrder: ${category['sortOrder']})');
       }
 
-      // Add sorted categories to _categories list
       for (var categoryData in categoriesWithSortOrder) {
         _categories
             .add(Category(id: categoryData['id'], name: categoryData['name']));
       }
 
-      // Apply custom sorting to products within each category
       _applyCategoryProductSorting();
 
-      // Group products into variations after sorting
       _groupProductVariations();
 
-      // If we still don't have any categories or products, create a default one
       if (_categories.isEmpty) {
         print(
             'MenuService: No categories found at all, creating default category');
@@ -393,13 +387,13 @@ class MenuService {
           'MenuService: Processed ${_categories.length} categories and ${_allProducts.length} products');
 
       // Cache the data for future use
-      print('MenuService: Updating cache');
+      // print('MenuService: Updating cache');
       await _updateCache(apiData, isNewApi: true);
-      print('MenuService: Cache updated successfully');
+      // print('MenuService: Cache updated successfully');
 
       _isInitialized = true;
     } catch (e, stackTrace) {
-      print('MenuService: Error processing new API data: $e');
+      // print('MenuService: Error processing new API data: $e');
       print('MenuService: Stack trace: $stackTrace');
       _createDefaultData();
     }
@@ -587,7 +581,7 @@ class MenuService {
     } catch (e, stackTrace) {
       // print('MenuService: Error processing item: $e');
       // print('MenuService: Item data: $item');
-      // print('MenuService: Stack trace: $stackTrace');
+      print('MenuService: Stack trace: $stackTrace');
     }
   }
 
@@ -624,6 +618,10 @@ class MenuService {
 
     // Define custom product sorting rules for specific categories
     final Map<String, Map<String, int>> categoryProductSorting = {
+      'Комбо М': {
+        'APPMAX':1,
+        'Bigger 2=3':2,
+      },
       'КОМБО': {
         // Example: Define specific product order for COMBO category
         // Add your specific product names and their desired order
@@ -747,10 +745,10 @@ class MenuService {
         // print('MenuService: Custom order map has ${customOrder.length} entries');
         
         // Debug: Check which products have custom priorities
-        for (var product in categoryProducts) {
-          int priority = customOrder[product.name] ?? 9999;
+        // for (var product in categoryProducts) {
+        //   int priority = customOrder[product.name] ?? 9999;
           // print('  Product "${product.name}" -> priority: $priority ${priority < 9999 ? "(CUSTOM)" : "(DEFAULT)"}');
-        }
+        // }
         
         // Apply custom sorting based on product names
         categoryProducts.sort((a, b) {
