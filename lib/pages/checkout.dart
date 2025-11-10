@@ -61,6 +61,7 @@ class _CheckoutState extends State<Checkout> {
   bool _isRemoteConfigInitialized = false;
 
   final FocusNode _carDetailsFocusNode = FocusNode();
+  final TextEditingController _carDetailsController = TextEditingController();
 
   @override
   void initState() {
@@ -68,6 +69,7 @@ class _CheckoutState extends State<Checkout> {
     _initializeRemoteConfig();
     _loadPhoneNumber();
     _loadCustomerName();
+    _loadCarDetails(); // Load cached car details
     // Check for pending Payme transactions
     PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
@@ -494,6 +496,7 @@ class _CheckoutState extends State<Checkout> {
   @override
   void dispose() {
     _carDetailsFocusNode.dispose();
+    _carDetailsController.dispose();
     super.dispose();
   }
 
@@ -536,6 +539,20 @@ class _CheckoutState extends State<Checkout> {
     });
   }
 
+  Future<void> _loadCarDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedCarDetails = prefs.getString('carDetails') ?? '';
+    setState(() {
+      carDetails = savedCarDetails;
+      _carDetailsController.text = savedCarDetails;
+    });
+  }
+
+  Future<void> _saveCarDetails(String details) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('carDetails', details);
+  }
+
   void _updateCommented() {
     setState(() {
       commented = (clientComment.isNotEmpty ? clientComment + ', ' : '') +
@@ -567,7 +584,7 @@ class _CheckoutState extends State<Checkout> {
     'Loook Maksim Gorkiy',
     'Loook Boulevard',
     'Loook Yangiyol',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1281,6 +1298,7 @@ class _CheckoutState extends State<Checkout> {
                                   child: TextField(
                                     focusNode: _carDetailsFocusNode,
                                     autocorrect: false,
+                                    controller: _carDetailsController,
                                     decoration: InputDecoration(
                                       hintText: AppLocalizations.of(context)
                                           .carDetailsHint,
@@ -1294,6 +1312,7 @@ class _CheckoutState extends State<Checkout> {
                                         carDetails = value;
                                         _updateCarDetails();
                                       });
+                                      _saveCarDetails(value); // Save to cache
                                     },
                                   ),
                                 ),
@@ -2680,7 +2699,7 @@ class _CheckoutState extends State<Checkout> {
             }
           ],
           "value": total,
-          "note": comment,
+          "note": "$comment\nCar Details: $carDetails",
           "day_session_id": null,
           "pager_number": phone,
           "pos_id": null,

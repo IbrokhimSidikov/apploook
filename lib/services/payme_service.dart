@@ -17,8 +17,7 @@ class PaymeService {
   }
 
   // Create the Payme checkout URL
-  static String createPaymeCheckoutUrl(
-      String merchantId, String orderId, double amount) {
+  static String createPaymeCheckoutUrl(String merchantId, String orderId, double amount) {
     // Convert amount to integer (amount in tiyins - 100 tiyins = 1 UZS)
     final amountInTiyins = (amount * 100).toInt();
 
@@ -38,7 +37,8 @@ class PaymeService {
     String merchantId,
     String orderId,
     double amount,
-  ) async {
+  )
+  async {
     try {
       print('🚀 Starting Payme checkout launch process...');
       print('📋 Parameters: merchantId=$merchantId, orderId=$orderId, amount=$amount');
@@ -289,8 +289,7 @@ class PaymeService {
   }
 
   // Test function to directly check transaction status without pending payment check
-  static Future<Map<String, dynamic>> testCheckTransaction(
-      String orderId) async {
+  static Future<Map<String, dynamic>> testCheckTransaction(String orderId) async {
     try {
       print(
           '🧪 TEST: Directly checking transaction status for order: $orderId');
