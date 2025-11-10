@@ -172,6 +172,11 @@ class AppLocalizations {
       'bagPriceTitle': 'Bag price',
       'deliveryFeeTitle': 'Delivery fee',
       'totalTitle': 'Total',
+      // Order progress stages
+      'orderAccepted': 'Accepted',
+      'orderCooking': 'Cooking',
+      'orderOnTheWay': 'On the way',
+      'orderDelivered': 'Delivered',
     },
     'uz': {
       // Onboard Page
@@ -337,6 +342,11 @@ class AppLocalizations {
       'bagPriceTitle': 'Paket narxi',
       'deliveryFeeTitle': 'Yetkazib berish narxi',
       'totalTitle': 'Ja\'mi',
+      // Order progress stages
+      'orderAccepted': 'Qabul qilindi',
+      'orderCooking': 'Pishirilmoqda',
+      'orderOnTheWay': 'Yetkazilmoqda',
+      'orderDelivered': 'Yetkazildi',
     },
     'ru': {
       // Onboard Page
@@ -492,6 +502,11 @@ class AppLocalizations {
       'bagPriceTitle': 'Стоимость пакета',
       'deliveryFeeTitle': 'Стоимость доставки',
       'totalTitle': 'Итого',
+      // Order progress stages
+      'orderAccepted': 'Принят',
+      'orderCooking': 'Готовится',
+      'orderOnTheWay': 'В пути',
+      'orderDelivered': 'Доставлен',
     },
   };
 
@@ -780,4 +795,14 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['deliveryFeeTitle']!;
   String get totalTitle =>
       _localizedValues[locale.languageCode]!['totalTitle']!;
+
+  // Order progress stages getters
+  String get orderAccepted =>
+      _localizedValues[locale.languageCode]!['orderAccepted']!;
+  String get orderCooking =>
+      _localizedValues[locale.languageCode]!['orderCooking']!;
+  String get orderOnTheWay =>
+      _localizedValues[locale.languageCode]!['orderOnTheWay']!;
+  String get orderDelivered =>
+      _localizedValues[locale.languageCode]!['orderDelivered']!;
 }

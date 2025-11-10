@@ -298,6 +298,166 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
     );
   }
 
+  int _getCurrentStepIndex(String status) {
+    final statusLower = status.toLowerCase();
+    
+    switch (statusLower) {
+      case 'new':
+      case 'pending':
+      case 'accepted_by_restaurant':
+      case 'confirmed':
+      case 'accepted':
+        return 0; // Accepted
+      case 'cooking':
+      case 'preparing':
+      case 'in_progress':
+      case 'inprogress':
+        return 1; // Cooking
+      case 'ready':
+      case 'ready_for_delivery':
+      case 'taken_by_courier':
+      case 'delivering':
+      case 'on_the_way':
+      case 'ontheway':
+      case 'in_delivery':
+        return 2; // On the way
+      case 'delivered':
+      case 'completed':
+      case 'complete':
+        return 3; // Delivered
+      default:
+        return 0;
+    }
+  }
+
+  Widget _buildProgressTracker(BuildContext context, String status) {
+    final currentStep = _getCurrentStepIndex(status);
+    final steps = [
+      {
+        'icon': Icons.check_circle_outline_rounded,
+        'label': AppLocalizations.of(context).orderAccepted,
+      },
+      {
+        'icon': Icons.restaurant_rounded,
+        'label': AppLocalizations.of(context).orderCooking,
+      },
+      {
+        'icon': Icons.directions_walk_rounded,
+        'label': AppLocalizations.of(context).orderOnTheWay,
+      },
+      {
+        'icon': Icons.home_rounded,
+        'label': AppLocalizations.of(context).orderDelivered,
+      },
+    ];
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: List.generate(steps.length, (index) {
+              final isCompleted = index <= currentStep;
+              final isActive = index == currentStep;
+              
+              return Expanded(
+                child: Column(
+                  children: [
+                    // Icon
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: isCompleted
+                            ? LinearGradient(
+                                colors: [
+                                  Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor.withOpacity(0.7),
+                                ],
+                              )
+                            : null,
+                        color: isCompleted ? null : Colors.grey.shade300,
+                        shape: BoxShape.circle,
+                        boxShadow: isActive
+                            ? [
+                                BoxShadow(
+                                  color: Theme.of(context).primaryColor.withOpacity(0.4),
+                                  blurRadius: 12,
+                                  spreadRadius: 2,
+                                ),
+                              ]
+                            : [],
+                      ),
+                      child: Icon(
+                        steps[index]['icon'] as IconData,
+                        color: isCompleted ? Colors.white : Colors.grey.shade600,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // Label
+                    Text(
+                      steps[index]['label'] as String,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                        color: isCompleted
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey.shade600,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 12),
+          // Progress line
+          Stack(
+            children: [
+              // Background line
+              Container(
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              // Progress line
+              FractionallySizedBox(
+                widthFactor: (currentStep + 1) / steps.length,
+                child: Container(
+                  height: 4,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor,
+                        Theme.of(context).primaryColor.withOpacity(0.7),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final timestamp = _orderData['timestamp'] ?? '';
@@ -401,7 +561,10 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
+            // Progress Tracker
+            _buildProgressTracker(context, status),
+            const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(

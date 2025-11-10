@@ -39,7 +39,7 @@ class MenuService {
   // You can specify products by their UUID or name
   final Map<String, List<String>> pinnedProductsByCategory = {
     // Example: Pin specific products to the top of 'Комбо М' category
-    'Комбо М': ['APPMAX', 'Bigger 2=3'], // By product name
+    'Комбо М': ['APPMAX', 'Bigger 2=3', 'Smart Set (M)'], // By product name
     // Or use UUIDs:
     // 'КОМБО': ['product-uuid-1', 'product-uuid-2'],
     
