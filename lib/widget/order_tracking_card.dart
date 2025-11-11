@@ -521,25 +521,25 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
                   child: GestureDetector(
                     onTap: () {
                       // Show a snackbar with the full order ID when tapped
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                              '${AppLocalizations.of(context).orderID} : ${_orderData['id']}'),
-                          duration: const Duration(seconds: 3),
-                          action: SnackBarAction(
-                            label: 'Copy',
-                            onPressed: () {
-                              Clipboard.setData(ClipboardData(
-                                  text: _orderData['id'].toString()));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Order ID copied to clipboard')),
-                              );
-                            },
-                          ),
-                        ),
-                      );
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   SnackBar(
+                      //     content: Text(
+                      //         '${AppLocalizations.of(context).orderID} : ${_orderData['id']}'),
+                      //     duration: const Duration(seconds: 3),
+                      //     action: SnackBarAction(
+                      //       label: 'Copy',
+                      //       onPressed: () {
+                      //         Clipboard.setData(ClipboardData(
+                      //             text: _orderData['id'].toString()));
+                      //         ScaffoldMessenger.of(context).showSnackBar(
+                      //           const SnackBar(
+                      //               content:
+                      //                   Text('Order ID copied to clipboard')),
+                      //         );
+                      //       },
+                      //     ),
+                      //   ),
+                      // );
                     },
                     child: Text(
                       '${AppLocalizations.of(context).orderCardTitle} ${_formatDateOnly(timestamp)}',
