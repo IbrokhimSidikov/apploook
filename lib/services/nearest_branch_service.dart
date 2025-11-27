@@ -1,9 +1,9 @@
-import 'dart:math';
+import 'dart:convert';
 import 'package:apploook/config/branch_config.dart';
 import 'package:apploook/models/app_lat_long.dart';
 import 'package:apploook/services/app_location_service.dart';
-import 'package:apploook/widget/branch_locations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class NearestBranchService {
   static final NearestBranchService _instance = NearestBranchService._internal();
@@ -11,12 +11,13 @@ class NearestBranchService {
 
   static const String _nearestBranchKey = 'nearest_branch_name';
   static const String _nearestBranchDeliverIdKey = 'nearest_branch_deliver_id';
+  static const String _backendApiUrl = 'http://64.23.216.120:3000';
   
   final LocationService _locationService = LocationService();
   
   NearestBranchService._internal();
   
-  // Find the nearest branch based on user's location
+  // Find the nearest branch based on user's location using backend API
   Future<String> findNearestBranch() async {
     try {
       print('🔍 NearestBranchService: Starting nearest branch detection');
@@ -26,9 +27,9 @@ class NearestBranchService {
         print('📱 NearestBranchService: No location permission, requesting...');
         hasPermission = await _locationService.requestPermission();
         if (!hasPermission) {
-          print('❌ NearestBranchService: Location permission denied, defaulting to Loook Yunusobod');
+          print('❌ NearestBranchService: Location permission denied, defaulting to Yunusobod');
           // Default to a branch if permission is denied
-          return _saveAndReturnBranch('Loook Yunusobod');
+          return _saveAndReturnBranch('Yunusobod');
         }
       }
       
@@ -37,8 +38,8 @@ class NearestBranchService {
       AppLatLong currentLocation = await _locationService.getCurrentLocation();
       print('📍 NearestBranchService: Current location - Lat: ${currentLocation.lat}, Long: ${currentLocation.long}');
       
-      // Calculate nearest branch
-      String nearestBranch = _calculateNearestBranch(currentLocation.lat, currentLocation.long);
+      // Call backend API to get nearest branch
+      String nearestBranch = await _fetchNearestBranchFromBackend(currentLocation.lat, currentLocation.long);
       print('🏪 NearestBranchService: Nearest branch detected: $nearestBranch');
       
       // Save the nearest branch name for future use
@@ -46,73 +47,63 @@ class NearestBranchService {
     } catch (e) {
       print('❌ NearestBranchService: Error finding nearest branch: $e');
       // Default to a branch if there's an error
-      return _saveAndReturnBranch('Loook Yunusobod');
+      return _saveAndReturnBranch('Yunusobod');
     }
   }
   
-  // Calculate which branch is closest to the user's location
-  String _calculateNearestBranch(double userLat, double userLong) {
-    print('🧮 NearestBranchService: Calculating nearest branch from user location');
-    double minDistance = double.infinity;
-    String nearestBranch = 'Loook Yunusobod'; // Default branch
-    
-    // Create a map to store all branch distances for logging
-    Map<String, double> branchDistances = {};
-    
-    BranchLocations.branchCoordinates.forEach((branchName, coordinates) {
-      List<String> parts = coordinates.split(',');
-      if (parts.length == 2) {
-        try {
-          double branchLat = double.parse(parts[0].trim());
-          double branchLong = double.parse(parts[1].trim());
-          
-          // Calculate distance using the Haversine formula
-          double distance = _calculateDistance(userLat, userLong, branchLat, branchLong);
-          
-          // Store distance for logging
-          branchDistances[branchName] = distance;
-          
-          if (distance < minDistance) {
-            minDistance = distance;
-            nearestBranch = branchName;
+  // Fetch nearest branch from backend API
+  Future<String> _fetchNearestBranchFromBackend(double userLat, double userLong) async {
+    try {
+      print('🌐 NearestBranchService: Calling backend API...');
+      final url = Uri.parse('$_backendApiUrl/branch/nearest?lat=$userLat&long=$userLong');
+      print('🌐 NearestBranchService: API URL: $url');
+      
+      final response = await http.get(url).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Backend API request timed out');
+        },
+      );
+      
+      print('🌐 NearestBranchService: API Response Status: ${response.statusCode}');
+      
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('🌐 NearestBranchService: API Response Data: $responseData');
+        
+        // Extract branch name from nested response structure
+        // Response format: {success: true, data: {branch: {name: "City Boulevard Loook", ...}, distance: 0.19}}
+        String branchName = 'Yunusobod'; // Default fallback
+        
+        if (responseData['success'] == true && responseData['data'] != null) {
+          final data = responseData['data'];
+          if (data['branch'] != null) {
+            final branch = data['branch'];
+            final apiName = branch['name'] as String?;
+            final distance = data['distance'];
+            final distanceUnit = data['distanceUnit'];
+            
+            print('🏪 NearestBranchService: Branch details from API:');
+            print('  • Branch Name: $apiName');
+            print('  • Distance: $distance $distanceUnit');
+            
+            // Use branch name directly from API (no mapping needed)
+            branchName = apiName ?? 'Yunusobod';
           }
-        } catch (e) {
-          print('❌ NearestBranchService: Error parsing coordinates for $branchName: $e');
         }
+        
+        print('✅ NearestBranchService: Backend returned branch: $branchName');
+        return branchName;
+      } else {
+        print('❌ NearestBranchService: Backend API error - Status: ${response.statusCode}');
+        print('❌ NearestBranchService: Response body: ${response.body}');
+        throw Exception('Backend API returned status ${response.statusCode}');
       }
-    });
-    
-    // Log all branch distances for debugging
-    print('📊 NearestBranchService: Branch distances from user location:');
-    branchDistances.forEach((branch, distance) {
-      String marker = branch == nearestBranch ? '✅' : '  ';
-      print('  $marker $branch: ${distance.toStringAsFixed(2)} km');
-    });
-    
-    // Get the deliver ID for the nearest branch
-    BranchConfig config = BranchConfigs.getConfig(nearestBranch);
-    print('🏪 NearestBranchService: Selected branch: $nearestBranch (Deliver ID: ${config.deleverId})');
-    
-    return nearestBranch;
-  }
-  
-  // Calculate distance between two coordinates using the Haversine formula
-  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const int earthRadius = 6371; // Radius of the earth in km
-    
-    double dLat = _degreesToRadians(lat2 - lat1);
-    double dLon = _degreesToRadians(lon2 - lon1);
-    
-    double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(_degreesToRadians(lat1)) * cos(_degreesToRadians(lat2)) *
-        sin(dLon / 2) * sin(dLon / 2);
-    
-    double c = 2 * atan2(sqrt(a), sqrt(1 - a));
-    return earthRadius * c; // Distance in km
-  }
-  
-  double _degreesToRadians(double degrees) {
-    return degrees * (pi / 180);
+    } catch (e) {
+      print('❌ NearestBranchService: Error calling backend API: $e');
+      // Fallback to default branch
+      return 'Yunusobod';
+    }
   }
   
   // Save the branch name and its deliver ID to SharedPreferences

@@ -578,12 +578,12 @@ class _CheckoutState extends State<Checkout> {
   String? selectedCity;
 
   List<String> branches = [
-    'Loook Yunusobod',
-    'Loook Beruniy',
-    'Loook Chilanzar',
-    'Loook Maksim Gorkiy',
-    'Loook Boulevard',
-    'Loook Yangiyol',
+    'Yunusobod',
+    'Beruniy',
+    'Chilonzor',
+    'Maksim Gorkiy',
+    'City Boulevard Loook',
+    'Yangiyol Loook',
     'Test'
   ];
   List<String> city = [
@@ -2051,7 +2051,7 @@ class _CheckoutState extends State<Checkout> {
                   ? const Padding(
                       padding: EdgeInsets.all(12.0),
                       child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : Padding(

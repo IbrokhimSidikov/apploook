@@ -27,7 +27,8 @@ class BranchConfigs {
       merchantId: '',
       deleverId: '',
     ),
-    'Loook Yunusobod': const BranchConfig(
+    // Backend API names (matching exactly)
+    'Yunusobod': const BranchConfig(
       branchId: 3,
       sievesApiCode: '62a4d1be-d92e-4df4-98ea-837f14959f9c',
       sievesApiToken: '62a4d1be-d92e-4df4-98ea-837f14959f9c',
@@ -35,7 +36,7 @@ class BranchConfigs {
       merchantId: '685bcb1804711a17e505cfdb',
       deleverId: 'b6780176-358c-4d55-a8bc-0bdb8e3aee6a',
     ),
-    'Loook Beruniy': const BranchConfig(
+    'Beruniy': const BranchConfig(
       branchId: 4,
       sievesApiCode: '5fdd640b-516e-42d9-8f06-6aff0806d4c5',
       sievesApiToken: '5fdd640b-516e-42d9-8f06-6aff0806d4c5',
@@ -43,7 +44,7 @@ class BranchConfigs {
       merchantId: '686386cc74755eccf65a0f26',
       deleverId: '6aa27a5c-cba8-46eb-a225-6e6aa3ce485c',
     ),
-    'Loook Chilanzar': const BranchConfig(
+    'Chilonzor': const BranchConfig(
       branchId: 5,
       sievesApiCode: 'd78fe61d-e901-415a-942c-dab83c361f0b',
       sievesApiToken: 'd78fe61d-e901-415a-942c-dab83c361f0b',
@@ -51,7 +52,7 @@ class BranchConfigs {
       merchantId: '685bca7c04711a17e505cfcb',
       deleverId: '6185a3b8-c874-4f83-88b5-d5caf4a511c7',
     ),
-    'Loook Maksim Gorkiy': const BranchConfig(
+    'Maksim Gorkiy': const BranchConfig(
       branchId: 11,
       sievesApiCode: 'cfe6aa95-f035-431c-bd00-9a181c947b4a',
       sievesApiToken: 'cfe6aa95-f035-431c-bd00-9a181c947b4a',
@@ -59,7 +60,7 @@ class BranchConfigs {
       merchantId: '6863871674755eccf65a0f37',
       deleverId: '04671531-ef4e-486f-8fe3-4dfcdead80f9',
     ),
-    'Loook Boulevard': const BranchConfig(
+    'City Boulevard Loook': const BranchConfig(
       branchId: 14,
       sievesApiCode: '81e57435850af8fe58f8e6540cad5fd6',
       sievesApiToken: '81e57435850af8fe58f8e6540cad5fd6',
@@ -75,7 +76,7 @@ class BranchConfigs {
       merchantId: '6863879a74755eccf65a0f4d',
       deleverId: '',
     ),
-    'Loook Yangiyol': const BranchConfig(
+    "Yangiyol Loook": const BranchConfig(
       branchId: 25,
       sievesApiCode: 'a2890a1395c57770f05fda46f4a83f07',
       sievesApiToken: 'a2890a1395c57770f05fda46f4a83f07',
