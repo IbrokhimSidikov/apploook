@@ -47,8 +47,9 @@ class MenuService {
     // 'Category Name': ['Product Name or UUID 1', 'Product Name or UUID 2'],
   };
 
-  final Map<String, List<String>> productVariationGroups = {
-    // TODO: Add your product variation groups here
+  // Product variation groups - can be overridden by backend data
+  Map<String, List<String>> productVariationGroups = {
+    // Default/fallback product variation groups
     'Hot Wings': ['5208c67b-2ac6-4f43-88ab-65a83f7ebb81', '0c7b899f-d028-4570-8cb4-269672e0accb', '06cb14c5-0562-40b1-a626-9c7cca693277', '9ffac736-6889-4d2b-84ea-2cc42792eee5'],
     'Strips': ['728d38c6-a045-46c2-9f43-05b565752320', 'fe87c6c4-3380-42a0-8037-2fa9fc7c7379', 'ac15b71b-5529-44e9-9dc2-100ce27a3b40', 'b65855ac-b4f1-4323-a706-872a72eb1732'],
     'Cheese Nuggets': ['9300d02a-3058-4b9f-a7c5-7adef6f7d591', '9f1c53f0-f61a-42b1-a27a-244369cc19e4'],
@@ -79,46 +80,117 @@ class MenuService {
     print('======== END NEAREST BRANCH INFORMATION ========\n');
   }
 
+  // Load menu data directly from backend response (from NearestBranchService)
+  Future<void> loadMenuDataFromBackend(Map<String, dynamic> menuData) async {
+    try {
+      print('\n========  Marking pinned products ========');
+      print('MenuService: Loading menu data from backend response');
+      
+      // Extract data
+      List<dynamic> categories = menuData['categories'] ?? [];
+      List<dynamic> items = menuData['items'] ?? [];
+      var backendVariationGroups = menuData['productVariationGroups']; // Can be Map or List
+      
+      int groupCount = 0;
+      if (backendVariationGroups is Map) {
+        groupCount = backendVariationGroups.length;
+      } else if (backendVariationGroups is List) {
+        groupCount = backendVariationGroups.length;
+      }
+      
+      print('MenuService: Backend data - Categories: ${categories.length}, Items: ${items.length}, Variation Groups: $groupCount');
+      
+      // Update productVariationGroups from backend if available
+      if (backendVariationGroups != null) {
+        print('MenuService: Updating productVariationGroups from backend');
+        productVariationGroups = {};
+        
+        // Handle both formats: Map (object) or List (array)
+        if (backendVariationGroups is Map) {
+          // Backend sends as object: {"Hot Wings": ["id1", "id2"], ...}
+          print('MenuService: Processing productVariationGroups as Map');
+          backendVariationGroups.forEach((key, value) {
+            if (value is List) {
+              String groupName = key.toString();
+              List<String> productIds = List<String>.from(value);
+              productVariationGroups[groupName] = productIds;
+              print('  • Group: $groupName (${productIds.length} products)');
+            }
+          });
+        } else if (backendVariationGroups is List) {
+          // Backend sends as array: [{"groupName": "Hot Wings", "productIds": [...]}]
+          print('MenuService: Processing productVariationGroups as List');
+          for (var group in backendVariationGroups) {
+            if (group is Map && group['groupName'] != null && group['productIds'] != null) {
+              String groupName = group['groupName'].toString();
+              List<String> productIds = List<String>.from(group['productIds']);
+              productVariationGroups[groupName] = productIds;
+              print('  • Group: $groupName (${productIds.length} products)');
+            }
+          }
+        }
+        
+        print('MenuService: Loaded ${productVariationGroups.length} product variation groups from backend');
+      } else {
+        print('MenuService: No productVariationGroups from backend, using default config');
+      }
+      
+      // Process the menu data
+      await _processNewApiData(categories, items, menuData);
+      
+      // Cache the data
+      await _updateCache(menuData, isNewApi: true);
+      
+      print('MenuService: Successfully loaded menu from backend');
+      print('======== END LOADING MENU FROM BACKEND ========\n');
+    } catch (e, stackTrace) {
+      print('❌ MenuService: Error loading menu from backend: $e');
+      print('MenuService: Stack trace: $stackTrace');
+      throw Exception('Failed to load menu from backend: $e');
+    }
+  }
+
   Future<void> initialize() async {
-    // print('MenuService: Initializing...');
+    print('MenuService: initialize() called - This is deprecated, use loadMenuDataFromBackend() instead');
     if (_isInitialized) {
-      // print('MenuService: Already initialized, returning');
+      print('MenuService: Already initialized, returning');
       return;
     }
 
-
     try {
-      // print('MenuService: Checking cache validity');
+      print('MenuService: Checking cache validity');
       bool isCacheValid = await _isCacheValid();
-      // print('MenuService: Cache valid: $isCacheValid');
+      print('MenuService: Cache valid: $isCacheValid');
 
       if (isCacheValid) {
-        // print('MenuService: Loading from cache');
+        print('MenuService: Loading from cache');
         final loaded = await _loadFromCache();
         if (loaded) {
           _isInitialized = true;
-          // print(
-          //     'MenuService: Initialized from cache, refreshing data in background');
-
-          refreshData().catchError((e) {
-            // print('MenuService: Background refresh error: $e');
-          });
+          print('MenuService: Initialized from cache successfully');
+          
+          // REMOVED: Background refresh - menu now comes from backend
+          // refreshData().catchError((e) {
+          //   print('MenuService: Background refresh error: $e');
+          // });
         } else {
-          // print('MenuService: Cache is valid but data is null');
+          print('MenuService: Cache is valid but data is null');
         }
       } else {
-        // print('MenuService: Cache is not valid or missing');
+        print('MenuService: Cache is not valid or missing');
       }
 
       if (!_isInitialized) {
-        // print('MenuService: Not initialized from cache, fetching fresh data');
-        await refreshData();
+        print('❌ MenuService: Not initialized from cache - FALLBACK DISABLED FOR TESTING');
+        print('❌ Menu MUST come from backend endpoint: /branch/nearest');
+        throw Exception('Menu not loaded from backend! Check if loadMenuDataFromBackend() was called.');
+        // await refreshData(); // DISABLED FOR TESTING
       }
     } catch (e, stackTrace) {
-      // print('MenuService: Error initializing: $e');
+      print('MenuService: Error initializing: $e');
       print('MenuService: Stack trace: $stackTrace');
       if (!_isInitialized) {
-        // print('MenuService: Not initialized, throwing exception');
+        print('MenuService: Not initialized, throwing exception');
         throw Exception('Failed to initialize menu data: $e');
       }
     }
@@ -157,9 +229,38 @@ class MenuService {
   void _processCategoryData(dynamic data) {
     try {
       if (data is Map<String, dynamic> && data.containsKey('categories')) {
+        print('MenuService: Processing cached menu data');
+        
         // Process in standard API format
         List<dynamic> categories = data['categories'] ?? [];
         List<dynamic> items = data['items'] ?? [];
+
+        // Handle productVariationGroups from cache (same as loadMenuDataFromBackend)
+        var backendVariationGroups = data['productVariationGroups'];
+        if (backendVariationGroups != null) {
+          print('MenuService: Loading productVariationGroups from cache');
+          productVariationGroups = {};
+          
+          if (backendVariationGroups is Map) {
+            backendVariationGroups.forEach((key, value) {
+              if (value is List) {
+                String groupName = key.toString();
+                List<String> productIds = List<String>.from(value);
+                productVariationGroups[groupName] = productIds;
+              }
+            });
+            print('MenuService: Loaded ${productVariationGroups.length} variation groups from cache');
+          } else if (backendVariationGroups is List) {
+            for (var group in backendVariationGroups) {
+              if (group is Map && group['groupName'] != null && group['productIds'] != null) {
+                String groupName = group['groupName'].toString();
+                List<String> productIds = List<String>.from(group['productIds']);
+                productVariationGroups[groupName] = productIds;
+              }
+            }
+            print('MenuService: Loaded ${productVariationGroups.length} variation groups from cache');
+          }
+        }
 
         _processNewApiData(categories, items, data);
       } else if (data is Map<String, dynamic> && data.containsKey('items')) {
@@ -171,7 +272,7 @@ class MenuService {
         _createDefaultData();
       }
     } catch (e) {
-      // print('MenuService: Error processing category data: $e');
+      print('MenuService: Error processing category data: $e');
       _createDefaultData();
     }
   }
@@ -179,7 +280,17 @@ class MenuService {
   Future<void> refreshData() async {
     print('\n======== MENU SERVICE REFRESH DATA ========');
     print('MenuService: Starting refreshData');
+    print('⚠️ WARNING: This method is deprecated. Menu now loads from backend via loadMenuDataFromBackend()');
+    print('❌ FALLBACK DISABLED FOR TESTING - Menu MUST come from new backend endpoint');
+    
+    // COMMENTED OUT FOR TESTING - If you see this, menu is NOT from new backend!
+    throw Exception('❌ FALLBACK MENU DISABLED! Menu should come from backend endpoint: /branch/nearest');
+    
+    /* FALLBACK DISABLED FOR TESTING
     try {
+      // OLD WAY - Commented out since menu now comes from backend
+      // This is kept as fallback only
+      
       // Set the restaurant ID if we have a nearest branch deliver ID
       if (_nearestBranchDeliverId != null &&
           _nearestBranchDeliverId!.isNotEmpty) {
@@ -189,8 +300,8 @@ class MenuService {
         print('MenuService: No nearest branch deliver ID set, using default restaurant ID');
       }
 
-      // Always fetch from the new API regardless of order mode
-      print('MenuService: Fetching menu items from API service');
+      // ======== OLD MENU API REQUEST (FALLBACK ONLY) ========
+      print('MenuService: Fetching menu items from API service (FALLBACK)');
       final menuItems = await _apiService.getMenuItems();
       print('MenuService: Received menu items from API, count: ${menuItems.length}');
 
@@ -209,12 +320,14 @@ class MenuService {
 
       // Process data from the API
       await _processNewApiData(categories, directItems, apiData);
+      // ======== END OLD MENU API REQUEST ========
     } catch (e, stackTrace) {
       print('MenuService: Error refreshing data: $e');
       print('MenuService: Stack trace: $stackTrace');
       // Create default data if there's an error
       _createDefaultData();
     }
+    */
   }
 
   Future<void> _processNewApiData(List<dynamic> categories,
@@ -572,6 +685,12 @@ class MenuService {
         }
       }
 
+      // Get isPinned from backend (defaults to false if not present)
+      bool isPinned = item['is_pinned'] == true;
+      if (isPinned) {
+        print('📌 MenuService: Item "$name" is marked as pinned from backend');
+      }
+
       // Create the product
       final product = Product(
         id: id,
@@ -588,6 +707,7 @@ class MenuService {
         sortOrder: item['sortOrder'],
         serviceCodesUz: item['serviceCodesUz'],
         images: images,
+        isPinned: isPinned,  // Use backend value
       );
 
       // print(
@@ -630,9 +750,16 @@ class MenuService {
   }
 
   // Mark products as pinned based on the configuration
+  // DEPRECATED: Pinning now comes from backend via is_pinned field
   void _markPinnedProducts() {
-    print('MenuService: Marking pinned products');
+    print('⚠️ MenuService: _markPinnedProducts() is deprecated - pinning now comes from backend');
+    print('MenuService: Skipping static pinned products configuration');
     
+    // Skip this logic when using backend data - is_pinned comes from API
+    return;
+    
+    // OLD LOGIC (kept for reference, not executed)
+    // ignore: dead_code
     for (var entry in pinnedProductsByCategory.entries) {
       String categoryName = entry.key;
       List<String> pinnedIdentifiers = entry.value;
@@ -999,6 +1126,19 @@ class MenuService {
       // print('MenuService: Updated cache');
     } catch (e) {
       // print('MenuService: Error updating cache: $e');
+    }
+  }
+
+  // Clear the menu cache (useful for testing or forcing refresh)
+  Future<void> clearCache() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_cacheKey);
+      await prefs.remove(_cacheTimestampKey);
+      _isInitialized = false;
+      print('✅ MenuService: Cache cleared successfully');
+    } catch (e) {
+      print('❌ MenuService: Error clearing cache: $e');
     }
   }
 

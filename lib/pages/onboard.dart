@@ -276,16 +276,32 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     // print('Onboard: Starting menu preloading during video playback');
 
     try {
+      // Check if we have menu data from the backend (from nearest branch API)
+      final menuData = _nearestBranchService.getLatestMenuData();
+      
+      if (menuData != null) {
+        print('Onboard: Using menu data from backend response');
+        
+        // Set the branch deliver ID
+        if (_nearestBranchDeliverId != null &&
+            _nearestBranchDeliverId!.isNotEmpty) {
+          _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
+        }
+        
+        // Load menu directly from backend data
+        await _menuService.loadMenuDataFromBackend(menuData);
+      } else {
+        print('Onboard: No menu data from backend, using traditional flow');
+        
+        // Fallback to traditional flow
+        if (_nearestBranchDeliverId != null &&
+            _nearestBranchDeliverId!.isNotEmpty) {
+          _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
+        }
 
-      if (_nearestBranchDeliverId != null &&
-          _nearestBranchDeliverId!.isNotEmpty) {
-        // print(
-        //     'Onboard: Setting nearest branch deliver ID: $_nearestBranchDeliverId');
-        _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
+        // Only call refreshData() - initialize() is deprecated and calls refreshData() internally
+        await _menuService.refreshData();
       }
-
-      await _menuService.initialize();
-      await _menuService.refreshData();
 
       // print('Onboard: Menu data preloading completed successfully');
 

@@ -17,6 +17,12 @@ class NearestBranchService {
   
   NearestBranchService._internal();
   
+  // Store the latest menu data from backend
+  Map<String, dynamic>? _latestMenuData;
+  
+  // Get the latest menu data
+  Map<String, dynamic>? getLatestMenuData() => _latestMenuData;
+  
   // Find the nearest branch based on user's location using backend API
   Future<String> findNearestBranch() async {
     try {
@@ -38,7 +44,7 @@ class NearestBranchService {
       AppLatLong currentLocation = await _locationService.getCurrentLocation();
       print('📍 NearestBranchService: Current location - Lat: ${currentLocation.lat}, Long: ${currentLocation.long}');
       
-      // Call backend API to get nearest branch
+      // Call backend API to get nearest branch and menu data
       String nearestBranch = await _fetchNearestBranchFromBackend(currentLocation.lat, currentLocation.long);
       print('🏪 NearestBranchService: Nearest branch detected: $nearestBranch');
       
@@ -69,14 +75,16 @@ class NearestBranchService {
       
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        print('🌐 NearestBranchService: API Response Data: $responseData');
+        print('🌐 NearestBranchService: API Response Status: Success');
         
-        // Extract branch name from nested response structure
-        // Response format: {success: true, data: {branch: {name: "City Boulevard Loook", ...}, distance: 0.19}}
+        // Extract branch name and menu data from nested response structure
+        // Response format: {success: true, data: {branch: {...}, distance: 0.19, categories: [], items: [], productVariationGroups: []}}
         String branchName = 'Yunusobod'; // Default fallback
         
         if (responseData['success'] == true && responseData['data'] != null) {
           final data = responseData['data'];
+          
+          // Extract branch information
           if (data['branch'] != null) {
             final branch = data['branch'];
             final apiName = branch['name'] as String?;
@@ -89,6 +97,46 @@ class NearestBranchService {
             
             // Use branch name directly from API (no mapping needed)
             branchName = apiName ?? 'Yunusobod';
+          }
+          
+          // Extract menu data (nested inside "menu" object)
+          if (data['menu'] != null) {
+            final menuData = data['menu'];
+            
+            // Extract categories - items are nested inside categories
+            List<dynamic> categories = menuData['categories'] ?? [];
+            List<dynamic> allItems = [];
+            
+            // Extract items from each category
+            for (var category in categories) {
+              if (category is Map && category['items'] != null) {
+                var items = category['items'];
+                if (items is List) {
+                  allItems.addAll(items);
+                }
+              }
+            }
+            
+            // Handle productVariationGroups - can be array or null
+            var variationGroups = menuData['productVariationGroups'];
+            List<dynamic> productVariationGroupsList = [];
+            if (variationGroups != null && variationGroups is List) {
+              productVariationGroupsList = variationGroups;
+            }
+            
+            _latestMenuData = {
+              'categories': categories,
+              'items': allItems,
+              'productVariationGroups': productVariationGroupsList,
+            };
+            
+            print('📋 NearestBranchService: Menu data extracted:');
+            print('  • Categories: ${categories.length}');
+            print('  • Items: ${allItems.length}');
+            print('  • Product Variation Groups: ${productVariationGroupsList.length}');
+          } else {
+            print('⚠️ NearestBranchService: No menu data in response');
+            _latestMenuData = null;
           }
         }
         

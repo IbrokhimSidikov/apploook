@@ -282,8 +282,16 @@ class _HomeNewState extends State<HomeNew>
         final menuService = MenuService();
         menuService.setNearestBranchDeliverId(nearestBranchDeliverId);
         
-        // Refresh menu data with new branch
-        await menuService.refreshData();
+        // Check if we have menu data from backend
+        final menuData = nearestBranchService.getLatestMenuData();
+        
+        if (menuData != null) {
+          print('HomeNew: Using menu data from backend response');
+          await menuService.loadMenuDataFromBackend(menuData);
+        } else {
+          print('HomeNew: No menu data from backend, refreshing traditionally');
+          await menuService.refreshData();
+        }
         
         // Reload UI with new menu
         if (mounted) {
@@ -434,7 +442,10 @@ class _HomeNewState extends State<HomeNew>
     for (var entry in _categoryScrollControllers.entries) {
       int categoryId = entry.key;
       ScrollController controller = entry.value;
-      if (scrollPosition >= controller.position.pixels &&
+      
+      // Check if controller is attached before accessing position
+      if (controller.hasClients && 
+          scrollPosition >= controller.position.pixels &&
           scrollPosition < controller.position.maxScrollExtent) {
         newCategoryId = categoryId;
         break;
