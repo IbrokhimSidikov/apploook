@@ -177,6 +177,13 @@ class AppLocalizations {
       'orderCooking': 'Cooking',
       'orderOnTheWay': 'On the way',
       'orderDelivered': 'Delivered',
+      //Rahmat dialog
+      'processingPayment': 'Processing payment...',
+      'waitingForConfirmation':'Waiting for payment confirmation...',
+      'completeBrowserTitle':'Complete payment in browser',
+      'returnToApp':'Return to app after payment',
+      'checkingStatus':'Checking status...',
+      'cancelButton':'Cancel',
     },
     'uz': {
       // Onboard Page
@@ -347,6 +354,13 @@ class AppLocalizations {
       'orderCooking': 'Pishirilmoqda',
       'orderOnTheWay': 'Yetkazilmoqda',
       'orderDelivered': 'Yetkazildi',
+      //Rahmat dialog
+      'processingPayment': 'Toʻlov qayta ishlanmoqda...',
+      'waitingForConfirmation': 'Toʻlov tasdigʻi kutilmoqda...',
+      'completeBrowserTitle': 'Toʻlovni brauzerda yakunlang',
+      'returnToApp': 'Toʻlovdan soʻng ilovaga qayting',
+      'checkingStatus': 'Holat tekshirilmoqda...',
+      'cancelButton': 'Bekor qilish'
     },
     'ru': {
       // Onboard Page
@@ -507,6 +521,13 @@ class AppLocalizations {
       'orderCooking': 'Готовится',
       'orderOnTheWay': 'В пути',
       'orderDelivered': 'Доставлен',
+      //Rahmat dialog
+      'processingPayment': 'Обработка платежа...',
+      'waitingForConfirmation': 'Ожидание подтверждения платежа...',
+      'completeBrowserTitle': 'Завершите оплату в браузере',
+      'returnToApp': 'Вернитесь в приложение после оплаты',
+      'checkingStatus': 'Проверка статуса...',
+      'cancelButton': 'Отмена'
     },
   };
 
@@ -805,4 +826,24 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['orderOnTheWay']!;
   String get orderDelivered =>
       _localizedValues[locale.languageCode]!['orderDelivered']!;
+
+  //Rahmat dialog
+  String get processingPayment =>
+      _localizedValues[locale.languageCode]!['processingPayment']!;
+
+  String get waitingForConfirmation =>
+      _localizedValues[locale.languageCode]!['waitingForConfirmation']!;
+
+  String get completeBrowserTitle =>
+      _localizedValues[locale.languageCode]!['completeBrowserTitle']!;
+
+  String get returnToApp =>
+      _localizedValues[locale.languageCode]!['returnToApp']!;
+
+  String get checkingStatus =>
+      _localizedValues[locale.languageCode]!['checkingStatus']!;
+
+  String get cancelButton =>
+      _localizedValues[locale.languageCode]!['cancelButton']!;
+
 }

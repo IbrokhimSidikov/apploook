@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:apploook/services/rahmat_pay_service.dart';
 import 'package:provider/provider.dart';
@@ -668,8 +669,8 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
               
               // Title
               Text(
-                'Processing Payment',
-                style: TextStyle(
+                AppLocalizations.of(context).processingPayment,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
@@ -699,7 +700,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
                     SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        'Waiting for payment confirmation...',
+                        AppLocalizations.of(context).waitingForConfirmation,
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.blue[900],
@@ -745,7 +746,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Complete payment in browser',
+                            AppLocalizations.of(context).completeBrowserTitle,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.black87,
@@ -778,7 +779,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'Return to app after payment',
+                            AppLocalizations.of(context).returnToApp,
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.black87,
@@ -799,7 +800,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Checking status...',
+                        AppLocalizations.of(context).checkingStatus,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey[600],
@@ -840,7 +841,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
                   ),
                 ),
                 child: Text(
-                  'Cancel',
+                  AppLocalizations.of(context).cancelButton,
                   style: TextStyle(
                     color: Colors.grey[700],
                     fontSize: 16,
