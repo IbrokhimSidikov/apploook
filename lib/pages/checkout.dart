@@ -12,6 +12,7 @@ import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
+import 'package:apploook/services/rahmat_pay_service.dart';
 import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -349,6 +350,150 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
+  // Handle Card payment with Rahmat Pay
+  Future<void> _handleCardPayment({
+    required String name,
+    required String phone,
+    required String? branchName,
+    required String comment,
+    required double total,
+    required CartProvider cartProvider,
+    required int selectedIndex,
+    String? carDetails,
+  }) async {
+    try {
+      setState(() {
+        _isProcessing = true;
+      });
+
+      print('\n======== CARD PAYMENT HANDLER ========');
+      print('Branch: $branchName');
+      print('Total: $total');
+      print('Order Type Index: $selectedIndex');
+
+      // Make sure branch name is not null
+      if (branchName == null) {
+        throw Exception('Branch name is required for card payment');
+      }
+
+      // Get branch config
+      final branchConfig = await BranchConfigs.getConfig(branchName);
+
+      // Get bearer token from Sieves API
+      // Using the branch's API token as bearer token
+      final bearerToken = branchConfig.sievesApiToken;
+
+      // Get order type ID based on selected index
+      final orderTypeId = RahmatPayService.getOrderTypeId(selectedIndex);
+
+      // Payment type ID is 3 for card
+      const paymentTypeId = 3;
+
+      // Convert cart items to OFD format
+      final ofdItems = RahmatPayService.convertCartItemsToOFD(cartProvider.cartItems);
+
+      // Prepare note with car details if carhop
+      String finalNote = comment;
+      if (selectedIndex == 2 && carDetails != null && carDetails.isNotEmpty) {
+        finalNote = '$comment\nCar Details: $carDetails';
+      }
+
+      // Create invoice
+      // Extract last 2 digits from phone for pager_number (API expects simple number like "12")
+      final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
+      final pagerNumber = digitsOnly.length >= 2 ? digitsOnly.substring(digitsOnly.length - 2) : digitsOnly;
+      
+      final invoiceResult = await RahmatPayService.createInvoice(
+        branchName: branchName,
+        orderTypeId: orderTypeId,
+        paymentTypeId: paymentTypeId,
+        customerQuantity: 1,
+        pagerNumber: pagerNumber,
+        note: finalNote,
+        amount: (total * 100).toInt(), // Convert to tiyin (multiply by 100)
+        lang: 'ru', // TODO: Get from app locale
+        ofdItems: ofdItems,
+        bearerToken: bearerToken,
+      );
+
+      if (invoiceResult['success'] == true) {
+        final shortLink = invoiceResult['short_link'] as String;
+        final invoiceId = invoiceResult['invoice_id'] as String?;
+
+        print('Invoice created successfully!');
+        print('Short Link: $shortLink');
+        print('Invoice ID: $invoiceId');
+
+        // Save pending payment for verification later
+        if (invoiceId != null) {
+          await RahmatPayService.savePendingCardPayment(
+            invoiceId: invoiceId,
+            shortLink: shortLink,
+            orderData: {
+              'name': name,
+              'phone': phone,
+              'branch': branchName,
+              'comment': finalNote,
+              'total': total,
+              'cart_items': cartProvider.cartItems.map((item) => {
+                'name': item.product.name,
+                'quantity': item.quantity,
+                'price': item.product.price,
+              }).toList(),
+            },
+          );
+        }
+
+        // Launch payment URL
+        final launched = await RahmatPayService.launchPaymentUrl(shortLink);
+
+        if (!launched) {
+          throw Exception('Could not launch Rahmat Pay checkout');
+        }
+
+        // Show info dialog
+        if (context.mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: const Text('Card Payment'),
+              content: const Text(
+                'You will be redirected to the payment page. Please complete the payment and return to the app.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Navigate back to home
+                    Navigator.pushNamed(context, '/homeNew');
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to create invoice');
+      }
+    } catch (e) {
+      print('Error handling card payment: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() {
+        _isProcessing = false;
+      });
+    }
+  }
+
   // Check if there's a pending Payme payment (keeping for reference)
   Future<void> _checkPendingPaymePayment() async {
     final pendingPayment = await PaymeService.getPendingPayment();
@@ -446,7 +591,7 @@ class _CheckoutState extends State<Checkout> {
   }
 
 
-  // Function to calculate distance to the nearest branch
+  // Function to calculate distance to the nearest branch using backend API
   Future<void> _calculateDistanceToNearestBranch() async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final clientLat = cartProvider.showLat();
@@ -460,30 +605,61 @@ class _CheckoutState extends State<Checkout> {
       });
 
       try {
-        final nearestBranch = await findNearestBranch(clientLat, clientLng);
+        print('🔍 CHECKOUT: Fetching nearest branch from backend API');
+        print('🔍 CHECKOUT: Client coordinates - Lat: $clientLat, Long: $clientLng');
+        
+        // Call backend API
+        final url = Uri.parse('http://64.23.216.120:3000/branch/nearest?lat=$clientLat&long=$clientLng');
+        final response = await http.get(url).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw Exception('Backend API request timed out');
+          },
+        );
 
-        setState(() {
-          _nearestBranch = nearestBranch;
-          if (nearestBranch != null) {
-            _distanceMessage =
-                'Distance to nearest branch: ${nearestBranch['distance'].toStringAsFixed(2)} km';
-            // Update delivery fee if available
-            if (nearestBranch['deliveryFee'] != null) {
-              deliveryFee =
-                  double.tryParse(nearestBranch['deliveryFee'].toString()) ?? 0;
-            } else {
-              deliveryFee = 0;
-            }
+        print('🔍 CHECKOUT: API Response Status: ${response.statusCode}');
+
+        if (response.statusCode == 200) {
+          final responseData = json.decode(response.body);
+          
+          if (responseData['success'] == true && responseData['data'] != null) {
+            final data = responseData['data'];
+            final branch = data['branch'];
+            final distance = data['distance'];
+            final deliveryFeeFromApi = data['deliveryFee'];
+            
+            print('✅ CHECKOUT: Nearest branch found: ${branch['name']}');
+            print('✅ CHECKOUT: Distance: $distance km');
+            print('✅ CHECKOUT: Delivery fee: $deliveryFeeFromApi');
+            
+            // Store branch information in the format expected by the rest of the code
+            final nearestBranch = {
+              'name': branch['name'],
+              'lat': branch['lat'],
+              'lng': branch['lng'],
+              'distance': distance,
+              'deliveryFee': deliveryFeeFromApi,
+              'id': branch['id'],
+            };
+
+            setState(() {
+              _nearestBranch = nearestBranch;
+              _distanceMessage = 'Distance to ${branch['name']}: ${distance.toStringAsFixed(2)} km';
+              deliveryFee = double.tryParse(deliveryFeeFromApi.toString()) ?? 0;
+              _isCalculatingDistance = false;
+            });
           } else {
-            _distanceMessage = 'Could not calculate distance to nearest branch';
-            deliveryFee = 0;
+            throw Exception('Invalid response format from backend');
           }
-          _isCalculatingDistance = false;
-        });
+        } else {
+          throw Exception('Backend API returned status ${response.statusCode}');
+        }
       } catch (e) {
+        print('❌ CHECKOUT: Error fetching nearest branch: $e');
         setState(() {
           _distanceMessage = 'Error calculating distance: $e';
           _isCalculatingDistance = false;
+          deliveryFee = 0;
         });
       }
     } else {
@@ -1503,26 +1679,17 @@ class _CheckoutState extends State<Checkout> {
                 value: selectedOption,
                 isExpanded: true,
                 items: [
+                  // Card payment - available for all order types
                   DropdownMenuItem<String>(
-                    value: 'Cash',
+                    value: 'Card',
                     child: Row(
                       children: [
-                        const Icon(Icons.money, color: Colors.green),
+                        const Icon(Icons.credit_card, color: Colors.blue),
                         const SizedBox(width: 10),
-                        Text(AppLocalizations.of(context).cash),
+                        Text(AppLocalizations.of(context).card),
                       ],
                     ),
                   ),
-                  // DropdownMenuItem<String>(
-                  //   value: 'Card',
-                  //   child: Row(
-                  //     children: [
-                  //       const Icon(Icons.credit_card, color: Colors.blue),
-                  //       const SizedBox(width: 10),
-                  //       Text(AppLocalizations.of(context).card),
-                  //     ],
-                  //   ),
-                  // ),
                   // Only show Payme for delivery (0) and carhop (2) orders
                   if (_selectedIndex == 0 || _selectedIndex == 2)
                     const DropdownMenuItem<String>(
@@ -1705,6 +1872,64 @@ class _CheckoutState extends State<Checkout> {
                       setState(() {
                         _isProcessing = true; // Start processing
                       });
+
+                      // Check if payment type is Card
+                      if (selectedOption == 'Card') {
+                        try {
+                          // Handle Card payment based on order type
+                          String? branchForPayment;
+                          
+                          if (_selectedIndex == 0) {
+                            // For delivery orders, use the nearest branch
+                            if (_nearestBranch == null) {
+                              throw Exception(
+                                  'Unable to determine nearest branch for delivery. Please try again.');
+                            }
+                            branchForPayment = _nearestBranch!['name'] as String;
+                          } else {
+                            // For other order types, use selected branch
+                            if (selectedBranch == null) {
+                              throw Exception('Please select a branch before proceeding with payment');
+                            }
+                            branchForPayment = selectedBranch;
+                          }
+
+                          // Handle card payment for all order types
+                          await _handleCardPayment(
+                            name: firstName,
+                            phone: phoneNumber,
+                            branchName: branchForPayment,
+                            comment: commented,
+                            total: _selectedIndex == 0 
+                                ? orderPrice + deliveryFee 
+                                : orderPrice,
+                            cartProvider: cartProvider,
+                            selectedIndex: _selectedIndex,
+                            carDetails: _selectedIndex == 2 ? carDetails : null,
+                          );
+
+                          // Reset processing state
+                          setState(() {
+                            _isProcessing = false;
+                          });
+
+                          // Return early - payment flow handled
+                          return;
+                        } catch (e) {
+                          print('Error handling Card payment: $e');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  'Error processing Card payment: ${e.toString()}'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                          return;
+                        }
+                      }
 
                       // Check if payment type is Payme
                       if (selectedOption == 'Payme') {

@@ -50,27 +50,27 @@ class MenuService {
   // Product variation groups - can be overridden by backend data
   Map<String, List<String>> productVariationGroups = {
     // Default/fallback product variation groups
-    'Hot Wings': ['5208c67b-2ac6-4f43-88ab-65a83f7ebb81', '0c7b899f-d028-4570-8cb4-269672e0accb', '06cb14c5-0562-40b1-a626-9c7cca693277', '9ffac736-6889-4d2b-84ea-2cc42792eee5'],
-    'Strips': ['728d38c6-a045-46c2-9f43-05b565752320', 'fe87c6c4-3380-42a0-8037-2fa9fc7c7379', 'ac15b71b-5529-44e9-9dc2-100ce27a3b40', 'b65855ac-b4f1-4323-a706-872a72eb1732'],
-    'Cheese Nuggets': ['9300d02a-3058-4b9f-a7c5-7adef6f7d591', '9f1c53f0-f61a-42b1-a27a-244369cc19e4'],
-    'Dinner Meal': ['75c0da75-ecf7-431e-855b-87c97cf392f4', '1b61189a-6c50-47cc-baf2-3e7ab608f288', '974ae6b2-be27-4f7c-be95-76203edf8c29', '403cda4a-5d4b-418d-972f-d95d84d63cc6', '9282dcff-0e73-4ca3-91ad-2b17b2e64ef3'],
-    'Snack Meal': ['aeefbdad-b759-4ef0-ba88-62589fb68127', 'f6ff8302-1af3-4308-978f-d15b0579465b', '2a3bef8f-5833-46b9-b233-fcb717813568'],
-    'Mix Meal':['fee1bf9f-27c6-40d6-81e0-02e63f9d4730', '5e0873ff-a9fa-4504-beca-3eda42ed886e'],
-    'Chicken Set': ['cfb76795-f5fb-4ec6-9a90-6a165ca70563', '0f03c202-033c-4f70-9033-93808d8ac57a', 'ea379f61-4095-4d92-bfa3-f5eff88aed54'],
-    'Kids Set':['c423c6e2-f6d8-464c-983c-895136a1f216', 'd67575af-326f-4a6d-a133-e68c73b8a557', '7fad3b0b-92b2-4836-af7c-d9304aac812d', '22d35b88-2346-494c-b815-b75c074a981f'],
-    'Crispy Roll':['8d23a259-13c3-4f0e-8c70-4a784a2d0945', '1891f90b-9df6-4523-b3f5-ff755ab71df1', 'b9317bbc-77ed-499e-8e73-760161eebf90'],
-    'Fully Combo':['62d6b1c3-f76b-4b95-99aa-fc42b69fdb28', '12d16ac8-f62e-4d41-b0a1-8b70b1e9c637'],
-    'Spinner':['062b72b9-5b5c-4d51-9182-a00e6a91f841', '66096ce0-d34f-4ab1-a5c7-4f2f4736a4ca', 'daed46c5-0599-4206-a342-88d40f512247', '7c9ba5db-a76e-41e6-b9c7-0ded9c1a88db', 'b08ac987-14f7-413e-ab3a-d0d26b2d62e1','ba7f3fc3-00bc-4c95-8fb7-7c5c39a557db'],
-    'Donuts Choco':['aff2af4d-9963-48d3-9cf3-a1c38b8142c5', 'ef69e862-08cf-4f87-b3c7-d401cda63c12'],
-    'Donuts Strawberry':['9b8dd673-72cb-488d-9d9a-6fa1839ae272','e58a54fc-cf44-45a7-afc7-9ff5d97b0576'],
-    'Bucket 0.5kg':['ffee92e6-ae79-4d33-8996-5903c060edc6','eb297d99-8276-4d16-bce7-213213a4c726','eb028d52-cf82-456e-9727-65602becaa51'],
-    'Bucket 1kg':['4435699c-d08e-45e4-91b8-7998469c5b92','d4d7844e-6d2b-4c63-a8f0-5bc7a24b670f','3e09dabf-c3a1-4b9e-90b1-fe892a29ee75'],
-    '24+24':['e2609966-acc6-4b93-971d-b7dd17cd88eb', '11434b02-c4d7-4116-a479-8a924e04c353', '63ad6a59-bd48-4f40-aceb-8706d5f4fb10', '54e87b06-d27f-46a4-af4e-d43ce37648db','5f575cc6-b5b1-465e-a1dd-631ef3abc3af','f90ad28f-9948-49e3-984f-cede71ee32f5',],
-    '32+32':['aa8e310f-2a2a-4d34-8622-a83d5f654dca', '4e5e85a6-86f7-4e77-918f-2007b65b4228', '38032505-91de-4f02-912e-a551dbd8690b'],
-    'Sok':['3e71755c-1fc5-4125-a53d-646bb88b9cda','6da73496-4fba-4dea-869a-984822c3275c','f3ca491b-aae6-41db-ae91-76a6b323797e', '7f4f6fd3-1e1c-45a9-9a9c-f8dca93d3057','e33099c5-218e-4fdf-9e67-c07c1c28ba7e'],
-    'Sauce':['96a8d98f-fabd-4ecd-89cb-bd71a60716eb', 'f4e6fe5f-5b2b-431f-bc36-053655dac03d', '93ccb42f-a254-4e15-b3d6-c5292c73bc41', '73fa3cb2-c8c7-4f0e-a165-e412c259e7c0', 'bf057a06-7cc0-4f54-a6b1-d3335f0663c3', '08cdcb00-49c9-4146-a623-1e9a4319e32e', 'a4e74610-4fff-48df-b300-5fbb8f4a50aa'],
-    'Drinks 400ml/500ml':['b51e725e-902d-4f26-934b-9f30070a4a9f', '78f390a4-46e3-40bf-abd9-b27dadfe22a3', 'f4842842-30d3-4327-ae80-391ce5da4db7', 'b1552fc9-9384-4d4e-b202-10558e31bcb1','9471a051-9ad9-49c2-a391-8745a65d37ce', '84272c5c-6a74-41e0-a31f-55f9d819ac53'],
-    'Drinks 0.5l/1l/1.5l':['a6b36cbe-434d-474e-b691-280c829510ec','41a49528-0bd7-4916-a0c0-43c19e0f9d55','7af66c3f-662a-40b2-9144-bd49faf5c40f', '138ba514-54d5-46f5-b383-91592a7f0d24', 'daf628a0-2703-481d-aa6c-80f7480ead30', 'aa33df32-b1c6-485d-8228-d5711fe57ca3', 'd6082ef4-0e41-408e-9da2-3e0a7f2bd8a1', 'c4a19f0c-fc98-4e92-be95-29da300465c4', '2213ae97-1494-4406-9603-d9e289d6f38c', '5ad414ab-365d-43fb-ab3c-da9a7d5af397', '602e48f1-2faa-4ce0-a481-5f3b4d597c1e', 'bdc34b0e-7eb5-4c2d-9c71-5202a32e7646'],
+    // 'Hot Wings': ['5208c67b-2ac6-4f43-88ab-65a83f7ebb81', '0c7b899f-d028-4570-8cb4-269672e0accb', '06cb14c5-0562-40b1-a626-9c7cca693277', '9ffac736-6889-4d2b-84ea-2cc42792eee5'],
+    // 'Strips': ['728d38c6-a045-46c2-9f43-05b565752320', 'fe87c6c4-3380-42a0-8037-2fa9fc7c7379', 'ac15b71b-5529-44e9-9dc2-100ce27a3b40', 'b65855ac-b4f1-4323-a706-872a72eb1732'],
+    // 'Cheese Nuggets': ['9300d02a-3058-4b9f-a7c5-7adef6f7d591', '9f1c53f0-f61a-42b1-a27a-244369cc19e4'],
+    // 'Dinner Meal': ['75c0da75-ecf7-431e-855b-87c97cf392f4', '1b61189a-6c50-47cc-baf2-3e7ab608f288', '974ae6b2-be27-4f7c-be95-76203edf8c29', '403cda4a-5d4b-418d-972f-d95d84d63cc6', '9282dcff-0e73-4ca3-91ad-2b17b2e64ef3'],
+    // 'Snack Meal': ['aeefbdad-b759-4ef0-ba88-62589fb68127', 'f6ff8302-1af3-4308-978f-d15b0579465b', '2a3bef8f-5833-46b9-b233-fcb717813568'],
+    // 'Mix Meal':['fee1bf9f-27c6-40d6-81e0-02e63f9d4730', '5e0873ff-a9fa-4504-beca-3eda42ed886e'],
+    // 'Chicken Set': ['cfb76795-f5fb-4ec6-9a90-6a165ca70563', '0f03c202-033c-4f70-9033-93808d8ac57a', 'ea379f61-4095-4d92-bfa3-f5eff88aed54'],
+    // 'Kids Set':['c423c6e2-f6d8-464c-983c-895136a1f216', 'd67575af-326f-4a6d-a133-e68c73b8a557', '7fad3b0b-92b2-4836-af7c-d9304aac812d', '22d35b88-2346-494c-b815-b75c074a981f'],
+    // 'Crispy Roll':['8d23a259-13c3-4f0e-8c70-4a784a2d0945', '1891f90b-9df6-4523-b3f5-ff755ab71df1', 'b9317bbc-77ed-499e-8e73-760161eebf90'],
+    // 'Fully Combo':['62d6b1c3-f76b-4b95-99aa-fc42b69fdb28', '12d16ac8-f62e-4d41-b0a1-8b70b1e9c637'],
+    // 'Spinner':['062b72b9-5b5c-4d51-9182-a00e6a91f841', '66096ce0-d34f-4ab1-a5c7-4f2f4736a4ca', 'daed46c5-0599-4206-a342-88d40f512247', '7c9ba5db-a76e-41e6-b9c7-0ded9c1a88db', 'b08ac987-14f7-413e-ab3a-d0d26b2d62e1','ba7f3fc3-00bc-4c95-8fb7-7c5c39a557db'],
+    // 'Donuts Choco':['aff2af4d-9963-48d3-9cf3-a1c38b8142c5', 'ef69e862-08cf-4f87-b3c7-d401cda63c12'],
+    // 'Donuts Strawberry':['9b8dd673-72cb-488d-9d9a-6fa1839ae272','e58a54fc-cf44-45a7-afc7-9ff5d97b0576'],
+    // 'Bucket 0.5kg':['ffee92e6-ae79-4d33-8996-5903c060edc6','eb297d99-8276-4d16-bce7-213213a4c726','eb028d52-cf82-456e-9727-65602becaa51'],
+    // 'Bucket 1kg':['4435699c-d08e-45e4-91b8-7998469c5b92','d4d7844e-6d2b-4c63-a8f0-5bc7a24b670f','3e09dabf-c3a1-4b9e-90b1-fe892a29ee75'],
+    // '24+24':['e2609966-acc6-4b93-971d-b7dd17cd88eb', '11434b02-c4d7-4116-a479-8a924e04c353', '63ad6a59-bd48-4f40-aceb-8706d5f4fb10', '54e87b06-d27f-46a4-af4e-d43ce37648db','5f575cc6-b5b1-465e-a1dd-631ef3abc3af','f90ad28f-9948-49e3-984f-cede71ee32f5',],
+    // '32+32':['aa8e310f-2a2a-4d34-8622-a83d5f654dca', '4e5e85a6-86f7-4e77-918f-2007b65b4228', '38032505-91de-4f02-912e-a551dbd8690b'],
+    // 'Sok':['3e71755c-1fc5-4125-a53d-646bb88b9cda','6da73496-4fba-4dea-869a-984822c3275c','f3ca491b-aae6-41db-ae91-76a6b323797e', '7f4f6fd3-1e1c-45a9-9a9c-f8dca93d3057','e33099c5-218e-4fdf-9e67-c07c1c28ba7e'],
+    // 'Sauce':['96a8d98f-fabd-4ecd-89cb-bd71a60716eb', 'f4e6fe5f-5b2b-431f-bc36-053655dac03d', '93ccb42f-a254-4e15-b3d6-c5292c73bc41', '73fa3cb2-c8c7-4f0e-a165-e412c259e7c0', 'bf057a06-7cc0-4f54-a6b1-d3335f0663c3', '08cdcb00-49c9-4146-a623-1e9a4319e32e', 'a4e74610-4fff-48df-b300-5fbb8f4a50aa'],
+    // 'Drinks 400ml/500ml':['b51e725e-902d-4f26-934b-9f30070a4a9f', '78f390a4-46e3-40bf-abd9-b27dadfe22a3', 'f4842842-30d3-4327-ae80-391ce5da4db7', 'b1552fc9-9384-4d4e-b202-10558e31bcb1','9471a051-9ad9-49c2-a391-8745a65d37ce', '84272c5c-6a74-41e0-a31f-55f9d819ac53'],
+    // 'Drinks 0.5l/1l/1.5l':['a6b36cbe-434d-474e-b691-280c829510ec','41a49528-0bd7-4916-a0c0-43c19e0f9d55','7af66c3f-662a-40b2-9144-bd49faf5c40f', '138ba514-54d5-46f5-b383-91592a7f0d24', 'daf628a0-2703-481d-aa6c-80f7480ead30', 'aa33df32-b1c6-485d-8228-d5711fe57ca3', 'd6082ef4-0e41-408e-9da2-3e0a7f2bd8a1', 'c4a19f0c-fc98-4e92-be95-29da300465c4', '2213ae97-1494-4406-9603-d9e289d6f38c', '5ad414ab-365d-43fb-ab3c-da9a7d5af397', '602e48f1-2faa-4ce0-a481-5f3b4d597c1e', 'bdc34b0e-7eb5-4c2d-9c71-5202a32e7646'],
   };
 
   void setNearestBranchDeliverId(String deliverId) {
@@ -1018,7 +1018,9 @@ class MenuService {
 
   /// Group products into ProductGroups based on the configuration map
   void _groupProductVariations() {
-    print('MenuService: Starting product variation grouping');
+    print('\n======== GROUPING PRODUCT VARIATIONS ========');
+    print('MenuService: Total productVariationGroups config: ${productVariationGroups.length}');
+    print('MenuService: Total products to check: ${_allProducts.length}');
     _productGroups.clear();
 
     // Create a set to track which products have been grouped
@@ -1028,9 +1030,13 @@ class MenuService {
     for (var entry in productVariationGroups.entries) {
       String groupName = entry.key;
       List<String> uuidList = entry.value;
+      
+      print('\n📦 Processing group: "$groupName" (${uuidList.length} UUIDs)');
 
       // Find all products that match the UUIDs in this group
       List<Product> matchingProducts = [];
+      int notFoundCount = 0;
+      
       for (String uuid in uuidList) {
         var product = _allProducts.firstWhere(
           (p) => p.uuid == uuid,
@@ -1048,7 +1054,15 @@ class MenuService {
         if (product.id != 0) {
           matchingProducts.add(product);
           groupedProductUuids.add(uuid);
+          print('  ✅ Found: ${product.name} (${product.uuid})');
+        } else {
+          notFoundCount++;
+          print('  ❌ Not found: $uuid');
         }
+      }
+      
+      if (notFoundCount > 0) {
+        print('  ⚠️ Missing ${notFoundCount}/${uuidList.length} products for group "$groupName"');
       }
 
       // Only create a group if we found at least 2 matching products
@@ -1064,18 +1078,20 @@ class MenuService {
         );
 
         _productGroups.add(group);
-        print('MenuService: Created group "$groupName" with ${matchingProducts.length} variations');
+        print('  ✅ Created group "$groupName" with ${matchingProducts.length} variations');
       } else if (matchingProducts.length == 1) {
-        print('MenuService: Warning - Group "$groupName" only has 1 product, skipping grouping');
+        print('  ⚠️ Group "$groupName" only has 1 product, skipping grouping');
         // Remove from grouped set so it appears as a regular product
         groupedProductUuids.remove(matchingProducts.first.uuid);
       } else {
-        print('MenuService: Warning - Group "$groupName" has no matching products');
+        print('  ❌ Group "$groupName" has no matching products');
       }
     }
 
+    print('\n📊 GROUPING SUMMARY:');
     print('MenuService: Created ${_productGroups.length} product groups');
     print('MenuService: Grouped ${groupedProductUuids.length} products');
+    print('======== END GROUPING ========\n');
   }
 
   /// Check if a product is part of a variation group
