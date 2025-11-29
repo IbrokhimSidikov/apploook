@@ -235,4 +235,61 @@ class RahmatPayService {
         return 2; // Default to delivery
     }
   }
+
+  /// Checks the payment status for a given invoice ID
+  /// Returns the payment status from the backend API
+  static Future<Map<String, dynamic>> checkPaymentStatus(String invoiceId) async {
+    try {
+      print('\n======== RAHMAT PAY: Checking Payment Status ========');
+      print('Invoice ID: $invoiceId');
+      
+      final url = Uri.parse('$_baseUrl/rahmat-pay/status/$invoiceId');
+      print('Status URL: $url');
+      
+      // TODO: TESTING ONLY - Using _testBearerToken for authentication
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_testBearerToken',
+        },
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Payment status check timed out');
+        },
+      );
+      
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Payment status retrieved successfully');
+        print('Status: ${responseData['status']}');
+        print('======== END RAHMAT PAY: Checking Payment Status ========\n');
+        
+        return {
+          'success': true,
+          'status': responseData['status'],
+          'data': responseData,
+        };
+      } else {
+        print('Failed to check payment status: ${response.statusCode}');
+        print('======== END RAHMAT PAY: Checking Payment Status ========\n');
+        return {
+          'success': false,
+          'error': 'Failed to check status: ${response.statusCode}',
+        };
+      }
+    } catch (e, stackTrace) {
+      print('Error checking payment status: $e');
+      print('Stack trace: $stackTrace');
+      print('======== END RAHMAT PAY: Checking Payment Status ========\n');
+      return {
+        'success': false,
+        'error': e.toString(),
+      };
+    }
+  }
 }

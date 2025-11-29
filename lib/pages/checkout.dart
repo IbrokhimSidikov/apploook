@@ -13,6 +13,7 @@ import 'package:apploook/services/api_service.dart';
 import 'package:apploook/services/payme_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/rahmat_pay_service.dart';
+import 'package:apploook/services/rahmat_pay_transaction_service.dart';
 import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -442,37 +443,31 @@ class _CheckoutState extends State<Checkout> {
               }).toList(),
             },
           );
-        }
 
-        // Launch payment URL
-        final launched = await RahmatPayService.launchPaymentUrl(shortLink);
+          // Start the payment status checking dialog
+          // This will poll the backend every 3 seconds for payment status
+          if (context.mounted) {
+            RahmatPayTransactionService.startPaymentStatusCheck(
+              context,
+              invoiceId,
+            );
+          }
 
-        if (!launched) {
-          throw Exception('Could not launch Rahmat Pay checkout');
-        }
+          // Launch payment URL after showing the status dialog
+          final launched = await RahmatPayService.launchPaymentUrl(shortLink);
 
-        // Show info dialog
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: const Text('Card Payment'),
-              content: const Text(
-                'You will be redirected to the payment page. Please complete the payment and return to the app.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Navigate back to home
-                    Navigator.pushNamed(context, '/homeNew');
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
+          if (!launched) {
+            // If we couldn't launch the payment URL, close the dialog and show error
+            if (context.mounted) {
+              Navigator.of(context, rootNavigator: true).pop(); // Close the status dialog
+              throw Exception('Could not launch Rahmat Pay checkout');
+            }
+          }
+
+          // Note: We don't navigate away or show additional dialogs
+          // The transaction status check will handle navigation after successful payment
+        } else {
+          throw Exception('Invoice ID not received from backend');
         }
       } else {
         throw Exception('Failed to create invoice');
