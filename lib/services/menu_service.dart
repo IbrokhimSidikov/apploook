@@ -431,49 +431,9 @@ class MenuService {
         }
       }
 
-      // Custom sort for delivery/takeaway mode
-      // Define custom order priority map
-      final Map<String, int> customOrderPriority = {
-        'Комбо М':1,
-        'КОМБО': 2,
-        'АППЕТАЙЗЕРЫ (М)': 3,
-        'АППЕТАЙЗЕРЫ': 3,
-        'КУРИЦА': 4,
-        'СПИННЕРЫ': 5,
-        'БУРГЕРЫ': 6,
-        'ПИЦЦА': 7,
-        'САЛАТЫ': 8,
-        'Напитки М':9,
-        'НАПИТКИ': 9,
-        'ГОРЯЧИЕ НАПИТКИ': 10,
-        'ДЕСЕРТЫ': 11,
-        'ВАФЛИ':11,
-        'Мороженое и милишайки': 12,
-        // Any other categories will be sorted after these by their original sortOrder
-      };
-
+      // Sort categories by sortOrder from API response
       categoriesWithSortOrder.sort((a, b) {
-        String nameA = a['name'].toString().trim();
-        String nameB = b['name'].toString().trim();
-
-        // Get priority from map or use a high number as default
-        int priorityA = customOrderPriority[nameA] ?? 1000;
-        int priorityB = customOrderPriority[nameB] ?? 1000;
-
-        // If both are in the priority map, sort by priority
-        if (priorityA < 1000 && priorityB < 1000) {
-          return priorityA.compareTo(priorityB);
-        }
-        // If only one is in the priority map, it comes first
-        else if (priorityA < 1000) {
-          return -1;
-        } else if (priorityB < 1000) {
-          return 1;
-        }
-        // If neither is in the priority map, sort by original sortOrder
-        else {
-          return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
-        }
+        return (a['sortOrder'] as int).compareTo(b['sortOrder'] as int);
       });
 
       for (var category in categoriesWithSortOrder) {
@@ -812,113 +772,9 @@ class MenuService {
     print('MenuService: Finished marking pinned products');
   }
 
-  // Apply custom sorting to products within each category
+  // Apply sorting to products within each category based on backend data
   void _applyCategoryProductSorting() {
-    // print('MenuService: Applying custom product sorting within categories');
-
-    // Define custom product sorting rules for specific categories
-    final Map<String, Map<String, int>> categoryProductSorting = {
-      'Комбо М': {
-        'APPMAX':1,
-        'Bigger 2=3':2,
-      },
-      'КОМБО': {
-        // Example: Define specific product order for COMBO category
-        // Add your specific product names and their desired order
-      },
-      'АППЕТАЙЗЕРЫ': {
-        // Example: Define specific product order for CHICKEN category
-        // 'Куриные крылышки': 1,
-        // 'Куриные ножки': 2,
-        // 'Куриная грудка': 3,
-      },
-      ' КУРИЦА': {
-        '12 куриных сетов не острый':1,
-        '12 куриных сетов острый':2,
-        '12 куриных сетов микс':3,
-        'Диннер мил острый':4,
-        'Диннер меал не острый':5,
-        'Диннер меал (2 не острый, 1 острый)':6,
-        'Диннер меал  (2 не острый, 1 острый)':7,
-        'Снек меал острый':8,
-        'Снек меал не острый':9,
-        'Снек меал':10,
-        'Микс меал':11,
-        'Микс меал острый':12,
-        'острый чикен':13,
-        'Чикен не острый':14
-      },
-      'СПИННЕРЫ': {
-        'Дует Мастер':1,
-        'Смайл бокс':2,
-        'Хрустящий ролл':3,
-        'Хрустящий куриный ролл':4,
-        'Хрустящий ролл микс':5,
-        'Спиннер Тако':6,
-        'Спиннер Super Charged':7,
-        'Спиннер сальса':8,
-        'спиннер снек':9,
-        'спиннер без соуса':10
-        },
-      'БУРГЕРЫ':{
-        'Биггер':1,
-        'Лонгер':2,
-        'Джуниор бургер':3,
-        'Чики бургер':4,
-        'Твинс бургер курийный':5,
-        'Чиз бургер':6,
-        'Бееф Лонгер':7,
-        'Чили Лонгер':8,
-        'Твинс бургер говяжий':9,
-        'Пакет':10,
-      },
-      'ПИЦЦА':{
-
-      },
-      'САЛАТЫ': {
-
-      },
-      'НАПИТКИ':{
-        'Coca Cola':1,
-        'Coca-Cola  разлив':2,
-        'Фанта':3,
-        'Fanta разлив':4,
-        'Sprite':5,
-        'Sprite разлив':6,
-        'Минеральная вода без газа':7,
-        'Минеральная вода с газом':8,
-        'Апельсиновый сок Tip-Top':9,
-        'Абрикосовый сок Tip-Top':10,
-        'Ананасовый сок Tip-Top':11,
-        'Dinay':12,
-        'Айс ти':13,
-      },
-      'ГОРЯЧИЕ НАПИТКИ':{
-
-      },
-      'ДЕСЕРТЫ':{
-
-      },
-      'МОРОЖЕНОЕ И МИЛКШЕЙКИ':{
-        'Loook мороженое с бинго':1,
-        'Loook мороженое с вафли':2,
-        'Клубничное мороженое':3,
-        'Шоколадное мороженое':4,
-        'мороженое (500гр)':5,
-        'Банановый милкшейк':6,
-        'Молочный коктейль  шоколадный':7,
-        'Молочный коктейль клубничный':8
-      },
-      'ДЕТСКОЕ БЛЮДО':{
-
-      },
-      'СОУСЫ':{
-
-      },
-      'GENERAL':{
-
-      },
-    };
+    print('MenuService: Applying product sorting within categories using backend sortOrder');
 
     // Sort products within each category
     for (var category in _categories) {
@@ -930,80 +786,30 @@ class MenuService {
       if (categoryProducts.isEmpty) continue;
 
       // Log all products in this category for easy reference
-      // print('MenuService: === ${category.name} CATEGORY (${categoryProducts.length} products) ===');
+      print('MenuService: === ${category.name} CATEGORY (${categoryProducts.length} products) ===');
       for (int i = 0; i < categoryProducts.length; i++) {
         var product = categoryProducts[i];
-        print('  ${i + 1}. "${product.name}" (ID: ${product.id}, sortOrder: ${product.sortOrder ?? 'null'}, price: ${product.price})');
+        print('  ${i + 1}. "${product.name}" (ID: ${product.id}, sortOrder: ${product.sortOrder ?? 'null'}, isPinned: ${product.isPinned})');
       }
-      // print('MenuService: === End of ${category.name} products ===\n');
 
-      // Check if we have custom sorting rules for this category
-      Map<String, int>? customOrder = categoryProductSorting[category.name];
-
-      if (customOrder != null && customOrder.isNotEmpty) {
-        // print('MenuService: Found custom sorting rules for ${category.name} category');
-        // print('MenuService: Custom order map has ${customOrder.length} entries');
+      // Sort by isPinned first, then by sortOrder from backend
+      categoryProducts.sort((a, b) {
+        // First priority: Pinned products always come first
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
         
-        // Debug: Check which products have custom priorities
-        // for (var product in categoryProducts) {
-        //   int priority = customOrder[product.name] ?? 9999;
-          // print('  Product "${product.name}" -> priority: $priority ${priority < 9999 ? "(CUSTOM)" : "(DEFAULT)"}');
-        // }
-        
-        // Apply custom sorting based on product names
-        categoryProducts.sort((a, b) {
-          // First priority: Pinned products always come first
-          if (a.isPinned && !b.isPinned) return -1;
-          if (!a.isPinned && b.isPinned) return 1;
-          
-          // If both are pinned or both are not pinned, use custom order
-          int priorityA = customOrder[a.name] ?? 9999;
-          int priorityB = customOrder[b.name] ?? 9999;
-
-          // If both products have custom priority, sort by priority
-          if (priorityA < 9999 && priorityB < 9999) {
-            return priorityA.compareTo(priorityB);
-          }
-          // If only one has custom priority, it comes first
-          else if (priorityA < 9999) {
-            return -1;
-          } else if (priorityB < 9999) {
-            return 1;
-          }
-          // If neither has custom priority, fall back to sortOrder or name
-          else {
-            // First try to sort by sortOrder if available
-            if (a.sortOrder != null && b.sortOrder != null) {
-              return a.sortOrder!.compareTo(b.sortOrder!);
-            }
-            // If sortOrder is not available, sort alphabetically
-            return a.name.compareTo(b.name);
-          }
-        });
-
-        // print('MenuService: Applied custom sorting to ${category.name} category (${categoryProducts.length} products)');
-        // print('MenuService: Products after custom sorting:');
-        for (int i = 0; i < categoryProducts.length; i++) {
-          print('  ${i + 1}. "${categoryProducts[i].name}"');
+        // If both are pinned or both are not pinned, sort by sortOrder from backend
+        if (a.sortOrder != null && b.sortOrder != null) {
+          int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
+          if (sortComparison != 0) return sortComparison;
         }
-      } else {
-        // Apply default sorting (by sortOrder, then by name)
-        categoryProducts.sort((a, b) {
-          // First priority: Pinned products always come first
-          if (a.isPinned && !b.isPinned) return -1;
-          if (!a.isPinned && b.isPinned) return 1;
-          
-          // If both are pinned or both are not pinned, use default sorting
-          // First try to sort by sortOrder if available
-          if (a.sortOrder != null && b.sortOrder != null) {
-            int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
-            if (sortComparison != 0) return sortComparison;
-          }
-          // If sortOrder is the same or not available, sort alphabetically
-          return a.name.compareTo(b.name);
-        });
+        // If sortOrder is the same or not available, sort alphabetically
+        return a.name.compareTo(b.name);
+      });
 
-        // print('MenuService: Applied default sorting to ${category.name} category (${categoryProducts.length} products)');
+      print('MenuService: Products after sorting:');
+      for (int i = 0; i < categoryProducts.length; i++) {
+        print('  ${i + 1}. "${categoryProducts[i].name}"');
       }
 
       // Update the products in _allProducts with the sorted order
