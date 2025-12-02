@@ -5,11 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:apploook/config/branch_config.dart';
 
 class RahmatPayService {
-  static const String _baseUrl = 'http://64.23.216.120:3000';
+  static const String _baseUrl = 'https://api.v3.sievesapp.com';
   static const String _createInvoiceEndpoint = '$_baseUrl/rahmat-pay/create-invoice';
   
   // TODO: TESTING ONLY - Replace with actual bearer token
-  static const String _testBearerToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJqTkRNRGhDTmpoQ01EWTBSalF6TUVFeU9FTTROa0ZDUkVRd1FUSkVOVUUwUkRaRE1qZEVNZyJ9.eyJpc3MiOiJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjViY2RlMDA5ODMwYTllN2JiY2U3NWQ0IiwiYXVkIjpbImxvY2FsaG9zdDo4MDgwL2xvb29rLWFwaS93ZWIiLCJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY0NDA2NjM2LCJleHAiOjE3NjQ0OTMwMzYsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiI1dXBaSkJsSU1pR1Z1SEw2ZGFmOFBvOUZMWFhKMkxHNSJ9.EBu4V_0QUk1H2ble4TGa660wClV1jDSxHHCuu9wIPuI8UZ1bF-xcxr0v4gQIHvnG8fb1ESXoNMF6MPfBpJuAIqtF-yXyU91ThAaKIr4SPdYpDEpwHFvMzErWvzF_PgK5BW64YlE47As0-h6Z6XfHezCbhu1XZ2fd4HI55AmbRpR258uxDhV5Neq7kmxMAR0q_EWhx5YTY5n_uV_YaVEPQcgIzXytqtnzrtvufHXOeQClche1SgeiT1XeLIpzSVMaXFC1htqO7DNG71UEvunSyLP30YuYj6JxA543hIaQB-Yc2rz45CsgjzvvZn0xzdye91H_VVW38ROJZ7oMs6b1-w';
+  static const String _testBearerToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJqTkRNRGhDTmpoQ01EWTBSalF6TUVFeU9FTTROa0ZDUkVRd1FUSkVOVUUwUkRaRE1qZEVNZyJ9.eyJpc3MiOiJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjViY2RlMDA5ODMwYTllN2JiY2U3NWQ0IiwiYXVkIjpbImxvY2FsaG9zdDo4MDgwL2xvb29rLWFwaS93ZWIiLCJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY0NjYxODg0LCJleHAiOjE3NjQ3NDgyODQsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiI1dXBaSkJsSU1pR1Z1SEw2ZGFmOFBvOUZMWFhKMkxHNSJ9.lbhoj8Bhc9bMHbt8Yj1UuOseJ0umni4nxRRM2YipF4jLC3PI56m30o3kQKg017IBhlVTdl-2koQ78-ed6hjZ5V7myIYNXFDRVMggl1tAsIYg-u1JZ6fVRz-_URFZ1_eMXMQZsuhbJMB_O_sg6tSykVOf9kfJ6AKkbYdLWEl1F2ZIf4ecagPB1uxpO-f1FVDl2kVXa6TzKtmlVmoGmEUydsaI3gZSPLZC2iD8CvSTpNDmqBbYQg8icMgr5muxnti7gWfSPmKNGVLbaCslAQBM_xm-jUbOpd0k-JJmsKPR_56rChoKyqLT_D6VgfyxZ_xgafpdKwmi2g8EExKltYHYVg';
 
   /// Creates an invoice with Rahmat Pay and returns the payment URL
   /// 
@@ -22,7 +22,7 @@ class RahmatPayService {
   /// - [note]: Order note/comment
   /// - [amount]: Total amount in UZS (in tiyin - multiply by 100)
   /// - [lang]: Language code (ru, uz, en)
-  /// - [ofdItems]: List of OFD items for fiscal data
+  /// - [cartItems]: List of cart items
   /// - [bearerToken]: Authentication token from Sieves API
   static Future<Map<String, dynamic>> createInvoice({
     required String branchName,
@@ -33,7 +33,7 @@ class RahmatPayService {
     required String note,
     required int amount,
     required String lang,
-    required List<Map<String, dynamic>> ofdItems,
+    required List<dynamic> cartItems,
     required String bearerToken,
   }) async {
     try {
@@ -50,29 +50,98 @@ class RahmatPayService {
       print('Pager Number: $pagerNumber');
       print('Note: $note');
       print('Language: $lang');
-      print('OFD Items Count: ${ofdItems.length}');
-      print('OFD Items: ${json.encode(ofdItems)}');
+      print('Cart Items Count: ${cartItems.length}');
 
-      // Prepare request body
+      // Build Sieves order items
+      final List<Map<String, dynamic>> sievesOrderItems = cartItems.map((item) {
+        final String? productUuid = item.product.uuid;
+        final String productIdentifier = productUuid ?? item.product.id.toString();
+        
+        return {
+          "product_id": productIdentifier,
+          "total_price": item.totalPrice,
+          "quantity": item.quantity,
+          "actual_price": (item.totalPrice / item.quantity).toString(),
+        };
+      }).toList();
+
+      // Build Rahmat OFD items with static mxik, package_code, and name
+      final List<Map<String, dynamic>> rahmatOfdItems = cartItems.map((item) {
+        // Calculate total price including modifiers in tiyin
+        final basePrice = (item.product.price * 100).toInt();
+        final quantity = item.quantity;
+        
+        // Calculate modifier total
+        int modifierTotal = 0;
+        if (item.selectedModifiers != null && item.selectedModifiers.isNotEmpty) {
+          for (var modifier in item.selectedModifiers) {
+            modifierTotal += ((modifier.modifier.price * modifier.quantity * 100) as num).toInt();
+          }
+        }
+        
+        final pricePerItem = basePrice + modifierTotal;
+        final totalPrice = pricePerItem * quantity;
+        
+        return {
+          "qty": quantity,
+          "price": pricePerItem,
+          "mxik": "10202001002000000", // Static value
+          "total": totalPrice,
+          "package_code": "1506113", // Static value
+          "name": "fast food", // Static value
+        };
+      }).toList();
+
+      // Prepare request body with new structure
       final Map<String, dynamic> requestBody = {
-        "branch_id": branchConfig.branchId,
-        "employee_id": branchConfig.employeeId,
-        "order_type_id": orderTypeId,
-        "payment_type_id": paymentTypeId,
-        "customer_quantity": customerQuantity,
-        "pager_number": pagerNumber,
-        "note": note,
-        "amount": amount,
-        "lang": lang,
-        "ofd": ofdItems,
+        "sieves_payload": {
+          "delivery_employee_id": null,
+          "isSynchronous": "sync",
+          "is_fast": 0,
+          "queue_type": "sync",
+          "day_session_id": 26702,
+          "employee_id": branchConfig.employeeId,
+          "pos_id": 58,
+          "branch_id": branchConfig.branchId,
+          "pos_session_id": 125158,
+          "order_type_id": orderTypeId,
+          "customer_id": null,
+          "address_id": null,
+          "start_time": "now",
+          "pager_number": pagerNumber,
+          "orderItems": sievesOrderItems,
+          "transactions": [
+            {
+              "account_id": 1,
+              "payment_type_id": paymentTypeId,
+              "amount": amount / 100, // Convert back from tiyin to UZS
+              "type": "deposit"
+            }
+          ],
+          "value": amount / 100, // Convert back from tiyin to UZS
+          "customer_quantity": customerQuantity,
+        },
+        "rahmat_payload": {
+          "amount": amount,
+          "lang": lang,
+          "ofd": rahmatOfdItems,
+        },
       };
 
       print('Request Body: ${json.encode(requestBody)}');
 
+      // Build URL with query parameters
+      final url = Uri.parse(_createInvoiceEndpoint).replace(queryParameters: {
+        'code': branchConfig.sievesApiCode,
+        'isCarhop': '1',
+      });
+
+      print('Request URL: $url');
+
       // Make POST request
       // TODO: TESTING ONLY - Using _testBearerToken instead of bearerToken parameter
       final response = await http.post(
-        Uri.parse(_createInvoiceEndpoint),
+        url,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $_testBearerToken',
@@ -224,15 +293,15 @@ class RahmatPayService {
   static int getOrderTypeId(int selectedIndex) {
     switch (selectedIndex) {
       case 0:
-        return 2; // Delivery
+        return 3; // Delivery
       case 1:
-        return 1; // Self-Pickup
+        return 7; // Self-Pickup
       case 2:
         return 8; // Carhop
       case 3:
-        return 3; // In-Restaurant
+        return 1; // In-Restaurant
       default:
-        return 2; // Default to delivery
+        return 7; // Default to delivery
     }
   }
 

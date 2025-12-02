@@ -390,9 +390,6 @@ class _CheckoutState extends State<Checkout> {
       // Payment type ID is 3 for card
       const paymentTypeId = 3;
 
-      // Convert cart items to OFD format
-      final ofdItems = RahmatPayService.convertCartItemsToOFD(cartProvider.cartItems);
-
       // Prepare note with car details if carhop
       String finalNote = comment;
       if (selectedIndex == 2 && carDetails != null && carDetails.isNotEmpty) {
@@ -400,9 +397,9 @@ class _CheckoutState extends State<Checkout> {
       }
 
       // Create invoice
-      // Extract last 2 digits from phone for pager_number (API expects simple number like "12")
+      // Use full phone number for pager_number (strip +998 and keep only digits)
       final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
-      final pagerNumber = digitsOnly.length >= 2 ? digitsOnly.substring(digitsOnly.length - 2) : digitsOnly;
+      final pagerNumber = digitsOnly.startsWith('998') ? digitsOnly.substring(3) : digitsOnly;
       
       final invoiceResult = await RahmatPayService.createInvoice(
         branchName: branchName,
@@ -413,7 +410,7 @@ class _CheckoutState extends State<Checkout> {
         note: finalNote,
         amount: (total * 100).toInt(), // Convert to tiyin (multiply by 100)
         lang: 'ru', // TODO: Get from app locale
-        ofdItems: ofdItems,
+        cartItems: cartProvider.cartItems,
         bearerToken: bearerToken,
       );
 
@@ -604,7 +601,7 @@ class _CheckoutState extends State<Checkout> {
         print('🔍 CHECKOUT: Client coordinates - Lat: $clientLat, Long: $clientLng');
         
         // Call backend API
-        final url = Uri.parse('http://64.23.216.120:3000/branch/nearest?lat=$clientLat&long=$clientLng');
+        final url = Uri.parse('https://api.v3.sievesapp.com/branch/nearest?lat=$clientLat&long=$clientLng');
         final response = await http.get(url).timeout(
           const Duration(seconds: 10),
           onTimeout: () {

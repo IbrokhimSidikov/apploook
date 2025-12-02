@@ -11,8 +11,9 @@ class NearestBranchService {
 
   static const String _nearestBranchKey = 'nearest_branch_name';
   static const String _nearestBranchDeliverIdKey = 'nearest_branch_deliver_id';
-  static const String _backendApiUrl = 'http://64.23.216.120:3000';
-  
+  // static const String _backendApiUrl = 'http://64.23.216.120:3000';
+  static const String _backendApiUrl = 'https://api.v3.sievesapp.com';
+
   final LocationService _locationService = LocationService();
   
   NearestBranchService._internal();
