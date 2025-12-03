@@ -599,7 +599,6 @@ class _CheckoutState extends State<Checkout> {
       try {
         print('🔍 CHECKOUT: Fetching nearest branch from backend API');
         print('🔍 CHECKOUT: Client coordinates - Lat: $clientLat, Long: $clientLng');
-        
         // Call backend API
         final url = Uri.parse('https://api.v3.sievesapp.com/branch/nearest?lat=$clientLat&long=$clientLng');
         final response = await http.get(url).timeout(
@@ -608,9 +607,7 @@ class _CheckoutState extends State<Checkout> {
             throw Exception('Backend API request timed out');
           },
         );
-
         print('🔍 CHECKOUT: API Response Status: ${response.statusCode}');
-
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
           

@@ -62,7 +62,7 @@ class NearestBranchService {
   Future<String> _fetchNearestBranchFromBackend(double userLat, double userLong) async {
     try {
       print('🌐 NearestBranchService: Calling backend API...');
-      final url = Uri.parse('$_backendApiUrl/branch/nearest?lat=$userLat&long=$userLong');
+      final url = Uri.parse('$_backendApiUrl/branch/menu?lat=$userLat&long=$userLong');
       print('🌐 NearestBranchService: API URL: $url');
       
       final response = await http.get(url).timeout(
