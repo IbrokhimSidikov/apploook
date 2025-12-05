@@ -13,12 +13,14 @@ class RahmatPayTransactionService {
   static void startPaymentStatusCheck(
     BuildContext context,
     String invoiceId,
+    String branchName,
   ) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => _PaymentStatusDialog(
         invoiceId: invoiceId,
+        branchName: branchName,
         parentContext: context,
       ),
     );
@@ -28,10 +30,12 @@ class RahmatPayTransactionService {
 /// Dialog widget that displays payment status and polls for updates
 class _PaymentStatusDialog extends StatefulWidget {
   final String invoiceId;
+  final String branchName;
   final BuildContext parentContext;
 
   const _PaymentStatusDialog({
     required this.invoiceId,
+    required this.branchName,
     required this.parentContext,
   });
 
@@ -92,7 +96,7 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
     try {
       print('🔍 Checking payment status (attempt ${_checkCount}/${_maxChecks})');
       
-      final result = await RahmatPayService.checkPaymentStatus(widget.invoiceId);
+      final result = await RahmatPayService.checkPaymentStatus(widget.invoiceId, widget.branchName);
       
       if (!mounted) return;
       

@@ -8,8 +8,6 @@ class RahmatPayService {
   static const String _baseUrl = 'https://api.v3.sievesapp.com';
   static const String _createInvoiceEndpoint = '$_baseUrl/rahmat-pay/create-invoice';
   
-  // TODO: TESTING ONLY - Replace with actual bearer token
-  static const String _testBearerToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJqTkRNRGhDTmpoQ01EWTBSalF6TUVFeU9FTTROa0ZDUkVRd1FUSkVOVUUwUkRaRE1qZEVNZyJ9.eyJpc3MiOiJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjViY2RlMDA5ODMwYTllN2JiY2U3NWQ0IiwiYXVkIjpbImxvY2FsaG9zdDo4MDgwL2xvb29rLWFwaS93ZWIiLCJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY0OTExMDk4LCJleHAiOjE3NjQ5OTc0OTgsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiI1dXBaSkJsSU1pR1Z1SEw2ZGFmOFBvOUZMWFhKMkxHNSJ9.WGJrjIxV7NeXrNVISBVh4BAddxtC6egqxwpY-yZ1ozruJsQ1VS9_0OLxWn6ViBO2XiDg1c9YpP753PURAQ5hmceE72aj5e_4pOQpI18KpcTwb_TtgU-XO9BIMjgFCbpEy312lz5wOSZTweyiEhXzdWh1s8QZ1YI7ImY1xv2pcnp-kvlg9X8rM_NLJ-MmoGNl14JPneCUNEnSk17Dg8wlbKrFSenEUlQhXFFkFp49MR6oxa8J0RKAmWiWDmYkJweoOjy5LVklF4tYrpk8J5-TBuRCSHkb9he41tz8H-OPPMU3_FD-Xs7ijQxfUKgkKxswah5oFySrUD4mlK_jl-rQEA';
 
   /// Creates an invoice with Rahmat Pay and returns the payment URL
   /// 
@@ -210,12 +208,12 @@ class RahmatPayService {
       print('Request URL: $url');
 
       // Make POST request
-      // TODO: TESTING ONLY - Using _testBearerToken instead of bearerToken parameter
+      // Using sievesApiCode from branch config for authentication
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_testBearerToken',
+          'Authorization': 'Bearer ${branchConfig.sievesApiCode}',
         },
         body: json.encode(requestBody),
       );
@@ -406,25 +404,32 @@ class RahmatPayService {
 
   /// Checks the payment status for a given invoice ID
   /// Returns the payment status from the backend API
-  static Future<Map<String, dynamic>> checkPaymentStatus(String invoiceId) async {
+  static Future<Map<String, dynamic>> checkPaymentStatus(String invoiceId, String branchName) async {
     try {
+      // Get branch configuration
+      final branchConfig = BranchConfigs.getConfig(branchName);
+      
       print('\n======== RAHMAT PAY: Checking Payment Status ========');
       print('Invoice ID: $invoiceId');
+      print('Branch: $branchName');
       
-      final url = Uri.parse('$_baseUrl/rahmat-pay/status/$invoiceId');
+      // Build URL with query parameters
+      final url = Uri.parse('$_baseUrl/rahmat-pay/status/$invoiceId').replace(queryParameters: {
+        'code': branchConfig.sievesApiCode,
+      });
       print('Status URL: $url');
       
-      // TODO: TESTING ONLY - Using _testBearerToken for authentication
+      // Using sievesApiCode from branch config for authentication
       final response = await http.get(
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_testBearerToken',
+          'Authorization': 'Bearer ${branchConfig.sievesApiCode}',
         },
       ).timeout(
         const Duration(seconds: 10),
         onTimeout: () {
-          throw Exception('Payment status check timed out');
+          throw Exception('Request timeout');
         },
       );
       

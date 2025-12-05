@@ -463,6 +463,7 @@ class _CheckoutState extends State<Checkout> {
             RahmatPayTransactionService.startPaymentStatusCheck(
               context,
               invoiceId,
+              branchName,
             );
           }
 

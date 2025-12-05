@@ -45,4 +45,10 @@ class ProductGroup {
   String getVariationLabel() {
     return '${variations.length} variations';
   }
+
+  /// Check if all variations are out of stock
+  bool get allOutOfStock => variations.every((p) => p.outOfStock);
+
+  /// Check if any variation is out of stock
+  bool get anyOutOfStock => variations.any((p) => p.outOfStock);
 }

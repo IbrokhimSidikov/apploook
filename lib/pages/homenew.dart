@@ -47,6 +47,7 @@ class Product {
   final Map<String, dynamic>? serviceCodesUz;
   final List<Map<String, dynamic>>? images;
   final bool isPinned;
+  final bool outOfStock;
 
   Product({
     required this.name,
@@ -64,6 +65,7 @@ class Product {
     this.serviceCodesUz,
     this.images,
     this.isPinned = false,
+    this.outOfStock = false,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -131,6 +133,7 @@ class Product {
       serviceCodesUz: json['serviceCodesUz'],
       images: images,
       isPinned: json['isPinned'] ?? false,
+      outOfStock: json['outOfStock'] ?? false,
     );
   }
 
@@ -1126,82 +1129,105 @@ class _HomeNewState extends State<HomeNew>
         }
       },
       child: GestureDetector(
-        onTap: () {
+        onTap: productGroup.allOutOfStock ? null : () {
           // Show variation selector bottom sheet
           VariationSelectorSheet.show(context, productGroup);
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10.0,
-            horizontal: 15.0,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Product image with variation badge
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Stack(
-                  children: [
-                    SizedBox(
-                      width: 135.0,
-                      child: AspectRatio(
-                        aspectRatio: 3 / 2,
-                        child: productGroup.imagePath != null
-                            ? CachedProductImage(
-                                imageUrl: productGroup.imagePath!,
-                                width: 135.0,
-                                height: 90.0,
-                              )
-                            : Container(
-                                color: Colors.grey[200],
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 40,
-                                    color: Colors.grey,
+        child: Opacity(
+          opacity: productGroup.allOutOfStock ? 0.5 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10.0,
+              horizontal: 15.0,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Product image with variation badge
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        width: 135.0,
+                        child: AspectRatio(
+                          aspectRatio: 3 / 2,
+                          child: productGroup.imagePath != null
+                              ? CachedProductImage(
+                                  imageUrl: productGroup.imagePath!,
+                                  width: 135.0,
+                                  height: 90.0,
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      size: 40,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
-                              ),
+                        ),
                       ),
-                    ),
-                    // Variation badge
-                    Positioned(
-                      top: 4,
-                      right: 4,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.list,
-                              size: 12,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${productGroup.variations.length}',
-                              style: const TextStyle(
+                      // Variation badge
+                      Positioned(
+                        top: 4,
+                        right: 4,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.list,
+                                size: 12,
                                 color: Colors.white,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                '${productGroup.variations.length}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      // Out of stock overlay
+                      if (productGroup.allOutOfStock)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'OUT OF\nSTOCK',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1269,6 +1295,7 @@ class _HomeNewState extends State<HomeNew>
             ],
           ),
         ),
+        ),
       ),
     );
   }
@@ -1288,7 +1315,7 @@ class _HomeNewState extends State<HomeNew>
         }
       },
       child: GestureDetector(
-        onTap: () {
+        onTap: product.outOfStock ? null : () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -1296,68 +1323,91 @@ class _HomeNewState extends State<HomeNew>
             ),
           );
         },
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10.0,
-            horizontal: 15.0,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 10.0),
-                child: Stack(
-                  children: [
-                    SizedBox(
-                      width: 135.0,
-                      child: AspectRatio(
-                        aspectRatio: 3 / 2,
-                        child: product.imagePath != null
-                            ? CachedProductImage(
-                                imageUrl: product.imagePath!,
-                                width: 135.0,
-                                height: 90.0,
-                              )
-                            : Container(
-                                color: Colors.grey[200],
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 40,
-                                    color: Colors.grey,
+        child: Opacity(
+          opacity: product.outOfStock ? 0.5 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10.0,
+              horizontal: 15.0,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: Stack(
+                    children: [
+                      SizedBox(
+                        width: 135.0,
+                        child: AspectRatio(
+                          aspectRatio: 3 / 2,
+                          child: product.imagePath != null
+                              ? CachedProductImage(
+                                  imageUrl: product.imagePath!,
+                                  width: 135.0,
+                                  height: 90.0,
+                                )
+                              : Container(
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: Icon(
+                                      Icons.image_not_supported,
+                                      size: 40,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
-                              ),
-                      ),
-                    ),
-                    // Pin badge for pinned products
-                    if (product.isPinned)
-                      Positioned(
-                        top: 4,
-                        left: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFEC700),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.push_pin,
-                            size: 14,
-                            color: Colors.black,
-                          ),
                         ),
                       ),
-                  ],
+                      // Pin badge for pinned products
+                      if (product.isPinned)
+                        Positioned(
+                          top: 4,
+                          left: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEC700),
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.push_pin,
+                              size: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      // Out of stock overlay
+                      if (product.outOfStock)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'OUT OF\nSTOCK',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1412,6 +1462,7 @@ class _HomeNewState extends State<HomeNew>
               ),
             ],
           ),
+        ),
         ),
       ),
     );

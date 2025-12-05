@@ -651,6 +651,12 @@ class MenuService {
         print('📌 MenuService: Item "$name" is marked as pinned from backend');
       }
 
+      // Get outOfStock from backend (defaults to false if not present)
+      bool outOfStock = item['out_of_stock'] == true;
+      if (outOfStock) {
+        print('❌ MenuService: Item "$name" is out of stock');
+      }
+
       // Create the product
       final product = Product(
         id: id,
@@ -668,6 +674,7 @@ class MenuService {
         serviceCodesUz: item['serviceCodesUz'],
         images: images,
         isPinned: isPinned,  // Use backend value
+        outOfStock: outOfStock,  // Use backend value
       );
 
       // print(
