@@ -171,7 +171,7 @@ class RahmatPayService {
           "paymentInfo": {
             "itemsCost": (amount - ((deliveryFee ?? 0) * 100)).toInt(),
             "deliveryFee": ((deliveryFee ?? 0)).toInt(),
-            "paymentType": "card",
+            "paymentType": "CARD",
             "netting_payment": false
           },
           "items": cartItems
