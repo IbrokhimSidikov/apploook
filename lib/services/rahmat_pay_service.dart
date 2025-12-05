@@ -174,23 +174,23 @@ class RahmatPayService {
             "paymentType": "card",
             "netting_payment": false
           },
-          "items": cartItems.map((item) {
-            return {
-              "id": item.product.uuid,
-              "name": item.displayName,
-              "price": (item.product.price * 100).toInt(), // Convert to tiyin
-              "quantity": item.quantity,
-              "totalPrice": (item.totalPrice * 100).toInt(), // Convert to tiyin
-              "selectedModifiers": item.selectedModifiers
-                  .map((modifier) => {
-                        "modifierId": modifier.modifier.id,
-                        "modifierName": modifier.modifier.name,
-                        "modifierPrice": (modifier.modifier.price * 100).toInt(), // Convert to tiyin
-                        "quantity": modifier.quantity,
-                      })
-                  .toList(),
-            };
-          }).toList(),
+          "items": cartItems
+              .map((item) => {
+                    "id": item.product.uuid,
+                    "name": item.displayName,
+                    "quantity": item.quantity,
+                    "price": (item.product.price * 100).toInt(),
+                    "modifications": item.selectedModifiers
+                        .map((modifier) => {
+                              "id": modifier.modifier.id,
+                              "group_id": modifier.modifier.id.toString().split('-').first + "-group",
+                              "name": modifier.modifier.name,
+                              "quantity": modifier.quantity,
+                              "price": (modifier.modifier.price * 100).toInt(),
+                            })
+                        .toList(),
+                  })
+              .toList(),
           "persons": customerQuantity,
           "comment": note
         }
