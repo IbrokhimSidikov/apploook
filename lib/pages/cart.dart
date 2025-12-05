@@ -295,6 +295,43 @@ class _CartState extends State<Cart> {
                   TextButton(
                     onPressed: price > 0
                         ? () async {
+                            // Log cart items before navigating to checkout
+                            final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                            print('\n======== CART → CHECKOUT: Cart Items ========');
+                            print('Total Items: ${cartProvider.cartItems.length}');
+                            print('Total Price: ${cartProvider.getTotalPrice()} UZS');
+                            
+                            for (int i = 0; i < cartProvider.cartItems.length; i++) {
+                              final item = cartProvider.cartItems[i];
+                              print('\n--- Item ${i + 1} ---');
+                              print('Product ID: ${item.product.id}');
+                              print('Product UUID: ${item.product.uuid}');
+                              print('Product Name: ${item.product.name}');
+                              print('Display Name: ${item.displayName}');
+                              print('Quantity: ${item.quantity}');
+                              print('Base Price: ${item.product.price} UZS');
+                              print('Total Price (with modifiers): ${item.totalPrice} UZS');
+                              
+                              if (item.selectedModifiers != null && item.selectedModifiers.isNotEmpty) {
+                                print('Selected Modifiers (${item.selectedModifiers.length}):');
+                                double modifiersTotal = 0.0;
+                                for (var modifier in item.selectedModifiers) {
+                                  final modPrice = modifier.modifier.price * modifier.quantity;
+                                  modifiersTotal += modPrice;
+                                  print('  - ${modifier.modifier.name}');
+                                  print('    ID: ${modifier.modifier.id}');
+                                  print('    Price: ${modifier.modifier.price} UZS');
+                                  print('    Quantity: ${modifier.quantity}');
+                                  print('    Subtotal: $modPrice UZS');
+                                }
+                                print('Total Modifiers Cost: $modifiersTotal UZS');
+                                print('Item Total (Base + Modifiers) × Quantity: ${(item.product.price + modifiersTotal) * item.quantity} UZS');
+                              } else {
+                                print('No modifiers selected');
+                              }
+                            }
+                            print('============================================\n');
+                            
                             bool isSignedIn = await _isUserSignedIn();
                             Navigator.pushNamed(
                               context,

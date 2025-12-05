@@ -368,11 +368,9 @@ class ApiService {
   }) async {
     try {
       print('Creating order with the new API endpoint');
-
       // Format the phone number correctly (remove + if present)
       String formattedPhone =
           phoneNumber.startsWith('+') ? phoneNumber.substring(1) : phoneNumber;
-
       // Generate a unique order ID in the format used by the successful example
       // Format: YYMMDD-randomnumber
       final now = DateTime.now();
@@ -382,7 +380,6 @@ class ApiService {
           (10000000 + DateTime.now().millisecondsSinceEpoch % 90000000)
               .toString();
       String orderId = '$datePrefix-$randomPart';
-
       String finalPaymentType =
           await _determinePaymentType(paymentType, paymeOrderId);
 
@@ -433,9 +430,7 @@ class ApiService {
             ? "mobile_payment_type:${finalPaymentType.toLowerCase()}\n\n$comment"
             : "mobile_payment_type:${finalPaymentType.toLowerCase()}"
       };
-
       print('Order payload: ${json.encode(orderPayload)}');
-
       // Send the order request using the endpoint constant
       // Remove the leading slash since _orderEndpoint already includes the full path
       final response = await _authenticatedRequest(
@@ -443,7 +438,6 @@ class ApiService {
         method: 'POST',
         body: orderPayload,
       );
-
       print('Order created successfully: $response');
       return response;
     } catch (e) {
@@ -452,18 +446,17 @@ class ApiService {
     }
   }
 
-  // This duplicate getOrderStatus method has been merged with the one above
+  //This duplicate getOrderStatus method has been merged with the one above
 
   Future<String> _determinePaymentType(
       String originalPaymentType, String? paymeOrderId) async {
-    // If payment was made through Payme and we have an order ID, verify the payment
+    //If payment was made through Payme and we have an order ID, verify the payment
     if (originalPaymentType.toLowerCase() == 'payme' && paymeOrderId != null) {
-      // Check if the Payme payment was successful
+      //Check if the Payme payment was successful
       final paymentResult = await PaymeService.verifyPayment(paymeOrderId);
       final isVerified = paymentResult['success'] == true;
-      if (isVerified) {
-        print(
-            'Payme payment verified as successful, setting payment type to card');
+      if(isVerified){
+        print('Payme payment verified as successful, setting payment type to card');
         return 'payme';
       }
     }

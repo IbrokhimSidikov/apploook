@@ -361,6 +361,8 @@ class _CheckoutState extends State<Checkout> {
     required CartProvider cartProvider,
     required int selectedIndex,
     String? carDetails,
+    String? address,
+    String? additionalPhone,
   }) async {
     try {
       setState(() {
@@ -401,6 +403,12 @@ class _CheckoutState extends State<Checkout> {
       final digitsOnly = phone.replaceAll(RegExp(r'[^\d]'), '');
       final pagerNumber = digitsOnly.startsWith('998') ? digitsOnly.substring(3) : digitsOnly;
       
+      // Get nearest branch restaurant ID if available
+      String? restaurantId;
+      if (_nearestBranch != null && _nearestBranch!['id'] != null) {
+        restaurantId = _nearestBranch!['id'].toString();
+      }
+      
       final invoiceResult = await RahmatPayService.createInvoice(
         branchName: branchName,
         orderTypeId: orderTypeId,
@@ -412,6 +420,14 @@ class _CheckoutState extends State<Checkout> {
         lang: 'ru', // TODO: Get from app locale
         cartItems: cartProvider.cartItems,
         bearerToken: bearerToken,
+        customerName: name,
+        customerPhone: phone,
+        deliveryAddress: address,
+        latitude: cartProvider.showLat(),
+        longitude: cartProvider.showLong(),
+        additionalPhone: additionalPhone,
+        restaurantId: restaurantId,
+        deliveryFee: deliveryFee,
       );
 
       if (invoiceResult['success'] == true) {
@@ -610,13 +626,13 @@ class _CheckoutState extends State<Checkout> {
         print('🔍 CHECKOUT: API Response Status: ${response.statusCode}');
         if (response.statusCode == 200) {
           final responseData = json.decode(response.body);
-          
+
           if (responseData['success'] == true && responseData['data'] != null) {
             final data = responseData['data'];
             final branch = data['branch'];
             final distance = data['distance'];
             final deliveryFeeFromApi = data['deliveryFee'];
-            
+
             print('✅ CHECKOUT: Nearest branch found: ${branch['name']}');
             print('✅ CHECKOUT: Distance: $distance km');
             print('✅ CHECKOUT: Delivery fee: $deliveryFeeFromApi');
@@ -1895,6 +1911,8 @@ class _CheckoutState extends State<Checkout> {
                             cartProvider: cartProvider,
                             selectedIndex: _selectedIndex,
                             carDetails: _selectedIndex == 2 ? carDetails : null,
+                            address: _selectedIndex == 0 ? selectedAddress : null,
+                            additionalPhone: clientCommentPhone.isNotEmpty ? clientCommentPhone : null,
                           );
 
                           // Reset processing state
@@ -2818,6 +2836,7 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
+  // Telegram order sending logic
   Future<void> sendOrderToTelegram(
       String? address,
       String branchName,

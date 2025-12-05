@@ -80,17 +80,21 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
   }
 
   Future<void> _checkPaymentStatus() async {
-    if (_isChecking) return;
+    if (_isChecking || !mounted) return;
 
-    setState(() {
-      _isChecking = true;
-      _statusMessage = 'Checking payment status... (${_checkCount}/${_maxChecks})';
-    });
+    if (mounted) {
+      setState(() {
+        _isChecking = true;
+        _statusMessage = 'Checking payment status... (${_checkCount}/${_maxChecks})';
+      });
+    }
 
     try {
       print('🔍 Checking payment status (attempt ${_checkCount}/${_maxChecks})');
       
       final result = await RahmatPayService.checkPaymentStatus(widget.invoiceId);
+      
+      if (!mounted) return;
       
       if (result['success'] == true) {
         final status = result['status'] as String?;
@@ -106,26 +110,34 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
           _handlePaymentFailure(status);
         } else {
           // Still pending, continue checking
-          setState(() {
-            _statusMessage = 'Payment status: $status\nWaiting for completion...';
-          });
+          if (mounted) {
+            setState(() {
+              _statusMessage = 'Payment status: $status\nWaiting for completion...';
+            });
+          }
         }
       } else {
         // Error checking status, but continue trying
         print('⚠️ Error checking status: ${result['error']}');
+        if (mounted) {
+          setState(() {
+            _statusMessage = 'Checking payment...\n(${_checkCount}/${_maxChecks})';
+          });
+        }
+      }
+    } catch (e) {
+      print('❌ Exception checking payment status: $e');
+      if (mounted) {
         setState(() {
           _statusMessage = 'Checking payment...\n(${_checkCount}/${_maxChecks})';
         });
       }
-    } catch (e) {
-      print('❌ Exception checking payment status: $e');
-      setState(() {
-        _statusMessage = 'Checking payment...\n(${_checkCount}/${_maxChecks})';
-      });
     } finally {
-      setState(() {
-        _isChecking = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isChecking = false;
+        });
+      }
     }
   }
 

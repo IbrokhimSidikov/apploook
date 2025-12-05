@@ -9,7 +9,7 @@ class RahmatPayService {
   static const String _createInvoiceEndpoint = '$_baseUrl/rahmat-pay/create-invoice';
   
   // TODO: TESTING ONLY - Replace with actual bearer token
-  static const String _testBearerToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJqTkRNRGhDTmpoQ01EWTBSalF6TUVFeU9FTTROa0ZDUkVRd1FUSkVOVUUwUkRaRE1qZEVNZyJ9.eyJpc3MiOiJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjViY2RlMDA5ODMwYTllN2JiY2U3NWQ0IiwiYXVkIjpbImxvY2FsaG9zdDo4MDgwL2xvb29rLWFwaS93ZWIiLCJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY0NjYxODg0LCJleHAiOjE3NjQ3NDgyODQsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiI1dXBaSkJsSU1pR1Z1SEw2ZGFmOFBvOUZMWFhKMkxHNSJ9.lbhoj8Bhc9bMHbt8Yj1UuOseJ0umni4nxRRM2YipF4jLC3PI56m30o3kQKg017IBhlVTdl-2koQ78-ed6hjZ5V7myIYNXFDRVMggl1tAsIYg-u1JZ6fVRz-_URFZ1_eMXMQZsuhbJMB_O_sg6tSykVOf9kfJ6AKkbYdLWEl1F2ZIf4ecagPB1uxpO-f1FVDl2kVXa6TzKtmlVmoGmEUydsaI3gZSPLZC2iD8CvSTpNDmqBbYQg8icMgr5muxnti7gWfSPmKNGVLbaCslAQBM_xm-jUbOpd0k-JJmsKPR_56rChoKyqLT_D6VgfyxZ_xgafpdKwmi2g8EExKltYHYVg';
+  static const String _testBearerToken = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJqTkRNRGhDTmpoQ01EWTBSalF6TUVFeU9FTTROa0ZDUkVRd1FUSkVOVUUwUkRaRE1qZEVNZyJ9.eyJpc3MiOiJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjViY2RlMDA5ODMwYTllN2JiY2U3NWQ0IiwiYXVkIjpbImxvY2FsaG9zdDo4MDgwL2xvb29rLWFwaS93ZWIiLCJodHRwczovL2V4b2RlbGljYWluYy5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNzY0OTExMDk4LCJleHAiOjE3NjQ5OTc0OTgsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJhenAiOiI1dXBaSkJsSU1pR1Z1SEw2ZGFmOFBvOUZMWFhKMkxHNSJ9.WGJrjIxV7NeXrNVISBVh4BAddxtC6egqxwpY-yZ1ozruJsQ1VS9_0OLxWn6ViBO2XiDg1c9YpP753PURAQ5hmceE72aj5e_4pOQpI18KpcTwb_TtgU-XO9BIMjgFCbpEy312lz5wOSZTweyiEhXzdWh1s8QZ1YI7ImY1xv2pcnp-kvlg9X8rM_NLJ-MmoGNl14JPneCUNEnSk17Dg8wlbKrFSenEUlQhXFFkFp49MR6oxa8J0RKAmWiWDmYkJweoOjy5LVklF4tYrpk8J5-TBuRCSHkb9he41tz8H-OPPMU3_FD-Xs7ijQxfUKgkKxswah5oFySrUD4mlK_jl-rQEA';
 
   /// Creates an invoice with Rahmat Pay and returns the payment URL
   /// 
@@ -24,6 +24,16 @@ class RahmatPayService {
   /// - [lang]: Language code (ru, uz, en)
   /// - [cartItems]: List of cart items
   /// - [bearerToken]: Authentication token from Sieves API
+  /// - [customerName]: Customer name for delivery
+  /// - [customerPhone]: Customer phone number with country code
+  /// - [deliveryAddress]: Full delivery address
+  /// - [latitude]: Delivery latitude
+  /// - [longitude]: Delivery longitude
+  /// - [additionalPhone]: Additional phone number (optional)
+  /// - [restaurantId]: Nearest branch restaurant ID for Delever
+  /// - [deliveryFee]: Delivery fee amount
+
+
   static Future<Map<String, dynamic>> createInvoice({
     required String branchName,
     required int orderTypeId,
@@ -35,6 +45,14 @@ class RahmatPayService {
     required String lang,
     required List<dynamic> cartItems,
     required String bearerToken,
+    String? customerName,
+    String? customerPhone,
+    String? deliveryAddress,
+    double? latitude,
+    double? longitude,
+    String? additionalPhone,
+    String? restaurantId,
+    double? deliveryFee,
   }) async {
     try {
       // Get branch configuration
@@ -62,6 +80,14 @@ class RahmatPayService {
           "total_price": item.totalPrice,
           "quantity": item.quantity,
           "actual_price": (item.totalPrice / item.quantity).toString(),
+          "selectedModifiers": item.selectedModifiers
+              .map((modifier) => {
+                    "modifierId": modifier.modifier.id,
+                    "modifierName": modifier.modifier.name,
+                    "modifierPrice": modifier.modifier.price,
+                    "quantity": modifier.quantity,
+                  })
+              .toList(),
         };
       }).toList();
 
@@ -126,6 +152,51 @@ class RahmatPayService {
           "lang": lang,
           "ofd": rahmatOfdItems,
         },
+        "delever_payload": {
+          "platform": "YE",
+          "discriminator": "marketplace",
+          "restaurantId": restaurantId ?? branchConfig.branchId.toString(),
+          "deliveryInfo": {
+            "clientName": customerName ?? "",
+            "phoneNumber": customerPhone ?? pagerNumber,
+            "additionalPhoneNumbers": additionalPhone != null ? [additionalPhone] : [],
+            "deliveryDate": DateTime.now().toUtc().toIso8601String(),
+            "deliveryAddress": {
+              "full": deliveryAddress ?? "Branch: $branchName",
+              "latitude": latitude?.toString() ?? "0.0",
+              "longitude": longitude?.toString() ?? "0.0"
+            },
+            "courierArrivementDate": DateTime.now().add(Duration(minutes: 30)).toUtc().toIso8601String(),
+            "realPhoneNumber": customerPhone ?? pagerNumber,
+            "pickupCode": DateTime.now().millisecondsSinceEpoch % 10000
+          },
+          "paymentInfo": {
+            "itemsCost": (amount - ((deliveryFee ?? 0) * 100)).toInt(),
+            "deliveryFee": ((deliveryFee ?? 0)).toInt(),
+            "paymentType": "card",
+            "netting_payment": false
+          },
+          "items": cartItems.map((item) {
+            return {
+              "id": item.product.uuid,
+              "name": item.displayName,
+              "price": (item.product.price * 100).toInt(), // Convert to tiyin
+              "quantity": item.quantity,
+              "totalPrice": (item.totalPrice * 100).toInt(), // Convert to tiyin
+              "selectedModifiers": item.selectedModifiers
+                  .map((modifier) => {
+                        "modifierId": modifier.modifier.id,
+                        "modifierName": modifier.modifier.name,
+                        "modifierPrice": (modifier.modifier.price * 100).toInt(), // Convert to tiyin
+                        "quantity": modifier.quantity,
+                      })
+                  .toList(),
+            };
+          }).toList(),
+          "persons": customerQuantity,
+          "comment": note
+        }
+
       };
 
       print('Request Body: ${json.encode(requestBody)}');
@@ -191,23 +262,51 @@ class RahmatPayService {
       
       final Uri uri = Uri.parse(paymentUrl);
       
-      if (await canLaunchUrl(uri)) {
+      // Try different launch modes in order of preference
+      // 1. Try external application first (opens in browser)
+      try {
         final launched = await launchUrl(
           uri,
           mode: LaunchMode.externalApplication,
         );
-        
         if (launched) {
-          print('Successfully launched Rahmat Pay checkout');
+          print('Successfully launched Rahmat Pay checkout in external app');
           return true;
-        } else {
-          print('Failed to launch Rahmat Pay checkout');
-          return false;
         }
-      } else {
-        print('Cannot launch URL: $paymentUrl');
-        return false;
+      } catch (e) {
+        print('External application launch failed: $e');
       }
+      
+      // 2. Try platform default (lets system decide)
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.platformDefault,
+        );
+        if (launched) {
+          print('Successfully launched Rahmat Pay checkout with platform default');
+          return true;
+        }
+      } catch (e) {
+        print('Platform default launch failed: $e');
+      }
+      
+      // 3. Try external non-browser mode
+      try {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalNonBrowserApplication,
+        );
+        if (launched) {
+          print('Successfully launched Rahmat Pay checkout in external non-browser app');
+          return true;
+        }
+      } catch (e) {
+        print('External non-browser launch failed: $e');
+      }
+      
+      print('Cannot launch URL: $paymentUrl - all launch modes failed');
+      return false;
     } catch (e) {
       print('Error launching payment URL: $e');
       return false;
