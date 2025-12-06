@@ -27,11 +27,6 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
   String? _updatingOrderId;
   Set<String> _arrivedOrders = {};
 
-  // Track new orders for each tab
-  int _newDeliveryOrders = 0;
-  int _newCarhopOrders = 0;
-  int _newSelfPickupOrders = 0;
-
   late TabController _tabController;
 
   @override
@@ -39,25 +34,53 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    // Add listener to clear notification for the active tab
-    _tabController.addListener(_handleTabChange);
-
-    // Load both types of orders
-    _loadOrders();
+    // Load both types of orders with smart caching
+    _loadOrdersWithBackgroundRefresh();
   }
 
-  void _handleTabChange() {
-    if (_tabController.indexIsChanging) {
-      setState(() {
-        // Clear notification indicator for the selected tab
-        if (_tabController.index == 0) {
-          _newDeliveryOrders = 0;
-        } else if (_tabController.index == 1) {
-          _newCarhopOrders = 0;
-        } else {
-          _newSelfPickupOrders = 0;
-        }
+  Future<void> _loadOrdersWithBackgroundRefresh() async {
+    await _loadOrders(forceRefresh: false);
+    
+    _backgroundRefresh();
+  }
+
+  void _backgroundRefresh() async {
+    try {
+      final response = await _orderHistoryService.fetchOrderHistory(
+        page: 1,
+        limit: 50,
+        forceRefresh: true,
+      );
+
+      final orders = (response['data'] as List<dynamic>? ?? [])
+          .map((order) => order as Map<String, dynamic>)
+          .toList();
+
+      orders.sort((a, b) {
+        final aTime = DateTime.parse(a['time'] ?? '');
+        final bTime = DateTime.parse(b['time'] ?? '');
+        return bTime.compareTo(aTime);
       });
+
+      final deliveryOrders = orders
+          .where((order) => order['order_type_id'] == 3)
+          .toList();
+      final carhopOrders = orders
+          .where((order) => order['order_type_id'] == 8)
+          .toList();
+      final selfPickupOrders = orders
+          .where((order) => order['order_type_id'] == 7 || order['order_type_id'] == 1 || order['order_type_id'] == 2)
+          .toList();
+
+      if (mounted) {
+        setState(() {
+          _deliveryOrders = deliveryOrders;
+          _carhopOrders = carhopOrders;
+          _selfPickupOrders = selfPickupOrders;
+        });
+      }
+    } catch (e) {
+      print('Background refresh failed: $e');
     }
   }
 
@@ -67,21 +90,17 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
     super.dispose();
   }
 
-  Future<void> _loadOrders() async {
+  Future<void> _loadOrders({bool forceRefresh = false}) async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Get previous counts to calculate new orders
-      final prevDeliveryCount = _deliveryOrders.length;
-      final prevCarhopCount = _carhopOrders.length;
-      final prevSelfPickupCount = _selfPickupOrders.length;
-
-      // Fetch orders from API
+      // Fetch orders from API (with caching)
       final response = await _orderHistoryService.fetchOrderHistory(
         page: 1,
         limit: 50,
+        forceRefresh: forceRefresh,
       );
 
       final orders = (response['data'] as List<dynamic>? ?? [])
@@ -97,42 +116,19 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
 
       // Separate orders by type
       final deliveryOrders = orders
-          .where((order) => order['order_type_id'] == 1 || order['order_type_id'] == 3)
+          .where((order) =>  order['order_type_id'] == 3)
           .toList();
       final carhopOrders = orders
           .where((order) => order['order_type_id'] == 8)
           .toList();
       final selfPickupOrders = orders
-          .where((order) => order['order_type_id'] == 7)
+          .where((order) => order['order_type_id'] == 7 || order['order_type_id'] == 1 || order['order_type_id'] == 2)
           .toList();
-
-      // Calculate new orders (only if there are more orders than before)
-      final newDeliveryOrders = deliveryOrders.length > prevDeliveryCount
-          ? deliveryOrders.length - prevDeliveryCount
-          : 0;
-      final newCarhopOrders = carhopOrders.length > prevCarhopCount
-          ? carhopOrders.length - prevCarhopCount
-          : 0;
-      final newSelfPickupOrders = selfPickupOrders.length > prevSelfPickupCount
-          ? selfPickupOrders.length - prevSelfPickupCount
-          : 0;
 
       setState(() {
         _deliveryOrders = deliveryOrders;
         _carhopOrders = carhopOrders;
         _selfPickupOrders = selfPickupOrders;
-
-        // Update notification counts (don't reset the current tab)
-        if (_tabController.index != 0) {
-          _newDeliveryOrders += newDeliveryOrders;
-        }
-        if (_tabController.index != 1) {
-          _newCarhopOrders += newCarhopOrders;
-        }
-        if (_tabController.index != 2) {
-          _newSelfPickupOrders += newSelfPickupOrders;
-        }
-
         _isLoading = false;
       });
     } catch (e) {
@@ -320,142 +316,46 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
             tabs: [
             Tab(
               height: 66,
-              child: Stack(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.delivery_dining),
-                        const SizedBox(height: 2),
-                        Text(
-                          localizations.deliveryOrders,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+                  const Icon(Icons.delivery_dining),
+                  const SizedBox(height: 2),
+                  Text(
+                    localizations.deliveryOrders,
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  if (_newDeliveryOrders > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$_newDeliveryOrders',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
             Tab(
               height: 66,
-              child: Stack(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.local_parking),
-                        const SizedBox(height: 2),
-                        Text(
-                          localizations.carhopOrders,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+                  const Icon(Icons.local_parking),
+                  const SizedBox(height: 2),
+                  Text(
+                    localizations.carhopOrders,
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  if (_newCarhopOrders > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$_newCarhopOrders',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
             Tab(
               height: 66,
-              child: Stack(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.shopping_bag),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Pickup/Dine-In',
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+                  const Icon(Icons.shopping_bag),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Pickup/Dine-In',
+                    style: const TextStyle(fontSize: 12),
                   ),
-                  if (_newSelfPickupOrders > 0)
-                    Positioned(
-                      right: 0,
-                      top: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$_newSelfPickupOrders',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -465,7 +365,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: _loadOrders,
+            onPressed: () => _loadOrders(forceRefresh: true),
             tooltip: 'Refresh',
           ),
           // Test uchun
@@ -492,7 +392,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
               : _deliveryOrders.isEmpty
                   ? _buildEmptyState(0)
                   : RefreshIndicator(
-                      onRefresh: _loadOrders,
+                      onRefresh: () => _loadOrders(forceRefresh: true),
                       child: ListView.builder(
                         padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _deliveryOrders.length,
@@ -510,7 +410,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
               : _carhopOrders.isEmpty
                   ? _buildEmptyState(1)
                   : RefreshIndicator(
-                      onRefresh: _loadOrders,
+                      onRefresh: () => _loadOrders(forceRefresh: true),
                       child: ListView.builder(
                         padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _carhopOrders.length,
@@ -587,7 +487,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
               : _selfPickupOrders.isEmpty
                   ? _buildEmptyState(2)
                   : RefreshIndicator(
-                      onRefresh: _loadOrders,
+                      onRefresh: () => _loadOrders(forceRefresh: true),
                       child: ListView.builder(
                         padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _selfPickupOrders.length,

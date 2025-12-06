@@ -165,13 +165,15 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
   String _getOrderTypeIcon(int orderTypeId) {
     switch (orderTypeId) {
       case 1:
-        return '🚗';
-      case 2:
-        return '🅿️';
-      case 3:
-        return '🛍️';
-      case 4:
         return '🍽️';
+      case 2:
+        return '🍽️';
+      case 3:
+        return '🚗';
+      case 7:
+        return '🛍️';
+      case 8:
+        return '🅿️';
       default:
         return '📦';
     }
@@ -180,13 +182,15 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
   String _getOrderTypeName(int orderTypeId) {
     switch (orderTypeId) {
       case 1:
-        return 'Delivery';
-      case 2:
-        return 'Carhop';
-      case 3:
-        return 'Self-Pickup';
-      case 4:
         return 'Dine-In';
+      case 2:
+        return 'In-Restaurant';
+      case 3:
+        return 'Delivery';
+      case 7:
+        return 'Self-Pickup';
+      case 8:
+        return 'Carhop';
       default:
         return 'Unknown';
     }
