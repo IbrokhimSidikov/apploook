@@ -97,13 +97,13 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
 
       // Separate orders by type
       final deliveryOrders = orders
-          .where((order) => order['order_type_id'] == 1)
+          .where((order) => order['order_type_id'] == 1 || order['order_type_id'] == 3)
           .toList();
       final carhopOrders = orders
-          .where((order) => order['order_type_id'] == 2)
+          .where((order) => order['order_type_id'] == 8)
           .toList();
       final selfPickupOrders = orders
-          .where((order) => order['order_type_id'] == 3 || order['order_type_id'] == 4)
+          .where((order) => order['order_type_id'] == 7)
           .toList();
 
       // Calculate new orders (only if there are more orders than before)

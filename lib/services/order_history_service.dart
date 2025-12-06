@@ -29,7 +29,7 @@ class OrderHistoryService {
       }
 
       final url = Uri.parse(
-        '$_baseUrl/orders/search-by-phone?phone=$phoneNumber&page=$page&limit=10',
+        '$_baseUrl/orders/search-by-phone?phone=$phoneNumber&page=$page&limit=$limit',
       );
 
       print('Fetching order history from: $url');
