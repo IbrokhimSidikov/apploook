@@ -68,14 +68,6 @@ class BranchConfigs {
       merchantId: '686387fd74755eccf65a0f64',
       deleverId: '7c68b555-5fc5-4d8c-ac45-25360c05fdf5',
     ),
-    'Ava Pizza': const BranchConfig(
-      branchId: 15,
-      sievesApiCode: '81e57435850af8fe58f8e6540cad5fd6',
-      sievesApiToken: '81e57435850af8fe58f8e6540cad5fd6',
-      employeeId: 423,
-      merchantId: '6863879a74755eccf65a0f4d',
-      deleverId: '',
-    ),
     "Yangiyol Loook": const BranchConfig(
       branchId: 25,
       sievesApiCode: 'a2890a1395c57770f05fda46f4a83f07',
@@ -83,14 +75,6 @@ class BranchConfigs {
       employeeId: 423,
       merchantId: '6863894974755eccf65a0f93',
       deleverId: '981422f2-326d-4ca7-97ce-0b7ebcbe0c49',
-    ),
-    'Loook High Town': const BranchConfig(
-      branchId: 26,
-      sievesApiCode: '8c4492755f4a0f0ee466ffb10c721335',
-      sievesApiToken: '8c4492755f4a0f0ee466ffb10c721335',
-      employeeId: 423,
-      merchantId: '6863885274755eccf65a0f6e',
-      deleverId: '',
     ),
   };
 
