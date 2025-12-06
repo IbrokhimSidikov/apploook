@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:apploook/services/order_history_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
-import 'package:apploook/widget/order_tracking_card.dart';
+import 'package:apploook/widget/api_order_tracking_card.dart';
 import 'package:http/http.dart' as http;
 
 class UnifiedOrderTrackingPage extends StatefulWidget {
@@ -17,6 +18,7 @@ class UnifiedOrderTrackingPage extends StatefulWidget {
 
 class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
     with SingleTickerProviderStateMixin {
+  final OrderHistoryService _orderHistoryService = OrderHistoryService();
   final OrderTrackingService _trackingService = OrderTrackingService();
   bool _isLoading = true;
   List<Map<String, dynamic>> _deliveryOrders = [];
@@ -76,40 +78,33 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
       final prevCarhopCount = _carhopOrders.length;
       final prevSelfPickupCount = _selfPickupOrders.length;
 
-      // Load delivery orders
-      final deliveryOrders = await _trackingService.getSavedDeliveryOrders();
+      // Fetch orders from API
+      final response = await _orderHistoryService.fetchOrderHistory(
+        page: 1,
+        limit: 50,
+      );
 
-      // Load carhop orders
-      final prefs = await SharedPreferences.getInstance();
-      final savedCarhopOrders = prefs.getStringList('carhop_orders') ?? [];
-      final carhopOrders = savedCarhopOrders
-          .map((order) => jsonDecode(order) as Map<String, dynamic>)
+      final orders = (response['data'] as List<dynamic>? ?? [])
+          .map((order) => order as Map<String, dynamic>)
           .toList();
 
-      // Load self-pickup and in-restaurant orders
-      final savedSelfPickupOrders = prefs.getStringList('selfpickup_orders') ?? [];
-      final selfPickupOrders = savedSelfPickupOrders
-          .map((order) => jsonDecode(order) as Map<String, dynamic>)
+      // Sort orders by time (newest first)
+      orders.sort((a, b) {
+        final aTime = DateTime.parse(a['time'] ?? '');
+        final bTime = DateTime.parse(b['time'] ?? '');
+        return bTime.compareTo(aTime);
+      });
+
+      // Separate orders by type
+      final deliveryOrders = orders
+          .where((order) => order['order_type_id'] == 1)
           .toList();
-
-      // Sort orders by timestamp (newest first)
-      deliveryOrders.sort((a, b) {
-        final aTime = DateTime.parse(a['timestamp'] ?? '');
-        final bTime = DateTime.parse(b['timestamp'] ?? '');
-        return bTime.compareTo(aTime);
-      });
-
-      carhopOrders.sort((a, b) {
-        final aTime = DateTime.parse(a['timestamp'] ?? '');
-        final bTime = DateTime.parse(b['timestamp'] ?? '');
-        return bTime.compareTo(aTime);
-      });
-
-      selfPickupOrders.sort((a, b) {
-        final aTime = DateTime.parse(a['timestamp'] ?? '');
-        final bTime = DateTime.parse(b['timestamp'] ?? '');
-        return bTime.compareTo(aTime);
-      });
+      final carhopOrders = orders
+          .where((order) => order['order_type_id'] == 2)
+          .toList();
+      final selfPickupOrders = orders
+          .where((order) => order['order_type_id'] == 3 || order['order_type_id'] == 4)
+          .toList();
 
       // Calculate new orders (only if there are more orders than before)
       final newDeliveryOrders = deliveryOrders.length > prevDeliveryCount
@@ -140,9 +135,6 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
 
         _isLoading = false;
       });
-
-      // Mark orders as read in the tracking service
-      _trackingService.markOrdersAsRead();
     } catch (e) {
       print('Error loading orders: $e');
       setState(() {
@@ -505,7 +497,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                         padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _deliveryOrders.length,
                         itemBuilder: (context, index) {
-                          return OrderTrackingCard(
+                          return ApiOrderTrackingCard(
                             orderData: _deliveryOrders[index],
                           );
                         },
@@ -520,339 +512,70 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                   : RefreshIndicator(
                       onRefresh: _loadOrders,
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _carhopOrders.length,
                         itemBuilder: (context, index) {
                           final order = _carhopOrders[index];
-                          final timestamp = DateTime.parse(order['timestamp']);
-                          final formattedDate =
-                              DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
-
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                // Order Header
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 16),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(16),
-                                      topRight: Radius.circular(16),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .primaryColor
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: Icon(
-                                                Icons.receipt_outlined,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                                size: 24,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Order #${order['id']}',
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w600,
-                                                    letterSpacing: -0.5,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.access_time_rounded,
-                                                      size: 14,
-                                                      color: Colors.grey[600],
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    Text(
-                                                      formattedDate,
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        color: Colors.grey[600],
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () {
-                                          updateCarhopOrderStatus(
-                                              order['id'].toString());
-                                        },
-                                        child: Tooltip(
-                                          message: localizations
-                                              .arrivedButtonTooltip,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 10,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: _arrivedOrders.contains(
-                                                      order['id'].toString())
-                                                  ? Colors.grey[300]
-                                                  : const Color(0xFFFEC700),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                              boxShadow: [
-                                                if (!_arrivedOrders.contains(
-                                                    order['id'].toString()))
-                                                  BoxShadow(
-                                                    color:
-                                                        const Color(0xFFFEC700)
-                                                            .withOpacity(0.3),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
-                                                  ),
-                                              ],
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                if (_updatingOrderId ==
-                                                    order['id'].toString())
-                                                  const SizedBox(
-                                                    width: 20,
-                                                    height: 20,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      strokeWidth: 2,
-                                                      valueColor:
-                                                          AlwaysStoppedAnimation<
-                                                              Color>(
-                                                        Colors.black,
-                                                      ),
-                                                    ),
-                                                  )
-                                                else
-                                                  const Icon(
-                                                    Icons
-                                                        .directions_car_rounded,
-                                                    size: 20,
-                                                    color: Colors.black,
-                                                  ),
-                                                const SizedBox(width: 8),
-                                                Text(
-                                                  _arrivedOrders.contains(
-                                                          order['id']
-                                                              .toString())
-                                                      ? localizations
-                                                          .alreadyArrived
-                                                      : localizations.arrived,
-                                                  style: TextStyle(
-                                                    color:
-                                                        _arrivedOrders.contains(
-                                                                order['id']
-                                                                    .toString())
-                                                            ? Colors.grey[600]
-                                                            : Colors.black,
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w600,
-                                                    letterSpacing: 0.2,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Order Items
-                                if (order['orderItems'] != null) ...[
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      children: [
-                                        ...List<Widget>.from(
-                                          (order['orderItems'] as List)
-                                              .map((item) {
-                                            // Get modifiers if they exist
-                                            final selectedModifiers = item['selectedModifiers'] as List<dynamic>? ?? [];
-                                            final hasModifiers = selectedModifiers.isNotEmpty;
-                                            // Use totalPrice if available, otherwise calculate from price
-                                            final itemTotal = item['totalPrice'] ?? (item['price'] * item['quantity']);
-                                            
-                                            return Padding(
-                                              padding: const EdgeInsets.only(bottom: 12),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        width: 24,
-                                                        height: 24,
-                                                        decoration: BoxDecoration(
-                                                          color: Theme.of(context)
-                                                              .primaryColor
-                                                              .withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(6),
-                                                        ),
-                                                        child: Center(
-                                                          child: Text(
-                                                            '${item['quantity']}x',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: Theme.of(context).primaryColor,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Expanded(
-                                                        child: Text(
-                                                          '${item['name']}',
-                                                          style: const TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${itemTotal.toStringAsFixed(0)} UZS',
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  // Display modifiers if they exist
-                                                  if (hasModifiers)
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(left: 36, top: 4),
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: selectedModifiers.map((modifier) {
-                                                          return Padding(
-                                                            padding: const EdgeInsets.only(bottom: 2),
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.add_circle_outline,
-                                                                  size: 12,
-                                                                  color: Colors.grey[600],
-                                                                ),
-                                                                const SizedBox(width: 4),
-                                                                Expanded(
-                                                                  child: Text(
-                                                                    '${modifier['modifierName']}',
-                                                                    style: TextStyle(
-                                                                      fontSize: 12,
-                                                                      color: Colors.grey[600],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  '+${NumberFormat('#,##0').format(modifier['modifierPrice'])} UZS',
-                                                                  style: TextStyle(
-                                                                    fontSize: 12,
-                                                                    color: Colors.grey[600],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
+                          
+                          return Column(
+                            children: [
+                              ApiOrderTrackingCard(
+                                orderData: order,
+                              ),
+                              // Arrived Button for Carhop Orders
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    updateCarhopOrderStatus(order['id'].toString());
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey[50],
-                                      borderRadius: const BorderRadius.only(
-                                        bottomLeft: Radius.circular(12),
-                                        bottomRight: Radius.circular(12),
-                                      ),
+                                      color: _arrivedOrders.contains(order['id'].toString())
+                                          ? Colors.grey[300]
+                                          : const Color(0xFFFEC700),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          localizations.totalAmount,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
+                                        if (_updatingOrderId == order['id'].toString())
+                                          const SizedBox(
+                                            width: 20,
+                                            height: 20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                                            ),
+                                          )
+                                        else
+                                          const Icon(
+                                            Icons.directions_car_rounded,
+                                            size: 20,
+                                            color: Colors.black,
                                           ),
-                                        ),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          '${() {
-                                            // Calculate total from order items
-                                            double total = 0;
-                                            if (order['orderItems'] != null) {
-                                              for (var item in order['orderItems']) {
-                                                // Use totalPrice if available (includes modifiers), otherwise calculate from base price
-                                                total += (item['totalPrice'] ?? (item['price'] * item['quantity']));
-                                              }
-                                            }
-                                            return total.toStringAsFixed(0);
-                                          }()} UZS',
+                                          _arrivedOrders.contains(order['id'].toString())
+                                              ? localizations.alreadyArrived
+                                              : localizations.arrived,
                                           style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor,
+                                            color: _arrivedOrders.contains(order['id'].toString())
+                                                ? Colors.grey[600]
+                                                : Colors.black,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ],
-                            ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                            ],
                           );
                         },
                       ),
@@ -866,305 +589,11 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                   : RefreshIndicator(
                       onRefresh: _loadOrders,
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.only(top: 8, bottom: 24),
                         itemCount: _selfPickupOrders.length,
                         itemBuilder: (context, index) {
-                          final order = _selfPickupOrders[index];
-                          final timestamp = DateTime.parse(order['timestamp']);
-                          final formattedDate =
-                              DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
-                          final orderType = order['orderType'] ?? 'Self-Pickup';
-
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                // Order Header
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 16),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(16),
-                                      topRight: Radius.circular(16),
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              padding: const EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .primaryColor
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                              ),
-                                              child: Icon(
-                                                orderType == 'In-Restaurant'
-                                                    ? Icons.restaurant
-                                                    : Icons.shopping_bag_outlined,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
-                                                size: 24,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Order #${order['id']}',
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w600,
-                                                      letterSpacing: -0.5,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        Icons.access_time_rounded,
-                                                        size: 14,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        formattedDate,
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          color: Colors.grey[600],
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(
-                                                        horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: orderType == 'In-Restaurant'
-                                                          ? Colors.orange.withOpacity(0.2)
-                                                          : Colors.blue.withOpacity(0.2),
-                                                      borderRadius:
-                                                          BorderRadius.circular(8),
-                                                    ),
-                                                    child: Text(
-                                                      orderType,
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: orderType == 'In-Restaurant'
-                                                            ? Colors.orange[800]
-                                                            : Colors.blue[800],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Branch Info
-                                if (order['branchName'] != null)
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    color: Colors.grey[50],
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.location_on,
-                                            size: 20, color: Colors.grey[600]),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          order['branchName'],
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.grey[800],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                // Order Items
-                                if (order['orderItems'] != null) ...[
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      children: [
-                                        ...List<Widget>.from(
-                                          (order['orderItems'] as List)
-                                              .map((item) {
-                                            // Get modifiers if they exist
-                                            final selectedModifiers = item['selectedModifiers'] as List<dynamic>? ?? [];
-                                            final hasModifiers = selectedModifiers.isNotEmpty;
-                                            // Use totalPrice if available, otherwise calculate from price
-                                            final itemTotal = item['totalPrice'] ?? (item['price'] * item['quantity']);
-                                            
-                                            return Padding(
-                                              padding: const EdgeInsets.only(bottom: 12),
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Container(
-                                                        width: 24,
-                                                        height: 24,
-                                                        decoration: BoxDecoration(
-                                                          color: Theme.of(context)
-                                                              .primaryColor
-                                                              .withOpacity(0.1),
-                                                          borderRadius: BorderRadius.circular(6),
-                                                        ),
-                                                        child: Center(
-                                                          child: Text(
-                                                            '${item['quantity']}x',
-                                                            style: TextStyle(
-                                                              fontSize: 12,
-                                                              fontWeight: FontWeight.bold,
-                                                              color: Theme.of(context).primaryColor,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 12),
-                                                      Expanded(
-                                                        child: Text(
-                                                          '${item['name']}',
-                                                          style: const TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight: FontWeight.w500,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${itemTotal.toStringAsFixed(0)} UZS',
-                                                        style: const TextStyle(
-                                                          fontSize: 14,
-                                                          fontWeight: FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  // Display modifiers if they exist
-                                                  if (hasModifiers)
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(left: 36, top: 4),
-                                                      child: Column(
-                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                        children: selectedModifiers.map((modifier) {
-                                                          return Padding(
-                                                            padding: const EdgeInsets.only(bottom: 2),
-                                                            child: Row(
-                                                              children: [
-                                                                Icon(
-                                                                  Icons.add_circle_outline,
-                                                                  size: 12,
-                                                                  color: Colors.grey[600],
-                                                                ),
-                                                                const SizedBox(width: 4),
-                                                                Expanded(
-                                                                  child: Text(
-                                                                    '${modifier['modifierName']}',
-                                                                    style: TextStyle(
-                                                                      fontSize: 12,
-                                                                      color: Colors.grey[600],
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Text(
-                                                                  '+${NumberFormat('#,##0').format(modifier['modifierPrice'])} UZS',
-                                                                  style: TextStyle(
-                                                                    fontSize: 12,
-                                                                    color: Colors.grey[600],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[50],
-                                      borderRadius: const BorderRadius.only(
-                                        bottomLeft: Radius.circular(12),
-                                        bottomRight: Radius.circular(12),
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          localizations.totalAmount,
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${() {
-                                            // Calculate total from order items
-                                            double total = 0;
-                                            if (order['orderItems'] != null) {
-                                              for (var item in order['orderItems']) {
-                                                // Use totalPrice if available (includes modifiers), otherwise calculate from base price
-                                                total += (item['totalPrice'] ?? (item['price'] * item['quantity']));
-                                              }
-                                            }
-                                            return total.toStringAsFixed(0);
-                                          }()} UZS',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ),
+                          return ApiOrderTrackingCard(
+                            orderData: _selfPickupOrders[index],
                           );
                         },
                       ),
