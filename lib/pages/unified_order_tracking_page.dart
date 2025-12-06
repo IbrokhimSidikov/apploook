@@ -6,6 +6,7 @@ import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/services/order_history_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 import 'package:apploook/widget/api_order_tracking_card.dart';
+import 'package:apploook/widget/order_tracking_shimmer.dart';
 import 'package:http/http.dart' as http;
 
 class UnifiedOrderTrackingPage extends StatefulWidget {
@@ -388,7 +389,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
         children: [
           // Delivery Orders Tab
           _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const OrderTrackingShimmer()
               : _deliveryOrders.isEmpty
                   ? _buildEmptyState(0)
                   : RefreshIndicator(
@@ -406,7 +407,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
 
           // Carhop Orders Tab
           _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const OrderTrackingShimmer()
               : _carhopOrders.isEmpty
                   ? _buildEmptyState(1)
                   : RefreshIndicator(
@@ -483,7 +484,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
 
           // Self-Pickup & In-Restaurant Orders Tab
           _isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? const OrderTrackingShimmer()
               : _selfPickupOrders.isEmpty
                   ? _buildEmptyState(2)
                   : RefreshIndicator(

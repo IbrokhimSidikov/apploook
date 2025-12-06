@@ -1696,18 +1696,30 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
-                  // Only show Payme for delivery (0) and carhop (2) orders
-                  if (_selectedIndex == 0 || _selectedIndex == 2)
-                    const DropdownMenuItem<String>(
-                      value: 'Payme',
-                      child: Row(
-                        children: [
-                          Icon(Icons.payment, color: Colors.purple),
-                          SizedBox(width: 10),
-                          Text('Payme'),
-                        ],
-                      ),
-                    ),
+                  // Only show Payme for carhop (2) orders - Delivery (0) is commented out
+                  // if (_selectedIndex == 2)
+                  //   const DropdownMenuItem<String>(
+                  //     value: 'Payme',
+                  //     child: Row(
+                  //       children: [
+                  //         Icon(Icons.payment, color: Colors.purple),
+                  //         SizedBox(width: 10),
+                  //         Text('Payme'),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // Payme for delivery orders is disabled
+                  // if (_selectedIndex == 0 || _selectedIndex == 2)
+                  //   const DropdownMenuItem<String>(
+                  //     value: 'Payme',
+                  //     child: Row(
+                  //       children: [
+                  //         Icon(Icons.payment, color: Colors.purple),
+                  //         SizedBox(width: 10),
+                  //         Text('Payme'),
+                  //       ],
+                  //     ),
+                  //   ),
                 ],
                 onChanged: (value) {
                   setState(() {

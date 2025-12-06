@@ -133,6 +133,7 @@ class RahmatPayService {
           "address_id": null,
           "start_time": "now",
           "pager_number": pagerNumber,
+          "note": note,
           "orderItems": sievesOrderItems,
           "transactions": [
             {
