@@ -409,6 +409,34 @@ class _CheckoutState extends State<Checkout> {
         restaurantId = _nearestBranch!['id'].toString();
       }
       
+      // Filter cart items: exclude "Пакет" for non-delivery orders (selectedIndex 1, 2, 3)
+      // Only delivery (selectedIndex == 0) should include the package
+      List<dynamic> filteredCartItems = cartProvider.cartItems;
+      double adjustedTotal = total;
+      
+      if (selectedIndex != 0) {
+        // For Self-Pickup, Carhop, and In-Restaurant, remove "Пакет" from cart items
+        filteredCartItems = cartProvider.cartItems
+            .where((item) => item.product.name != 'Пакет')
+            .toList();
+        
+        // Calculate the package price to subtract from total
+        final packageItems = cartProvider.cartItems
+            .where((item) => item.product.name == 'Пакет')
+            .toList();
+        final packageItem = packageItems.isNotEmpty ? packageItems.first : null;
+        
+        if (packageItem != null) {
+          final packagePrice = packageItem.totalPrice;
+          adjustedTotal = total - packagePrice;
+          print('Removed "Пакет" from order. Package price: $packagePrice UZS');
+          print('Adjusted total: $adjustedTotal UZS (was: $total UZS)');
+        }
+      }
+      
+      print('Filtered cart items count: ${filteredCartItems.length}');
+      print('Final amount to charge: $adjustedTotal UZS');
+      
       final invoiceResult = await RahmatPayService.createInvoice(
         branchName: branchName,
         orderTypeId: orderTypeId,
@@ -416,9 +444,9 @@ class _CheckoutState extends State<Checkout> {
         customerQuantity: 1,
         pagerNumber: pagerNumber,
         note: finalNote,
-        amount: (total * 100).toInt(), // Convert to tiyin (multiply by 100)
+        amount: (adjustedTotal * 100).toInt(), // Convert to tiyin (multiply by 100)
         lang: 'ru', // TODO: Get from app locale
-        cartItems: cartProvider.cartItems,
+        cartItems: filteredCartItems,
         bearerToken: bearerToken,
         customerName: name,
         customerPhone: phone,
@@ -448,8 +476,8 @@ class _CheckoutState extends State<Checkout> {
               'phone': phone,
               'branch': branchName,
               'comment': finalNote,
-              'total': total,
-              'cart_items': cartProvider.cartItems.map((item) => {
+              'total': adjustedTotal,
+              'cart_items': filteredCartItems.map((item) => {
                 'name': item.product.name,
                 'quantity': item.quantity,
                 'price': item.product.price,
