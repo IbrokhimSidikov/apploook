@@ -198,7 +198,9 @@ class RahmatPayService {
 
       };
 
-      print('Request Body: ${json.encode(requestBody)}');
+      print('\n======== FULL REQUEST BODY ========');
+      print(const JsonEncoder.withIndent('  ').convert(requestBody));
+      print('======== END REQUEST BODY ========\n');
 
       // Build URL with query parameters
       final url = Uri.parse(_createInvoiceEndpoint).replace(queryParameters: {

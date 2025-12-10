@@ -389,8 +389,8 @@ class _CheckoutState extends State<Checkout> {
       // Get order type ID based on selected index
       final orderTypeId = RahmatPayService.getOrderTypeId(selectedIndex);
 
-      // Payment type ID is 3 for card
-      const paymentTypeId = 3;
+      // Payment type ID is 10 for RAHMAT
+      const paymentTypeId = 10;
 
       // Prepare note with car details if carhop
       String finalNote = comment;
