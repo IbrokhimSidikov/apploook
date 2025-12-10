@@ -337,7 +337,7 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
                         ],
                       ),
                       Text(
-                        '${NumberFormat('#,##0').format(value)} sum',
+                        '${NumberFormat('#,##0').format(value + deliveryFee)} sum',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
