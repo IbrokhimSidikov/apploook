@@ -109,10 +109,10 @@ class RahmatPayService {
         return {
           "qty": quantity,
           "price": pricePerItem,
-          "mxik": "10202001002000000", // Static value
+          "mxik": "10202001002000000",
           "total": totalPrice,
-          "package_code": "1506113", // Static value
-          "name": "fast food", // Static value
+          "package_code": "1506113",
+          "name": "fast food",
         };
       }).toList();
 
@@ -123,11 +123,11 @@ class RahmatPayService {
           "isSynchronous": "sync",
           "is_fast": 0,
           "queue_type": "sync",
-          "day_session_id": 26702,
+          "day_session_id": null,
           "employee_id": branchConfig.employeeId,
-          "pos_id": 58,
+          "pos_id": null,
           "branch_id": branchConfig.branchId,
-          "pos_session_id": 125158,
+          "pos_session_id": null,
           "order_type_id": orderTypeId,
           "customer_id": null,
           "address_id": null,
@@ -139,11 +139,11 @@ class RahmatPayService {
             {
               "account_id": 1,
               "payment_type_id": paymentTypeId,
-              "amount": amount / 100, // Convert back from tiyin to UZS
+              "amount": amount / 100,
               "type": "deposit"
             }
           ],
-          "value": amount / 100, // Convert back from tiyin to UZS
+          "value": amount / 100,
           "customer_quantity": customerQuantity,
         },
         "rahmat_payload": {

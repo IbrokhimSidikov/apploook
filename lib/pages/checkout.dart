@@ -64,6 +64,7 @@ class _CheckoutState extends State<Checkout> {
 
   final FocusNode _carDetailsFocusNode = FocusNode();
   final TextEditingController _carDetailsController = TextEditingController();
+  final TextEditingController _additionalPhoneController = TextEditingController();
 
   @override
   void initState() {
@@ -72,6 +73,7 @@ class _CheckoutState extends State<Checkout> {
     _loadPhoneNumber();
     _loadCustomerName();
     _loadCarDetails(); // Load cached car details
+    _loadAdditionalPhoneNumber(); // Load user's phone number for additional phone field
     // Check for pending Payme transactions
     PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
@@ -707,6 +709,7 @@ class _CheckoutState extends State<Checkout> {
   void dispose() {
     _carDetailsFocusNode.dispose();
     _carDetailsController.dispose();
+    _additionalPhoneController.dispose();
     super.dispose();
   }
 
@@ -737,6 +740,19 @@ class _CheckoutState extends State<Checkout> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       phoneNumber = prefs.getString('phoneNumber') ?? 'No number';
+    });
+  }
+
+  Future<void> _loadAdditionalPhoneNumber() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userPhone = prefs.getString('phoneNumber') ?? '';
+    // Extract just the digits from the phone number (remove +998 prefix if present)
+    final digitsOnly = userPhone.replaceAll(RegExp(r'[^\d]'), '');
+    final phoneDigits = digitsOnly.startsWith('998') ? digitsOnly.substring(3) : digitsOnly;
+    
+    setState(() {
+      _additionalPhoneController.text = phoneDigits;
+      clientCommentPhone = phoneDigits;
     });
   }
 
@@ -794,7 +810,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1804,6 +1820,7 @@ class _CheckoutState extends State<Checkout> {
                         // Phone number input
                         Expanded(
                           child: TextField(
+                            controller: _additionalPhoneController,
                             decoration: InputDecoration(
                               hintText:
                                   AppLocalizations.of(context).numberHintText,
