@@ -19,7 +19,7 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
 
   String _formatDateTime(String isoString) {
     try {
-      final dateTime = DateTime.parse(isoString);
+      final dateTime = DateTime.parse(isoString).toUtc().add(const Duration(hours: 5));
       return DateFormat('MMM d, h:mm a').format(dateTime);
     } catch (e) {
       return 'Unknown time';
@@ -28,7 +28,7 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
 
   String _formatDateOnly(String isoString) {
     try {
-      final dateTime = DateTime.parse(isoString);
+      final dateTime = DateTime.parse(isoString).toUtc().add(const Duration(hours: 5));
       return DateFormat('MMM d').format(dateTime);
     } catch (e) {
       return 'Unknown date';

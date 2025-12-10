@@ -109,7 +109,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
 
   String _formatDateTime(String isoString) {
     try {
-      final dateTime = DateTime.parse(isoString);
+      final dateTime = DateTime.parse(isoString).toUtc().add(const Duration(hours: 5));
       return DateFormat('MMM d, h:mm a').format(dateTime);
     } catch (e) {
       return 'Unknown time';
@@ -118,7 +118,7 @@ class _OrderTrackingCardState extends State<OrderTrackingCard> {
 
   String _formatDateOnly(String isoString) {
     try {
-      final dateTime = DateTime.parse(isoString);
+      final dateTime = DateTime.parse(isoString).toUtc().add(const Duration(hours: 5));
       return DateFormat('MMM d').format(dateTime);
     } catch (e) {
       return 'Unknown date';
