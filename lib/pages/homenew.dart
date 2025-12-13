@@ -22,6 +22,7 @@ import '../models/modifier_models.dart';
 import '../models/product_group.dart';
 import '../widget/banner_widget.dart';
 import '../widget/variation_selector_sheet.dart';
+import '../widget/menu_shimmer.dart';
 
 class Category {
   final int id;
@@ -874,12 +875,7 @@ class _HomeNewState extends State<HomeNew>
                 child: Container(
                   decoration: const BoxDecoration(color: Colors.white),
                   child: allProducts.isEmpty
-                      ? const SizedBox(
-                          height: 450,
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
+                      ? const MenuShimmer()
                       : Column(
                           children: categories.map((category) {
                             // Get MenuService instance
