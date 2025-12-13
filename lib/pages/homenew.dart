@@ -891,6 +891,14 @@ class _HomeNewState extends State<HomeNew>
                             List<ProductGroup> productGroups = menuService
                                 .getProductGroupsForCategory(category.id);
                             
+                            // Debug logging
+                            if (productGroups.isNotEmpty) {
+                              print('🎯 UI: Category "${category.name}" has ${productGroups.length} product groups');
+                              for (var group in productGroups) {
+                                print('  • ${group.groupName} (${group.variations.length} variations)');
+                              }
+                            }
+                            
                             // Combine groups and ungrouped products into a single list
                             // We'll use a list of dynamic items (either Product or ProductGroup)
                             List<dynamic> displayItems = [];
@@ -1168,40 +1176,6 @@ class _HomeNewState extends State<HomeNew>
                                     ),
                                   ),
                                 ),
-                        ),
-                      ),
-                      // Variation badge
-                      Positioned(
-                        top: 4,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.list,
-                                size: 12,
-                                color: Colors.white,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${productGroup.variations.length}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                       // Out of stock overlay

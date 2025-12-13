@@ -118,23 +118,25 @@ class NearestBranchService {
               }
             }
             
-            // Handle productVariationGroups - can be array or null
+            // Handle productVariationGroups - can be Map (object) or List (array)
             var variationGroups = menuData['productVariationGroups'];
-            List<dynamic> productVariationGroupsList = [];
-            if (variationGroups != null && variationGroups is List) {
-              productVariationGroupsList = variationGroups;
-            }
             
             _latestMenuData = {
               'categories': categories,
               'items': allItems,
-              'productVariationGroups': productVariationGroupsList,
+              'productVariationGroups': variationGroups, // Pass as-is (Map or List)
             };
             
             print('📋 NearestBranchService: Menu data extracted:');
             print('  • Categories: ${categories.length}');
             print('  • Items: ${allItems.length}');
-            print('  • Product Variation Groups: ${productVariationGroupsList.length}');
+            int groupCount = 0;
+            if (variationGroups is Map) {
+              groupCount = variationGroups.length;
+            } else if (variationGroups is List) {
+              groupCount = variationGroups.length;
+            }
+            print('  • Product Variation Groups: $groupCount');
           } else {
             print('⚠️ NearestBranchService: No menu data in response');
             _latestMenuData = null;
