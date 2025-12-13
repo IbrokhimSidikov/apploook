@@ -257,7 +257,7 @@ class AppLocalizations {
       'deliveryPrice': 'Yetkazib berish narxi',
       'unknown': 'Noma\'lum',
       'paymentMethod': 'To\'lov usuli',
-      'cash': 'Naxt',
+      'cash': 'Naqd',
       'card': 'Karta',
       'additionalNumber': 'Qo\'shimcha telefon raqami',
       'comments': 'Izohlar',

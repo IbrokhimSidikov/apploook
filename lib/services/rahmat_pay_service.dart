@@ -468,4 +468,149 @@ class RahmatPayService {
       };
     }
   }
+
+  /// Sends Sieves payload to a custom API endpoint for CASH payments
+  /// This is used for Self-Pickup, Carhop, and In-Restaurant orders (selectedIndex 1, 2, 3)
+  /// 
+  /// Parameters:
+  /// - [apiEndpoint]: The custom API endpoint to send the payload to
+  /// - [branchName]: Name of the branch (used to get branch config)
+  /// - [orderTypeId]: Order type ID (7 for self-pickup, 8 for carhop, 1 for in-restaurant)
+  /// - [customerQuantity]: Number of customers
+  /// - [pagerNumber]: Customer phone number
+  /// - [note]: Order note/comment
+  /// - [amount]: Total amount in UZS
+  /// - [cartItems]: List of cart items
+  /// - [additionalHeaders]: Optional additional headers for the API request
+  static Future<Map<String, dynamic>> sendCashOrderToApi({
+    required String apiEndpoint,
+    required String branchName,
+    required int orderTypeId,
+    required int customerQuantity,
+    required String pagerNumber,
+    required String note,
+    required double amount,
+    required List<dynamic> cartItems,
+    Map<String, String>? additionalHeaders,
+  }) async {
+    try {
+      // Get branch configuration
+      final branchConfig = BranchConfigs.getConfig(branchName);
+
+      print('\n======== CASH ORDER: Sending to Custom API ========');
+      print('API Endpoint: $apiEndpoint');
+      print('Branch: $branchName');
+      print('Branch ID: ${branchConfig.branchId}');
+      print('Employee ID: ${branchConfig.employeeId}');
+      print('Order Type ID: $orderTypeId');
+      print('Amount: $amount UZS');
+      print('Pager Number: $pagerNumber');
+      print('Note: $note');
+      print('Cart Items Count: ${cartItems.length}');
+
+      // Build Sieves order items (same structure as in createInvoice)
+      final List<Map<String, dynamic>> sievesOrderItems = cartItems.map((item) {
+        final String? productUuid = item.product.uuid;
+        final String productIdentifier = productUuid ?? item.product.id.toString();
+        
+        return {
+          "product_id": productIdentifier,
+          "total_price": item.totalPrice,
+          "quantity": item.quantity,
+          "actual_price": (item.totalPrice / item.quantity).toString(),
+          "selectedModifiers": item.selectedModifiers
+              .map((modifier) => {
+                    "modifierId": modifier.modifier.id,
+                    "modifierName": modifier.modifier.name,
+                    "modifierPrice": modifier.modifier.price,
+                    "quantity": modifier.quantity,
+                  })
+              .toList(),
+        };
+      }).toList();
+
+      // Prepare Sieves payload
+      final Map<String, dynamic> sievesPayload = {
+        "delivery_employee_id": null,
+        "isSynchronous": "sync",
+        "is_fast": 0,
+        "queue_type": "sync",
+        "day_session_id": null,
+        "employee_id": branchConfig.employeeId,
+        "pos_id": null,
+        "branch_id": branchConfig.branchId,
+        "pos_session_id": null,
+        "order_type_id": orderTypeId,
+        "customer_id": null,
+        "address_id": null,
+        "start_time": "now",
+        "pager_number": pagerNumber,
+        "note": note,
+        "orderItems": sievesOrderItems,
+        "transactions": [
+          {
+            "account_id": 1,
+            "payment_type_id": 2,
+            "amount": amount,
+            "type": "deposit"
+          }
+        ],
+        "value": amount,
+        "customer_quantity": customerQuantity,
+      };
+
+      print('\n======== SIEVES PAYLOAD ========');
+      print(const JsonEncoder.withIndent('  ').convert(sievesPayload));
+      print('======== END SIEVES PAYLOAD ========\n');
+
+      // Prepare headers
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${branchConfig.sievesApiCode}',
+        ...?additionalHeaders,
+      };
+
+      print('Request Headers: $headers');
+
+      // Build URL with query parameters (code and isCarhop)
+      final url = Uri.parse(apiEndpoint).replace(queryParameters: {
+        'code': branchConfig.sievesApiCode,
+        'isCarhop': '1',
+      });
+
+      print('Request URL: $url');
+
+      // Make POST request to custom API
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(sievesPayload),
+      );
+
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        print('Cash order sent successfully to custom API!');
+        print('Response Data: $responseData');
+        print('======== END CASH ORDER: Sending to Custom API ========\n');
+
+        return {
+          'success': true,
+          'data': responseData,
+        };
+      } else {
+        print('Failed to send cash order: ${response.statusCode}');
+        print('Error Response: ${response.body}');
+        print('======== END CASH ORDER: Sending to Custom API ========\n');
+        throw Exception('Failed to send cash order: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      print('Error sending cash order to custom API: $e');
+      print('Stack trace: $stackTrace');
+      print('======== END CASH ORDER: Sending to Custom API ========\n');
+      rethrow;
+    }
+  }
 }

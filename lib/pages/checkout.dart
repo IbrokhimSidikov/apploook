@@ -810,7 +810,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1741,17 +1741,17 @@ class _CheckoutState extends State<Checkout> {
                     ),
                   ),
                   // Only show Payme for carhop (2) orders - Delivery (0) is commented out
-                  // if (_selectedIndex == 2)
-                  //   const DropdownMenuItem<String>(
-                  //     value: 'Payme',
-                  //     child: Row(
-                  //       children: [
-                  //         Icon(Icons.payment, color: Colors.purple),
-                  //         SizedBox(width: 10),
-                  //         Text('Payme'),
-                  //       ],
-                  //     ),
-                  //   ),
+                  if (_selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3)
+                    DropdownMenuItem<String>(
+                      value: 'Cash',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.payment, color: Colors.purple),
+                          const SizedBox(width: 10),
+                          Text(AppLocalizations.of(context).cash),
+                        ],
+                      ),
+                    ),
                   // Payme for delivery orders is disabled
                   // if (_selectedIndex == 0 || _selectedIndex == 2)
                   //   const DropdownMenuItem<String>(
@@ -1996,251 +1996,94 @@ class _CheckoutState extends State<Checkout> {
                         }
                       }
 
-                      // Check if payment type is Payme
-                      if (selectedOption == 'Payme') {
-                        try {
-                          // Handle Payme payment based on order type
-                          if (_selectedIndex == 0) {
-                            // For delivery orders, use the nearest branch
-                            if (_nearestBranch == null) {
-                              throw Exception(
-                                  'Unable to determine nearest branch for delivery. Please try again.');
-                            }
-
-                            // Get branch name from nearest branch calculation
-                            final nearestBranchName =
-                                _nearestBranch!['name'] as String;
-
-                            // Delivery order with Payme payment
-                            await _handlePaymePayment(
-                              name: firstName,
-                              phone: phoneNumber,
-                              address: selectedAddress,
-                              comment: commented,
-                              total: orderPrice,
-                              latitude: cartProvider.showLat(),
-                              longitude: cartProvider.showLong(),
-                              cartProvider: cartProvider,
-                              deliveryFee: deliveryFee,
-                              branchName: nearestBranchName,
-                            );
-                          } else if (_selectedIndex == 2) {
-                            // For carhop orders, branch must be selected by user
-                            if (selectedBranch == null) {
-                              throw Exception(
-                                  'Please select a branch before proceeding with carhop payment');
-                            }
-
-                            // Carhop order with Payme payment
-                            await _handlePaymeCarhopPayment(
-                              name: firstName,
-                              phone: phoneNumber,
-                              branchName: selectedBranch,
-                              comment: commented,
-                              carDetails: carDetails,
-                              total: orderPrice,
-                              latitude: 41.313798749076454, // default latitude
-                              longitude: 69.24407311805851, // default longitude
-                              cartProvider: cartProvider,
-                              orderType: 'carhop',
-                            );
-                          } else if (_selectedIndex == 1 || _selectedIndex == 3) {
-                            // Pickup or In-Restaurant order with Payme payment
-                            // For pickup/in-restaurant, we'll use the same flow as delivery but with branch address
-                            await _handlePaymePayment(
-                              name: firstName,
-                              phone: phoneNumber,
-                              address: "Branch: $selectedBranch",
-                              comment: commented,
-                              total: orderPrice,
-                              latitude: 41.313798749076454, // default latitude
-                              longitude: 69.24407311805851, // default longitude
-                              cartProvider: cartProvider,
-                              deliveryFee: 0, // No delivery fee for pickup
-                              branchName: selectedBranch!,
-                            );
-                          }
-
-                          // Do NOT navigate away - the transaction status check will handle navigation
-                          // after successful payment. The popup must remain visible until
-                          // the transaction is approved and the order is submitted.
-
-                          // Reset processing state but keep the popup visible
-                          setState(() {
-                            _isProcessing = false;
-                          });
-
-                          // Add a test button to check the transaction status directly
-                          // This will show up in debug mode only
-                          // Future.delayed(Duration(seconds: 2), () {
-                          //   if (kDebugMode) {
-                          //     showDialog(
-                          //       context: context,
-                          //       builder: (context) => AlertDialog(
-                          //         title: Text('Test API'),
-                          //         content: Column(
-                          //           mainAxisSize: MainAxisSize.min,
-                          //           children: [
-                          //             Text('Test the Payme API directly'),
-                          //             SizedBox(height: 10),
-                          //             ElevatedButton(
-                          //               onPressed: () async {
-                          //                 // Use the generated order ID from the payment handler
-                          //                 final testOrderId = PaymeService.generateOrderId();
-                          //                 print('🧪 Testing with order ID: $testOrderId');
-                          //                 final result = await PaymeService.testCheckTransaction(testOrderId);
-                          //                 print('🧪 Test API result: $result');
-                          //               },
-                          //               child: Text('Test API with current order ID'),
-                          //             ),
-                          //           ],
-                          //         ),
-                          //         actions: [
-                          //           TextButton(
-                          //             onPressed: () => Navigator.of(context).pop(),
-                          //             child: Text('Close'),
-                          //           ),
-                          //         ],
-                          //       ),
-                          //     );
-                          //   }
-                          // });
-
-                          // Return early but don't navigate away
-                          return;
-                        } catch (e) {
-                          print('Error handling Payme payment: $e');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                  'Error processing Payme payment: ${e.toString()}'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          setState(() {
-                            _isProcessing = false;
-                          });
-                          return;
-                        }
-                      }
 
                       try {
                         // First try to use the new API endpoint
                         bool apiSuccess = false;
 
-                        // Only use carhop flow for _selectedIndex == 2
-                        if (_selectedIndex != 2) {
-                          // Try the new API endpoint first
+                        // Handle different order types
+                        if (_selectedIndex == 0) {
+                          // Delivery order
                           try {
-                            if (_selectedIndex == 0) {
-                              // Delivery order
-                              apiSuccess = await sendOrderToApi(
-                                selectedAddress, // address
-                                firstName, // name
-                                phoneNumber, // phone
-                                selectedOption!, // paymentType
-                                commented, // comment
-                                orderPrice, // total
-                                cartProvider.showLat(), // latitude
-                                cartProvider.showLong(), // longitude
-                                cartProvider,
-                                deliveryFee:
-                                    deliveryFee, // Add delivery fee from nearest branch
-                              );
-                            }
-                            // else if (_selectedIndex == 1) {
-                            //   // Pickup order
-                            //   apiSuccess = await sendOrderToApi(
-                            //     "Branch: $selectedBranch", // address with branch name
-                            //     firstName, // name
-                            //     phoneNumber, // phone
-                            //     selectedOption!, // paymentType
-                            //     commented, // comment
-                            //     orderPrice, // total
-                            //     41.313798749076454, // default latitude
-                            //     69.24407311805851, // default longitude
-                            //     cartProvider,
-                            //     // No delivery fee for pickup orders
-                            //   );
-                            // }
-                          } catch (e) {
-                            print(
-                                'Error with new API, falling back to old method: $e');
-                            apiSuccess = false;
-                          }
-                        }
-
-                        // If the new API failed or it's a carhop/self-pickup order, use the old method
-                        if (!apiSuccess) {
-                          if (_selectedIndex == 0) {
-                            // Send order to Telegram
-                            await sendOrderToTelegram(
+                            apiSuccess = await sendOrderToApi(
                               selectedAddress, // address
-                              "Неизвестно", // branchName
                               firstName, // name
                               phoneNumber, // phone
                               selectedOption!, // paymentType
-                              commented,
-                              orderItems, // orderItems
+                              commented, // comment
                               orderPrice, // total
                               cartProvider.showLat(), // latitude
                               cartProvider.showLong(), // longitude
-                              orderType,
-                              carDetails,
                               cartProvider,
+                              deliveryFee:
+                                  deliveryFee, // Add delivery fee from nearest branch
                             );
-                          } else if (_selectedIndex == 1) {
-                            // Self-pickup order - send to Sieves API
-                            await sendSelfPickupOrderToSieves(
-                              branchName: selectedBranch!,
-                              name: firstName,
-                              phone: phoneNumber,
-                              paymentType: selectedOption!,
-                              comment: commented,
-                              total: orderPrice,
-                              cartProvider: cartProvider,
-                            );
-                          } else if (_selectedIndex == 2) {
-                            await sendOrderToTelegram(
-                              "Неизвестно", // address
-                              selectedBranch!, // branchName
-                              firstName, // name
-                              phoneNumber, // phone
-                              selectedOption!, // paymentType
-                              commented,
-                              orderItems, // orderItems
-                              orderPrice, // total
-                              41.313798749076454, // latitude ,
-                              69.24407311805851, // longitude
-                              "carhop", // Explicitly set to carhop for this order type
-                              carDetails,
-                              cartProvider,
-                            );
-                          } else if (_selectedIndex == 3) {
-                            // In-restaurant order - send to Sieves API (same as self-pickup)
-                            // Calculate total excluding "Пакет" (package)
-                            final packageItem = cartProvider.cartItems.firstWhere(
-                              (item) => item.product.name == 'Пакет',
-                              orElse: () => cartProvider.cartItems.first, // fallback
-                            );
-                            final packagePrice = packageItem.product.name == 'Пакет' 
-                                ? packageItem.totalPrice 
-                                : 0.0;
-                            final adjustedTotal = orderPrice - packagePrice;
-                            
-                            await sendSelfPickupOrderToSieves(
-                              branchName: selectedBranch!,
-                              name: firstName,
-                              phone: phoneNumber,
-                              paymentType: selectedOption!,
-                              comment: commented,
-                              total: adjustedTotal,
-                              cartProvider: cartProvider,
-                              isInRestaurant: true,
-                            );
+                          } catch (e) {
+                            print('Error with delivery order API: $e');
+                            apiSuccess = false;
                           }
+                        } else if (_selectedIndex == 1) {
+                          // Self-pickup order
+                          if (selectedBranch == null) {
+                            throw Exception('Please select a branch for self-pickup');
+                          }
+                          await sendSelfPickupOrderToSieves(
+                            branchName: selectedBranch!,
+                            name: firstName,
+                            phone: phoneNumber,
+                            paymentType: selectedOption!,
+                            comment: commented,
+                            total: orderPrice,
+                            cartProvider: cartProvider,
+                            isInRestaurant: false,
+                          );
+                          apiSuccess = true;
+                        } else if (_selectedIndex == 2) {
+                          // Carhop order
+                          if (selectedBranch == null) {
+                            throw Exception('Please select a branch for carhop order');
+                          }
+                          // For carhop, we need to send to Sieves API with order_type_id 8
+                          await sendSelfPickupOrderToSieves(
+                            branchName: selectedBranch!,
+                            name: firstName,
+                            phone: phoneNumber,
+                            paymentType: selectedOption!,
+                            comment: "$commented\nCar Details: $carDetails",
+                            total: orderPrice,
+                            cartProvider: cartProvider,
+                            isInRestaurant: false,
+                            isCarhop: true, // Mark as carhop order
+                          );
+                          apiSuccess = true;
+                        } else if (_selectedIndex == 3) {
+                          // In-restaurant order
+                          if (selectedBranch == null) {
+                            throw Exception('Please select a branch for in-restaurant order');
+                          }
+                          // Calculate total excluding "Пакет" (package)
+                          final packageItem = cartProvider.cartItems.firstWhere(
+                            (item) => item.product.name == 'Пакет',
+                            orElse: () => cartProvider.cartItems.first,
+                          );
+                          final packagePrice = packageItem.product.name == 'Пакет' 
+                              ? packageItem.totalPrice 
+                              : 0.0;
+                          final adjustedTotal = orderPrice - packagePrice;
+                          
+                          await sendSelfPickupOrderToSieves(
+                            branchName: selectedBranch!,
+                            name: firstName,
+                            phone: phoneNumber,
+                            paymentType: selectedOption!,
+                            comment: commented,
+                            total: adjustedTotal,
+                            cartProvider: cartProvider,
+                            isInRestaurant: true,
+                          );
+                          apiSuccess = true;
                         }
-
+                        
                         // Reset processing state
                         setState(() {
                           _isProcessing = false;
@@ -2545,16 +2388,6 @@ class _CheckoutState extends State<Checkout> {
         print('ORDER TRACKING: Error fetching initial status: $e');
       }
 
-      // Save order details to SharedPreferences for tracking
-      await _saveDeliveryOrderToPrefs(
-          orderId: orderId,
-          address: address ?? 'No address provided',
-          paymentType: paymentType,
-          items: formattedItems,
-          total: total,
-          deliveryFee: deliveryFee,
-          latitude: latitude,
-          longitude: longitude);
 
       // Add order notification
       final notificationProvider =
@@ -2630,84 +2463,6 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
-  // Save delivery order details to SharedPreferences for tracking
-  Future<void> _saveDeliveryOrderToPrefs({
-    required String orderId,
-    required String address,
-    required String paymentType,
-    required List<Map<String, dynamic>> items,
-    required double total,
-    required double deliveryFee,
-    required double latitude,
-    required double longitude,
-  }) async {
-    try {
-      print('Saving delivery order to SharedPreferences: $orderId');
-      final prefs = await SharedPreferences.getInstance();
-
-      // Get existing orders or initialize empty list
-      List<String> savedOrders = prefs.getStringList('delivery_orders') ?? [];
-
-      // Process items to ensure we have the correct total prices including modifiers
-      List<Map<String, dynamic>> processedItems = items.map((item) {
-        // Create a copy of the item to avoid modifying the original
-        Map<String, dynamic> processedItem = Map<String, dynamic>.from(item);
-        
-        // If the item has modifiers, ensure the totalPrice reflects the modified price
-        if (item.containsKey('selectedModifiers') && item['selectedModifiers'] is List) {
-          double basePrice = (item['price'] ?? 0.0).toDouble();
-          int quantity = (item['quantity'] ?? 1).toInt();
-          double modifiersTotal = 0.0;
-          
-          // Calculate total price from modifiers
-          if (item['selectedModifiers'] != null) {
-            for (var modifier in item['selectedModifiers']) {
-              if (modifier is Map && modifier['modifierPrice'] != null) {
-                double modifierPrice = (modifier['modifierPrice'] is int 
-                    ? (modifier['modifierPrice'] as int).toDouble() 
-                    : modifier['modifierPrice']) ?? 0.0;
-                int modifierQty = (modifier['quantity'] ?? 1).toInt();
-                modifiersTotal += modifierPrice * modifierQty;
-              }
-            }
-          }
-          
-          // Update the total price to include modifiers
-          processedItem['totalPrice'] = (basePrice + modifiersTotal) * quantity;
-        }
-        
-        return processedItem;
-      }).toList();
-
-      // Create new order object with processed items
-      Map<String, dynamic> orderDetails = {
-        'id': orderId,
-        'status': 'pending',
-        'timestamp': DateTime.now().toIso8601String(),
-        'address': address,
-        'paymentType': paymentType,
-        'items': processedItems, // Use the processed items with correct prices
-        'total': total,
-        'deliveryFee': deliveryFee,
-        'latitude': latitude,
-        'longitude': longitude,
-      };
-
-      // Add new order to the list
-      savedOrders.add(jsonEncode(orderDetails));
-
-      // Keep only the last 5 orders to prevent memory issues
-      if (savedOrders.length > 5) {
-        savedOrders = savedOrders.sublist(savedOrders.length - 5);
-      }
-
-      // Save updated list
-      await prefs.setStringList('delivery_orders', savedOrders);
-      print('Delivery order saved successfully: $orderId');
-    } catch (e) {
-      print('Error saving delivery order to SharedPreferences: $e');
-    }
-  }
 
   // Send self-pickup order to Sieves API
   Future<void> sendSelfPickupOrderToSieves({
@@ -2719,6 +2474,7 @@ class _CheckoutState extends State<Checkout> {
     required double total,
     required CartProvider cartProvider,
     bool isInRestaurant = false,
+    bool isCarhop = false,
   }) async {
     try {
       if (branchName.isEmpty) {
@@ -2774,7 +2530,7 @@ class _CheckoutState extends State<Checkout> {
         "delivery_employee_id": null,
         "employee_id": branchConfig.employeeId,
         "branch_id": branchConfig.branchId,
-        "order_type_id": 7, // 7 for self-pickup
+        "order_type_id": isCarhop ? 8 : (isInRestaurant ? 1 : 7), // 8 for carhop, 1 for in-restaurant, 7 for self-pickup
         "orderItems": formattedOrderItems,
         "transactions": [
           {
@@ -2787,345 +2543,90 @@ class _CheckoutState extends State<Checkout> {
           }
         ],
         "value": total,
-        "note": isInRestaurant
-            ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
-            : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой"),
+        "note": isCarhop
+            ? comment // Carhop comment already includes car details
+            : (isInRestaurant
+                ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
+                : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой")),
         "day_session_id": null,
-        "pager_number": phone,
+        "pager_number": phone.replaceFirst('+998', ''),
         "pos_id": null,
         "pos_session_id": null,
         "delivery_amount": null
       };
 
-      // Detailed debug logging
-      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-      print('\n===== SELF-PICKUP ORDER REQUEST DETAILS =====');
-      print(
-          'URL: https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}');
-      print('Headers: ${{"Content-Type": "application/json", "Authorization": "Bearer ${branchConfig.sievesApiToken}", "Accept": "application/json"}}');
-      print('Request Body:\n${encoder.convert(requestBody)}');
-      print('Order Items Structure:\n${encoder.convert(formattedOrderItems)}');
-      print('================================\n');
-
-      final response = await http.post(
-        Uri.parse(
-            'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}&isCarhop=1'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode != 200) {
-        print('Response status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        throw Exception('Failed to send self-pickup order');
-      } else {
-        print("Self-pickup order sent successfully! Response: ${response.body}");
-
-        // Parse the response and save order details
-        final responseData = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-
-        // Get existing orders or initialize empty list
-        List<String> savedOrders = prefs.getStringList('selfpickup_orders') ?? [];
-
-        // Create new order object
-        // Filter out "Пакет" for in-restaurant orders in the saved order items
-        final orderItemsToSave = isInRestaurant
-            ? cartProvider.cartItems.where((item) => item.product.name != 'Пакет').toList()
-            : cartProvider.cartItems;
+      // If payment type is CASH, send to custom API endpoint
+      if (paymentType.toLowerCase() == 'cash') {
+        print('\n===== CASH PAYMENT DETECTED - Sending to Custom API =====');
         
-        Map<String, dynamic> orderDetails = {
-          'id': responseData['id'],
-          'paid': responseData['paid'],
-          'timestamp': DateTime.now().toIso8601String(),
-          'branchName': branchName,
-          'orderType': isInRestaurant ? 'In-Restaurant' : 'Self-Pickup',
-          'orderItems': orderItemsToSave
-              .map((item) => {
-                    'name': item.product.name,
-                    'quantity': item.quantity,
-                    'price': item.product.price,
-                    'totalPrice': item.totalPrice, // Include the actual total price with modifiers
-                    'selectedModifiers': item.selectedModifiers
-                        .map((modifier) => {
-                              'modifierId': modifier.modifier.id,
-                              'modifierName': modifier.modifier.name,
-                              'modifierPrice': modifier.modifier.price,
-                              'quantity': modifier.quantity,
-                            })
-                        .toList(),
-                  })
-              .toList(),
-        };
-
-        // Add new order to the list
-        savedOrders.add(jsonEncode(orderDetails));
-
-        // Keep only the last 5 orders to prevent memory issues
-        if (savedOrders.length > 5) {
-          savedOrders = savedOrders.sublist(savedOrders.length - 5);
-        }
-
-        // Save updated list
-        await prefs.setStringList('selfpickup_orders', savedOrders);
-
+        // API endpoint - will be called with ?code={branchConfig.sievesApiCode}&isCarhop=1
+        const String customApiEndpoint = 'https://api.sievesapp.com/v1/order';
+        
+        // Determine order type ID based on order type
+        final int orderTypeId = isCarhop ? 8 : (isInRestaurant ? 1 : 2); // 8 for carhop, 1 for in-restaurant, 7 for self-pickup
+        
+        // Remove +998 prefix from phone number
+        final String cleanPhone = phone.replaceFirst('+998', '');
+        
+        // Send to custom API using RahmatPayService
+        final customApiResult = await RahmatPayService.sendCashOrderToApi(
+          apiEndpoint: customApiEndpoint,
+          branchName: branchName,
+          orderTypeId: orderTypeId,
+          customerQuantity: 1,
+          pagerNumber: cleanPhone,
+          note: isCarhop
+              ? comment // Carhop comment already includes car details
+              : (isInRestaurant
+                  ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
+                  : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой")),
+          amount: total,
+          cartItems: itemsToProcess,
+        );
+        
+        print('Custom API response: ${customApiResult['data']}');
+        print('===== END CASH PAYMENT - Custom API Call =====\n');
+        
+        // Parse the response and handle success
+        final responseData = customApiResult['data'];
+        
+        // Extract order ID from response (handle different possible structures)
+        final orderId = responseData?['id']?.toString() ?? 
+                       responseData?['order_id']?.toString() ?? 
+                       DateTime.now().millisecondsSinceEpoch.toString();
+        
+        print('Order ID for notification: $orderId');
+        
         // Add order notification
         final notificationProvider =
             Provider.of<NotificationProvider>(context, listen: false);
         await notificationProvider.addOrderNotification(
-          title: "New Self-Pickup Order",
-          body: "Your self-pickup order has been placed successfully!",
-          messageId: responseData['id'].toString(),
+          title: isCarhop 
+              ? "New Carhop Order" 
+              : (isInRestaurant ? "New In-Restaurant Order" : "New Self-Pickup Order"),
+          body: isCarhop
+              ? "Your carhop order has been placed successfully!"
+              : (isInRestaurant 
+                  ? "Your in-restaurant order has been placed successfully!"
+                  : "Your self-pickup order has been placed successfully!"),
+          messageId: orderId,
         );
 
         // Update order tracking notification indicator
         final orderTrackingService = OrderTrackingService();
         orderTrackingService.markNewOrderAdded();
 
+        // Clear cart
         cartProvider.clearCart();
+        
+        // Navigate to home page
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/homeNew', (route) => false);
+        }
+        return;
       }
     } catch (e) {
       print('Error sending self-pickup order: $e');
-      rethrow;
-    }
-  }
-
-  // Telegram order sending logic
-  Future<void> sendOrderToTelegram(
-      String? address,
-      String branchName,
-      String name,
-      String phone,
-      String paymentType,
-      String comment,
-      List orderItems,
-      double total,
-      double latitude,
-      double longitude,
-      String orderType,
-      String carDetails,
-      CartProvider cartProvider) async {
-    try {
-      // Handle carhop orders
-      if (orderType.toLowerCase() == 'carhop') {
-        if (selectedBranch == null) {
-          throw Exception('Please select a branch first');
-        }
-
-        // Handle Payme payment for carhop orders
-        if (paymentType.toLowerCase() == 'payme') {
-          await _handlePaymeCarhopPayment(
-            name: name,
-            phone: phone,
-            branchName: selectedBranch,
-            comment: comment,
-            carDetails: carDetails,
-            total: total,
-            latitude: latitude,
-            longitude: longitude,
-            cartProvider: cartProvider,
-            orderType: orderType,
-          );
-          return;
-        }
-
-        final branchConfig = BranchConfigs.getConfig(selectedBranch!);
-        // Use the actual cart items from the cart provider
-        final List<Map<String, dynamic>> formattedOrderItems =
-            cartProvider.cartItems.map((item) {
-          // Use UUID for product_id as required by the API
-          final String? productUuid = item.product.uuid;
-          if (productUuid == null || productUuid.isEmpty) {
-            print(
-                'WARNING: Missing UUID for product ${item.product.name} (ID: ${item.product.id})');
-          }
-          final String productIdentifier =
-              productUuid ?? item.product.id.toString();
-          print(
-              'Checkout: Using product identifier: $productIdentifier for ${item.product.name}');
-
-          return {
-            "actual_price": item.totalPrice / item.quantity,
-            "product_id": productIdentifier,
-            "quantity": item.quantity,
-            "note": item.selectedModifiers.isNotEmpty
-                ? "Modifiers: ${item.selectedModifiers.map((m) => m.modifier.name).join(", ")}"
-                : null,
-            "selectedModifiers": item.selectedModifiers
-                .map((modifier) => {
-                      "modifierId": modifier.modifier.id,
-                      "modifierName": modifier.modifier.name,
-                      "modifierPrice": modifier.modifier.price,
-                      "quantity": modifier.quantity,
-                    })
-                .toList(),
-          };
-        }).toList();
-
-        // Prepare the request body for Sieves API
-        final Map<String, dynamic> requestBody = {
-          "customer_quantity": 1,
-          "customer_id": null,
-          "is_fast": 0,
-          "queue_type": "sync",
-          "start_time": "now",
-          "isSynchronous": "sync",
-          "delivery_employee_id": null,
-          "employee_id": branchConfig.employeeId,
-          "branch_id": branchConfig.branchId,
-          "order_type_id": 8, // for carhop - zakas s parkovki
-          "orderItems": formattedOrderItems,
-          "transactions": [
-            {
-              "account_id": 1,
-              "amount": total,
-              "payment_type_id": paymentType.toLowerCase() == 'card'
-                  ? 1
-                  : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
-              "type": "deposit"
-            }
-          ],
-          "value": total,
-          "note": "$comment\nCar Details: $carDetails",
-          "day_session_id": null,
-          "pager_number": phone,
-          "pos_id": null,
-          "pos_session_id": null,
-          "delivery_amount": null
-        };
-
-        // Detailed debug logging
-        const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-        print('\n===== CARHOP ORDER REQUEST DETAILS =====');
-        print(
-            'URL: https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}');
-        print('Headers: ${{
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ${branchConfig.sievesApiToken}",
-          "Accept": "application/json"
-        }}');
-        print('Request Body:\n${encoder.convert(requestBody)}');
-        print(
-            'Order Items Structure:\n${encoder.convert(formattedOrderItems)}');
-        print('================================\n');
-
-        final response = await http.post(
-          Uri.parse(
-              'https://app.sievesapp.com/v1/order?code=${branchConfig.sievesApiCode}&isCarhop=1'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ${branchConfig.sievesApiToken}',
-            'Accept': 'application/json',
-          },
-          body: jsonEncode(requestBody),
-        );
-
-        if (response.statusCode != 200) {
-          print('Response status code: ${response.statusCode}');
-          print('Response body: ${response.body}');
-          throw Exception('Failed to send carhop order');
-        } else {
-          print("Carhop order sent successfully! Response: ${response.body}");
-
-          // Parse the response and save order details
-          final responseData = jsonDecode(response.body);
-          final prefs = await SharedPreferences.getInstance();
-
-          // Get existing orders or initialize empty list
-          List<String> savedOrders = prefs.getStringList('carhop_orders') ?? [];
-
-          // Create new order object
-          Map<String, dynamic> orderDetails = {
-            'id': responseData['id'],
-            'paid': responseData['paid'],
-            'timestamp': DateTime.now().toIso8601String(),
-            'orderItems': cartProvider.cartItems
-                .map((item) => {
-                      'name': item.product.name,
-                      'quantity': item.quantity,
-                      'price': item.product.price,
-                      'totalPrice': item.totalPrice, // Include the actual total price with modifiers
-                      'selectedModifiers': item.selectedModifiers
-                          .map((modifier) => {
-                                'modifierId': modifier.modifier.id,
-                                'modifierName': modifier.modifier.name,
-                                'modifierPrice': modifier.modifier.price,
-                                'quantity': modifier.quantity,
-                              })
-                          .toList(),
-                      'carDetails': carDetails
-                    })
-                .toList(),
-          };
-
-          savedOrders.add(jsonEncode(orderDetails));
-
-          if (savedOrders.length > 5) {
-            savedOrders = savedOrders.sublist(savedOrders.length - 5);
-          }
-
-          await prefs.setStringList('carhop_orders', savedOrders);
-
-          final notificationProvider =
-              Provider.of<NotificationProvider>(context, listen: false);
-          await notificationProvider.addOrderNotification(
-            title: "New Car-hop Order",
-            body: "Your car-hop order has been placed successfully!",
-            messageId: responseData['id'].toString(),
-          );
-
-          // Update order tracking notification indicator
-          final orderTrackingService = OrderTrackingService();
-          orderTrackingService.markNewOrderAdded();
-
-          cartProvider.clearCart();
-          return;
-        }
-      }
-      // Original telegram order sending logic for non-carhop orders
-      final orderDetails = "Адрес: $address\n" +
-          "Филиал: $branchName\n" +
-          "Имя: $name\n" +
-          "Тел: $phone\n" +
-          "Тип платежа: $paymentType\n\n" +
-          "Тип zakaza: $orderType\n\n" +
-          "Заметка: ${comment.isEmpty ? 'Нет заметки' : comment}\n\n" +
-          "🛒 <b>Корзина:</b>\n${orderItems.join("\n")}\n\n" +
-          "<b>Итого:</b> ${NumberFormat('#,##0').format(total).toString()} сум\n\n" +
-          "-----------------------\n" +
-          "Mashina ma'lumotlari:\n ${carDetails.isEmpty ? 'Ma\'lumot yo\'q' : carDetails}\n\n" +
-          "-----------------------\n" +
-          "Источник: Mobile App\n";
-
-      final encodedOrderDetails = Uri.encodeQueryComponent(orderDetails);
-
-      String chatId = await getChatId();
-      print("Using chatId: $chatId");
-
-      final telegramDebUrl =
-          "https://api.sievesapp.com/v1/public/make-post?chat_id=$chatId&text=$encodedOrderDetails&latitude=$latitude&longitude=$longitude";
-
-      final response = await http.get(
-        Uri.parse(telegramDebUrl),
-        headers: {
-          "Content-Type": "application/json; charset=UTF-8",
-        },
-      );
-
-      if (response.statusCode != 200) {
-        print('Response status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        throw Exception('Failed to send order');
-      } else {
-        print("Order sent successfully! Response: ${response.body}");
-        cartProvider.clearCart();
-      }
-    } catch (e) {
-      print('Error sending order: $e');
       rethrow;
     }
   }
