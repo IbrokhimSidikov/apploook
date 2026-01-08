@@ -407,7 +407,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     }
 
     return Scaffold(
-      backgroundColor: Colors.black87,
+      backgroundColor: Color(0xFFda2325),
       floatingActionButton: _showContent
           ? const Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -479,17 +479,17 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           ),
                         ),
                         child: Image.asset(
-                          'images/look-gradient.png',
+                          'images/look-gradient-1.png',
                           fit: BoxFit.fitWidth,
                           width: double.infinity,
                         ),
                       ),
                       Column(
                         children: [
-                          const Spacer(flex: 70),
+                          const Spacer(flex: 170),
                           Center(
                             child: SvgPicture.asset(
-                              'images/smile-loook.svg',
+                              'images/1.svg',
                               width: 150,
                               height: 120,
                             ),
@@ -607,7 +607,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         'English',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          color: Colors.black,
+                                          color: Color(0xFFda2325),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -653,7 +653,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         'Uzbek',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
-                                          color: Colors.black,
+                                          color: Color(0xFFda2325),
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -847,7 +847,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                             .continueButton,
                                         textAlign: TextAlign.center,
                                         style: const TextStyle(
-                                          color: Colors.black,
+                                          color: Color(0xFFda2325),
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
@@ -862,7 +862,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           const Text(
                             'PRIVACY POLICY',
                             style: TextStyle(
-                              color: Color.fromRGBO(95, 94, 94, 1),
+                              color: Color.fromRGBO(252, 247, 247, 1.0),
                               fontFamily: 'Poppins',
                             ),
                           ),
