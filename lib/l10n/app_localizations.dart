@@ -184,6 +184,14 @@ class AppLocalizations {
       'returnToApp':'Return to app after payment',
       'checkingStatus':'Checking status...',
       'cancelButton':'Cancel',
+      // Location permission
+      'locationPermissionTitle': 'Location Required',
+      'locationPermissionMessage': 'Location access is required to use this app. We need your location to show you the nearest branch and provide accurate delivery services.',
+      'allowLocation': 'Enable Location',
+      'notNow': 'Not Now',
+      'locationSettingsTitle': 'Location Permission Required',
+      'locationSettingsMessage': 'This app requires location access to function. Please enable location permission in your device settings to continue.',
+      'openSettings': 'Open Settings',
     },
     'uz': {
       // Onboard Page
@@ -360,7 +368,15 @@ class AppLocalizations {
       'completeBrowserTitle': 'Toʻlovni brauzerda yakunlang',
       'returnToApp': 'Toʻlovdan soʻng ilovaga qayting',
       'checkingStatus': 'Holat tekshirilmoqda...',
-      'cancelButton': 'Bekor qilish'
+      'cancelButton': 'Bekor qilish',
+      // Location permission
+      'locationPermissionTitle': 'Joylashuv talab qilinadi',
+      'locationPermissionMessage': 'Ushbu ilovadan foydalanish uchun joylashuv ruxsati talab qilinadi. Eng yaqin filialni ko\'rsatish va aniq yetkazib berish xizmatlari uchun sizning joylashuvingiz kerak.',
+      'allowLocation': 'Joylashuvni yoqish',
+      'notNow': 'Hozir emas',
+      'locationSettingsTitle': 'Joylashuv ruxsati talab qilinadi',
+      'locationSettingsMessage': 'Bu ilova ishlashi uchun joylashuv ruxsati kerak. Davom etish uchun qurilma sozlamalarida joylashuv ruxsatini yoqing.',
+      'openSettings': 'Sozlamalarni ochish'
     },
     'ru': {
       // Onboard Page
@@ -527,7 +543,15 @@ class AppLocalizations {
       'completeBrowserTitle': 'Завершите оплату в браузере',
       'returnToApp': 'Вернитесь в приложение после оплаты',
       'checkingStatus': 'Проверка статуса...',
-      'cancelButton': 'Отмена'
+      'cancelButton': 'Отмена',
+      // Location permission
+      'locationPermissionTitle': 'Требуется геолокация',
+      'locationPermissionMessage': 'Для использования этого приложения требуется доступ к геолокации. Нам нужна ваша геолокация, чтобы показать ближайший филиал и обеспечить точную доставку.',
+      'allowLocation': 'Включить геолокацию',
+      'notNow': 'Не сейчас',
+      'locationSettingsTitle': 'Требуется разрешение на геолокацию',
+      'locationSettingsMessage': 'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
+      'openSettings': 'Открыть настройки'
     },
   };
 
@@ -845,5 +869,27 @@ class AppLocalizations {
 
   String get cancelButton =>
       _localizedValues[locale.languageCode]!['cancelButton']!;
+
+  // Location permission getters
+  String get locationPermissionTitle =>
+      _localizedValues[locale.languageCode]!['locationPermissionTitle']!;
+
+  String get locationPermissionMessage =>
+      _localizedValues[locale.languageCode]!['locationPermissionMessage']!;
+
+  String get allowLocation =>
+      _localizedValues[locale.languageCode]!['allowLocation']!;
+
+  String get notNow =>
+      _localizedValues[locale.languageCode]!['notNow']!;
+
+  String get locationSettingsTitle =>
+      _localizedValues[locale.languageCode]!['locationSettingsTitle']!;
+
+  String get locationSettingsMessage =>
+      _localizedValues[locale.languageCode]!['locationSettingsMessage']!;
+
+  String get openSettings =>
+      _localizedValues[locale.languageCode]!['openSettings']!;
 
 }

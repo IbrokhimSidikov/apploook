@@ -11,7 +11,10 @@ import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
+import 'package:apploook/services/app_location_service.dart';
 import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/widgets/location_permission_dialog.dart';
+import 'package:geolocator/geolocator.dart';
 
 enum HapticFeedbackType { light, medium, heavy, selection }
 
@@ -60,7 +63,9 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   final MenuService _menuService = MenuService();
   final NearestBranchService _nearestBranchService = NearestBranchService();
   final VersionCheckerService _versionChecker = VersionCheckerService();
+  final LocationService _locationService = LocationService();
   String? _nearestBranchDeliverId;
+  bool _locationPermissionRequested = false;
 
   @override
   void initState() {
@@ -228,9 +233,89 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       _nearestBranchDeliverId =
           await _nearestBranchService.getSavedNearestBranchDeliverId();
       print('Nearest branch deliver ID: $_nearestBranchDeliverId');
+    } on LocationPermissionDeniedException {
+      print('Location permission denied during initial check');
     } catch (e) {
       print('Error finding nearest branch: $e');
     }
+  }
+
+  // Request location permission with dialog
+  Future<bool> _requestLocationPermission() async {
+    if (_locationPermissionRequested) {
+      return await _locationService.checkPermission();
+    }
+
+    _locationPermissionRequested = true;
+
+    // Check if permission is already granted
+    bool hasPermission = await _locationService.checkPermission();
+    if (hasPermission) {
+      return true;
+    }
+
+    // Check if permission is permanently denied
+    bool isPermanentlyDenied = await _locationService.isPermissionPermanentlyDenied();
+    if (isPermanentlyDenied) {
+      return await _showSettingsDialog();
+    }
+
+    // Show permission dialog
+    return await _showPermissionDialog();
+  }
+
+  Future<bool> _showPermissionDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => LocationPermissionDialog(
+        onPermissionGranted: () async {
+          Navigator.of(context).pop(true);
+        },
+        onPermissionDenied: () {
+          Navigator.of(context).pop(false);
+        },
+      ),
+    );
+
+    if (result == true) {
+      final granted = await _locationService.requestPermission();
+      if (granted) {
+        await _findNearestBranch();
+        _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+      }
+      return granted;
+    }
+
+    return false;
+  }
+
+  Future<bool> _showSettingsDialog() async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => LocationSettingsDialog(
+        onOpenSettings: () async {
+          Navigator.of(context).pop(true);
+        },
+        onCancel: () {
+          Navigator.of(context).pop(false);
+        },
+      ),
+    );
+
+    if (result == true) {
+      await Geolocator.openAppSettings();
+      await Future.delayed(const Duration(seconds: 1));
+      final granted = await _locationService.checkPermission();
+      if (granted) {
+        await _findNearestBranch();
+        _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+      }
+      return granted;
+    }
+
+    return false;
   }
 
   Future<void> _loadLanguagePreference() async {
@@ -359,6 +444,16 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
           duration: Duration(seconds: 2),
         ),
       );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Request location permission - mandatory for app usage
+    final hasLocationPermission = await _requestLocationPermission();
+    if (!hasLocationPermission) {
+      print('Location permission not granted, blocking app usage');
       setState(() {
         _isLoading = false;
       });

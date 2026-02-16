@@ -25,135 +25,135 @@ class NearestBranchService {
   Map<String, dynamic>? getLatestMenuData() => _latestMenuData;
   
   // Find the nearest branch based on user's location using backend API
-  Future<String> findNearestBranch() async {
-    try {
-      print('🔍 NearestBranchService: Starting nearest branch detection');
+  // Throws LocationPermissionDeniedException if permission is denied
+  Future<String> findNearestBranch({bool skipPermissionCheck = false}) async {
+    print('🔍 NearestBranchService: Starting nearest branch detection');
+    
+    // Skip permission check if explicitly requested (for background updates)
+    if (!skipPermissionCheck) {
       // Check if we have location permission
       bool hasPermission = await _locationService.checkPermission();
       if (!hasPermission) {
-        print('📱 NearestBranchService: No location permission, requesting...');
-        hasPermission = await _locationService.requestPermission();
-        if (!hasPermission) {
-          print('❌ NearestBranchService: Location permission denied, defaulting to Yunusobod');
-          // Default to a branch if permission is denied
-          return _saveAndReturnBranch('Yunusobod');
-        }
+        print('❌ NearestBranchService: Location permission denied');
+        throw LocationPermissionDeniedException();
       }
-      
-      // Get current location
-      print('📍 NearestBranchService: Getting current location...');
-      AppLatLong currentLocation = await _locationService.getCurrentLocation();
-      print('📍 NearestBranchService: Current location - Lat: ${currentLocation.lat}, Long: ${currentLocation.long}');
-      
-      // Call backend API to get nearest branch and menu data
-      String nearestBranch = await _fetchNearestBranchFromBackend(currentLocation.lat, currentLocation.long);
-      print('🏪 NearestBranchService: Nearest branch detected: $nearestBranch');
-      
-      // Save the nearest branch name for future use
-      return _saveAndReturnBranch(nearestBranch);
-    } catch (e) {
-      print('❌ NearestBranchService: Error finding nearest branch: $e');
-      // Default to a branch if there's an error
-      return _saveAndReturnBranch('Yunusobod');
+    }
+    
+    // Get current location
+    print('📍 NearestBranchService: Getting current location...');
+    AppLatLong currentLocation = await _locationService.getCurrentLocation();
+    print('📍 NearestBranchService: Current location - Lat: ${currentLocation.lat}, Long: ${currentLocation.long}');
+    
+    // Call backend API to get nearest branch and menu data
+    String nearestBranch = await _fetchNearestBranchFromBackend(currentLocation.lat, currentLocation.long);
+    print('🏪 NearestBranchService: Nearest branch detected: $nearestBranch');
+    
+    // Save the nearest branch name for future use
+    return _saveAndReturnBranch(nearestBranch);
+  }
+  
+  // Find nearest branch with permission - returns null if permission denied
+  Future<String?> findNearestBranchWithPermission() async {
+    try {
+      return await findNearestBranch();
+    } on LocationPermissionDeniedException {
+      return null;
     }
   }
   
   // Fetch nearest branch from backend API
   Future<String> _fetchNearestBranchFromBackend(double userLat, double userLong) async {
-    try {
-      print('🌐 NearestBranchService: Calling backend API...');
-      final url = Uri.parse('$_backendApiUrl/branch/menu?lat=$userLat&long=$userLong');
-      print('🌐 NearestBranchService: API URL: $url');
+    print('🌐 NearestBranchService: Calling backend API...');
+    final url = Uri.parse('$_backendApiUrl/branch/menu?lat=$userLat&long=$userLong');
+    print('🌐 NearestBranchService: API URL: $url');
+    
+    final response = await http.get(url).timeout(
+      const Duration(seconds: 10),
+      onTimeout: () {
+        throw Exception('Backend API request timed out');
+      },
+    );
+    
+    print('🌐 NearestBranchService: API Response Status: ${response.statusCode}');
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      print('🌐 NearestBranchService: API Response Status: Success');
       
-      final response = await http.get(url).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          throw Exception('Backend API request timed out');
-        },
-      );
+      // Extract branch name and menu data from nested response structure
+      // Response format: {success: true, data: {branch: {...}, distance: 0.19, categories: [], items: [], productVariationGroups: []}}
+      String? branchName;
       
-      print('🌐 NearestBranchService: API Response Status: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        print('🌐 NearestBranchService: API Response Status: Success');
+      if (responseData['success'] == true && responseData['data'] != null) {
+        final data = responseData['data'];
         
-        // Extract branch name and menu data from nested response structure
-        // Response format: {success: true, data: {branch: {...}, distance: 0.19, categories: [], items: [], productVariationGroups: []}}
-        String branchName = 'Yunusobod'; // Default fallback
-        
-        if (responseData['success'] == true && responseData['data'] != null) {
-          final data = responseData['data'];
+        // Extract branch information
+        if (data['branch'] != null) {
+          final branch = data['branch'];
+          final apiName = branch['name'] as String?;
+          final distance = data['distance'];
+          final distanceUnit = data['distanceUnit'];
           
-          // Extract branch information
-          if (data['branch'] != null) {
-            final branch = data['branch'];
-            final apiName = branch['name'] as String?;
-            final distance = data['distance'];
-            final distanceUnit = data['distanceUnit'];
-            
-            print('🏪 NearestBranchService: Branch details from API:');
-            print('  • Branch Name: $apiName');
-            print('  • Distance: $distance $distanceUnit');
-            
-            // Use branch name directly from API (no mapping needed)
-            branchName = apiName ?? 'Yunusobod';
-          }
+          print('🏪 NearestBranchService: Branch details from API:');
+          print('  • Branch Name: $apiName');
+          print('  • Distance: $distance $distanceUnit');
           
-          // Extract menu data (nested inside "menu" object)
-          if (data['menu'] != null) {
-            final menuData = data['menu'];
-            
-            // Extract categories - items are nested inside categories
-            List<dynamic> categories = menuData['categories'] ?? [];
-            List<dynamic> allItems = [];
-            
-            // Extract items from each category
-            for (var category in categories) {
-              if (category is Map && category['items'] != null) {
-                var items = category['items'];
-                if (items is List) {
-                  allItems.addAll(items);
-                }
-              }
-            }
-            
-            // Handle productVariationGroups - can be Map (object) or List (array)
-            var variationGroups = menuData['productVariationGroups'];
-            
-            _latestMenuData = {
-              'categories': categories,
-              'items': allItems,
-              'productVariationGroups': variationGroups, // Pass as-is (Map or List)
-            };
-            
-            print('📋 NearestBranchService: Menu data extracted:');
-            print('  • Categories: ${categories.length}');
-            print('  • Items: ${allItems.length}');
-            int groupCount = 0;
-            if (variationGroups is Map) {
-              groupCount = variationGroups.length;
-            } else if (variationGroups is List) {
-              groupCount = variationGroups.length;
-            }
-            print('  • Product Variation Groups: $groupCount');
-          } else {
-            print('⚠️ NearestBranchService: No menu data in response');
-            _latestMenuData = null;
-          }
+          branchName = apiName;
         }
         
-        print('✅ NearestBranchService: Backend returned branch: $branchName');
-        return branchName;
-      } else {
-        print('❌ NearestBranchService: Backend API error - Status: ${response.statusCode}');
-        print('❌ NearestBranchService: Response body: ${response.body}');
-        throw Exception('Backend API returned status ${response.statusCode}');
+        // Extract menu data (nested inside "menu" object)
+        if (data['menu'] != null) {
+          final menuData = data['menu'];
+          
+          // Extract categories - items are nested inside categories
+          List<dynamic> categories = menuData['categories'] ?? [];
+          List<dynamic> allItems = [];
+          
+          // Extract items from each category
+          for (var category in categories) {
+            if (category is Map && category['items'] != null) {
+              var items = category['items'];
+              if (items is List) {
+                allItems.addAll(items);
+              }
+            }
+          }
+          
+          // Handle productVariationGroups - can be Map (object) or List (array)
+          var variationGroups = menuData['productVariationGroups'];
+          
+          _latestMenuData = {
+            'categories': categories,
+            'items': allItems,
+            'productVariationGroups': variationGroups, // Pass as-is (Map or List)
+          };
+          
+          print('📋 NearestBranchService: Menu data extracted:');
+          print('  • Categories: ${categories.length}');
+          print('  • Items: ${allItems.length}');
+          int groupCount = 0;
+          if (variationGroups is Map) {
+            groupCount = variationGroups.length;
+          } else if (variationGroups is List) {
+            groupCount = variationGroups.length;
+          }
+          print('  • Product Variation Groups: $groupCount');
+        } else {
+          print('⚠️ NearestBranchService: No menu data in response');
+          _latestMenuData = null;
+        }
       }
-    } catch (e) {
-      print('❌ NearestBranchService: Error calling backend API: $e');
-      // Fallback to default branch
-      return 'Yunusobod';
+      
+      if (branchName == null || branchName.isEmpty) {
+        throw Exception('No branch found in API response');
+      }
+      
+      print('✅ NearestBranchService: Backend returned branch: $branchName');
+      return branchName;
+    } else {
+      print('❌ NearestBranchService: Backend API error - Status: ${response.statusCode}');
+      print('❌ NearestBranchService: Response body: ${response.body}');
+      throw Exception('Backend API returned status ${response.statusCode}');
     }
   }
   
@@ -191,4 +191,14 @@ class NearestBranchService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString(_nearestBranchDeliverIdKey);
   }
+}
+
+// Exception thrown when location permission is denied
+class LocationPermissionDeniedException implements Exception {
+  final String message;
+  
+  LocationPermissionDeniedException([this.message = 'Location permission denied']);
+  
+  @override
+  String toString() => message;
 }

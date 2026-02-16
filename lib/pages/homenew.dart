@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
@@ -16,6 +17,7 @@ import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
+import 'package:apploook/services/location_permission_guard.dart';
 
 import 'dart:convert';
 import '../models/modifier_models.dart';
@@ -236,6 +238,10 @@ class _HomeNewState extends State<HomeNew>
 
   Future<void> _initializeAndLoadData() async {
     try {
+      // Ensure location permission is granted (mandatory for app usage)
+      final permissionGuard = LocationPermissionGuard();
+      await permissionGuard.requireLocationPermission(context);
+      
       // Get banners (non-blocking)
       _getBanners();
 
@@ -275,7 +281,8 @@ class _HomeNewState extends State<HomeNew>
       print('HomeNew: Checking for nearest branch on app launch');
       
       final nearestBranchService = NearestBranchService();
-      await nearestBranchService.findNearestBranch();
+      // Skip permission check since user already granted it during onboarding
+      await nearestBranchService.findNearestBranch(skipPermissionCheck: true);
       
       final nearestBranchDeliverId = await nearestBranchService.getSavedNearestBranchDeliverId();
       
@@ -752,9 +759,18 @@ class _HomeNewState extends State<HomeNew>
                       const SizedBox(height: 10),
                       // Carousel Slider Banner
                       _isLoadingBanners
-                          ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
+                          ? Shimmer.fromColors(
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: Container(
+                          height: 160,
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      )
                           // : CarouselSlider(
                           //     options: CarouselOptions(
                           //       height: 160.0,

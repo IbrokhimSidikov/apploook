@@ -7,10 +7,13 @@ abstract class AppLocation {
   Future<bool> requestPermission();
 
   Future<bool> checkPermission();
+  
+  Future<bool> isPermissionPermanentlyDenied();
 }
 
 class LocationService implements AppLocation {
   final defLocation = const TashkentLocation();
+  
   @override
   Future<AppLatLong> getCurrentLocation() async {
     return Geolocator.getCurrentPosition().then((value) {
@@ -35,6 +38,13 @@ class LocationService implements AppLocation {
         .then((value) =>
             value == LocationPermission.always ||
             value == LocationPermission.whileInUse)
+        .catchError((_) => false);
+  }
+  
+  @override
+  Future<bool> isPermissionPermanentlyDenied() {
+    return Geolocator.checkPermission()
+        .then((value) => value == LocationPermission.deniedForever)
         .catchError((_) => false);
   }
 }
