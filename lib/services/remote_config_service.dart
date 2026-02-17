@@ -10,11 +10,19 @@ class RemoteConfigService {
   static const int _defaultCutoffHour = 23;
   static const int _defaultCutoffMinute = 45;
   static const String _defaultMinRequiredVersion = '1.0.0';
+  static const int _defaultOpeningHour = 9;
+  static const int _defaultOpeningMinute = 30;
+  static const int _defaultClosingHour = 23;
+  static const int _defaultClosingMinute = 30;
 
   // Remote config keys
   static const String _keyCutoffHour = 'order_cutoff_hour';
   static const String _keyCutoffMinute = 'order_cutoff_minute';
   static const String _keyMinRequiredVersion = 'min_required_version';
+  static const String _keyOpeningHour = 'restaurant_opening_hour';
+  static const String _keyOpeningMinute = 'restaurant_opening_minute';
+  static const String _keyClosingHour = 'restaurant_closing_hour';
+  static const String _keyClosingMinute = 'restaurant_closing_minute';
 
   factory RemoteConfigService() {
     return _instance;
@@ -34,6 +42,10 @@ class RemoteConfigService {
         _keyCutoffHour: _defaultCutoffHour,
         _keyCutoffMinute: _defaultCutoffMinute,
         _keyMinRequiredVersion: _defaultMinRequiredVersion,
+        _keyOpeningHour: _defaultOpeningHour,
+        _keyOpeningMinute: _defaultOpeningMinute,
+        _keyClosingHour: _defaultClosingHour,
+        _keyClosingMinute: _defaultClosingMinute,
       });
 
       // Fetch and activate the latest values
@@ -43,6 +55,8 @@ class RemoteConfigService {
         print('Remote Config initialized. Values updated: $updated');
         print('Current cutoff hour: ${orderCutoffHour}');
         print('Current cutoff minute: ${orderCutoffMinute}');
+        print('Opening time: ${openingHour}:${openingMinute}');
+        print('Closing time: ${closingHour}:${closingMinute}');
         print('Minimum required version: ${minimumRequiredVersion}');
       }
     } catch (e) {
@@ -90,6 +104,8 @@ class RemoteConfigService {
         print('Remote Config force updated. Values updated: $updated');
         print('New cutoff hour: ${orderCutoffHour}');
         print('New cutoff minute: ${orderCutoffMinute}');
+        print('New opening time: ${openingHour}:${openingMinute}');
+        print('New closing time: ${closingHour}:${closingMinute}');
         print('New minimum required version: ${minimumRequiredVersion}');
       }
       
@@ -99,6 +115,54 @@ class RemoteConfigService {
         print('Error force updating Remote Config: $e');
       }
       return false;
+    }
+  }
+
+  /// Get the restaurant opening hour (24-hour format)
+  int get openingHour {
+    try {
+      return _remoteConfig.getInt(_keyOpeningHour);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting opening hour: $e');
+      }
+      return _defaultOpeningHour;
+    }
+  }
+
+  /// Get the restaurant opening minute
+  int get openingMinute {
+    try {
+      return _remoteConfig.getInt(_keyOpeningMinute);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting opening minute: $e');
+      }
+      return _defaultOpeningMinute;
+    }
+  }
+
+  /// Get the restaurant closing hour (24-hour format)
+  int get closingHour {
+    try {
+      return _remoteConfig.getInt(_keyClosingHour);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting closing hour: $e');
+      }
+      return _defaultClosingHour;
+    }
+  }
+
+  /// Get the restaurant closing minute
+  int get closingMinute {
+    try {
+      return _remoteConfig.getInt(_keyClosingMinute);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting closing minute: $e');
+      }
+      return _defaultClosingMinute;
     }
   }
 

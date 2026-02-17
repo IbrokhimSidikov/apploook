@@ -166,6 +166,7 @@ class AppLocalizations {
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
       'orderHoursValidation': 'Orders not accepted after 23:30 PM',
+      'orderWillBeTaken':'Orders will be taken from ',
       // Order card
       'orderCardTitle': 'Order from',
       'orderSummaryTitle': 'Order Summary',
@@ -351,6 +352,7 @@ class AppLocalizations {
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
       'orderHoursValidation': '23:30 dan keyin buyurtmalar qabul qilinmaydi',
+      'orderWillBeTaken': 'Buyurtmalar qabul qilinadi ',
       // Order card
       'orderCardTitle': 'Buyurtma sanasi',
       'orderSummaryTitle': 'Buyurtma tafsilotlari',
@@ -551,7 +553,8 @@ class AppLocalizations {
       'notNow': 'Не сейчас',
       'locationSettingsTitle': 'Требуется разрешение на геолокацию',
       'locationSettingsMessage': 'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
-      'openSettings': 'Открыть настройки'
+      'openSettings': 'Открыть настройки',
+      'orderWillBeTaken': 'Заказы принимаются с ',
     },
   };
 
@@ -889,7 +892,8 @@ class AppLocalizations {
   String get locationSettingsMessage =>
       _localizedValues[locale.languageCode]!['locationSettingsMessage']!;
 
-  String get openSettings =>
-      _localizedValues[locale.languageCode]!['openSettings']!;
+  String get openSettings => _localizedValues[locale.languageCode]!['openSettings']!;
+
+  String get orderWillBeTaken => _localizedValues[locale.languageCode]!['orderWillBeTaken']!;
 
 }

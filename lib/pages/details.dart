@@ -140,9 +140,10 @@ class _DetailsState extends State<Details> {
   }
 
   // Check if current time is within allowed ordering hours
-  // Restaurant is CLOSED from 23:30 to 09:30 (overnight)
-  // Restaurant is OPEN from 09:30 to 23:30
+  // Fetches opening and closing times dynamically from Firebase Remote Config
+  // Note: DateTime.now() returns the LOCAL time on the user's device, NOT UTC
   bool _isOrderingTimeAllowed() {
+    final remoteConfig = RemoteConfigService();
     final now = DateTime.now();
     final currentHour = now.hour;
     final currentMinute = now.minute;
@@ -150,18 +151,24 @@ class _DetailsState extends State<Details> {
     // Convert current time to minutes since midnight for easier comparison
     final currentTimeInMinutes = currentHour * 60 + currentMinute;
     
-    // Define closing and opening times in minutes since midnight
-    const closingTime = 23 * 60 + 30; // 23:30 = 1410 minutes
-    const openingTime = 9 * 60 + 30;  // 09:30 = 570 minutes
+    // Get opening and closing times from Firebase Remote Config
+    final openingHour = remoteConfig.openingHour;
+    final openingMinute = remoteConfig.openingMinute;
+    final closingHour = remoteConfig.closingHour;
+    final closingMinute = remoteConfig.closingMinute;
+    
+    // Convert to minutes since midnight
+    final openingTime = openingHour * 60 + openingMinute;
+    final closingTime = closingHour * 60 + closingMinute;
     
     // Restaurant is CLOSED if:
-    // 1. Current time is >= 23:30 (from 23:30 to 23:59)
-    // 2. Current time is < 09:30 (from 00:00 to 09:29)
+    // 1. Current time is >= closing time (e.g., from 23:30 to 23:59)
+    // 2. Current time is < opening time (e.g., from 00:00 to 09:29)
     if (currentTimeInMinutes >= closingTime || currentTimeInMinutes < openingTime) {
-      return false; // Restaurant is closed
+      return false;
     }
     
-    return true; // Restaurant is open (09:30 to 23:29)
+    return true;
   }
 
   // Force refresh Remote Config values
@@ -444,7 +451,7 @@ class _DetailsState extends State<Details> {
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8.0),
                           child: Text(
-                            AppLocalizations.of(context).orderHoursValidation,
+                            AppLocalizations.of(context).orderWillBeTaken,
                             style: const TextStyle(
                               color: Colors.red,
                               fontWeight: FontWeight.bold,
