@@ -193,6 +193,12 @@ class AppLocalizations {
       'locationSettingsTitle': 'Location Permission Required',
       'locationSettingsMessage': 'This app requires location access to function. Please enable location permission in your device settings to continue.',
       'openSettings': 'Open Settings',
+
+      //review sheet
+      'rateOrderTitle':'Rate your order',
+      'writeReview':'Write your review',
+      'addPhoto':'Add photo',
+      'submit':'Submit',
     },
     'uz': {
       // Onboard Page
@@ -378,7 +384,13 @@ class AppLocalizations {
       'notNow': 'Hozir emas',
       'locationSettingsTitle': 'Joylashuv ruxsati talab qilinadi',
       'locationSettingsMessage': 'Bu ilova ishlashi uchun joylashuv ruxsati kerak. Davom etish uchun qurilma sozlamalarida joylashuv ruxsatini yoqing.',
-      'openSettings': 'Sozlamalarni ochish'
+      'openSettings': 'Sozlamalarni ochish',
+
+      //review sheet
+      'rateOrderTitle': 'Buyurtmangizni baholang',
+      'writeReview': 'Fikringizni yozing',
+      'addPhoto': 'Rasm qo‘shish',
+      'submit': 'Yuborish',
     },
     'ru': {
       // Onboard Page
@@ -472,6 +484,13 @@ class AppLocalizations {
       'notificationsPlaceholder': 'Уведомления появятся здесь',
       'arrivalNotificationSent': 'Уведомление о прибытии отправлено',
       'clearAll': 'Очистить все',
+      // Update Required Dialog
+      'updateRequired': 'Требуется обновление',
+      'updateRequiredDescription':
+          'Доступна новая версия приложения, необходимая для продолжения использования. Пожалуйста, обновите до последней версии.',
+      'currentVersion': 'Текущая версия',
+      'requiredVersion': 'Требуемая версия',
+      'updateNow': 'Обновить сейчас',
       // Notifications view
       'orderNumber': 'Номер заказа #',
       'arrived': 'Прибыл',
@@ -555,6 +574,12 @@ class AppLocalizations {
       'locationSettingsMessage': 'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
       'openSettings': 'Открыть настройки',
       'orderWillBeTaken': 'Заказы принимаются с ',
+
+      //review sheet
+      'rateOrderTitle': 'Оцените ваш заказ',
+      'writeReview': 'Напишите отзыв',
+      'addPhoto': 'Добавить фото',
+      'submit': 'Отправить',
     },
   };
 
@@ -895,5 +920,9 @@ class AppLocalizations {
   String get openSettings => _localizedValues[locale.languageCode]!['openSettings']!;
 
   String get orderWillBeTaken => _localizedValues[locale.languageCode]!['orderWillBeTaken']!;
+  String get rateOrderTitle => _localizedValues[locale.languageCode]!['rateOrderTitle']!;
+  String get writeReview => _localizedValues[locale.languageCode]!['writeReview']!;
+  String get addPhoto => _localizedValues[locale.languageCode]!['addPhoto']!;
+  String get submit => _localizedValues[locale.languageCode]!['submit']!;
 
 }

@@ -810,7 +810,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -825,8 +825,7 @@ class _CheckoutState extends State<Checkout> {
     orderPrice = cartProvider.getTotalPrice();
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
-      var itemTotal =
-          item.totalPrice; // Use totalPrice which includes modifiers
+      var itemTotal = item.totalPrice;
       total += itemTotal;
 
       return '${item.displayName}\n Total: ${NumberFormat('#,##0').format(item.totalPrice.toInt())} сум\n';

@@ -22,7 +22,9 @@ import 'package:apploook/services/location_permission_guard.dart';
 import 'dart:convert';
 import '../models/modifier_models.dart';
 import '../models/product_group.dart';
+import '../widget/app_bottom_sheet.dart';
 import '../widget/banner_widget.dart';
+import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 
@@ -503,21 +505,17 @@ class _HomeNewState extends State<HomeNew>
                   ),
                 ),
                 actions: [
-                  // Order mode selection icon
-                  // IconButton(
-                  //   icon: Icon(
-                  //     _orderModeService.currentMode ==
-                  //             OrderMode.deliveryTakeaway
-                  //         ? Icons.delivery_dining
-                  //         : Icons.directions_car,
-                  //     color: Colors.black,
-                  //   ),
-                  //   tooltip: 'Select Order Mode',
-                  //   onPressed: () async {
-                  //     // Show the order mode selection dialog
-                  //     _showOrderModeSelectionDialog();
-                  //   },
-                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await AppBottomSheet.show(
+                        context: context,
+                        child: const ReviewBottomSheet(orderId: 123), // static order
+                      );
+
+                      print("RESULT: $result");
+                    },
+                    child: const Text("Test"),
+                  ),
                   // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),
@@ -594,53 +592,6 @@ class _HomeNewState extends State<HomeNew>
                           .setLocale(Locale(newLocale));
                     },
                   ),
-                  // Consumer<NotificationProvider>(
-                  //   builder: (context, notificationProvider, child) {
-                  //     return GestureDetector(
-                  //       onTap: () async {
-                  //         await notificationProvider.markAllOrdersAsRead();
-                  //         Navigator.pushNamed(context, '/notificationsView');
-                  //       },
-                  //       child: Stack(
-                  //         children: [
-                  //           const Padding(
-                  //             padding: EdgeInsets.all(15.0),
-                  //             child: Icon(
-                  //               Icons.shopping_bag_outlined,
-                  //               size: 24.0,
-                  //               color: Colors.black,
-                  //             ),
-                  //           ),
-                  //           if (notificationProvider.unreadOrderCount > 0)
-                  //             Positioned(
-                  //               right: 10,
-                  //               top: 10,
-                  //               child: Container(
-                  //                 padding: const EdgeInsets.all(4),
-                  //                 decoration: BoxDecoration(
-                  //                   color: Colors.red,
-                  //                   borderRadius: BorderRadius.circular(10),
-                  //                 ),
-                  //                 constraints: const BoxConstraints(
-                  //                   minWidth: 16,
-                  //                   minHeight: 16,
-                  //                 ),
-                  //                 child: Text(
-                  //                   '${notificationProvider.unreadOrderCount}',
-                  //                   style: const TextStyle(
-                  //                     color: Colors.white,
-                  //                     fontSize: 10,
-                  //                   ),
-                  //                   textAlign: TextAlign.center,
-                  //                 ),
-                  //               ),
-                  //             ),
-                  //         ],
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-                  // const SizedBox(width: 10),
                   // Order tracking button
                   Builder(
                     builder: (context) {
@@ -963,20 +914,6 @@ class _HomeNewState extends State<HomeNew>
               ),
             ],
           ),
-          // // Simple Menu Button
-          // Positioned(
-          //   top: 100.0,
-          //   right: 20.0,
-          //   child: FloatingActionButton(
-          //     heroTag: 'simpleMenuButton',
-          //     backgroundColor: const Color(0xFFFEC700),
-          //     child: const Icon(Icons.menu_book, color: Colors.black),
-          //     onPressed: () {
-          //       Navigator.pushNamed(context, '/simpleMenu');
-          //     },
-          //   ),
-          // ),
-
           // Cart Button
           Positioned(
             bottom: 50.0,

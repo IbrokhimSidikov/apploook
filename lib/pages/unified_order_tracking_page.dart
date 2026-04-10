@@ -307,8 +307,13 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
     final localizations = AppLocalizations.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(localizations.orderTracking),
+        backgroundColor: Colors.white,
+        title: Text(
+            localizations.orderTracking,
+            textAlign: TextAlign.center,
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(70),
           child: TabBar(
