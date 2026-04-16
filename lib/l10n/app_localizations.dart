@@ -198,7 +198,14 @@ class AppLocalizations {
       'rateOrderTitle':'Rate your order',
       'writeReview':'Write your review',
       'addPhoto':'Add photo',
+      'changePhoto':'Change photo',
+      'removePhoto':'Remove photo',
       'submit':'Submit',
+      'skip':'Skip',
+      'selectRating':'Please select a rating',
+      'reviewSubmitted':'Thank you for your review!',
+      'reviewFailed':'Failed to submit review. Please try again.',
+      'uploadingPhoto':'Uploading photo...',
     },
     'uz': {
       // Onboard Page
@@ -389,8 +396,15 @@ class AppLocalizations {
       //review sheet
       'rateOrderTitle': 'Buyurtmangizni baholang',
       'writeReview': 'Fikringizni yozing',
-      'addPhoto': 'Rasm qo‘shish',
+      'addPhoto': 'Rasm qo\'shish',
+      'changePhoto': 'Rasmni o\'zgartirish',
+      'removePhoto': 'Rasmni o\'chirish',
       'submit': 'Yuborish',
+      'skip': 'O\'tkazib yuborish',
+      'selectRating': 'Iltimos, baho bering',
+      'reviewSubmitted': 'Fikringiz uchun rahmat!',
+      'reviewFailed': 'Fikr yuborishda xato. Qayta urinib ko\'ring.',
+      'uploadingPhoto': 'Rasm yuklanmoqda...',
     },
     'ru': {
       // Onboard Page
@@ -579,7 +593,14 @@ class AppLocalizations {
       'rateOrderTitle': 'Оцените ваш заказ',
       'writeReview': 'Напишите отзыв',
       'addPhoto': 'Добавить фото',
+      'changePhoto': 'Изменить фото',
+      'removePhoto': 'Удалить фото',
       'submit': 'Отправить',
+      'skip': 'Пропустить',
+      'selectRating': 'Пожалуйста, выберите оценку',
+      'reviewSubmitted': 'Спасибо за ваш отзыв!',
+      'reviewFailed': 'Не удалось отправить отзыв. Попробуйте снова.',
+      'uploadingPhoto': 'Загрузка фото...',
     },
   };
 
@@ -923,6 +944,13 @@ class AppLocalizations {
   String get rateOrderTitle => _localizedValues[locale.languageCode]!['rateOrderTitle']!;
   String get writeReview => _localizedValues[locale.languageCode]!['writeReview']!;
   String get addPhoto => _localizedValues[locale.languageCode]!['addPhoto']!;
+  String get changePhoto => _localizedValues[locale.languageCode]!['changePhoto']!;
+  String get removePhoto => _localizedValues[locale.languageCode]!['removePhoto']!;
   String get submit => _localizedValues[locale.languageCode]!['submit']!;
+  String get skip => _localizedValues[locale.languageCode]!['skip']!;
+  String get selectRating => _localizedValues[locale.languageCode]!['selectRating']!;
+  String get reviewSubmitted => _localizedValues[locale.languageCode]!['reviewSubmitted']!;
+  String get reviewFailed => _localizedValues[locale.languageCode]!['reviewFailed']!;
+  String get uploadingPhoto => _localizedValues[locale.languageCode]!['uploadingPhoto']!;
 
 }

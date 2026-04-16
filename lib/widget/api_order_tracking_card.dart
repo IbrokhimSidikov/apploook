@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:apploook/widget/delivery_status_timeline.dart';
 
 class ApiOrderTrackingCard extends StatefulWidget {
   final Map<String, dynamic> orderData;
@@ -36,10 +37,9 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
   }
 
   String _getStatusText(String status) {
-    final statusLower = status.toLowerCase();
-
-    switch (statusLower) {
+    switch (status.toLowerCase().trim()) {
       case 'new':
+      case 'open':
       case 'pending':
         return 'Pending';
       case 'accepted':
@@ -47,14 +47,17 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
         return 'Confirmed';
       case 'cooking':
       case 'preparing':
+      case 'production':
         return 'Preparing';
       case 'ready':
         return 'Ready';
       case 'on the way':
+      case 'on_the_way':
       case 'delivering':
         return 'On the way';
       case 'delivered':
       case 'completed':
+      case 'closed':
         return 'Delivered';
       case 'cancel':
       case 'cancelled':
@@ -66,10 +69,9 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
   }
 
   Color _getStatusColor(String status) {
-    final statusLower = status.toLowerCase();
-
-    switch (statusLower) {
+    switch (status.toLowerCase().trim()) {
       case 'new':
+      case 'open':
       case 'pending':
         return Colors.orange;
       case 'accepted':
@@ -77,14 +79,17 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
         return Colors.blue;
       case 'cooking':
       case 'preparing':
+      case 'production':
         return Colors.amber;
       case 'ready':
         return Colors.indigo;
       case 'on the way':
+      case 'on_the_way':
       case 'delivering':
         return Colors.purple;
       case 'delivered':
       case 'completed':
+      case 'closed':
         return Colors.green;
       case 'cancel':
       case 'cancelled':
@@ -315,6 +320,11 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
                     ],
                   ),
                   const SizedBox(height: 12),
+                  // ── Delivery status timeline (delivery orders only) ──
+                  if (orderTypeId == 3) ...[
+                    DeliveryStatusTimeline(statusName: statusName),
+                    const SizedBox(height: 8),
+                  ],
                   // Date and Total Price Row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

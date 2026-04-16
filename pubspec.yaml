@@ -2,7 +2,7 @@ name: apploook
 description: "LOOOK Mobile Application"
 publish_to: "none"
 
-version: 2.5.0+36
+version: 2.7.0+38
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
@@ -43,6 +43,7 @@ dependencies:
   shimmer: ^3.0.0
   vibration: ^3.1.4
   package_info_plus: ^8.3.0
+  image_picker: ^1.2.1
   
 
 dev_dependencies:

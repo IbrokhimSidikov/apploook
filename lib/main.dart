@@ -12,6 +12,7 @@ import 'package:apploook/pages/order_tracking_page.dart';
 import 'package:apploook/pages/unified_order_tracking_page.dart';
 import 'package:apploook/pages/signin.dart';
 import 'package:apploook/pages/simple_menu.dart';
+import 'package:apploook/services/delivery_review_scheduler.dart';
 import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
@@ -43,7 +44,7 @@ class MyLoaderApp extends StatefulWidget {
 
 class _MyLoaderAppState extends State<MyLoaderApp> {
   bool? _acceptedPrivacyPolicy;
-  bool _isLoading = true; // Add loading state
+  bool _isLoading = true;
   final notificationProvider = NotificationProvider();
   final notificationService = NotificationService();
   final localeProvider = LocaleProvider();
@@ -55,7 +56,6 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   }
 
   Future<void> _initializeApp() async {
-    // Start with loading state
     setState(() {
       _isLoading = true;
     });
@@ -82,6 +82,9 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     // Initialize notification service with provider
     notificationService.setProvider(notificationProvider);
     await notificationService.initialize();
+
+    // Start delivery review scheduler (shows review prompt 5 min after delivery)
+    DeliveryReviewScheduler().start(navigatorKey);
 
     // Only update UI after all initialization is complete
     if (mounted) {
