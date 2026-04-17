@@ -203,8 +203,9 @@ class AppLocalizations {
       'submit':'Submit',
       'skip':'Skip',
       'selectRating':'Please select a rating',
-      'reviewSubmitted':'Thank you for your review!',
+      'reviewSubmitted':'Thank you for your review! 🎉',
       'reviewFailed':'Failed to submit review. Please try again.',
+      'reviewAlreadySubmitted':'You\'ve already reviewed this order.',
       'uploadingPhoto':'Uploading photo...',
     },
     'uz': {
@@ -402,8 +403,9 @@ class AppLocalizations {
       'submit': 'Yuborish',
       'skip': 'O\'tkazib yuborish',
       'selectRating': 'Iltimos, baho bering',
-      'reviewSubmitted': 'Fikringiz uchun rahmat!',
+      'reviewSubmitted': 'Fikringiz uchun rahmat! 🎉',
       'reviewFailed': 'Fikr yuborishda xato. Qayta urinib ko\'ring.',
+      'reviewAlreadySubmitted': 'Bu buyurtma uchun fikr allaqachon yuborilgan.',
       'uploadingPhoto': 'Rasm yuklanmoqda...',
     },
     'ru': {
@@ -598,8 +600,9 @@ class AppLocalizations {
       'submit': 'Отправить',
       'skip': 'Пропустить',
       'selectRating': 'Пожалуйста, выберите оценку',
-      'reviewSubmitted': 'Спасибо за ваш отзыв!',
+      'reviewSubmitted': 'Спасибо за ваш отзыв! 🎉',
       'reviewFailed': 'Не удалось отправить отзыв. Попробуйте снова.',
+      'reviewAlreadySubmitted': 'Вы уже оставили отзыв на этот заказ.',
       'uploadingPhoto': 'Загрузка фото...',
     },
   };
@@ -951,6 +954,7 @@ class AppLocalizations {
   String get selectRating => _localizedValues[locale.languageCode]!['selectRating']!;
   String get reviewSubmitted => _localizedValues[locale.languageCode]!['reviewSubmitted']!;
   String get reviewFailed => _localizedValues[locale.languageCode]!['reviewFailed']!;
+  String get reviewAlreadySubmitted => _localizedValues[locale.languageCode]!['reviewAlreadySubmitted']!;
   String get uploadingPhoto => _localizedValues[locale.languageCode]!['uploadingPhoto']!;
 
 }

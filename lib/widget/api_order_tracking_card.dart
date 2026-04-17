@@ -208,6 +208,7 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
     final time = widget.orderData['time'] ?? '';
     final orderTypeId = widget.orderData['order_type_id'] ?? 0;
     final statusName = widget.orderData['status_name'] ?? 'Unknown';
+    final currentStatusId = widget.orderData['current_status_id'] as int?;
     final value = widget.orderData['value'] ?? 0;
     final branchName = widget.orderData['branch_name'] ?? 'Unknown Branch';
     final orderItems = widget.orderData['order_items'] as List<dynamic>? ?? [];
@@ -322,7 +323,7 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
                   const SizedBox(height: 12),
                   // ── Delivery status timeline (delivery orders only) ──
                   if (orderTypeId == 3) ...[
-                    DeliveryStatusTimeline(statusName: statusName),
+                    DeliveryStatusTimeline(statusName: statusName, statusId: currentStatusId),
                     const SizedBox(height: 8),
                   ],
                   // Date and Total Price Row

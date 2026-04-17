@@ -1,30 +1,53 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+enum ReviewResult { success, alreadySubmitted, failed }
 
 class ReviewService {
   static const String _baseUrl = 'https://api.v3.sievesapp.com';
   static const String _reviewShownPrefix = 'review_shown_';
+
+  /// Static upload token accepted ONLY by POST /file/upload/image.
+  /// Replace the value here when the token rotates.
+  static const String _uploadToken = 'd22fc27d96a51b45f2b44adc1ad482331a55783c9dd4e89bb919bfba0c2bb24c';
 
   /// Upload an image file and return the CDN URL, or null on failure.
   Future<String?> uploadImage(File imageFile) async {
     try {
       final bytes = await imageFile.readAsBytes();
       final fileName = imageFile.path.split('/').last;
+      final ext = fileName.split('.').last.toLowerCase();
+
+      // Map extension → MIME type accepted by the server
+      final mimeType = switch (ext) {
+        'jpg' || 'jpeg' => 'image/jpeg',
+        'png'           => 'image/png',
+        'gif'           => 'image/gif',
+        'webp'          => 'image/webp',
+        _               => 'image/jpeg', // safe fallback
+      };
 
       print('ReviewService [uploadImage] → POST $_baseUrl/file/upload/image');
-      print('ReviewService [uploadImage] fileName: $fileName, size: ${bytes.length} bytes');
+      print('ReviewService [uploadImage] fileName: $fileName, mimeType: $mimeType, size: ${bytes.length} bytes');
 
       final request = http.MultipartRequest(
         'POST',
         Uri.parse('$_baseUrl/file/upload/image'),
       );
+
+      // Static upload token — no Bearer auth on this route
+      request.headers['x-upload-token'] = _uploadToken;
+      print('ReviewService [uploadImage] x-upload-token: $_uploadToken');
+
       request.files.add(
         http.MultipartFile.fromBytes(
           'file',
           bytes,
           filename: fileName,
+          contentType: MediaType.parse(mimeType),
         ),
       );
 
@@ -54,7 +77,7 @@ class ReviewService {
   }
 
   /// Submit the order review to the backend.
-  Future<bool> submitReview({
+  Future<ReviewResult> submitReview({
     required int orderId,
     required int rating,
     String? comment,
@@ -68,12 +91,24 @@ class ReviewService {
       if (comment != null && comment.isNotEmpty) body['comment'] = comment;
       if (photoUrl != null && photoUrl.isNotEmpty) body['photo_url'] = photoUrl;
 
-      print('ReviewService [submitReview] → POST $_baseUrl/order-review');
+      // Read phone number from SharedPreferences and normalise to 998xxxxxxxxx
+      final prefs = await SharedPreferences.getInstance();
+      String phone = prefs.getString('phoneNumber') ?? '';
+      if (phone.startsWith('+')) phone = phone.substring(1);
+
+      final uri = Uri.parse('$_baseUrl/order-review').replace(
+        queryParameters: phone.isNotEmpty ? {'phone': phone} : null,
+      );
+
+      print('ReviewService [submitReview] → POST $uri');
       print('ReviewService [submitReview] → body: ${jsonEncode(body)}');
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/order-review'),
-        headers: {'Content-Type': 'application/json'},
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-upload-token': _uploadToken,
+        },
         body: jsonEncode(body),
       );
 
@@ -83,10 +118,23 @@ class ReviewService {
       // Mark as shown regardless of API result
       await markReviewShown(orderId);
 
-      return response.statusCode == 200 || response.statusCode == 201;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return ReviewResult.success;
+      }
+
+      // Detect "already reviewed" 400
+      if (response.statusCode == 400) {
+        final body = jsonDecode(response.body);
+        final message = (body['message'] as String? ?? '').toLowerCase();
+        if (message.contains('already')) {
+          return ReviewResult.alreadySubmitted;
+        }
+      }
+
+      return ReviewResult.failed;
     } catch (e, st) {
       print('ReviewService [submitReview] ✗ exception: $e\n$st');
-      return false;
+      return ReviewResult.failed;
     }
   }
 

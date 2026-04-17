@@ -1,6 +1,30 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
+/// Maps a numeric current_status_id to one of the 4 delivery stages (0-3).
+/// Returns -1 for cancelled / unknown.
+///   9  → received   (stage 0)
+///  10  → production (stage 1)
+///  12  → go/on-the-way (stage 2)
+///  26  → delivered  (stage 3)
+///  13  → cancelled  (-1)
+int deliveryStageFromStatusId(int id) {
+  switch (id) {
+    case 9:
+      return 0;
+    case 10:
+      return 1;
+    case 12:
+      return 2;
+    case 26:
+      return 3;
+    case 13:
+      return -1;
+    default:
+      return -1;
+  }
+}
+
 /// Maps any raw API status string to one of the 4 delivery stages (0-3).
 /// Returns -1 for cancelled / unknown.
 int deliveryStageFromStatus(String raw) {
@@ -45,8 +69,10 @@ int deliveryStageFromStatus(String raw) {
 
 class DeliveryStatusTimeline extends StatelessWidget {
   final String statusName;
+  /// When provided, [statusId] takes precedence over [statusName] for stage resolution.
+  final int? statusId;
 
-  const DeliveryStatusTimeline({Key? key, required this.statusName})
+  const DeliveryStatusTimeline({Key? key, required this.statusName, this.statusId})
       : super(key: key);
 
   static const _stages = [
@@ -70,7 +96,9 @@ class DeliveryStatusTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currentStage = deliveryStageFromStatus(statusName);
+    final currentStage = statusId != null
+        ? deliveryStageFromStatusId(statusId!)
+        : deliveryStageFromStatus(statusName);
     final isCancelled = currentStage == -1;
 
     return Padding(
