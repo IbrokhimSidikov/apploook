@@ -178,6 +178,7 @@ class AppLocalizations {
       'orderCooking': 'Cooking',
       'orderOnTheWay': 'On the way',
       'orderDelivered': 'Delivered',
+      'orderCancelled': 'Order Cancelled',
       //Rahmat dialog
       'processingPayment': 'Processing payment...',
       'waitingForConfirmation':'Waiting for payment confirmation...',
@@ -207,6 +208,11 @@ class AppLocalizations {
       'reviewFailed':'Failed to submit review. Please try again.',
       'reviewAlreadySubmitted':'You\'ve already reviewed this order.',
       'uploadingPhoto':'Uploading photo...',
+      'ratingTerrible': '😞  Terrible',
+      'ratingPoor': '😕  Poor',
+      'ratingOkay': '😐  Okay',
+      'ratingGood': '😊  Good',
+      'ratingExcellent': '🤩  Excellent!',
     },
     'uz': {
       // Onboard Page
@@ -375,9 +381,10 @@ class AppLocalizations {
       'totalTitle': 'Ja\'mi',
       // Order progress stages
       'orderAccepted': 'Qabul qilindi',
-      'orderCooking': 'Pishirilmoqda',
+      'orderCooking': 'Tayyorlanmoqda',
       'orderOnTheWay': 'Yetkazilmoqda',
       'orderDelivered': 'Yetkazildi',
+      'orderCancelled': 'Buyurtma bekor qilindi',
       //Rahmat dialog
       'processingPayment': 'Toʻlov qayta ishlanmoqda...',
       'waitingForConfirmation': 'Toʻlov tasdigʻi kutilmoqda...',
@@ -407,6 +414,11 @@ class AppLocalizations {
       'reviewFailed': 'Fikr yuborishda xato. Qayta urinib ko\'ring.',
       'reviewAlreadySubmitted': 'Bu buyurtma uchun fikr allaqachon yuborilgan.',
       'uploadingPhoto': 'Rasm yuklanmoqda...',
+      'ratingTerrible': '😞  Juda yomon',
+      'ratingPoor': '😕  Yomon',
+      'ratingOkay': '😐  O\'rtacha',
+      'ratingGood': '😊  Yaxshi',
+      'ratingExcellent': '🤩  Ajoyib!',
     },
     'ru': {
       // Onboard Page
@@ -574,6 +586,7 @@ class AppLocalizations {
       'orderCooking': 'Готовится',
       'orderOnTheWay': 'В пути',
       'orderDelivered': 'Доставлен',
+      'orderCancelled': 'Заказ отменён',
       //Rahmat dialog
       'processingPayment': 'Обработка платежа...',
       'waitingForConfirmation': 'Ожидание подтверждения платежа...',
@@ -604,6 +617,11 @@ class AppLocalizations {
       'reviewFailed': 'Не удалось отправить отзыв. Попробуйте снова.',
       'reviewAlreadySubmitted': 'Вы уже оставили отзыв на этот заказ.',
       'uploadingPhoto': 'Загрузка фото...',
+      'ratingTerrible': '😞  Oчень плохо',
+      'ratingPoor': '😕  Плохо',
+      'ratingOkay': '😐  Нормально',
+      'ratingGood': '😊  Хорошо',
+      'ratingExcellent': '🤩  Отлично!',
     },
   };
 
@@ -902,6 +920,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['orderOnTheWay']!;
   String get orderDelivered =>
       _localizedValues[locale.languageCode]!['orderDelivered']!;
+  String get orderCancelled =>
+      _localizedValues[locale.languageCode]!['orderCancelled']!;
 
   //Rahmat dialog
   String get processingPayment =>
@@ -956,5 +976,10 @@ class AppLocalizations {
   String get reviewFailed => _localizedValues[locale.languageCode]!['reviewFailed']!;
   String get reviewAlreadySubmitted => _localizedValues[locale.languageCode]!['reviewAlreadySubmitted']!;
   String get uploadingPhoto => _localizedValues[locale.languageCode]!['uploadingPhoto']!;
+  String get ratingTerrible => _localizedValues[locale.languageCode]!['ratingTerrible']!;
+  String get ratingPoor => _localizedValues[locale.languageCode]!['ratingPoor']!;
+  String get ratingOkay => _localizedValues[locale.languageCode]!['ratingOkay']!;
+  String get ratingGood => _localizedValues[locale.languageCode]!['ratingGood']!;
+  String get ratingExcellent => _localizedValues[locale.languageCode]!['ratingExcellent']!;
 
 }

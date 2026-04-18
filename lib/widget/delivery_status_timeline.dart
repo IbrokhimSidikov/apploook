@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../l10n/app_localizations.dart';
 
 /// Maps a numeric current_status_id to one of the 4 delivery stages (0-3).
 /// Returns -1 for cancelled / unknown.
@@ -75,24 +76,22 @@ class DeliveryStatusTimeline extends StatelessWidget {
   const DeliveryStatusTimeline({Key? key, required this.statusName, this.statusId})
       : super(key: key);
 
-  static const _stages = [
-    _Stage(
-      icon: Icons.receipt_long_rounded,
-      label: 'Order\nReceived',
-    ),
-    _Stage(
-      icon: Icons.soup_kitchen_rounded,
-      label: 'Preparing',
-    ),
-    _Stage(
-      icon: Icons.delivery_dining_rounded,
-      label: 'On the\nWay',
-    ),
-    _Stage(
-      icon: Icons.home_rounded,
-      label: 'Delivered',
-    ),
+  static const _stageIcons = [
+    Icons.receipt_long_rounded,
+    Icons.soup_kitchen_rounded,
+    Icons.delivery_dining_rounded,
+    Icons.home_rounded,
   ];
+
+  List<_Stage> _buildStages(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return [
+      _Stage(icon: _stageIcons[0], label: loc.orderAccepted),
+      _Stage(icon: _stageIcons[1], label: loc.orderCooking),
+      _Stage(icon: _stageIcons[2], label: loc.orderOnTheWay),
+      _Stage(icon: _stageIcons[3], label: loc.orderDelivered),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +106,9 @@ class DeliveryStatusTimeline extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (isCancelled)
-            _buildCancelledBanner()
+            _buildCancelledBanner(context)
           else
-            _buildTimeline(currentStage),
+            _buildTimeline(context, currentStage),
         ],
       ),
     );
@@ -117,7 +116,8 @@ class DeliveryStatusTimeline extends StatelessWidget {
 
   // ── Cancelled banner ──────────────────────────────────────────────────────
 
-  Widget _buildCancelledBanner() {
+  Widget _buildCancelledBanner(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -131,7 +131,7 @@ class DeliveryStatusTimeline extends StatelessWidget {
           Icon(Icons.cancel_outlined, color: Colors.red.shade400, size: 18),
           const SizedBox(width: 8),
           Text(
-            'Order Cancelled',
+            loc.orderCancelled,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -145,10 +145,11 @@ class DeliveryStatusTimeline extends StatelessWidget {
 
   // ── Timeline ───────────────────────────────────────────────────────────────
 
-  Widget _buildTimeline(int currentStage) {
+  Widget _buildTimeline(BuildContext context, int currentStage) {
+    final stages = _buildStages(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: List.generate(_stages.length * 2 - 1, (i) {
+      children: List.generate(stages.length * 2 - 1, (i) {
         if (i.isOdd) {
           // Connector line
           final stageIndex = i ~/ 2;
@@ -169,7 +170,7 @@ class DeliveryStatusTimeline extends StatelessWidget {
           final completed = currentStage > stageIndex;
           final active = currentStage == stageIndex;
           return _StageNode(
-            stage: _stages[stageIndex],
+            stage: stages[stageIndex],
             completed: completed,
             active: active,
           );

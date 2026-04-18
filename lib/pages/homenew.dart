@@ -505,17 +505,19 @@ class _HomeNewState extends State<HomeNew>
                   ),
                 ),
                 actions: [
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     final result = await AppBottomSheet.show(
-                  //       context: context,
-                  //       child: const ReviewBottomSheet(orderId: 7512101), // static order
-                  //     );
-                  //
-                  //     print("RESULT: $result");
-                  //   },
-                  //   child: const Text("Test"),
-                  // ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final result = await AppBottomSheet.show(
+                        context: context,
+                        isDismissible: false,
+                        enableDrag: false,
+                        child: const ReviewBottomSheet(orderId: 7111182), // static order
+                      );
+
+                      print("RESULT: $result");
+                    },
+                    child: const Text("Test"),
+                  ),
                   // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),
@@ -722,39 +724,10 @@ class _HomeNewState extends State<HomeNew>
                           ),
                         ),
                       )
-                          // : CarouselSlider(
-                          //     options: CarouselOptions(
-                          //       height: 160.0,
-                          //       autoPlay: true,
-                          //       autoPlayInterval: const Duration(seconds: 3),
-                          //       enlargeCenterPage: true,
-                          //       enableInfiniteScroll: true,
-                          //     ),
-                          //     items: banners.map((banner) {
-                          //       return Builder(
-                          //         builder: (BuildContext context) {
-                          //           return Container(
-                          //             width: MediaQuery.of(context).size.width,
-                          //             margin: const EdgeInsets.symmetric(
-                          //                 horizontal: 0.0),
-                          //             decoration: BoxDecoration(
-                          //               color: banner.boxColor.withOpacity(0.0),
-                          //               borderRadius:
-                          //                   BorderRadius.circular(16.0),
-                          //             ),
-                          //             child: Image.asset(
-                          //               banner.imagePath,
-                          //               fit: BoxFit.fill,
-                          //             ),
-                          //           );
-                          //         },
-                          //       );
-                          //     }).toList(),
-                          //   ),
                           : BannerCarouselWidget(
                               banners: banners,
                               isLoading: _isLoadingBanners,
-                            ),
+                          ),
                     ],
                   ),
                 ),

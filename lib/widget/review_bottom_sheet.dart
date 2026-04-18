@@ -135,17 +135,17 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     final (String message, Color bg, IconData icon) = switch (result) {
       ReviewResult.success => (
           loc.reviewSubmitted,
-          const Color(0xFF1B8A4C),
+          AppColors.cx1B8A4C,
           Icons.check_circle_rounded,
         ),
       ReviewResult.alreadySubmitted => (
           loc.reviewAlreadySubmitted,
-          const Color(0xFF1565C0),
+          AppColors.cx1565C0,
           Icons.info_rounded,
         ),
       ReviewResult.failed => (
           loc.reviewFailed,
-          const Color(0xFFC62828),
+          AppColors.cxC62828,
           Icons.error_rounded,
         ),
     };
@@ -283,7 +283,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                   Text(
                     _rating == 0
                         ? '⭐  ${loc.selectRating}'
-                        : _ratingLabel(_rating.toInt()),
+                        : _ratingLabel(_rating.toInt(), context),
                     style: TextStyle(
                       fontSize: 13,
                       color: _rating == 0
@@ -339,6 +339,9 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                     hintText: loc.writeReview,
                     hintStyle: TextStyle(
                         color: Colors.grey.shade400, fontSize: 14),
+                    helperText: 'Emoji are not supported',
+                    helperStyle: TextStyle(
+                        color: Colors.grey.shade400, fontSize: 11),
                     filled: true,
                     fillColor: Colors.grey.shade50,
                     contentPadding:
@@ -408,7 +411,7 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
                         : _submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.cxFEC700,
-                  foregroundColor: const Color(0xFF0B0B0B),
+                  foregroundColor: AppColors.cx0B0B0B,
                   disabledBackgroundColor:
                       AppColors.cxFEC700.withValues(alpha: 0.45),
                   elevation: 0,
@@ -645,13 +648,14 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
     );
   }
 
-  String _ratingLabel(int r) {
+  String _ratingLabel(int r, BuildContext context) {
+    final l = AppLocalizations.of(context);
     switch (r) {
-      case 1: return '😞  Terrible';
-      case 2: return '😕  Poor';
-      case 3: return '😐  Okay';
-      case 4: return '😊  Good';
-      case 5: return '🤩  Excellent!';
+      case 1: return l.ratingTerrible;
+      case 2: return l.ratingPoor;
+      case 3: return l.ratingOkay;
+      case 4: return l.ratingGood;
+      case 5: return l.ratingExcellent;
       default: return '';
     }
   }

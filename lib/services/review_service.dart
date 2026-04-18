@@ -76,6 +76,20 @@ class ReviewService {
     }
   }
 
+  /// Strips characters outside the Basic Multilingual Plane (e.g. most emoji)
+  /// that cause 500 errors on servers expecting plain BMP text.
+  static String _sanitizeComment(String text) {
+    // Remove code-points above U+FFFF (surrogate pairs / emoji)
+    final buffer = StringBuffer();
+    for (final rune in text.runes) {
+      if (rune <= 0xFFFF) {
+        buffer.writeCharCode(rune);
+      }
+      // else: skip the non-BMP character silently
+    }
+    return buffer.toString().trim();
+  }
+
   /// Submit the order review to the backend.
   Future<ReviewResult> submitReview({
     required int orderId,
@@ -84,11 +98,14 @@ class ReviewService {
     String? photoUrl,
   }) async {
     try {
+      // Sanitize comment — remove emoji / non-BMP chars that cause server 500s
+      final sanitizedComment = comment != null ? _sanitizeComment(comment) : null;
+
       final body = <String, dynamic>{
         'order_id': orderId,
         'rating': rating,
       };
-      if (comment != null && comment.isNotEmpty) body['comment'] = comment;
+      if (sanitizedComment != null && sanitizedComment.isNotEmpty) body['comment'] = sanitizedComment;
       if (photoUrl != null && photoUrl.isNotEmpty) body['photo_url'] = photoUrl;
 
       // Read phone number from SharedPreferences and normalise to 998xxxxxxxxx
