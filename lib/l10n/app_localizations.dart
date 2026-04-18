@@ -166,7 +166,7 @@ class AppLocalizations {
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
       'orderHoursValidation': 'Orders not accepted after 23:30 PM',
-      'orderWillBeTaken':'Orders will be taken from ',
+      'orderWillBeTaken':'Orders will be taken from 09:00 to 23:30 ',
       // Order card
       'orderCardTitle': 'Order from',
       'orderSummaryTitle': 'Order Summary',
@@ -372,7 +372,7 @@ class AppLocalizations {
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
       'orderHoursValidation': '23:30 dan keyin buyurtmalar qabul qilinmaydi',
-      'orderWillBeTaken': 'Buyurtmalar qabul qilinadi ',
+      'orderWillBeTaken': 'Buyurtmalar 09:00 dan 23:30 gacha qabul qilinadi ',
       // Order card
       'orderCardTitle': 'Buyurtma sanasi',
       'orderSummaryTitle': 'Buyurtma tafsilotlari',
@@ -602,7 +602,7 @@ class AppLocalizations {
       'locationSettingsTitle': 'Требуется разрешение на геолокацию',
       'locationSettingsMessage': 'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
       'openSettings': 'Открыть настройки',
-      'orderWillBeTaken': 'Заказы принимаются с ',
+      'orderWillBeTaken': 'Заказы принимаются с 09:00 дo 23:30',
 
       //review sheet
       'rateOrderTitle': 'Оцените ваш заказ',

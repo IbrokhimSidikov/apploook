@@ -16,6 +16,7 @@ import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_tracking_service.dart';
+import 'package:apploook/services/order_history_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/services/location_permission_guard.dart';
 
@@ -507,14 +508,30 @@ class _HomeNewState extends State<HomeNew>
                 actions: [
                   ElevatedButton(
                     onPressed: () async {
-                      final result = await AppBottomSheet.show(
+                      const testOrderId = 7375108;
+                      Map<String, dynamic>? orderData;
+                      try {
+                        final response = await OrderHistoryService()
+                            .fetchOrderHistory(page: 1, limit: 50, forceRefresh: true);
+                        final orders = (response['data'] as List<dynamic>? ?? [])
+                            .cast<Map<String, dynamic>>();
+                        orderData = orders.firstWhere(
+                          (o) => o['id'] == testOrderId,
+                          orElse: () => <String, dynamic>{},
+                        );
+                        if (orderData?.isEmpty == true) orderData = null;
+                      } catch (_) {}
+
+                      if (!mounted) return;
+                      await AppBottomSheet.show(
                         context: context,
                         isDismissible: false,
                         enableDrag: false,
-                        child: const ReviewBottomSheet(orderId: 7111182), // static order
+                        child: ReviewBottomSheet(
+                          orderId: testOrderId,
+                          orderData: orderData,
+                        ),
                       );
-
-                      print("RESULT: $result");
                     },
                     child: const Text("Test"),
                   ),

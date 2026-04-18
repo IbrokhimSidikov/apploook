@@ -82,8 +82,9 @@ class DeliveryReviewScheduler {
 
         // Schedule the prompt
         _scheduledOrderIds.add(orderIdInt);
+        final orderSnapshot = Map<String, dynamic>.from(order);
         Future.delayed(reviewDelay, () {
-          _showReviewSheet(navigatorKey, orderIdInt);
+          _showReviewSheet(navigatorKey, orderIdInt, orderSnapshot);
         });
         print(
             'DeliveryReviewScheduler: Scheduled review for order $orderIdInt in ${reviewDelay.inMinutes} min');
@@ -94,7 +95,7 @@ class DeliveryReviewScheduler {
   }
 
   void _showReviewSheet(
-      GlobalKey<NavigatorState> navigatorKey, int orderId) async {
+      GlobalKey<NavigatorState> navigatorKey, int orderId, [Map<String, dynamic>? orderData]) async {
     // Double-check it hasn't been shown while waiting
     final alreadyShown = await _reviewService.hasReviewBeenShown(orderId);
     if (alreadyShown) return;
@@ -113,7 +114,7 @@ class DeliveryReviewScheduler {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => ReviewBottomSheet(orderId: orderId),
+      builder: (_) => ReviewBottomSheet(orderId: orderId, orderData: orderData),
     );
   }
 }

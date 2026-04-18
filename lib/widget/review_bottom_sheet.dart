@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../constants/app_colors.dart';
 import '../l10n/app_localizations.dart';
@@ -8,8 +9,10 @@ import '../services/review_service.dart';
 
 class ReviewBottomSheet extends StatefulWidget {
   final int orderId;
+  /// Optional order data map (from order history API) to show a compact summary.
+  final Map<String, dynamic>? orderData;
 
-  const ReviewBottomSheet({required this.orderId, Key? key}) : super(key: key);
+  const ReviewBottomSheet({required this.orderId, this.orderData, Key? key}) : super(key: key);
 
   @override
   State<ReviewBottomSheet> createState() => _ReviewBottomSheetState();
@@ -270,6 +273,12 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
             ),
             const SizedBox(height: 24),
 
+            // ── Compact order snapshot ────────────────────────────────────
+            if (widget.orderData != null) ...[
+              _buildOrderSnapshot(widget.orderData!),
+              const SizedBox(height: 16),
+            ],
+
             // ── Star rating ───────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -449,6 +458,155 @@ class _ReviewBottomSheetState extends State<ReviewBottomSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ─── Compact order snapshot ──────────────────────────────────────────────
+
+  Widget _buildOrderSnapshot(Map<String, dynamic> order) {
+    final items = (order['order_items'] as List<dynamic>? ?? []);
+    final branch = order['branch_name'] as String? ?? '';
+    final timeStr = order['time'] as String?;
+    String formattedDate = '';
+    if (timeStr != null) {
+      try {
+        final dt = DateTime.parse(timeStr).toLocal();
+        formattedDate = DateFormat('dd MMM · HH:mm').format(dt);
+      } catch (_) {}
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.cxFEC700.withValues(alpha: 0.08),
+            Colors.white,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.cxFEC700.withValues(alpha: 0.30)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Header bar ──────────────────────────────────────────────────
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppColors.cxFEC700.withValues(alpha: 0.12),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.cxFEC700.withValues(alpha: 0.25),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.storefront_rounded,
+                      size: 14, color: AppColors.cxFEC700),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    branch,
+                    style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1A1A)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (formattedDate.isNotEmpty)
+                  Row(
+                    children: [
+                      Icon(Icons.access_time_rounded,
+                          size: 12, color: Colors.grey.shade500),
+                      const SizedBox(width: 3),
+                      Text(formattedDate,
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500)),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+
+          // ── Items ────────────────────────────────────────────────────────
+          if (items.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+              child: Column(
+                children: [
+                  ...items.take(4).map((item) {
+                    final name = item['name'] as String? ??
+                        item['product_name'] as String? ??
+                        '–';
+                    final qty = item['quantity'] ?? item['count'] ?? 1;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 7),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Quantity pill
+                          Container(
+                            width: 26,
+                            height: 20,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColors.cxFEC700,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              '×$qty',
+                              style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black),
+                            ),
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade800),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  if (items.length > 4)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '+${items.length - 4} more items',
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
