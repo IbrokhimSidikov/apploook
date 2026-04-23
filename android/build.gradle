@@ -1,14 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.9.25'
+    ext.kotlin_version = '2.1.0'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-         classpath "com.android.tools.build:gradle:8.6.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.25"
+        classpath "com.android.tools.build:gradle:8.9.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0"
         classpath "com.google.gms:google-services:4.4.2"
     }
 }
@@ -27,6 +27,14 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+    // Force Kotlin version across all configurations
+    configurations.all {
+        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                details.useVersion '2.1.0'
+            }
+        }
+    }
 }
 
 tasks.register("clean", Delete) {
