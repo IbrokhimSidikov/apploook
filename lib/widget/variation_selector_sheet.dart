@@ -108,7 +108,7 @@ class VariationSelectorSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   child: CachedProductImage(
                     imageUrl: variation.imagePath!,
-                    width: 80,
+                    width: 100,
                     height: 80,
                   ),
                 ),
