@@ -1,6 +1,7 @@
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/authorization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class SignIn extends StatefulWidget {
@@ -17,74 +18,69 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appBar(),
-      body: Column(
-        children: [
-          const SizedBox(
-            height: 70.0,
-          ),
-          Center(
-            child: Image.asset(
-              'images/look_signin.png',
-              width: 300,
-              height: 300,
+      body: Padding(
+        padding:  EdgeInsets.symmetric(horizontal: 10.w),
+        child: Column(
+          children: [
+            70.verticalSpace,
+            Center(
+              child: Image.asset(
+                'images/look_signin.png',
+                width: 300.w,
+                height: 300.h,
+              ),
             ),
-          ),
-          Center(
-            child: Text(
-              AppLocalizations.of(context).signInToYourProfile,
-              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+            Center(
+              child: Text(
+                AppLocalizations.of(context).signInToYourProfile,
+                style: TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          Center(
-            child: Text(
-              AppLocalizations.of(context).underTitle,
-              style: const TextStyle(fontWeight: FontWeight.w200),
+            Center(
+              child: Text(
+                AppLocalizations.of(context).underTitle,
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w200, fontSize: 14.sp),
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 25,
-          ),
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => Authorization()));
-              },
-              child: Container(
-                padding:
-                    EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    color: const Color(0xffFEC700)),
-                child: Text(
-                  AppLocalizations.of(context).phoneNumberButton,
-                  style: TextStyle(fontSize: 17),
+            25.verticalSpace,
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => Authorization()));
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30.r),
+                      color: const Color(0xffFEC700)),
+                  child: Text(
+                    AppLocalizations.of(context).phoneNumberButton,
+                    style: TextStyle(fontSize: 17.sp),
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 20.0,
-          ),
-          Center(
-            child: Text(
-              AppLocalizations.of(context).privacyPolicy,
-              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13),
+            20.verticalSpace,
+            Center(
+              child: Text(
+                AppLocalizations.of(context).privacyPolicy,
+                style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13.sp),
+              ),
             ),
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
-          Center(
-            child: Text(
-              'Version 1.0.0, build 10001',
-              style: TextStyle(
-                  fontWeight: FontWeight.w100,
-                  fontSize: 13,
-                  color: Colors.black26),
-            ),
-          )
-        ],
+            SizedBox(height: 10.h),
+            Center(
+              child: Text(
+                'Version 1.0.0, build 10001',
+                style: TextStyle(
+                    fontWeight: FontWeight.w100,
+                    fontSize: 13.sp,
+                    color: Colors.black26),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -95,7 +91,7 @@ class _SignInState extends State<SignIn> {
       title: Text(
         AppLocalizations.of(context).signIn,
         style: TextStyle(
-            color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+            color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w500),
       ),
       elevation: 0.0,
       centerTitle: true,
@@ -104,15 +100,15 @@ class _SignInState extends State<SignIn> {
           Navigator.pushNamed(context, '/homeNew');
         },
         child: Container(
-          margin: EdgeInsets.all(10),
+          margin: EdgeInsets.all(10.r),
+          decoration: BoxDecoration(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              borderRadius: BorderRadius.circular(10.r)),
           child: SvgPicture.asset(
             'images/keyboard_arrow_left.svg',
-            height: 30,
-            width: 30,
+            height: 30.h,
+            width: 30.w,
           ),
-          decoration: BoxDecoration(
-              color: Color.fromARGB(255, 255, 255, 255),
-              borderRadius: BorderRadius.circular(10)),
         ),
       ),
       actions: [
@@ -128,7 +124,7 @@ class _SignInState extends State<SignIn> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(context).pop(); // Close the dialog
+                        Navigator.of(context).pop();
                       },
                       child: const Text(
                         "Cancel",
@@ -149,16 +145,16 @@ class _SignInState extends State<SignIn> {
             );
           },
           child: Container(
-            margin: EdgeInsets.all(10),
-            width: 37,
+            margin: EdgeInsets.all(10.r),
+            width: 37.w,
+            decoration: BoxDecoration(
+                color: const Color.fromARGB(255, 255, 255, 255),
+                borderRadius: BorderRadius.circular(10.r)),
             child: SvgPicture.asset(
               'images/perm_phone_msg.svg',
-              height: 30,
-              width: 30,
+              height: 30.h,
+              width: 30.w,
             ),
-            decoration: BoxDecoration(
-                color: Color.fromARGB(255, 255, 255, 255),
-                borderRadius: BorderRadius.circular(10)),
           ),
         ),
       ],

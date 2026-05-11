@@ -18,6 +18,7 @@ import 'package:apploook/config/branch_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -851,22 +852,17 @@ class _CheckoutState extends State<Checkout> {
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 15.0,
-                ),
+                SizedBox(width: 15.w),
                 Text(
                   AppLocalizations.of(context).chooseOrderType,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                 ),
-                SizedBox(
-                  width: 170,
-                ),
-                // SvgPicture.asset('images/error_outline.svg'),
+                SizedBox(width: 170.w),
               ],
             ),
             const SizedBox(height: 20.0),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: Column(
                 children: [
                   // First row - Delivery and Self-Pickup
@@ -882,12 +878,12 @@ class _CheckoutState extends State<Checkout> {
                             });
                           },
                           child: Container(
-                            height: 80,
+                            height: 80.h,
                             decoration: BoxDecoration(
                               color: _selectedIndex == 0
                                   ? const Color(0xffFEC700)
                                   : const Color(0xffF1F2F7),
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(15.r),
                               border: Border.all(
                                 color: _selectedIndex == 0
                                     ? const Color(0xffFEC700)
@@ -901,15 +897,15 @@ class _CheckoutState extends State<Checkout> {
                                 Icon(
                                   Icons.delivery_dining_outlined,
                                   color: Colors.black,
-                                  size: 28,
+                                  size: 28.w,
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(height: 5.h),
                                 Text(
                                   AppLocalizations.of(context).delivery,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -925,19 +921,18 @@ class _CheckoutState extends State<Checkout> {
                           onTap: () {
                             setState(() {
                               _selectedIndex = 1;
-                              // Reset Payme selection if selected
                               if (selectedOption == 'Payme') {
                                 selectedOption = null;
                               }
                             });
                           },
                           child: Container(
-                            height: 80,
+                            height: 80.h,
                             decoration: BoxDecoration(
                               color: _selectedIndex == 1
                                   ? const Color(0xffFEC700)
                                   : const Color(0xffF1F2F7),
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(15.r),
                               border: Border.all(
                                 color: _selectedIndex == 1
                                     ? const Color(0xffFEC700)
@@ -951,15 +946,15 @@ class _CheckoutState extends State<Checkout> {
                                 Icon(
                                   Icons.shopping_bag_outlined,
                                   color: Colors.black,
-                                  size: 28,
+                                  size: 28.w,
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(height: 5.h),
                                 Text(
                                   AppLocalizations.of(context).selfPickup,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -984,12 +979,12 @@ class _CheckoutState extends State<Checkout> {
                             });
                           },
                           child: Container(
-                            height: 80,
+                            height: 80.h,
                             decoration: BoxDecoration(
                               color: _selectedIndex == 2
                                   ? const Color(0xffFEC700)
                                   : const Color(0xffF1F2F7),
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(15.r),
                               border: Border.all(
                                 color: _selectedIndex == 2
                                     ? const Color(0xffFEC700)
@@ -997,21 +992,21 @@ class _CheckoutState extends State<Checkout> {
                                 width: 2,
                               ),
                             ),
-                            child: const Column(
+                            child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.car_repair_outlined,
                                   color: Colors.black,
-                                  size: 28,
+                                  size: 28.w,
                                 ),
-                                SizedBox(height: 5),
+                                SizedBox(height: 5.h),
                                 Text(
                                   'Carhop',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -1034,12 +1029,12 @@ class _CheckoutState extends State<Checkout> {
                             });
                           },
                           child: Container(
-                            height: 80,
+                            height: 80.h,
                             decoration: BoxDecoration(
                               color: _selectedIndex == 3
                                   ? const Color(0xffFEC700)
                                   : const Color(0xffF1F2F7),
-                              borderRadius: BorderRadius.circular(15),
+                              borderRadius: BorderRadius.circular(15.r),
                               border: Border.all(
                                 color: _selectedIndex == 3
                                     ? const Color(0xffFEC700)
@@ -1053,15 +1048,15 @@ class _CheckoutState extends State<Checkout> {
                                 Icon(
                                   Icons.restaurant,
                                   color: Colors.black,
-                                  size: 28,
+                                  size: 28.w,
                                 ),
-                                const SizedBox(height: 5),
+                                SizedBox(height: 5.h),
                                 Text(
                                   AppLocalizations.of(context).inRestaurant,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                   ),
                                   textAlign: TextAlign.center,
                                 ),
@@ -1083,6 +1078,7 @@ class _CheckoutState extends State<Checkout> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
                       Text(
@@ -1093,8 +1089,9 @@ class _CheckoutState extends State<Checkout> {
                                 : _selectedIndex == 2
                                     ? AppLocalizations.of(context).carhopService
                                     : AppLocalizations.of(context).inRestaurantTitle,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20.sp, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -1121,12 +1118,12 @@ class _CheckoutState extends State<Checkout> {
                         }
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                        padding: EdgeInsets.symmetric(horizontal: 15.w),
                         child: Container(
-                          height: 140,
+                          height: 140.h,
                           width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
+                            borderRadius: BorderRadius.circular(15.r),
                             color: const Color(0xFFF1F2F7),
                             boxShadow: [
                               BoxShadow(
@@ -1142,7 +1139,7 @@ class _CheckoutState extends State<Checkout> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.all(15.0),
+                                  padding: EdgeInsets.all(15.r),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -1150,9 +1147,9 @@ class _CheckoutState extends State<Checkout> {
                                       Text(
                                         AppLocalizations.of(context)
                                             .yourDeliveryLocation,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontWeight: FontWeight.w500,
-                                          fontSize: 20,
+                                          fontSize: 20.sp,
                                         ),
                                       ),
                                       SvgPicture.asset(
@@ -1161,17 +1158,17 @@ class _CheckoutState extends State<Checkout> {
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 15.0,
-                                      right: 15.0,
-                                      bottom: 15.0,
-                                      top: 10),
+                                  padding: EdgeInsets.only(
+                                      left: 15.w,
+                                      right: 15.w,
+                                      bottom: 15.h,
+                                      top: 10.h),
                                   child: Text(
                                     selectedAddress ??
                                         AppLocalizations.of(context)
                                             .chooseYourLocation,
-                                    style: const TextStyle(
-                                        fontSize: 16,
+                                    style: TextStyle(
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.w500),
                                   ),
                                 ),
@@ -1184,12 +1181,12 @@ class _CheckoutState extends State<Checkout> {
 
                     // SELF-PICKUP
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      padding: EdgeInsets.symmetric(horizontal: 15.w),
                       child: Container(
-                        height: 140,
-                        width: 390,
+                        height: 140.h,
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15.r),
                           color: const Color(0xFFF1F2F7),
                           boxShadow: [
                             BoxShadow(
@@ -1201,16 +1198,16 @@ class _CheckoutState extends State<Checkout> {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(15.0),
+                          padding: EdgeInsets.all(15.r),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 AppLocalizations.of(context).chooseBranchToPick,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500, fontSize: 20),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 20.sp),
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                               DropdownButton<String>(
                                 value: selectedBranch,
                                 hint: Text(
@@ -1238,15 +1235,15 @@ class _CheckoutState extends State<Checkout> {
 
                     // CARHOP
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      padding: EdgeInsets.symmetric(horizontal: 15.w),
                       child: SizedBox(
-                        height: _selectedIndex == 2 ? 480 : 140,
-                        width: 390,
+                        height: _selectedIndex == 2 ? 480.h : 140.h,
+                        width: double.infinity,
                         child: Column(
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(15.r),
                                 color: const Color(0xFFF1F2F7),
                                 boxShadow: [
                                   BoxShadow(
@@ -1258,7 +1255,7 @@ class _CheckoutState extends State<Checkout> {
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(15.0),
+                                padding: EdgeInsets.all(15.r),
                                 child: Column(
                                   children: [
                                     Row(
@@ -1277,10 +1274,10 @@ class _CheckoutState extends State<Checkout> {
                                                 value: city,
                                                 child: Text(
                                                   city,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w600,
-                                                      fontSize: 14),
+                                                      fontSize: 14.sp),
                                                 ),
                                               );
                                             }).toList(),
@@ -1303,7 +1300,7 @@ class _CheckoutState extends State<Checkout> {
                                           ),
                                       ],
                                     ),
-                                    const SizedBox(height: 10),
+                                    SizedBox(height: 10.h),
                                     Row(
                                       children: [
                                         Expanded(
@@ -1321,10 +1318,10 @@ class _CheckoutState extends State<Checkout> {
                                                 value: branch,
                                                 child: Text(
                                                   branch,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.w600,
-                                                      fontSize: 14),
+                                                      fontSize: 14.sp),
                                                 ),
                                               );
                                             }).toList(),
@@ -1351,32 +1348,28 @@ class _CheckoutState extends State<Checkout> {
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 22.0,
-                            ),
+                            SizedBox(height: 22.h),
                             Align(
                               alignment: AlignmentDirectional.centerStart,
                               child: Text(
                                 AppLocalizations.of(context)
                                     .carhopServiceBranchInfo,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 14),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14.sp),
                               ),
                             ),
-                            const SizedBox(
-                              height: 15.0,
-                            ),
+                            SizedBox(height: 15.h),
                             Container(
-                              height: 158,
-                              width: 390,
+                              height: 158.h,
+                              width: double.infinity,
                               decoration: BoxDecoration(
                                 color: const Color(0xFFF1F2F7),
-                                borderRadius: BorderRadius.circular(15),
+                                borderRadius: BorderRadius.circular(15.r),
                                 border: Border.all(color: Colors.red),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                    top: 20.0, right: 15.0),
+                                padding: EdgeInsets.only(
+                                    top: 20.h, right: 15.w),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -1390,9 +1383,7 @@ class _CheckoutState extends State<Checkout> {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(
-                                      width: 10.0,
-                                    ),
+                                    SizedBox(width: 10.w),
                                     Expanded(
                                       flex: 6,
                                       child: Container(
@@ -1415,37 +1406,31 @@ class _CheckoutState extends State<Checkout> {
                                                 ),
                                               ),
                                               if (selectedBranch != null) ...[
-                                                const SizedBox(height: 5.0),
+                                                SizedBox(height: 5.h),
                                                 Text(
                                                   BranchData.getBranchAddress(
                                                       selectedBranch),
-                                                  style: const TextStyle(
-                                                    fontSize: 12,
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
                                                     fontWeight: FontWeight.w500,
-                                                    color: Color(0xff5B5B5B),
+                                                    color: const Color(0xff5B5B5B),
                                                   ),
                                                 ),
                                               ],
-                                              const SizedBox(
-                                                height: 15.0,
-                                              ),
+                                              SizedBox(height: 15.h),
                                               Text(
                                                 '${AppLocalizations.of(context).openingHours} 9:00-00:00',
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontWeight: FontWeight.w600,
-                                                  fontSize: 12.0,
+                                                  fontSize: 12.sp,
                                                 ),
                                               ),
-                                              const SizedBox(
-                                                height: 15.0,
-                                              ),
+                                              SizedBox(height: 15.h),
                                               Row(
                                                 children: [
                                                   SvgPicture.asset(
                                                       'images/mapPointer.svg'),
-                                                  const SizedBox(
-                                                    width: 15.0,
-                                                  ),
+                                                  SizedBox(width: 15.w),
                                                   GestureDetector(
                                                     onTap: () {
                                                       BranchLocations.openMap(
@@ -1455,10 +1440,10 @@ class _CheckoutState extends State<Checkout> {
                                                       AppLocalizations.of(
                                                               context)
                                                           .viewInMap,
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         color:
-                                                            Color(0xFF1C90E1),
-                                                        fontSize: 12,
+                                                            const Color(0xFF1C90E1),
+                                                        fontSize: 12.sp,
                                                         fontWeight:
                                                             FontWeight.w600,
                                                         decoration:
@@ -1478,38 +1463,27 @@ class _CheckoutState extends State<Checkout> {
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 15.0,
-                            ),
+                            SizedBox(height: 15.h),
                             Align(
                               alignment: AlignmentDirectional.centerStart,
                               child: Column(
                                 children: [
                                   Text(
                                     AppLocalizations.of(context).carDetails,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14),
+                                        fontSize: 14.sp),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            // Text(
-                            //   AppLocalizations.of(context).carDetailsHint,
-                            //   style: const TextStyle(
-                            //       fontSize: 12, color: Color(0xFFB0B0B0)),
-                            // ),
-                            const SizedBox(
-                              height: 5.0,
-                            ),
+                            SizedBox(height: 5.h),
+                            SizedBox(height: 5.h),
                             Container(
-                              width: 390,
-                              height: 48,
+                              width: double.infinity,
+                              height: 48.h,
                               decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(10.r),
                                 border: Border.all(color: Colors.black26),
                               ),
                               child: GestureDetector(
@@ -1518,8 +1492,8 @@ class _CheckoutState extends State<Checkout> {
                                       .requestFocus(_carDetailsFocusNode);
                                 },
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w),
                                   child: TextField(
                                     focusNode: _carDetailsFocusNode,
                                     autocorrect: false,
@@ -1527,17 +1501,17 @@ class _CheckoutState extends State<Checkout> {
                                     decoration: InputDecoration(
                                       hintText: AppLocalizations.of(context)
                                           .carDetailsHint,
-                                      hintStyle: const TextStyle(fontSize: 12),
+                                      hintStyle: TextStyle(fontSize: 12.sp),
                                       border: InputBorder.none,
                                       contentPadding:
-                                          const EdgeInsets.only(left: 15.0),
+                                          EdgeInsets.only(left: 15.w),
                                     ),
                                     onChanged: (value) {
                                       setState(() {
                                         carDetails = value;
                                         _updateCarDetails();
                                       });
-                                      _saveCarDetails(value); // Save to cache
+                                      _saveCarDetails(value);
                                     },
                                   ),
                                 ),
@@ -1550,12 +1524,12 @@ class _CheckoutState extends State<Checkout> {
 
                     // IN-RESTAURANT
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      padding: EdgeInsets.symmetric(horizontal: 15.w),
                       child: Container(
-                        height: 140,
-                        width: 390,
+                        height: 140.h,
+                        width: double.infinity,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(15.r),
                           color: const Color(0xFFF1F2F7),
                           boxShadow: [
                             BoxShadow(
@@ -1567,16 +1541,16 @@ class _CheckoutState extends State<Checkout> {
                           ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(15.0),
+                          padding: EdgeInsets.all(15.r),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 AppLocalizations.of(context).chooseBranchToPick,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500, fontSize: 20),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 20.sp),
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                               DropdownButton<String>(
                                 value: selectedBranch,
                                 hint: Text(
@@ -1609,32 +1583,32 @@ class _CheckoutState extends State<Checkout> {
               height: 40.0,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 200,
+                height: 200.h,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15.0),
+                  borderRadius: BorderRadius.circular(15.r),
                   color: Colors.white,
                   boxShadow: const [
                     BoxShadow(
-                      color: Color(0xFFD9D9D9), // Shadow color
-                      offset: Offset(0, 7), // Offset in x and y direction
-                      blurRadius: 10.0, // Spread radius
-                      spreadRadius: 2.0, // Blur radius
+                      color: Color(0xFFD9D9D9),
+                      offset: Offset(0, 7),
+                      blurRadius: 10.0,
+                      spreadRadius: 2.0,
                     ),
                   ],
                 ),
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(15.r),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${AppLocalizations.of(context).orderPrice} :',
-                            style: const TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16.sp),
                           ),
                           Text(
                               '${NumberFormat('#,##0').format(orderPrice)} UZS'),
@@ -1642,19 +1616,19 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(15.r),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${AppLocalizations.of(context).deliveryPrice} :',
-                            style: const TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 16.sp),
                           ),
                           _selectedIndex == 0 && _isCalculatingDistance
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
+                              ? SizedBox(
+                                  width: 20.w,
+                                  height: 20.h,
+                                  child: const CircularProgressIndicator(
                                     strokeWidth: 2,
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                         Colors.amber),
@@ -1670,33 +1644,15 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    // Padding(
-                    //   padding: EdgeInsets.all(15.0),
-                    //   child: Row(
-                    //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    //     children: [
-                    //       Text(
-                    //         AppLocalizations.of(context).bagPrice,
-                    //         style: const TextStyle(fontSize: 16),
-                    //       ),
-                    //       Text(
-                    //         _selectedIndex == 0 ? '2000 UZS' : '0 UZS',
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
-                    // const SizedBox(
-                    //   height: 10.0,
-                    // ),
                     Padding(
-                      padding: const EdgeInsets.all(15.0),
+                      padding: EdgeInsets.all(15.r),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             '${AppLocalizations.of(context).totalPrice} :',
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16.sp, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             _selectedIndex == 0
@@ -1704,7 +1660,7 @@ class _CheckoutState extends State<Checkout> {
                                         _nearestBranch!['deliveryFee'] != null
                                     ? '${NumberFormat('#,##0').format(orderPrice + (_nearestBranch!['deliveryFee'] as num))} UZS'
                                     : '${NumberFormat('#,##0').format(orderPrice)} UZS')
-                                : '${NumberFormat('#,##0').format(orderPrice)} UZS', // No bag price for self-pickup
+                                : '${NumberFormat('#,##0').format(orderPrice)} UZS',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1714,11 +1670,9 @@ class _CheckoutState extends State<Checkout> {
                 ),
               ),
             ),
-            const SizedBox(
-              height: 40,
-            ),
+            const SizedBox(height: 40),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).paymentMethod,
@@ -1728,41 +1682,27 @@ class _CheckoutState extends State<Checkout> {
                 value: selectedOption,
                 isExpanded: true,
                 items: [
-                  // Card payment - available for all order types
                   DropdownMenuItem<String>(
                     value: 'Card',
                     child: Row(
                       children: [
                         const Icon(Icons.credit_card, color: Colors.blue),
-                        const SizedBox(width: 10),
+                        SizedBox(width: 10.w),
                         Text(AppLocalizations.of(context).card),
                       ],
                     ),
                   ),
-                  // Only show Payme for carhop (2) orders - Delivery (0) is commented out
                   if (_selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3)
                     DropdownMenuItem<String>(
                       value: 'Cash',
                       child: Row(
                         children: [
                           const Icon(Icons.payment, color: Colors.purple),
-                          const SizedBox(width: 10),
+                          SizedBox(width: 10.w),
                           Text(AppLocalizations.of(context).cash),
                         ],
                       ),
                     ),
-                  // Payme for delivery orders is disabled
-                  // if (_selectedIndex == 0 || _selectedIndex == 2)
-                  //   const DropdownMenuItem<String>(
-                  //     value: 'Payme',
-                  //     child: Row(
-                  //       children: [
-                  //         Icon(Icons.payment, color: Colors.purple),
-                  //         SizedBox(width: 10),
-                  //         Text('Payme'),
-                  //       ],
-                  //     ),
-                  //   ),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -1771,35 +1711,30 @@ class _CheckoutState extends State<Checkout> {
                 },
               ),
             ),
-            const SizedBox(
-              height: 40,
-            ),
+            const SizedBox(height: 40),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15.0),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     AppLocalizations.of(context).additionalNumber,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(
-                    height: 15.0,
-                  ),
+                  SizedBox(height: 15.h),
                   Container(
-                    height: 48,
+                    height: 48.h,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black26),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Row(
                       children: [
-                        // Country code section
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
                           decoration: const BoxDecoration(
                             border: Border(
                               right: BorderSide(
@@ -1808,15 +1743,14 @@ class _CheckoutState extends State<Checkout> {
                               ),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             '+998',
                             style: TextStyle(
-                              fontSize: 16.0,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
-                        // Phone number input
                         Expanded(
                           child: TextField(
                             controller: _additionalPhoneController,
@@ -1824,14 +1758,14 @@ class _CheckoutState extends State<Checkout> {
                               hintText:
                                   AppLocalizations.of(context).numberHintText,
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 8.h,
                               ),
                               isDense: true,
                             ),
-                            style: const TextStyle(
-                              fontSize: 16.0,
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w400,
                             ),
                             keyboardType: TextInputType.phone,
@@ -1851,27 +1785,25 @@ class _CheckoutState extends State<Checkout> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40.0),
+                  SizedBox(height: 40.h),
                   Text(
                     AppLocalizations.of(context).comments,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: 16.sp,
                       color: Colors.black,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(
-                    height: 15.0,
-                  ),
+                  SizedBox(height: 15.h),
                   Container(
-                    height: 100,
+                    height: 100.h,
                     width: MediaQuery.of(context).size.width - 32,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(color: Colors.black26),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: TextField(
                         decoration: const InputDecoration(
                           border: InputBorder.none,
@@ -1892,21 +1824,19 @@ class _CheckoutState extends State<Checkout> {
             // Show warning message when delivery fee is not calculated in delivery mode
             _selectedIndex == 0 && deliveryFee <= 0
                 ? Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
                     child: Text(
                       AppLocalizations.of(context).deliveryFeeSpinner,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.red,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                        fontSize: 14.sp,
                       ),
                       textAlign: TextAlign.center,
                     ),
                   )
                 : const SizedBox.shrink(),
-            const SizedBox(
-              height: 20.0,
-            ),
+            const SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: (_selectedIndex == 0
                       ? selectedAddress != null &&
@@ -2180,28 +2110,26 @@ class _CheckoutState extends State<Checkout> {
                 ),
               ),
               child: _isProcessing
-                  ? const Padding(
-                      padding: EdgeInsets.all(12.0),
-                      child: CircularProgressIndicator(
+                  ? Padding(
+                      padding: EdgeInsets.all(12.r),
+                      child: const CircularProgressIndicator(
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
                   : Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 15.0, horizontal: 125.0),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15.h, horizontal: 125.w),
                       child: Text(
                         AppLocalizations.of(context).order,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           color: Colors.black,
                         ),
                       ),
                     ),
             ),
-            const SizedBox(
-              height: 50.0,
-            )
+            SizedBox(height: 50.h),
           ],
         ),
       ),
@@ -2213,7 +2141,7 @@ class _CheckoutState extends State<Checkout> {
       backgroundColor: Colors.white,
       title: Text(
         AppLocalizations.of(context).checkout,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500),
       ),
       centerTitle: true,
       leading: GestureDetector(
@@ -2222,8 +2150,8 @@ class _CheckoutState extends State<Checkout> {
               context, MaterialPageRoute(builder: (context) => const Cart()));
         },
         child: SizedBox(
-          height: 25,
-          width: 25,
+          height: 25.h,
+          width: 25.w,
           child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
         ),
       ),

@@ -4,6 +4,7 @@ import 'package:apploook/models/category-model.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -35,13 +36,13 @@ class _CartState extends State<Cart> {
 
   void _ensureMandatoryPackage() async {
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    
+
     // Get all products from MenuService
     try {
       final menuService = MenuService();
       await menuService.initialize();
       final allProducts = menuService.allProducts;
-      
+
       // Ensure mandatory package is added if cart has items
       cartProvider.ensureMandatoryPackage(allProducts);
     } catch (e) {
@@ -76,8 +77,7 @@ class _CartState extends State<Cart> {
     double getTotalPrice(CartProvider cartProvider) {
       double totalPrice = 0;
       for (var cartItem in cartProvider.cartItems) {
-        totalPrice +=
-            cartItem.totalPrice; // Use the totalPrice that includes modifiers
+        totalPrice += cartItem.totalPrice;
       }
       return totalPrice;
     }
@@ -90,7 +90,7 @@ class _CartState extends State<Cart> {
         backgroundColor: Colors.white,
         title: Text(
           AppLocalizations.of(context).cart,
-          style: TextStyle(color: Colors.black, fontSize: 18),
+          style: TextStyle(color: Colors.black, fontSize: 18.sp),
         ),
         elevation: 0.0,
         centerTitle: true,
@@ -102,13 +102,13 @@ class _CartState extends State<Cart> {
             );
           },
           child: Container(
-            margin: const EdgeInsets.only(left: 10.0),
+            margin: EdgeInsets.only(left: 10.w),
             child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
           ),
         ),
         actions: [
           Container(
-            margin: const EdgeInsets.only(right: 10.0),
+            margin: EdgeInsets.only(right: 10.w),
             child: IconButton(
               onPressed: () {
                 cartProvider.clearCart();
@@ -128,15 +128,15 @@ class _CartState extends State<Cart> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 15.0),
+              SizedBox(height: 15.h),
               Text(
                 '$item items ${NumberFormat('#,##0').format(price)} UZS',
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 5.0),
+              SizedBox(height: 5.h),
               SingleChildScrollView(
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height / 1.8,
@@ -145,12 +145,12 @@ class _CartState extends State<Cart> {
                     itemBuilder: (context, index) {
                       final cartItem = cartProvider.cartItems[index];
                       final isMandatoryPackage = cartItem.product.name == 'Пакет';
-                      
+
                       return ListTile(
                         leading: Image.network(
                           cartItem.product.imagePath,
-                          width: 70,
-                          height: 70,
+                          width: 70.w,
+                          height: 70.h,
                           fit: BoxFit.cover,
                         ),
                         title: Row(
@@ -158,26 +158,26 @@ class _CartState extends State<Cart> {
                             Expanded(
                               child: Text(
                                 cartItem.displayName,
-                                style: const TextStyle(
-                                  fontSize: 18,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                             if (isMandatoryPackage)
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 6.w,
+                                  vertical: 2.h,
                                 ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFEC700),
-                                  borderRadius: BorderRadius.circular(4),
+                                  borderRadius: BorderRadius.circular(4.r),
                                 ),
-                                child: const Text(
+                                child: Text(
                                   'Required',
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 10.sp,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
@@ -192,9 +192,9 @@ class _CartState extends State<Cart> {
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.grey[200],
-                                  borderRadius: BorderRadius.circular(50.0),
+                                  borderRadius: BorderRadius.circular(50.r),
                                 ),
-                                padding: const EdgeInsets.all(8.0),
+                                padding: EdgeInsets.all(8.r),
                                 child: Row(
                                   children: [
                                     GestureDetector(
@@ -210,20 +210,21 @@ class _CartState extends State<Cart> {
                                       },
                                       child: const Icon(Icons.remove),
                                     ),
-                                    const SizedBox(width: 8.0),
-                                    Container(
-                                      width: 20,
-                                      height: 20,
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        cartItem.quantity.toString(),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14,
+                                    SizedBox(width: 8.w),
+                                    SizedBox(
+                                      width: 20.w,
+                                      height: 20.h,
+                                      child: Center(
+                                        child: Text(
+                                          cartItem.quantity.toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14.sp,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 8.0),
+                                    SizedBox(width: 8.w),
                                     GestureDetector(
                                       onTap: () {
                                         cartProvider.updateQuantity(
@@ -237,21 +238,20 @@ class _CartState extends State<Cart> {
                                 ),
                               )
                             else
-                              // For mandatory package, show fixed quantity
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(50.0),
+                                  borderRadius: BorderRadius.circular(50.r),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 8.0,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 8.h,
                                 ),
                                 child: Text(
                                   '${cartItem.quantity}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                   ),
                                 ),
                               ),
@@ -265,33 +265,11 @@ class _CartState extends State<Cart> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30.0),
+              SizedBox(height: 30.h),
               Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // ElevatedButton(
-                  //   onPressed: () {},
-                  //   style: ButtonStyle(
-                  //     backgroundColor: MaterialStateProperty.all(
-                  //       const Color(0xffF1F2F7),
-                  //     ),
-                  //     foregroundColor: MaterialStateProperty.all(
-                  //       Colors.black,
-                  //     ),
-                  //   ),
-                  //   child: const Padding(
-                  //     padding: EdgeInsets.all(12.0),
-                  //     child: Text(
-                  //       'Apply promo code',
-                  //       style: TextStyle(
-                  //         fontSize: 18,
-                  //         fontWeight: FontWeight.w500,
-                  //         color: Colors.black26,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  const SizedBox(height: 25.0),
+                  SizedBox(height: 25.h),
                   TextButton(
                     onPressed: price > 0
                         ? () async {
@@ -300,7 +278,7 @@ class _CartState extends State<Cart> {
                             print('\n======== CART → CHECKOUT: Cart Items ========');
                             print('Total Items: ${cartProvider.cartItems.length}');
                             print('Total Price: ${cartProvider.getTotalPrice()} UZS');
-                            
+
                             for (int i = 0; i < cartProvider.cartItems.length; i++) {
                               final item = cartProvider.cartItems[i];
                               print('\n--- Item ${i + 1} ---');
@@ -311,7 +289,7 @@ class _CartState extends State<Cart> {
                               print('Quantity: ${item.quantity}');
                               print('Base Price: ${item.product.price} UZS');
                               print('Total Price (with modifiers): ${item.totalPrice} UZS');
-                              
+
                               if (item.selectedModifiers != null && item.selectedModifiers.isNotEmpty) {
                                 print('Selected Modifiers (${item.selectedModifiers.length}):');
                                 double modifiersTotal = 0.0;
@@ -331,7 +309,7 @@ class _CartState extends State<Cart> {
                               }
                             }
                             print('============================================\n');
-                            
+
                             bool isSignedIn = await _isUserSignedIn();
                             Navigator.pushNamed(
                               context,
@@ -343,17 +321,17 @@ class _CartState extends State<Cart> {
                       backgroundColor: price > 0
                           ? const Color(0xFFFEC700)
                           : const Color(0xFFCCCCCC),
-                      padding: const EdgeInsets.only(
-                          top: 12.0, bottom: 12.0, left: 24, right: 24),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 12.h, horizontal: 24.w),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
+                        borderRadius: BorderRadius.circular(50.r),
                       ),
                     ),
                     child: Text(
                       '${AppLocalizations.of(context).proceedToCheckout} - ${NumberFormat('#,##0').format(price)} UZS',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.black,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

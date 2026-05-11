@@ -2,6 +2,7 @@ import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/verification_screen.dart';
 import 'package:apploook/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -141,8 +142,8 @@ class _AuthorizationState extends State<Authorization> {
         backgroundColor: Colors.white,
         title: Text(
           AppLocalizations.of(context).authorization,
-          style: const TextStyle(
-            fontSize: 18.0,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w500,
             color: Colors.grey,
           ),
@@ -150,8 +151,7 @@ class _AuthorizationState extends State<Authorization> {
         centerTitle: true,
       ),
       body: GestureDetector(
-        onTap: () =>
-            FocusScope.of(context).unfocus(), // Dismiss keyboard on tap outside
+        onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: SingleChildScrollView(
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -168,18 +168,18 @@ class _AuthorizationState extends State<Authorization> {
                   // Top content
                   Column(
                     children: [
-                      const SizedBox(height: 75),
+                      SizedBox(height: 75.h),
                       Center(
                         child: Text(
                           AppLocalizations.of(context).authorizationTitle,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 20),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700, fontSize: 20.sp),
                         ),
                       ),
-                      const SizedBox(height: 40.0),
+                      SizedBox(height: 40.h),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: TextField(
                           controller: _firstNameController,
                           textInputAction: TextInputAction.next,
@@ -187,10 +187,10 @@ class _AuthorizationState extends State<Authorization> {
                             labelText:
                                 AppLocalizations.of(context).nameTranslation,
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
+                              borderRadius: BorderRadius.circular(10.r),
                               borderSide: const BorderSide(
                                 color: Color.fromARGB(255, 255, 215, 56),
                               ),
@@ -198,9 +198,9 @@ class _AuthorizationState extends State<Authorization> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20.0),
+                      SizedBox(height: 20.h),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
                         child: Form(
                           key: _phoneFormKey,
                           child: PhoneFormField(
@@ -214,10 +214,10 @@ class _AuthorizationState extends State<Authorization> {
                               labelText: AppLocalizations.of(context)
                                   .phoneNumberTranslation,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                                borderRadius: BorderRadius.circular(10.r),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10.0),
+                                borderRadius: BorderRadius.circular(10.r),
                                 borderSide: const BorderSide(
                                   color: Color.fromARGB(255, 255, 215, 56),
                                 ),
@@ -243,11 +243,11 @@ class _AuthorizationState extends State<Authorization> {
                   // Bottom button
                   Padding(
                     padding: EdgeInsets.only(
-                      left: 20.0,
-                      right: 20.0,
+                      left: 20.w,
+                      right: 20.w,
                       bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                          ? 20.0
-                          : 50.0,
+                          ? 20.h
+                          : 50.h,
                     ),
                     child: SizedBox(
                       width: double.infinity,
@@ -256,16 +256,16 @@ class _AuthorizationState extends State<Authorization> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
                               const Color.fromARGB(255, 255, 215, 56),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: EdgeInsets.symmetric(vertical: 15.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                            borderRadius: BorderRadius.circular(25.r),
                           ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
+                            ? SizedBox(
+                                height: 20.h,
+                                width: 20.w,
+                                child: const CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
                                       Colors.black),
@@ -273,8 +273,8 @@ class _AuthorizationState extends State<Authorization> {
                               )
                             : Text(
                                 AppLocalizations.of(context).continueButton,
-                                style: const TextStyle(
-                                    fontSize: 16,
+                                style: TextStyle(
+                                    fontSize: 16.sp,
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600),
                               ),

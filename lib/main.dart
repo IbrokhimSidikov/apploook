@@ -1,4 +1,5 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/branches.dart';
@@ -226,10 +227,14 @@ class _MyAppState extends State<MyApp> {
       );
     }
     
-    return Consumer<LocaleProvider>(
-      builder: (context, localeProvider, _) {
-        return MaterialApp(
-          navigatorKey: navigatorKey,
+    return ScreenUtilInit(
+      designSize: const Size(393, 852),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) => Consumer<LocaleProvider>(
+        builder: (context, localeProvider, _) {
+          return MaterialApp(
+            navigatorKey: navigatorKey,
           debugShowCheckedModeBanner: false,
           title: 'LOOOK MOBILE',
           theme: ThemeData(
@@ -271,6 +276,7 @@ class _MyAppState extends State<MyApp> {
           },
         );
       },
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -585,16 +586,16 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           Center(
                             child: SvgPicture.asset(
                               'images/1.svg',
-                              width: 150,
-                              height: 120,
+                              width: 150.w,
+                              height: 120.h,
                             ),
                           ),
                           const Spacer(flex: 5),
                           Text(
                             AppLocalizations.of(context).orderNowNotOnlyChicken,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Poppins',
                             ),
@@ -608,12 +609,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 children: [
                                   SvgPicture.asset(
                                       'images/suitable-for-all-basket.svg'),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: 4.w),
                                   Text(
                                     AppLocalizations.of(context)
                                         .suitableForEveryone,
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12.sp),
                                     textAlign: TextAlign.left,
                                   ),
                                 ],
@@ -622,12 +623,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 children: [
                                   SvgPicture.asset(
                                       'images/solar--sale-linear.svg'),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: 4.w),
                                   Text(
                                     AppLocalizations.of(context)
                                         .promosOfferDeals,
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12.sp),
                                     textAlign: TextAlign.left,
                                   ),
                                 ],
@@ -636,11 +637,11 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                 children: [
                                   SvgPicture.asset(
                                       'images/heroicons--device-phone-mobile.svg'),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: 4.w),
                                   Text(
                                     AppLocalizations.of(context).easyOrdering,
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 12.sp),
                                     textAlign: TextAlign.left,
                                   ),
                                 ],
@@ -651,12 +652,13 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 30.0),
+                              padding: EdgeInsets.only(left: 30.w),
                               child: Text(
                                 AppLocalizations.of(context).chooseLanguage,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ),
@@ -667,8 +669,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -680,14 +682,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                           .setLocale(const Locale('en'));
                                     },
                                     child: Container(
-                                      height: 50,
+                                      height: 50.h,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isEnglishSelected
                                             ? const Color.fromARGB(
                                                 255, 255, 210, 57)
                                             : Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(10.r),
                                         boxShadow: [
                                           BoxShadow(
                                             color:
@@ -698,12 +700,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                           ),
                                         ],
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         'English',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Color(0xFFda2325),
-                                          fontSize: 15,
+                                          fontSize: 15.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -713,8 +715,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -726,14 +728,14 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                           .setLocale(const Locale('uz'));
                                     },
                                     child: Container(
-                                      height: 50,
+                                      height: 50.h,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
                                         color: isUzbekSelected
                                             ? const Color.fromARGB(
                                                 255, 255, 210, 57)
                                             : Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(10.r),
                                         boxShadow: [
                                           BoxShadow(
                                             color:
@@ -744,12 +746,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                           ),
                                         ],
                                       ),
-                                      child: const Text(
+                                      child: Text(
                                         'Uzbek',
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: Color(0xFFda2325),
-                                          fontSize: 15,
+                                          fontSize: 15.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
@@ -908,28 +910,28 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.zero,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
+                                borderRadius: BorderRadius.circular(50.r),
                               ),
                             ),
                             child: Padding(
                               padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                                  EdgeInsets.symmetric(horizontal: 12.w),
                               child: Container(
                                 width: double.infinity,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 20),
+                                    EdgeInsets.symmetric(vertical: 18.h),
                                 decoration: BoxDecoration(
                                   color: _isLoading
                                       ? const Color(0xFFE0E0E0)
                                       : const Color(0xFFFEC700),
-                                  borderRadius: BorderRadius.circular(50),
+                                  borderRadius: BorderRadius.circular(50.r),
                                 ),
                                 child: _isLoading
-                                    ? const Center(
+                                    ? Center(
                                         child: SizedBox(
-                                          width: 24,
-                                          height: 24,
-                                          child: CircularProgressIndicator(
+                                          width: 24.w,
+                                          height: 24.h,
+                                          child: const CircularProgressIndicator(
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
                                                     Colors.black),
@@ -941,11 +943,11 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         AppLocalizations.of(context)
                                             .continueButton,
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          color: Color(0xFFda2325),
+                                        style: TextStyle(
+                                          color: const Color(0xFFda2325),
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
+                                          fontSize: 16.sp,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.visible,
@@ -954,11 +956,12 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             ),
                           ),
                           const Spacer(flex: 1),
-                          const Text(
+                          Text(
                             'PRIVACY POLICY',
                             style: TextStyle(
-                              color: Color.fromRGBO(252, 247, 247, 1.0),
+                              color: const Color.fromRGBO(252, 247, 247, 1.0),
                               fontFamily: 'Poppins',
+                              fontSize: 12.sp,
                             ),
                           ),
                           const Spacer(flex: 6),

@@ -6,6 +6,7 @@ import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/widget/widget_support.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
@@ -201,11 +202,11 @@ class _DetailsState extends State<Details> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 8.h),
             child: Text(
               group.name,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
@@ -213,16 +214,16 @@ class _DetailsState extends State<Details> {
           ),
           Text(
             'Choose ${group.minSelectedModifiers}-${group.maxSelectedModifiers}',
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               color: Colors.grey,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           ...group.modifiers.map((modifier) {
             bool isSelected = _isModifierSelected(group.id, modifier.id);
             return Container(
-              margin: const EdgeInsets.symmetric(vertical: 4),
+              margin: EdgeInsets.symmetric(vertical: 4.h),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: isSelected
@@ -230,7 +231,7 @@ class _DetailsState extends State<Details> {
                       : Colors.grey.shade300,
                   width: 2,
                 ),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: ListTile(
                 title: Text(
@@ -254,7 +255,7 @@ class _DetailsState extends State<Details> {
               ),
             );
           }).toList(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
         ],
       );
     }).toList();
@@ -269,7 +270,7 @@ class _DetailsState extends State<Details> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Container(
-        margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
+        margin: EdgeInsets.only(top: 50.h, left: 20.w, right: 20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -288,23 +289,23 @@ class _DetailsState extends State<Details> {
                     Container(
                       width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         color: Colors.grey[100],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         child: AspectRatio(
-                          aspectRatio: 3 / 2, // 600:400 = 3:2 aspect ratio
+                          aspectRatio: 3 / 2,
                           child: Image.network(
                             widget.product.imagePath,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
                                 color: Colors.grey[200],
-                                child: const Center(
+                                child: Center(
                                   child: Icon(
                                     Icons.image_not_supported,
-                                    size: 50,
+                                    size: 50.w,
                                     color: Colors.grey,
                                   ),
                                 ),
@@ -319,7 +320,7 @@ class _DetailsState extends State<Details> {
                                   width: MediaQuery.of(context).size.width,
                                   decoration: BoxDecoration(
                                     color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(12.r),
                                   ),
                                 ),
                               );
@@ -331,9 +332,9 @@ class _DetailsState extends State<Details> {
                     Row(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width - 180,
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width - 180.w,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -351,14 +352,13 @@ class _DetailsState extends State<Details> {
                         ),
                         const Spacer(),
                         Container(
-                          height: 48,
-                          width: 140,
+                          height: 48.h,
+                          width: 140.w,
                           decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Color(0xFFD9D9D9)),
+                              borderRadius: BorderRadius.circular(50.r),
+                              color: const Color(0xFFD9D9D9)),
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            padding: EdgeInsets.symmetric(horizontal: 10.w),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -375,19 +375,17 @@ class _DetailsState extends State<Details> {
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius:
-                                            BorderRadius.circular(50)),
+                                            BorderRadius.circular(50.r)),
                                     child: const Icon(Icons.remove,
                                         color: Colors.black),
                                   ),
                                 ),
-                                SizedBox(width: 20.0),
-                                Container(
-                                  child: Text(
-                                    quantity.toString(),
-                                    style: AppWidget.semiboldTextFieldStyle(),
-                                  ),
+                                SizedBox(width: 20.w),
+                                Text(
+                                  quantity.toString(),
+                                  style: AppWidget.semiboldTextFieldStyle(),
                                 ),
-                                SizedBox(width: 20.0),
+                                SizedBox(width: 20.w),
                                 GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -399,7 +397,7 @@ class _DetailsState extends State<Details> {
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius:
-                                            BorderRadius.circular(50)),
+                                            BorderRadius.circular(50.r)),
                                     child: const Icon(Icons.add,
                                         color: Colors.black),
                                   ),
@@ -410,9 +408,9 @@ class _DetailsState extends State<Details> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20.0),
-                    Container(
-                      height: 100,
+                    SizedBox(height: 20.h),
+                    SizedBox(
+                      height: 100.h,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Consumer<LocaleProvider>(
@@ -430,18 +428,18 @@ class _DetailsState extends State<Details> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20.0),
+                    SizedBox(height: 20.h),
                     // Modifier Groups Section
                     if (hasModifiers) ..._buildModifierGroups(),
-                    const SizedBox(height: 5.0),
+                    SizedBox(height: 5.h),
                     // ChangeDrinks(categories: categories) // Uncomment if ChangeDrinks is needed
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 20.0),
+            SizedBox(height: 20.h),
             Padding(
-              padding: const EdgeInsets.only(bottom: 50),
+              padding: EdgeInsets.only(bottom: 50.h),
               child: Column(
                 children: [
                   // Show warning message when ordering is not allowed
@@ -449,7 +447,7 @@ class _DetailsState extends State<Details> {
                     Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
+                          padding: EdgeInsets.only(bottom: 8.h),
                           child: Text(
                             AppLocalizations.of(context).orderWillBeTaken,
                             style: const TextStyle(
@@ -479,9 +477,9 @@ class _DetailsState extends State<Details> {
                         children: [
                           Text(
                             AppLocalizations.of(context).totalPrice,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w500,
-                              fontSize: 16.0,
+                              fontSize: 16.sp,
                             ),
                           ),
                           Text(
@@ -521,19 +519,19 @@ class _DetailsState extends State<Details> {
                                 const Color(0xFFFEC700)),
                             shape: WidgetStateProperty.all<OutlinedBorder>(
                               RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50),
+                                borderRadius: BorderRadius.circular(50.r),
                               ),
                             ),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 24),
+                            padding: EdgeInsets.symmetric(
+                                vertical: 12.h, horizontal: 24.w),
                             child: Text(
                               AppLocalizations.of(context).addToCart,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 16.0,
+                                fontSize: 16.sp,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
                               ),

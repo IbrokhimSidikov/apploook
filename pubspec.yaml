@@ -2,7 +2,7 @@ name: apploook
 description: "LOOOK Mobile Application"
 publish_to: "none"
 
-version: 2.8.0+43
+version: 2.8.0+44
 
 environment:
   sdk: ">=3.3.4 <4.0.0"
@@ -44,6 +44,7 @@ dependencies:
   vibration: ^3.1.4
   package_info_plus: ^8.3.0
   image_picker: ^1.2.1
+  flutter_screenutil: ^5.9.3
   
 
 dev_dependencies:

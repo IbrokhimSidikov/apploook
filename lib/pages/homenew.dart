@@ -1,5 +1,6 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
@@ -493,7 +494,7 @@ class _HomeNewState extends State<HomeNew>
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
-                expandedHeight: 270,
+                expandedHeight: 270.h,
                 floating: false,
                 pinned: true,
                 backgroundColor: const Color(0xFFF1F2F7),
@@ -502,7 +503,7 @@ class _HomeNewState extends State<HomeNew>
                     _scaffoldKey.currentState!.openDrawer();
                   },
                   child: Padding(
-                    padding: const EdgeInsets.all(10.0),
+                    padding: EdgeInsets.all(10.r),
                     child: SvgPicture.asset('images/profileIconHome.svg'),
                   ),
                 ),
@@ -544,12 +545,12 @@ class _HomeNewState extends State<HomeNew>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Container(
-                      margin: const EdgeInsets.only(right: 10),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                      margin: EdgeInsets.only(right: 10.w),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 8.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -560,10 +561,10 @@ class _HomeNewState extends State<HomeNew>
                                 .locale
                                 .languageCode
                                 .toUpperCase(),
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                             ),
                           ),
                           const Icon(Icons.arrow_drop_down,
@@ -624,11 +625,11 @@ class _HomeNewState extends State<HomeNew>
                         },
                         child: Stack(
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.all(15.0),
+                            Padding(
+                              padding: EdgeInsets.all(15.r),
                               child: Icon(
                                 Icons.receipt_long,
-                                size: 24.0,
+                                size: 24.w,
                                 color: Colors.black,
                               ),
                             ),
@@ -638,20 +639,20 @@ class _HomeNewState extends State<HomeNew>
                                 right: 10,
                                 top: 10,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: EdgeInsets.all(4.r),
                                   decoration: BoxDecoration(
                                     color: Colors.red,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(10.r),
                                   ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
+                                  constraints: BoxConstraints(
+                                    minWidth: 16.w,
+                                    minHeight: 16.h,
                                   ),
                                   child: Text(
                                     '${orderTrackingService.newOrdersCount}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: 10.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -673,11 +674,11 @@ class _HomeNewState extends State<HomeNew>
                         },
                         child: Stack(
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.all(15.0),
+                            Padding(
+                              padding: EdgeInsets.all(15.r),
                               child: Icon(
                                 Icons.notifications_outlined,
-                                size: 24.0,
+                                size: 24.w,
                                 color: Colors.black,
                               ),
                             ),
@@ -686,20 +687,20 @@ class _HomeNewState extends State<HomeNew>
                                 right: 10,
                                 top: 10,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: EdgeInsets.all(4.r),
                                   decoration: BoxDecoration(
                                     color: Colors.red,
-                                    borderRadius: BorderRadius.circular(10),
+                                    borderRadius: BorderRadius.circular(10.r),
                                   ),
-                                  constraints: const BoxConstraints(
-                                    minWidth: 16,
-                                    minHeight: 16,
+                                  constraints: BoxConstraints(
+                                    minWidth: 16.w,
+                                    minHeight: 16.h,
                                   ),
                                   child: Text(
                                     '${notificationProvider.unreadCount}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: 10.sp,
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
@@ -715,30 +716,30 @@ class _HomeNewState extends State<HomeNew>
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      const SizedBox(height: 100),
+                      SizedBox(height: 100.h),
                       Padding(
-                        padding: const EdgeInsets.only(left: 15),
+                        padding: EdgeInsets.only(left: 15.w),
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
                             AppLocalizations.of(context).whatsNew,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 18.sp),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       // Carousel Slider Banner
                       _isLoadingBanners
                           ? Shimmer.fromColors(
                         baseColor: Colors.grey[300]!,
                         highlightColor: Colors.grey[100]!,
                         child: Container(
-                          height: 160,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          height: 160.h,
+                          margin: EdgeInsets.symmetric(horizontal: 16.w),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(16.r),
                           ),
                         ),
                       )
@@ -763,7 +764,7 @@ class _HomeNewState extends State<HomeNew>
                       return false;
                     },
                     child: Container(
-                      height: 50,
+                      height: 50.h,
                       decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(20.0),
@@ -907,8 +908,8 @@ class _HomeNewState extends State<HomeNew>
           ),
           // Cart Button
           Positioned(
-            bottom: 50.0,
-            left: 25.0,
+            bottom: 50.h,
+            left: 25.w,
             child: cartProvider.showQuantity() > 0
                 ? TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0.8, end: 1.0),
@@ -927,7 +928,7 @@ class _HomeNewState extends State<HomeNew>
                       child: Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFFEC700),
-                          borderRadius: BorderRadius.circular(50.0),
+                          borderRadius: BorderRadius.circular(50.r),
                           border: Border.all(color: Colors.white),
                           boxShadow: [
                             BoxShadow(
@@ -937,25 +938,24 @@ class _HomeNewState extends State<HomeNew>
                             ),
                           ],
                         ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 10.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.w, vertical: 10.h),
                         child: Row(
-                          // mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Stack(
                               alignment: Alignment.topLeft,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.shopping_bag_outlined,
                                   color: Colors.black,
-                                  size: 28.0,
+                                  size: 28.w,
                                 ),
                                 Positioned(
                                   right: 0,
                                   top: -2,
                                   child: Container(
-                                    padding: const EdgeInsets.all(4),
+                                    padding: EdgeInsets.all(4.r),
                                     decoration: BoxDecoration(
                                       color: Colors.red,
                                       shape: BoxShape.circle,
@@ -964,16 +964,12 @@ class _HomeNewState extends State<HomeNew>
                                         width: 1.5,
                                       ),
                                     ),
-                                    // constraints: const BoxConstraints(
-                                    //   minWidth: 15,
-                                    //   minHeight: 15,
-                                    // ),
                                     child: Center(
                                       child: Text(
                                         '${cartProvider.showQuantity()}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 10,
+                                          fontSize: 10.sp,
                                           fontWeight: FontWeight.bold,
                                         ),
                                         textAlign: TextAlign.center,
@@ -983,13 +979,13 @@ class _HomeNewState extends State<HomeNew>
                                 ),
                               ],
                             ),
-                            const SizedBox(width: 12.0),
+                            SizedBox(width: 12.w),
                             Text(
                               AppLocalizations.of(context).cart,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16.0,
+                                fontSize: 16.sp,
                               ),
                             ),
                           ],
@@ -1084,34 +1080,34 @@ class _HomeNewState extends State<HomeNew>
         child: Opacity(
           opacity: productGroup.allOutOfStock ? 0.5 : 1.0,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 10.0,
-              horizontal: 15.0,
+            padding: EdgeInsets.symmetric(
+              vertical: 10.h,
+              horizontal: 15.w,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Product image with variation badge
                 Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: EdgeInsets.only(right: 10.w),
                   child: Stack(
                     children: [
                       SizedBox(
-                        width: 135.0,
+                        width: 135.w,
                         child: AspectRatio(
                           aspectRatio: 3 / 2,
                           child: productGroup.imagePath != null
                               ? CachedProductImage(
                                   imageUrl: productGroup.imagePath!,
-                                  width: 135.0,
-                                  height: 90.0,
+                                  width: 135.w,
+                                  height: 90.h,
                                 )
                               : Container(
                                   color: Colors.grey[200],
-                                  child: const Center(
+                                  child: Center(
                                     child: Icon(
                                       Icons.image_not_supported,
-                                      size: 40,
+                                      size: 40.w,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -1124,16 +1120,16 @@ class _HomeNewState extends State<HomeNew>
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 'OUT OF\nSTOCK',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ),
@@ -1151,20 +1147,20 @@ class _HomeNewState extends State<HomeNew>
                         Expanded(
                           child: Text(
                             productGroup.groupName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.0,
+                              fontSize: 16.sp,
                             ),
                           ),
                         ),
-                        const Icon(
+                        Icon(
                           Icons.arrow_forward_ios,
-                          size: 14,
+                          size: 14.w,
                           color: Colors.grey,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 5.0),
+                    SizedBox(height: 5.h),
                     Consumer<LocaleProvider>(
                       builder: (context, localeProvider, _) {
                         final description = productGroup.primaryVariation
@@ -1184,22 +1180,22 @@ class _HomeNewState extends State<HomeNew>
                         );
                       },
                     ),
-                    const SizedBox(height: 5.0),
+                    SizedBox(height: 5.h),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 35.0,
-                        vertical: 5.0,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 35.w,
+                        vertical: 5.h,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(20.r),
                         color: const Color(0xFFFEC700),
                       ),
                       child: Text(
                         '${productGroup.getPriceRange().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                        style: const TextStyle(
-                          fontSize: 12.0,
+                        style: TextStyle(
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: Color.fromARGB(255, 11, 11, 11),
+                          color: const Color.fromARGB(255, 11, 11, 11),
                         ),
                       ),
                     ),
@@ -1240,33 +1236,33 @@ class _HomeNewState extends State<HomeNew>
         child: Opacity(
           opacity: product.outOfStock ? 0.5 : 1.0,
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 10.0,
-              horizontal: 15.0,
+            padding: EdgeInsets.symmetric(
+              vertical: 10.h,
+              horizontal: 15.w,
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: EdgeInsets.only(right: 10.w),
                   child: Stack(
                     children: [
                       SizedBox(
-                        width: 135.0,
+                        width: 135.w,
                         child: AspectRatio(
                           aspectRatio: 3 / 2,
                           child: product.imagePath != null
                               ? CachedProductImage(
                                   imageUrl: product.imagePath!,
-                                  width: 90.0,
-                                  height: 90.0,
+                                  width: 90.w,
+                                  height: 90.h,
                                 )
                               : Container(
                                   color: Colors.grey[200],
-                                  child: const Center(
+                                  child: Center(
                                     child: Icon(
                                       Icons.image_not_supported,
-                                      size: 40,
+                                      size: 40.w,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -1279,10 +1275,10 @@ class _HomeNewState extends State<HomeNew>
                           top: 4,
                           left: 4,
                           child: Container(
-                            padding: const EdgeInsets.all(4),
+                            padding: EdgeInsets.all(4.r),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFEC700),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -1291,9 +1287,9 @@ class _HomeNewState extends State<HomeNew>
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.push_pin,
-                              size: 14,
+                              size: 14.w,
                               color: Colors.black,
                             ),
                           ),
@@ -1304,16 +1300,16 @@ class _HomeNewState extends State<HomeNew>
                           child: Container(
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(8.r),
                             ),
-                            child: const Center(
+                            child: Center(
                               child: Text(
                                 'OUT OF\nSTOCK',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               ),
                             ),
@@ -1328,12 +1324,12 @@ class _HomeNewState extends State<HomeNew>
                   children: [
                     Text(
                       product.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16.0,
+                        fontSize: 16.sp,
                       ),
                     ),
-                    const SizedBox(height: 5.0),
+                    SizedBox(height: 5.h),
                     Consumer<LocaleProvider>(
                       builder: (context, localeProvider, _) {
                         final description = product.getDescriptionInLanguage(
@@ -1352,22 +1348,22 @@ class _HomeNewState extends State<HomeNew>
                         );
                       },
                     ),
-                    const SizedBox(height: 5.0),
+                    SizedBox(height: 5.h),
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 35.0,
-                        vertical: 5.0,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 35.w,
+                        vertical: 5.h,
                       ),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0),
+                        borderRadius: BorderRadius.circular(20.r),
                         color: const Color(0xFFFEC700),
                       ),
                       child: Text(
                         '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                        style: const TextStyle(
-                          fontSize: 12.0,
+                        style: TextStyle(
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: Color.fromARGB(255, 11, 11, 11),
+                          color: const Color.fromARGB(255, 11, 11, 11),
                         ),
                       ),
                     ),
@@ -1422,10 +1418,10 @@ class _SliverCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 50.0;
+  double get maxExtent => 50.h;
 
   @override
-  double get minExtent => 50.0;
+  double get minExtent => 50.h;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
