@@ -4,6 +4,7 @@ import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:apploook/widget/cached_product_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -1231,7 +1232,7 @@ class _HomeNewState extends State<HomeNew>
         onTap: product.outOfStock ? null : () {
           Navigator.push(
             context,
-            MaterialPageRoute(
+            CupertinoPageRoute(
               builder: (context) => Details(product: product),
             ),
           );

@@ -4,6 +4,7 @@ import 'package:apploook/pages/details.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/widget/cached_product_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -90,7 +91,7 @@ class VariationSelectorSheet extends StatelessWidget {
         // Navigate to details page with the selected variation
         Navigator.push(
           context,
-          MaterialPageRoute(
+          CupertinoPageRoute(
             builder: (context) => Details(product: variation),
           ),
         );
