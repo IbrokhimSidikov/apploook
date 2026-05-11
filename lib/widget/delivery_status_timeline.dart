@@ -14,8 +14,9 @@ int deliveryStageFromStatusId(int id) {
     case 9:
       return 0;
     case 10:
+    case 11: // Book/Booked – still in production stage
       return 1;
-    case 12:
+    case 12: // Go/finish – on the way
       return 2;
     case 26:
       return 3;
@@ -43,12 +44,16 @@ int deliveryStageFromStatus(String raw) {
     case 'preparing':
     case 'production':
     case 'ready':
+    case 'book':
+    case 'booked':
       return 1;
 
     // ── Stage 2 – Delivering ──────────────────────────────────────────────
     case 'on the way':
     case 'delivering':
     case 'on_the_way':
+    case 'go':
+    case 'finish':
       return 2;
 
     // ── Stage 3 – Delivered ───────────────────────────────────────────────

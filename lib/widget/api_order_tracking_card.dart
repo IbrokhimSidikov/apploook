@@ -48,12 +48,16 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
       case 'cooking':
       case 'preparing':
       case 'production':
+      case 'book':
+      case 'booked':
         return 'Preparing';
       case 'ready':
         return 'Ready';
       case 'on the way':
       case 'on_the_way':
       case 'delivering':
+      case 'go':
+      case 'finish':
         return 'On the way';
       case 'delivered':
       case 'completed':
@@ -80,12 +84,16 @@ class _ApiOrderTrackingCardState extends State<ApiOrderTrackingCard> {
       case 'cooking':
       case 'preparing':
       case 'production':
+      case 'book':
+      case 'booked':
         return Colors.amber;
       case 'ready':
         return Colors.indigo;
       case 'on the way':
       case 'on_the_way':
       case 'delivering':
+      case 'go':
+      case 'finish':
         return Colors.purple;
       case 'delivered':
       case 'completed':

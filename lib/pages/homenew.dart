@@ -1253,11 +1253,11 @@ class _HomeNewState extends State<HomeNew>
                       SizedBox(
                         width: 135.0,
                         child: AspectRatio(
-                          aspectRatio: 3 / 2,
+                          aspectRatio: 2 / 2,
                           child: product.imagePath != null
                               ? CachedProductImage(
                                   imageUrl: product.imagePath!,
-                                  width: 135.0,
+                                  width: 90.0,
                                   height: 90.0,
                                 )
                               : Container(

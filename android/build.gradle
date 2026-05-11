@@ -27,14 +27,6 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
-    // Force Kotlin version across all configurations
-    configurations.all {
-        resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-            if (details.requested.group == 'org.jetbrains.kotlin') {
-                details.useVersion '2.1.0'
-            }
-        }
-    }
 }
 
 tasks.register("clean", Delete) {
