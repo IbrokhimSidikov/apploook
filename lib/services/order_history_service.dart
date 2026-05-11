@@ -3,11 +3,16 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderHistoryService {
+  // Singleton so only one memory cache exists across the app
+  static final OrderHistoryService _instance = OrderHistoryService._internal();
+  factory OrderHistoryService() => _instance;
+  OrderHistoryService._internal();
+
   static const String _baseUrl = 'https://api.v3.sievesapp.com';
   static const String _cacheKey = 'order_history_cache';
   static const String _cacheTimestampKey = 'order_history_cache_timestamp';
   static const Duration _cacheDuration = Duration(minutes: 5);
-  
+
   Map<String, dynamic>? _memoryCache;
   DateTime? _memoryCacheTimestamp;
 
@@ -55,12 +60,10 @@ class OrderHistoryService {
 
       if (response.statusCode == 200) {
         final responseBody = utf8.decode(response.bodyBytes);
-        print('Order history raw response: $responseBody');
-        
         final data = json.decode(responseBody) as Map<String, dynamic>;
-        print('Order history parsed data: $data');
         print('Order history fetched successfully: ${data['data']?.length ?? 0} orders');
         
+        // Release the raw string from memory before caching
         await _cacheData(data);
         
         return data;
@@ -100,6 +103,7 @@ class OrderHistoryService {
         final cacheAge = DateTime.now().difference(cacheTimestamp);
 
         if (ignoreExpiration || cacheAge < _cacheDuration) {
+          // Decode and immediately drop the raw string reference
           final data = json.decode(cachedJson) as Map<String, dynamic>;
           _memoryCache = data;
           _memoryCacheTimestamp = cacheTimestamp;
@@ -142,6 +146,12 @@ class OrderHistoryService {
     } catch (e) {
       print('Error clearing cache: $e');
     }
+  }
+
+  /// Free the in-memory cache without touching SharedPreferences.
+  void releaseMemoryCache() {
+    _memoryCache = null;
+    _memoryCacheTimestamp = null;
   }
 
   Map<String, dynamic> parseOrder(Map<String, dynamic> orderData) {

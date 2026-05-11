@@ -42,7 +42,7 @@ class DeliveryReviewScheduler {
       final response = await _orderHistoryService.fetchOrderHistory(
         page: 1,
         limit: 50,
-        forceRefresh: true,
+        forceRefresh: false, // use cache; fresh data comes in via the normal cache TTL
       );
 
       final orders = (response['data'] as List<dynamic>? ?? [])

@@ -22,6 +22,7 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
   final OrderHistoryService _orderHistoryService = OrderHistoryService();
   final OrderTrackingService _trackingService = OrderTrackingService();
   bool _isLoading = true;
+  bool _backgroundRefreshRunning = false;
   List<Map<String, dynamic>> _deliveryOrders = [];
   List<Map<String, dynamic>> _carhopOrders = [];
   List<Map<String, dynamic>> _selfPickupOrders = [];
@@ -46,12 +47,16 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
   }
 
   void _backgroundRefresh() async {
+    if (_backgroundRefreshRunning) return;
+    _backgroundRefreshRunning = true;
     try {
       final response = await _orderHistoryService.fetchOrderHistory(
         page: 1,
         limit: 50,
         forceRefresh: true,
       );
+
+      if (!mounted) return;
 
       final orders = (response['data'] as List<dynamic>? ?? [])
           .map((order) => order as Map<String, dynamic>)
@@ -82,12 +87,18 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
       }
     } catch (e) {
       print('Background refresh failed: $e');
+    } finally {
+      _backgroundRefreshRunning = false;
     }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    // Release list references so the GC can reclaim the order data
+    _deliveryOrders = [];
+    _carhopOrders = [];
+    _selfPickupOrders = [];
     super.dispose();
   }
 
@@ -310,9 +321,9 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         title: Text(
             localizations.orderTracking,
-            textAlign: TextAlign.center,
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(70),
@@ -331,36 +342,47 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
                   Text(
                     localizations.deliveryOrders,
                     style: const TextStyle(fontSize: 12),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
             Tab(
               height: 66,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.local_parking),
-                  const SizedBox(height: 2),
-                  Text(
-                    localizations.carhopOrders,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.local_parking),
+                    const SizedBox(height: 2),
+                    Text(
+                      localizations.carhopOrders,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Tab(
+            const Tab(
               height: 66,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.shopping_bag),
-                  const SizedBox(height: 2),
+                  Icon(Icons.shopping_bag),
+                  SizedBox(height: 2),
                   Text(
                     'Pickup/Dine-In',
-                    style: const TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -369,10 +391,13 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => _loadOrders(forceRefresh: true),
-            tooltip: 'Refresh',
+          Padding(
+            padding: EdgeInsets.only(right: 10.0),
+            child: IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => _loadOrders(forceRefresh: true),
+              tooltip: 'Refresh',
+            ),
           ),
           // Test uchun
           // Builder(
