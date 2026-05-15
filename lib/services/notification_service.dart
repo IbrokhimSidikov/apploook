@@ -85,6 +85,39 @@ class NotificationService {
     }
   }
 
+  /// Shows a local notification immediately (independent of Firebase).
+  Future<void> showLocalNotification({
+    required String title,
+    required String body,
+    String? payload,
+    int id = 0,
+  }) async {
+    try {
+      await _localNotifications.show(
+        id,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'high_importance_channel',
+            'High Importance Notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: payload,
+      );
+      print('🔔 Local notification shown: $title');
+    } catch (e) {
+      print('❌ Error showing local notification: $e');
+    }
+  }
+
   void _handleMessage(RemoteMessage message) async {
     print('🔔 Handling message:');
     print('🔔 Message ID: ${message.messageId}');

@@ -1078,7 +1078,6 @@ class _CheckoutState extends State<Checkout> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10, left: 15, right: 15),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const SizedBox(height: 20),
                       Text(
@@ -1089,7 +1088,6 @@ class _CheckoutState extends State<Checkout> {
                                 : _selectedIndex == 2
                                     ? AppLocalizations.of(context).carhopService
                                     : AppLocalizations.of(context).inRestaurantTitle,
-                        textAlign: TextAlign.center,
                         style: TextStyle(
                             fontSize: 20.sp, fontWeight: FontWeight.bold),
                       ),

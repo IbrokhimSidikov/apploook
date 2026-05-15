@@ -228,7 +228,7 @@ class _MyAppState extends State<MyApp> {
     }
     
     return ScreenUtilInit(
-      designSize: const Size(393, 852),
+      designSize: const Size(390, 844),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) => Consumer<LocaleProvider>(

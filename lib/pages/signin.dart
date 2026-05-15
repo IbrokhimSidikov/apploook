@@ -18,69 +18,65 @@ class _SignInState extends State<SignIn> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appBar(),
-      body: Padding(
-        padding:  EdgeInsets.symmetric(horizontal: 10.w),
-        child: Column(
-          children: [
-            70.verticalSpace,
-            Center(
-              child: Image.asset(
-                'images/look_signin.png',
-                width: 300.w,
-                height: 300.h,
-              ),
+      body: Column(
+        children: [
+          SizedBox(height: 70.h),
+          Center(
+            child: Image.asset(
+              'images/look_signin.png',
+              width: 300.w,
+              height: 300.h,
             ),
-            Center(
-              child: Text(
-                AppLocalizations.of(context).signInToYourProfile,
-                style: TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),
-              ),
+          ),
+          Center(
+            child: Text(
+              AppLocalizations.of(context).signInToYourProfile,
+              style: TextStyle(fontSize: 25.sp, fontWeight: FontWeight.bold),
             ),
-            Center(
-              child: Text(
-                AppLocalizations.of(context).underTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w200, fontSize: 14.sp),
-              ),
+          ),
+          Center(
+            child: Text(
+              AppLocalizations.of(context).underTitle,
+              style: TextStyle(fontWeight: FontWeight.w200, fontSize: 14.sp),
             ),
-            25.verticalSpace,
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Authorization()));
-                },
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30.r),
-                      color: const Color(0xffFEC700)),
-                  child: Text(
-                    AppLocalizations.of(context).phoneNumberButton,
-                    style: TextStyle(fontSize: 17.sp),
-                  ),
+          ),
+          SizedBox(height: 25.h),
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => Authorization()));
+              },
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 15.h),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30.r),
+                    color: const Color(0xffFEC700)),
+                child: Text(
+                  AppLocalizations.of(context).phoneNumberButton,
+                  style: TextStyle(fontSize: 17.sp),
                 ),
               ),
             ),
-            20.verticalSpace,
-            Center(
-              child: Text(
-                AppLocalizations.of(context).privacyPolicy,
-                style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13.sp),
-              ),
+          ),
+          SizedBox(height: 20.h),
+          Center(
+            child: Text(
+              AppLocalizations.of(context).privacyPolicy,
+              style: TextStyle(fontWeight: FontWeight.w100, fontSize: 13.sp),
             ),
-            SizedBox(height: 10.h),
-            Center(
-              child: Text(
-                'Version 1.0.0, build 10001',
-                style: TextStyle(
-                    fontWeight: FontWeight.w100,
-                    fontSize: 13.sp,
-                    color: Colors.black26),
-              ),
-            )
-          ],
-        ),
+          ),
+          SizedBox(height: 10.h),
+          Center(
+            child: Text(
+              'Version 1.0.0, build 10001',
+              style: TextStyle(
+                  fontWeight: FontWeight.w100,
+                  fontSize: 13.sp,
+                  color: Colors.black26),
+            ),
+          )
+        ],
       ),
     );
   }
