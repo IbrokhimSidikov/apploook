@@ -75,7 +75,11 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     await localeProvider.initialize();
     
     CachedNetworkImage.logLevel = CacheManagerLogLevel.warning;
+    // Limit Flutter's in-memory image cache: 50 MB total, max 100 images.
+    // Because memCacheWidth/Height is now set on all CachedNetworkImage widgets,
+    // each decoded image is small, so 50 MB / 100 entries is ample.
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
+    PaintingBinding.instance.imageCache.maximumSize = 100;
 
     // Initialize Firebase Remote Config service
     await RemoteConfigService().initialize();

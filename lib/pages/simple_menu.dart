@@ -121,6 +121,9 @@ class _SimpleMenuPageState extends State<SimpleMenuPage> {
                               width: 140,
                               height: 140,
                               fit: BoxFit.cover,
+                              // Limit decode to 280×280 physical px (140 logical @ 2×)
+                              cacheWidth: 280,
+                              cacheHeight: 280,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   width: 80,

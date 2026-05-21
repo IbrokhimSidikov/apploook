@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
@@ -296,35 +297,34 @@ class _DetailsState extends State<Details> {
                         borderRadius: BorderRadius.circular(12.r),
                         child: AspectRatio(
                           aspectRatio: 3 / 2,
-                          child: Image.network(
-                            widget.product.imagePath,
+                          child: CachedNetworkImage(
+                            imageUrl: widget.product.imagePath,
                             fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                color: Colors.grey[200],
-                                child: Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 50.w,
-                                    color: Colors.grey,
-                                  ),
+                            // Detail screen is full-width ~3:2; cap decode at
+                            // 1200×800 physical px — enough for any phone screen.
+                            memCacheWidth: 1200,
+                            memCacheHeight: 800,
+                            errorWidget: (context, url, error) => Container(
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50.w,
+                                  color: Colors.grey,
                                 ),
-                              );
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return Shimmer.fromColors(
-                                baseColor: Colors.grey[300]!,
-                                highlightColor: Colors.grey[100]!,
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
+                              ),
+                            ),
+                            placeholder: (context, url) => Shimmer.fromColors(
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[300],
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
-                              );
-                            },
+                              ),
+                            ),
                           ),
                         ),
                       ),

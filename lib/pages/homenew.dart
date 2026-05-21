@@ -1254,8 +1254,8 @@ class _HomeNewState extends State<HomeNew>
                           child: product.imagePath != null
                               ? CachedProductImage(
                                   imageUrl: product.imagePath!,
-                                  width: 90.w,
-                                  height: 90.h,
+                                  width: 135.w,
+                                  height: 90.w,
                                 )
                               : Container(
                                   color: Colors.grey[200],

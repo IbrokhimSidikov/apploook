@@ -59,9 +59,14 @@ class BannerCarouselWidget extends StatelessWidget {
 
   Widget _buildBannerImage(String imagePath) {
     if (imagePath.startsWith('http')) {
+      // Banners are displayed at ~160 logical px tall.
+      // Cap decode resolution at 800×320 physical px (≈400×160 logical @ 2×)
+      // to prevent multi-MB raw pixel buffers during carousel auto-play.
       return CachedNetworkImage(
         imageUrl: imagePath,
         fit: BoxFit.fill,
+        memCacheWidth: 800,
+        memCacheHeight: 320,
         placeholder: (context, url) => Shimmer.fromColors(
           baseColor: Colors.grey[300]!,
           highlightColor: Colors.grey[100]!,
