@@ -213,6 +213,8 @@ class AppLocalizations {
       'ratingOkay': '😐  Okay',
       'ratingGood': '😊  Good',
       'ratingExcellent': '🤩  Excellent!',
+      'addedToCart': 'Added to cart',
+      'recommendedTitle':'You might also like',
     },
     'uz': {
       // Onboard Page
@@ -419,6 +421,9 @@ class AppLocalizations {
       'ratingOkay': '😐  O\'rtacha',
       'ratingGood': '😊  Yaxshi',
       'ratingExcellent': '🤩  Ajoyib!',
+      'addedToCart': 'Savatga qo\'shildi',
+      'recommendedTitle':'Qo\'shimcha tavsiyalar',
+
     },
     'ru': {
       // Onboard Page
@@ -622,6 +627,9 @@ class AppLocalizations {
       'ratingOkay': '😐  Нормально',
       'ratingGood': '😊  Хорошо',
       'ratingExcellent': '🤩  Отлично!',
+      'addedToCart': 'Добавлено в корзину',
+      'recommendedTitle':'Вам также может понравиться',
+
     },
   };
 
@@ -981,5 +989,7 @@ class AppLocalizations {
   String get ratingOkay => _localizedValues[locale.languageCode]!['ratingOkay']!;
   String get ratingGood => _localizedValues[locale.languageCode]!['ratingGood']!;
   String get ratingExcellent => _localizedValues[locale.languageCode]!['ratingExcellent']!;
+  String get addedToCart => _localizedValues[locale.languageCode]!['addedToCart']!;
+  String get recommendedTitle => _localizedValues[locale.languageCode]!['recommendedTitle']!;
 
 }

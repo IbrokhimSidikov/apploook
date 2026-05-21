@@ -121,13 +121,16 @@ class NearestBranchService {
           
           // Handle productVariationGroups - can be Map (object) or List (array)
           var variationGroups = menuData['productVariationGroups'];
-          
+
+          var recommendedProducts = menuData['recommendedProductsByCategory'];
+
           _latestMenuData = {
             'categories': categories,
             'items': allItems,
             'productVariationGroups': variationGroups, // Pass as-is (Map or List)
+            'recommendedProductsByCategory': recommendedProducts, // Pass as-is (Map or List)
           };
-          
+
           print('📋 NearestBranchService: Menu data extracted:');
           print('  • Categories: ${categories.length}');
           print('  • Items: ${allItems.length}');
@@ -138,6 +141,13 @@ class NearestBranchService {
             groupCount = variationGroups.length;
           }
           print('  • Product Variation Groups: $groupCount');
+          int recommendedCount = 0;
+          if (recommendedProducts is Map) {
+            recommendedCount = recommendedProducts.length;
+          } else if (recommendedProducts is List) {
+            recommendedCount = recommendedProducts.length;
+          }
+          print('  • Recommended Categories: $recommendedCount');
         } else {
           print('⚠️ NearestBranchService: No menu data in response');
           _latestMenuData = null;

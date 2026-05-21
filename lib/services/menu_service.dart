@@ -35,6 +35,125 @@ class MenuService {
     );
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Recommended products configuration (shown in the Cart page)
+  // Map: category label (shown as section header) → list of product UUIDs or names.
+  // Populated from backend response (menu.recommendedProductsByCategory).
+  // ─────────────────────────────────────────────────────────────────────────
+  Map<String, List<String>> recommendedProductsByCategory = {};
+
+  /// Populate [recommendedProductsByCategory] from the backend payload.
+  /// Accepts either a Map ({"Drinks": ["uuid1", ...]}) or a List
+  /// ([{"categoryLabel": "Drinks", "productIds": ["uuid1", ...]}]).
+  void _loadRecommendedProductsFromBackend(dynamic raw) {
+    recommendedProductsByCategory = {};
+    if (raw == null) {
+      print('MenuService: No recommendedProductsByCategory from backend');
+      return;
+    }
+
+    if (raw is Map) {
+      raw.forEach((key, value) {
+        if (value is List) {
+          recommendedProductsByCategory[key.toString()] =
+              List<String>.from(value.map((v) => v.toString()));
+        }
+      });
+    } else if (raw is List) {
+      for (final entry in raw) {
+        if (entry is Map &&
+            entry['categoryLabel'] != null &&
+            entry['productIds'] is List) {
+          recommendedProductsByCategory[entry['categoryLabel'].toString()] =
+              List<String>.from(
+                  (entry['productIds'] as List).map((v) => v.toString()));
+        }
+      }
+    }
+
+    print(
+        'MenuService: Loaded ${recommendedProductsByCategory.length} recommended categories from backend');
+    for (final entry in recommendedProductsByCategory.entries) {
+      print('  • ${entry.key} (${entry.value.length} products)');
+    }
+  }
+
+  /// Returns recommended products organised by their category label.
+  /// Only categories with at least one found product are included.
+  Map<String, List<Product>> getRecommendedProductsByCategory() {
+    final Map<String, List<Product>> result = {};
+    for (final entry in recommendedProductsByCategory.entries) {
+      final List<Product> found = [];
+      for (final identifier in entry.value) {
+        final product = _allProducts.firstWhere(
+          (p) => p.uuid == identifier || p.name == identifier,
+          orElse: () => Product(
+            id: 0,
+            uuid: '',
+            name: '',
+            categoryId: 0,
+            categoryTitle: '',
+            price: 0,
+            description: {},
+          ),
+        );
+        if (product.id != 0 && !product.outOfStock) {
+          found.add(product);
+        }
+      }
+      if (found.isNotEmpty) {
+        result[entry.key] = found;
+      }
+    }
+    return result;
+  }
+
+  /// Automatic recommendations fallback.
+  ///
+  /// When [recommendedProductsByCategory] is empty (backend hasn't configured
+  /// explicit recommendations), this method builds smart suggestions by:
+  ///  • Excluding any product already in [cartProductUuids].
+  ///  • Excluding out-of-stock products.
+  ///  • Taking up to [maxPerCategory] products per category (pinned first).
+  ///  • Returning up to [maxCategories] categories.
+  Map<String, List<Product>> getAutoRecommendedProducts({
+    Set<String> cartProductUuids = const {},
+    int maxPerCategory = 4,
+    int maxCategories = 3,
+  }) {
+    final Map<String, List<Product>> result = {};
+
+    for (final category in _categories) {
+      if (result.length >= maxCategories) break;
+
+      final candidates = _allProducts
+          .where((p) =>
+              p.categoryId == category.id &&
+              !p.outOfStock &&
+              !cartProductUuids.contains(p.uuid) &&
+              p.price > 0)
+          .toList();
+
+      if (candidates.isEmpty) continue;
+
+      // Pinned products first, then by sortOrder
+      candidates.sort((a, b) {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        if (a.sortOrder != null && b.sortOrder != null) {
+          return a.sortOrder!.compareTo(b.sortOrder!);
+        }
+        return 0;
+      });
+
+      result[category.name] = candidates.take(maxPerCategory).toList();
+    }
+
+    print(
+        'MenuService: Auto-recommended ${result.values.fold(0, (s, l) => s + l.length)} products across ${result.length} categories');
+    return result;
+  }
+
   // Configuration for pinned products (products that should appear at the top of their category)
   // You can specify products by their UUID or name
   final Map<String, List<String>> pinnedProductsByCategory = {
@@ -134,7 +253,9 @@ class MenuService {
       } else {
         print('MenuService: No productVariationGroups from backend, using default config');
       }
-      
+
+      _loadRecommendedProductsFromBackend(menuData['recommendedProductsByCategory']);
+
       // Process the menu data
       await _processNewApiData(categories, items, menuData);
       
@@ -261,6 +382,8 @@ class MenuService {
             print('MenuService: Loaded ${productVariationGroups.length} variation groups from cache');
           }
         }
+
+        _loadRecommendedProductsFromBackend(data['recommendedProductsByCategory']);
 
         _processNewApiData(categories, items, data);
       } else if (data is Map<String, dynamic> && data.containsKey('items')) {
