@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../../cart_provider.dart';
 import '../data/reorder_repository.dart';
@@ -7,18 +7,59 @@ import '../domain/reorder_payload.dart';
 
 enum ReorderLoadState { idle, loading, ready, empty, error }
 
-class ReorderController extends ChangeNotifier {
+class ReorderController extends ChangeNotifier with WidgetsBindingObserver {
   ReorderController({ReorderRepository? repository})
-      : _repository = repository ?? ReorderRepository();
+      : _repository = repository ?? ReorderRepository() {
+    WidgetsBinding.instance.addObserver(this);
+  }
 
   final ReorderRepository _repository;
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Drop any staged reorder prefill when the user leaves the app. A
+    // resume an hour later shouldn't silently apply an old prefill the
+    // user has long forgotten about. `paused` fires when the app moves
+    // to the background; `inactive` (incoming calls, notification
+    // shade) is intentionally ignored so a brief interruption doesn't
+    // wipe state.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _pendingPrefill = null;
+    }
+  }
 
   ReorderLoadState _state = ReorderLoadState.idle;
   LastOrder? _lastOrder;
   bool _hasHistoryHint = false;
 
+  /// Payload staged by the reorder bottom sheet so Cart can route the user
+  /// through the cart page (recommendation upsell) before Checkout, while
+  /// Checkout still receives the prefill once the user proceeds.
+  /// Read once via [consumePrefill] — it auto-clears.
+  ReorderPayload? _pendingPrefill;
+
   ReorderLoadState get state => _state;
   LastOrder? get lastOrder => _lastOrder;
+  bool get hasPendingPrefill => _pendingPrefill != null;
+
+  void stagePrefill(ReorderPayload payload) {
+    _pendingPrefill = payload;
+  }
+
+  /// Returns the staged prefill (if any) and clears it. Intended to be
+  /// called from Checkout.initState so the prefill fires exactly once.
+  ReorderPayload? consumePrefill() {
+    final p = _pendingPrefill;
+    _pendingPrefill = null;
+    return p;
+  }
 
   /// True once we have any reason to believe the user has previous orders —
   /// either we already fetched one, or a previous session recorded the hint.
@@ -126,6 +167,7 @@ class ReorderController extends ChangeNotifier {
     _lastOrder = null;
     _state = ReorderLoadState.idle;
     _hasHistoryHint = false;
+    _pendingPrefill = null;
     notifyListeners();
   }
 }

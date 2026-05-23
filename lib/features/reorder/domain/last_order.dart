@@ -1,10 +1,10 @@
 /// Server-side order type IDs returned by the Sieves history API.
 /// Kept in one place so mapping between domains stays consistent.
 class HistoryOrderType {
-  static const int delivery = 1;
-  static const int carhop = 2;
-  static const int selfPickup = 3;
-  static const int dineIn = 4;
+  static const int delivery = 3;
+  static const int carhop = 8;
+  static const int selfPickup = 2;
+  static const int dineIn = 1;
 }
 
 /// One line item from a historical order, as it lived on the server.

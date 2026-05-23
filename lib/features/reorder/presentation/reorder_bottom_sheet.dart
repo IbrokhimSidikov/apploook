@@ -5,23 +5,32 @@ import 'package:provider/provider.dart';
 
 import '../../../cart_provider.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../pages/checkout.dart';
 import '../application/reorder_controller.dart';
 import '../domain/last_order.dart';
 
-class ReorderBottomSheet extends StatelessWidget {
+class ReorderBottomSheet extends StatefulWidget {
   const ReorderBottomSheet({super.key, required this.order});
 
   final LastOrder order;
 
   @override
+  State<ReorderBottomSheet> createState() => _ReorderBottomSheetState();
+}
+
+class _ReorderBottomSheetState extends State<ReorderBottomSheet> {
+  bool _isProcessing = false;
+
+  @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final order = widget.order;
     final cart = context.watch<CartProvider>();
     final cartIsDirty = cart.cartItems.isNotEmpty;
     final dateLabel = order.placedAt != null
         ? DateFormat('d MMM y · HH:mm').format(order.placedAt!.toLocal())
         : '';
     final itemCount = order.items.fold<int>(0, (sum, i) => sum + i.quantity);
+    final itemsLabel = itemCount == 1 ? l.itemSingular : l.items;
 
     return SafeArea(
       top: false,
@@ -40,7 +49,7 @@ class ReorderBottomSheet extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order again',
+                        l.orderAgain,
                         style: TextStyle(
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w700,
@@ -72,7 +81,7 @@ class ReorderBottomSheet extends StatelessWidget {
 
             // ── Item list ─────────────────────────────────────────────
             Text(
-              '$itemCount ${itemCount == 1 ? "item" : "items"}',
+              '$itemCount $itemsLabel',
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -91,7 +100,7 @@ class ReorderBottomSheet extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  AppLocalizations.of(context).totalPrice,
+                  l.totalPrice,
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                 ),
                 Text(
@@ -112,12 +121,14 @@ class ReorderBottomSheet extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 18.w, color: const Color(0xFFB28704)),
+                    Icon(Icons.info_outline,
+                        size: 18.w, color: const Color(0xFFB28704)),
                     SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
-                        'Your current cart (${cart.showQuantity()} items) will be replaced.',
-                        style: TextStyle(fontSize: 12.sp, color: const Color(0xFF6B4F00)),
+                        l.cartWillBeReplaced(cart.showQuantity()),
+                        style: TextStyle(
+                            fontSize: 12.sp, color: const Color(0xFF6B4F00)),
                       ),
                     ),
                   ],
@@ -135,16 +146,30 @@ class ReorderBottomSheet extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFEC700),
                   foregroundColor: Colors.black,
+                  disabledBackgroundColor:
+                      const Color(0xFFFEC700).withOpacity(0.7),
+                  disabledForegroundColor: Colors.black54,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14.r),
                   ),
                 ),
-                onPressed: () => _handleReorder(context),
-                child: Text(
-                  'Reorder',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
-                ),
+                onPressed: _isProcessing ? null : _handleReorder,
+                child: _isProcessing
+                    ? SizedBox(
+                        width: 22.w,
+                        height: 22.w,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.black87),
+                        ),
+                      )
+                    : Text(
+                        l.reorder,
+                        style: TextStyle(
+                            fontSize: 16.sp, fontWeight: FontWeight.w700),
+                      ),
               ),
             ),
             SizedBox(height: 12.h),
@@ -154,25 +179,41 @@ class ReorderBottomSheet extends StatelessWidget {
     );
   }
 
-  Future<void> _handleReorder(BuildContext context) async {
+  Future<void> _handleReorder() async {
+    final l = AppLocalizations.of(context);
     final controller = context.read<ReorderController>();
     final cart = context.read<CartProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
-    final payload = controller.applyToCart(order, cart);
-    if (payload == null) {
-      messenger.showSnackBar(const SnackBar(
-        content: Text('Sorry, none of these items are available right now.'),
-      ));
-      navigator.pop();
-      return;
-    }
+    setState(() => _isProcessing = true);
 
-    navigator.pop(); // close sheet
-    await navigator.push(MaterialPageRoute<void>(
-      builder: (_) => Checkout(prefill: payload),
-    ));
+    // Let the spinner paint before doing the (potentially blocking) cart
+    // materialization, so the user gets immediate feedback for the tap.
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+
+    try {
+      final payload = controller.applyToCart(widget.order, cart);
+      if (payload == null) {
+        messenger.showSnackBar(SnackBar(
+          content: Text(l.reorderNoItemsAvailable),
+        ));
+        navigator.pop();
+        return;
+      }
+
+      // Route through Cart first so users can see the upsell strip /
+      // recommended add-ons before paying. Checkout reads the staged
+      // prefill from the controller when the user proceeds.
+      controller.stagePrefill(payload);
+      navigator.pop(); // close sheet
+      Navigator.pushNamed(context, '/cart');
+    } catch (_) {
+      // Unblock the button on unexpected failures so the user can retry.
+      if (mounted) setState(() => _isProcessing = false);
+      rethrow;
+    }
   }
 }
 
@@ -195,7 +236,7 @@ class _OrderTypeChip extends StatelessWidget {
         icon = Icons.shopping_bag_outlined;
         break;
       case HistoryOrderType.carhop:
-        label = 'Carhop';
+        label = l.carhop;
         icon = Icons.car_repair_outlined;
         break;
       case HistoryOrderType.dineIn:
@@ -237,11 +278,12 @@ class _DestinationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
     final isDelivery = order.isDelivery;
     final text = isDelivery
         ? (order.deliveryAddress?.isNotEmpty == true
             ? order.deliveryAddress!
-            : 'Address will be re-confirmed at checkout')
+            : l.addressReconfirmAtCheckout)
         : (order.branchName ?? '');
     if (text.isEmpty) return const SizedBox.shrink();
     return Row(

@@ -215,6 +215,16 @@ class AppLocalizations {
       'ratingExcellent': '🤩  Excellent!',
       'addedToCart': 'Added to cart',
       'recommendedTitle':'You might also like',
+      // Reorder bottom sheet
+      'orderAgain': 'Order again',
+      'itemSingular': 'item',
+      'cartWillBeReplaced':
+          'Your current cart ({count} items) will be replaced.',
+      'reorder': 'Reorder',
+      'reorderNoItemsAvailable':
+          'Sorry, none of these items are available right now.',
+      'addressReconfirmAtCheckout':
+          'Address will be re-confirmed at checkout',
     },
     'uz': {
       // Onboard Page
@@ -423,7 +433,16 @@ class AppLocalizations {
       'ratingExcellent': '🤩  Ajoyib!',
       'addedToCart': 'Savatga qo\'shildi',
       'recommendedTitle':'Qo\'shimcha tavsiyalar',
-
+      // Reorder bottom sheet
+      'orderAgain': 'Buyurtmani takrorlash',
+      'itemSingular': 'dona',
+      'cartWillBeReplaced':
+          'Joriy savatchangiz ({count} dona) almashtiriladi.',
+      'reorder': 'Qayta buyurtma',
+      'reorderNoItemsAvailable':
+          'Kechirasiz, hozir bu mahsulotlardan birortasi mavjud emas.',
+      'addressReconfirmAtCheckout':
+          'Manzilni to\'lov sahifasida tasdiqlaysiz',
     },
     'ru': {
       // Onboard Page
@@ -629,7 +648,16 @@ class AppLocalizations {
       'ratingExcellent': '🤩  Отлично!',
       'addedToCart': 'Добавлено в корзину',
       'recommendedTitle':'Вам также может понравиться',
-
+      // Reorder bottom sheet
+      'orderAgain': 'Заказать снова',
+      'itemSingular': 'товар',
+      'cartWillBeReplaced':
+          'Текущая корзина ({count} товаров) будет заменена.',
+      'reorder': 'Повторить заказ',
+      'reorderNoItemsAvailable':
+          'К сожалению, эти товары сейчас недоступны.',
+      'addressReconfirmAtCheckout':
+          'Адрес будет подтверждён при оформлении заказа',
     },
   };
 
@@ -991,5 +1019,19 @@ class AppLocalizations {
   String get ratingExcellent => _localizedValues[locale.languageCode]!['ratingExcellent']!;
   String get addedToCart => _localizedValues[locale.languageCode]!['addedToCart']!;
   String get recommendedTitle => _localizedValues[locale.languageCode]!['recommendedTitle']!;
+
+  // Reorder bottom sheet
+  String get orderAgain =>
+      _localizedValues[locale.languageCode]!['orderAgain']!;
+  String get itemSingular =>
+      _localizedValues[locale.languageCode]!['itemSingular']!;
+  String get reorder => _localizedValues[locale.languageCode]!['reorder']!;
+  String get reorderNoItemsAvailable =>
+      _localizedValues[locale.languageCode]!['reorderNoItemsAvailable']!;
+  String get addressReconfirmAtCheckout =>
+      _localizedValues[locale.languageCode]!['addressReconfirmAtCheckout']!;
+  String cartWillBeReplaced(int count) =>
+      _localizedValues[locale.languageCode]!['cartWillBeReplaced']!
+          .replaceAll('{count}', count.toString());
 
 }

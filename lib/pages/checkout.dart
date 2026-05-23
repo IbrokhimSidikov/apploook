@@ -29,6 +29,7 @@ import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../widget/branch_data.dart';
+import '../features/reorder/application/reorder_controller.dart';
 import '../features/reorder/domain/reorder_payload.dart';
 
 class Checkout extends StatefulWidget {
@@ -95,7 +96,11 @@ class _CheckoutState extends State<Checkout> {
   }
 
   void _applyReorderPrefill() {
-    final p = widget.prefill;
+    // Prefer the constructor argument (direct Checkout(prefill:) callers);
+    // otherwise consume whatever the reorder flow staged before routing
+    // the user through Cart.
+    final p = widget.prefill ??
+        Provider.of<ReorderController>(context, listen: false).consumePrefill();
     if (p == null) return;
     _selectedIndex = p.orderTypeIndex;
     if (p.deliveryAddressText != null && p.deliveryAddressText!.isNotEmpty) {
@@ -854,7 +859,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -2499,7 +2504,7 @@ class _CheckoutState extends State<Checkout> {
         "delivery_employee_id": null,
         "employee_id": branchConfig.employeeId,
         "branch_id": branchConfig.branchId,
-        "order_type_id": isCarhop ? 8 : (isInRestaurant ? 1 : 7), // 8 for carhop, 1 for in-restaurant, 7 for self-pickup
+        "order_type_id": isCarhop ? 8 : (isInRestaurant ? 1 : 2), // 8 for carhop, 1 for in-restaurant, 2 for self-pickup
         "orderItems": formattedOrderItems,
         "transactions": [
           {
@@ -2532,7 +2537,7 @@ class _CheckoutState extends State<Checkout> {
         const String customApiEndpoint = 'https://api.sievesapp.com/v1/order';
         
         // Determine order type ID based on order type
-        final int orderTypeId = isCarhop ? 8 : (isInRestaurant ? 1 : 2); // 8 for carhop, 1 for in-restaurant, 7 for self-pickup
+        final int orderTypeId = isCarhop ? 8 : (isInRestaurant ? 1 : 2); // 8 for carhop, 1 for in-restaurant, 2 for self-pickup
         
         // Remove +998 prefix from phone number
         final String cleanPhone = phone.replaceFirst('+998', '');
