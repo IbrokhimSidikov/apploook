@@ -26,6 +26,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
 import 'providers/notification_provider.dart';
+import 'features/reorder/application/reorder_controller.dart';
 
 // Global navigator key to access context from anywhere
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -121,6 +122,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: notificationProvider),
+        ChangeNotifierProvider(create: (_) => ReorderController()),
       ],
       // Show elegant branded splash screen while initializing
       child: _isLoading 

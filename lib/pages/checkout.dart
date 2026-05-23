@@ -29,11 +29,18 @@ import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 import '../widget/branch_data.dart';
+import '../features/reorder/domain/reorder_payload.dart';
 
 class Checkout extends StatefulWidget {
   Checkout({
     Key? key,
+    this.prefill,
   }) : super(key: key);
+
+  /// Optional pre-populated values when entering Checkout from the
+  /// reorder flow. Address text is prefilled but the map still has to
+  /// be re-confirmed before placing the order.
+  final ReorderPayload? prefill;
 
   @override
   State<Checkout> createState() => _CheckoutState();
@@ -66,6 +73,7 @@ class _CheckoutState extends State<Checkout> {
   final FocusNode _carDetailsFocusNode = FocusNode();
   final TextEditingController _carDetailsController = TextEditingController();
   final TextEditingController _additionalPhoneController = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
 
   @override
   void initState() {
@@ -75,6 +83,7 @@ class _CheckoutState extends State<Checkout> {
     _loadCustomerName();
     _loadCarDetails(); // Load cached car details
     _loadAdditionalPhoneNumber(); // Load user's phone number for additional phone field
+    _applyReorderPrefill();
     // Check for pending Payme transactions
     PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
@@ -83,6 +92,39 @@ class _CheckoutState extends State<Checkout> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _logCartData();
     });
+  }
+
+  void _applyReorderPrefill() {
+    final p = widget.prefill;
+    if (p == null) return;
+    _selectedIndex = p.orderTypeIndex;
+    if (p.deliveryAddressText != null && p.deliveryAddressText!.isNotEmpty) {
+      selectedAddress = p.deliveryAddressText;
+    }
+    if (p.branchName != null && branches.contains(p.branchName)) {
+      selectedBranch = p.branchName;
+    }
+    if (p.comment != null && p.comment!.isNotEmpty) {
+      clientComment = p.comment!;
+      _commentController.text = p.comment!;
+      _updateCommented();
+    }
+    if (p.carDetails != null && p.carDetails!.isNotEmpty) {
+      carDetails = p.carDetails!;
+      _carDetailsController.text = p.carDetails!;
+    }
+
+    // Auto-confirm the map pin when we have historical coordinates so the
+    // user doesn't need to revisit the map screen. Distance / delivery fee
+    // are recalculated from the prefilled lat/lng.
+    if (p.deliveryLat != null && p.deliveryLng != null) {
+      final cart = Provider.of<CartProvider>(context, listen: false);
+      cart.addLatLong(p.deliveryLat, p.deliveryLng);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _calculateDistanceToNearestBranch();
+      });
+    }
   }
 
   void _logCartData() {
@@ -711,6 +753,7 @@ class _CheckoutState extends State<Checkout> {
     _carDetailsFocusNode.dispose();
     _carDetailsController.dispose();
     _additionalPhoneController.dispose();
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -811,7 +854,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1803,6 +1846,7 @@ class _CheckoutState extends State<Checkout> {
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                       child: TextField(
+                        controller: _commentController,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                         ),

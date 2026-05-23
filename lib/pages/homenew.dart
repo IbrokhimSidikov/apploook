@@ -30,6 +30,8 @@ import '../widget/banner_widget.dart';
 import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
+import '../features/reorder/application/reorder_controller.dart';
+import '../features/reorder/presentation/reorder_fab.dart';
 
 class Category {
   final int id;
@@ -219,6 +221,9 @@ class _HomeNewState extends State<HomeNew>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeAndLoadData();
       _checkPendingPaymePayments();
+      // Kick off the last-order lookup so the reorder FAB can appear once
+      // the menu is loaded. Uses cached data on warm starts.
+      context.read<ReorderController>().load();
     });
 
     WidgetsBinding.instance.addObserver(this);
@@ -994,6 +999,12 @@ class _HomeNewState extends State<HomeNew>
                     ),
                   )
                 : const SizedBox(),
+          ),
+          // Reorder FAB (right side, mirrors the cart pill on the left)
+          Positioned(
+            bottom: 50.h,
+            right: 25.w,
+            child: const ReorderFab(),
           ),
         ],
       ),
