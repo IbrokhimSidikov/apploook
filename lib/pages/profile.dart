@@ -1,4 +1,5 @@
 import 'package:apploook/cart_provider.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/auth_service.dart'; // Import AuthService
+import '../widgets/announcement_story_dialog.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -52,6 +54,107 @@ class _ProfileState extends State<Profile> {
     setState(() {
       clientFirstName = prefs.getString('firstName') ?? 'Anonymous';
     });
+  }
+
+  Future<void> _showAnnouncementDebugSheet(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  height: 4,
+                  width: 40,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Text(
+                  'Announcement (debug)',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Only visible in debug builds.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FutureBuilder<({String? storedId, int count, int max})>(
+                  future: AnnouncementStory.debugStatus(),
+                  builder: (context, snapshot) {
+                    final status = snapshot.data;
+                    final label = status == null
+                        ? 'View count: …'
+                        : 'Views this announcement: ${status.count} / ${status.max}';
+                    return Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Colors.grey.shade700,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Preview now (uses current Remote Config)'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () async {
+                    Navigator.of(sheetContext).pop();
+                    await AnnouncementStory.preview(context);
+                  },
+                ),
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text("Reset 'seen' for next launch"),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () async {
+                    await AnnouncementStory.resetSeen();
+                    if (!sheetContext.mounted) return;
+                    Navigator.of(sheetContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Cleared. Announcement will trigger on next launch.",
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
   @override
   Widget build(BuildContext context) {
@@ -116,6 +219,22 @@ class _ProfileState extends State<Profile> {
                   title: AppLocalizations.of(context).branches,
                   route: '/branches',
                 ),
+                if (kDebugMode) ...[
+                  40.verticalSpace,
+                  GestureDetector(
+                    onTap: () => _showAnnouncementDebugSheet(context),
+                    child: Row(
+                      children: [
+                        Icon(Icons.campaign_outlined, size: 24.sp),
+                        10.horizontalSpace,
+                        Text(
+                          'Announcement (debug)',
+                          style: TextStyle(fontSize: 18.sp),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 40.verticalSpace,
                 GestureDetector(
                   onTap: () async {
@@ -361,7 +480,7 @@ class _ProfileState extends State<Profile> {
         color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Version 2.9.0')],
+          children: [Text('Version 3.0.0')],
         ),
       ),
     );

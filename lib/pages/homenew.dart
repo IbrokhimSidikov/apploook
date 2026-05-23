@@ -23,6 +23,7 @@ import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/services/location_permission_guard.dart';
 
 import 'dart:convert';
+import '../constants/app_colors.dart';
 import '../models/modifier_models.dart';
 import '../models/product_group.dart';
 import '../widget/app_bottom_sheet.dart';
@@ -30,6 +31,7 @@ import '../widget/banner_widget.dart';
 import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
+import '../widgets/announcement_story_dialog.dart';
 import '../features/reorder/application/reorder_controller.dart';
 import '../features/reorder/presentation/reorder_bottom_sheet.dart';
 import '../features/reorder/presentation/reorder_fab.dart';
@@ -267,6 +269,20 @@ class _HomeNewState extends State<HomeNew>
       // Still try to load data even if there was an error
       await loadData();
     }
+
+    // After everything else has settled, surface the announcement (if any).
+    // Internally no-ops when there's nothing to show, when the user has
+    // already seen this announcement id, or when an update is required.
+    _maybeShowAnnouncement();
+  }
+
+  Future<void> _maybeShowAnnouncement() async {
+    // Small breather so the update-required dialog (if any) wins the race
+    // and so the story doesn't pop in while the home screen is still
+    // settling its first paint.
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (!mounted) return;
+    await AnnouncementStory.maybeShow(context);
   }
 
   // Check for app updates
@@ -570,8 +586,8 @@ class _HomeNewState extends State<HomeNew>
                                 padding: EdgeInsets.symmetric(
                                     horizontal: 12.w, vertical: 7.h),
                                 decoration: BoxDecoration(
-                                  color: Colors.black87,
-                                  borderRadius: BorderRadius.circular(50.r),
+                                  color: const Color(0xFFFEC700),
+                                  borderRadius: BorderRadius.circular(8.r),
                                   border: Border.all(color: Colors.white),
                                 ),
                                 child: Row(
@@ -579,14 +595,14 @@ class _HomeNewState extends State<HomeNew>
                                   children: [
                                     Icon(
                                       Icons.replay_rounded,
-                                      color: const Color(0xFFFEC700),
+                                      color: AppColors.cx0B0B0B,
                                       size: 18.w,
                                     ),
                                     SizedBox(width: 6.w),
                                     Text(
                                       l.reorder,
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: AppColors.cx0B0B0B,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 13.sp,
                                       ),

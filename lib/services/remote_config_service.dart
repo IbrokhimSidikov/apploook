@@ -14,6 +14,12 @@ class RemoteConfigService {
   static const int _defaultOpeningMinute = 30;
   static const int _defaultClosingHour = 23;
   static const int _defaultClosingMinute = 30;
+  static const bool _defaultAnnouncementEnabled = false;
+  static const String _defaultAnnouncementId = '';
+  static const String _defaultAnnouncementImageUrl = '';
+  static const int _defaultAnnouncementDurationSeconds = 5;
+  static const String _defaultAnnouncementLinkUrl = '';
+  static const int _defaultAnnouncementMaxShows = 3;
 
   // Remote config keys
   static const String _keyCutoffHour = 'order_cutoff_hour';
@@ -23,6 +29,13 @@ class RemoteConfigService {
   static const String _keyOpeningMinute = 'restaurant_opening_minute';
   static const String _keyClosingHour = 'restaurant_closing_hour';
   static const String _keyClosingMinute = 'restaurant_closing_minute';
+  static const String _keyAnnouncementEnabled = 'announcement_enabled';
+  static const String _keyAnnouncementId = 'announcement_id';
+  static const String _keyAnnouncementImageUrl = 'announcement_image_url';
+  static const String _keyAnnouncementDurationSeconds =
+      'announcement_duration_seconds';
+  static const String _keyAnnouncementLinkUrl = 'announcement_link_url';
+  static const String _keyAnnouncementMaxShows = 'announcement_max_shows';
 
   factory RemoteConfigService() {
     return _instance;
@@ -46,6 +59,12 @@ class RemoteConfigService {
         _keyOpeningMinute: _defaultOpeningMinute,
         _keyClosingHour: _defaultClosingHour,
         _keyClosingMinute: _defaultClosingMinute,
+        _keyAnnouncementEnabled: _defaultAnnouncementEnabled,
+        _keyAnnouncementId: _defaultAnnouncementId,
+        _keyAnnouncementImageUrl: _defaultAnnouncementImageUrl,
+        _keyAnnouncementDurationSeconds: _defaultAnnouncementDurationSeconds,
+        _keyAnnouncementLinkUrl: _defaultAnnouncementLinkUrl,
+        _keyAnnouncementMaxShows: _defaultAnnouncementMaxShows,
       });
 
       // Fetch and activate the latest values
@@ -163,6 +182,87 @@ class RemoteConfigService {
         print('Error getting closing minute: $e');
       }
       return _defaultClosingMinute;
+    }
+  }
+
+  /// Whether the announcement popup is enabled.
+  bool get announcementEnabled {
+    try {
+      return _remoteConfig.getBool(_keyAnnouncementEnabled);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement enabled flag: $e');
+      }
+      return _defaultAnnouncementEnabled;
+    }
+  }
+
+  /// Stable identifier for the current announcement. Used to ensure
+  /// the same announcement is only shown to a user once. Change this
+  /// value in Remote Config whenever you publish a new announcement.
+  String get announcementId {
+    try {
+      return _remoteConfig.getString(_keyAnnouncementId);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement id: $e');
+      }
+      return _defaultAnnouncementId;
+    }
+  }
+
+  /// Full-bleed image URL for the announcement story.
+  String get announcementImageUrl {
+    try {
+      return _remoteConfig.getString(_keyAnnouncementImageUrl);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement image url: $e');
+      }
+      return _defaultAnnouncementImageUrl;
+    }
+  }
+
+  /// Auto-dismiss duration in seconds.
+  int get announcementDurationSeconds {
+    try {
+      final raw = _remoteConfig.getInt(_keyAnnouncementDurationSeconds);
+      if (raw <= 0) return _defaultAnnouncementDurationSeconds;
+      return raw;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement duration: $e');
+      }
+      return _defaultAnnouncementDurationSeconds;
+    }
+  }
+
+  /// Optional URL/deep link opened when the user taps the announcement.
+  /// Empty string means non-actionable.
+  String get announcementLinkUrl {
+    try {
+      return _remoteConfig.getString(_keyAnnouncementLinkUrl);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement link url: $e');
+      }
+      return _defaultAnnouncementLinkUrl;
+    }
+  }
+
+  /// Maximum number of times a given announcement id should be shown to
+  /// the same user before it stops appearing. Values <= 0 fall back to
+  /// the default (3) — a zero would otherwise silently disable everything.
+  int get announcementMaxShows {
+    try {
+      final raw = _remoteConfig.getInt(_keyAnnouncementMaxShows);
+      if (raw <= 0) return _defaultAnnouncementMaxShows;
+      return raw;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting announcement max shows: $e');
+      }
+      return _defaultAnnouncementMaxShows;
     }
   }
 
