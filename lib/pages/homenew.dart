@@ -31,6 +31,7 @@ import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../features/reorder/application/reorder_controller.dart';
+import '../features/reorder/presentation/reorder_bottom_sheet.dart';
 import '../features/reorder/presentation/reorder_fab.dart';
 
 class Category {
@@ -196,7 +197,6 @@ class _HomeNewState extends State<HomeNew>
   ScrollController _scrollController = ScrollController();
   bool _isScrolling = false;
 
-
   Future<void> _getBanners() async {
     try {
       final loadedBanners = await BannerItem.getBanners();
@@ -251,7 +251,7 @@ class _HomeNewState extends State<HomeNew>
       // Ensure location permission is granted (mandatory for app usage)
       final permissionGuard = LocationPermissionGuard();
       await permissionGuard.requireLocationPermission(context);
-      
+
       // Get banners (non-blocking)
       _getBanners();
 
@@ -274,7 +274,7 @@ class _HomeNewState extends State<HomeNew>
     try {
       // Add a small delay to ensure the context is ready
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       if (mounted) {
         final versionChecker = VersionCheckerService();
         await versionChecker.checkForUpdates(context);
@@ -289,23 +289,25 @@ class _HomeNewState extends State<HomeNew>
   Future<void> _updateNearestBranch() async {
     try {
       print('HomeNew: Checking for nearest branch on app launch');
-      
+
       final nearestBranchService = NearestBranchService();
       // Skip permission check since user already granted it during onboarding
       await nearestBranchService.findNearestBranch(skipPermissionCheck: true);
-      
-      final nearestBranchDeliverId = await nearestBranchService.getSavedNearestBranchDeliverId();
-      
+
+      final nearestBranchDeliverId =
+          await nearestBranchService.getSavedNearestBranchDeliverId();
+
       if (nearestBranchDeliverId != null && nearestBranchDeliverId.isNotEmpty) {
-        print('HomeNew: Updated nearest branch deliver ID: $nearestBranchDeliverId');
-        
+        print(
+            'HomeNew: Updated nearest branch deliver ID: $nearestBranchDeliverId');
+
         // Update MenuService with new branch
         final menuService = MenuService();
         menuService.setNearestBranchDeliverId(nearestBranchDeliverId);
-        
+
         // Check if we have menu data from backend
         final menuData = nearestBranchService.getLatestMenuData();
-        
+
         if (menuData != null) {
           print('HomeNew: Using menu data from backend response');
           await menuService.loadMenuDataFromBackend(menuData);
@@ -313,7 +315,7 @@ class _HomeNewState extends State<HomeNew>
           print('HomeNew: No menu data from backend, refreshing traditionally');
           await menuService.refreshData();
         }
-        
+
         // Reload UI with new menu
         if (mounted) {
           await loadData();
@@ -324,9 +326,6 @@ class _HomeNewState extends State<HomeNew>
       // Don't block the app if branch detection fails
     }
   }
-
-
-
 
   Future<void> loadData() async {
     try {
@@ -463,9 +462,9 @@ class _HomeNewState extends State<HomeNew>
     for (var entry in _categoryScrollControllers.entries) {
       int categoryId = entry.key;
       ScrollController controller = entry.value;
-      
+
       // Check if controller is attached before accessing position
-      if (controller.hasClients && 
+      if (controller.hasClients &&
           scrollPosition >= controller.position.pixels &&
           scrollPosition < controller.position.maxScrollExtent) {
         newCategoryId = categoryId;
@@ -542,6 +541,66 @@ class _HomeNewState extends State<HomeNew>
                   //   },
                   //   child: const Text("Test"),
                   // ),
+                  // Reorder shortcut — only renders when we have an
+                  // eligible last order. Mirrors the floating Reorder pill
+                  // (black pill with yellow icon + label) so the two
+                  // entry points read as the same affordance.
+                  Consumer<ReorderController>(
+                    builder: (context, reorderController, _) {
+                      final order = reorderController.lastOrder;
+                      if (order == null) return const SizedBox.shrink();
+                      final l = AppLocalizations.of(context);
+                      return Padding(
+                        padding: EdgeInsets.only(right: 6.w),
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.8, end: 1.0),
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.elasticOut,
+                          builder: (context, value, child) =>
+                              Transform.scale(scale: value, child: child),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(50.r),
+                              onTap: () => AppBottomSheet.show(
+                                context: context,
+                                child: ReorderBottomSheet(order: order),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w, vertical: 7.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.black87,
+                                  borderRadius: BorderRadius.circular(50.r),
+                                  border: Border.all(color: Colors.white),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.replay_rounded,
+                                      color: const Color(0xFFFEC700),
+                                      size: 18.w,
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      l.reorder,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  8.horizontalSpace,
                   // Language selection dropdown
                   PopupMenuButton<String>(
                     offset: const Offset(0, 25),
@@ -551,8 +610,8 @@ class _HomeNewState extends State<HomeNew>
                     ),
                     child: Container(
                       margin: EdgeInsets.only(right: 10.w),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 8.w, vertical: 4.h),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                       decoration: BoxDecoration(
                         color: const Color(0xFFFEC700),
                         borderRadius: BorderRadius.circular(4.r),
@@ -619,6 +678,7 @@ class _HomeNewState extends State<HomeNew>
                     },
                   ),
                   // Order tracking button
+                  8.horizontalSpace,
                   Builder(
                     builder: (context) {
                       final orderTrackingService = OrderTrackingService();
@@ -630,13 +690,10 @@ class _HomeNewState extends State<HomeNew>
                         },
                         child: Stack(
                           children: [
-                            Padding(
-                              padding: EdgeInsets.all(15.r),
-                              child: Icon(
-                                Icons.receipt_long,
-                                size: 24.w,
-                                color: Colors.black,
-                              ),
+                            Icon(
+                              Icons.receipt_long,
+                              size: 24.w,
+                              color: Colors.black,
                             ),
                             // Show notification badge if there are new orders
                             if (orderTrackingService.hasNewOrders)
@@ -669,7 +726,7 @@ class _HomeNewState extends State<HomeNew>
                       );
                     },
                   ),
-                  const SizedBox(width: 10),
+                  8.horizontalSpace,
                   Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
                       return GestureDetector(
@@ -716,7 +773,7 @@ class _HomeNewState extends State<HomeNew>
                       );
                     },
                   ),
-                  const SizedBox(width: 10),
+                  8.horizontalSpace,
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
@@ -737,21 +794,21 @@ class _HomeNewState extends State<HomeNew>
                       // Carousel Slider Banner
                       _isLoadingBanners
                           ? Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          height: 160.h,
-                          margin: EdgeInsets.symmetric(horizontal: 16.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16.r),
-                          ),
-                        ),
-                      )
+                              baseColor: Colors.grey[300]!,
+                              highlightColor: Colors.grey[100]!,
+                              child: Container(
+                                height: 160.h,
+                                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16.r),
+                                ),
+                              ),
+                            )
                           : BannerCarouselWidget(
                               banners: banners,
                               isLoading: _isLoadingBanners,
-                          ),
+                            ),
                     ],
                   ),
                 ),
@@ -844,34 +901,40 @@ class _HomeNewState extends State<HomeNew>
                           children: categories.map((category) {
                             // Get MenuService instance
                             final menuService = MenuService();
-                            
+
                             // Get ungrouped products and product groups for this category
                             List<Product> ungroupedProducts = menuService
                                 .getUngroupedProductsForCategory(category.id);
                             List<ProductGroup> productGroups = menuService
                                 .getProductGroupsForCategory(category.id);
-                            
+
                             // Debug logging
                             if (productGroups.isNotEmpty) {
-                              print('🎯 UI: Category "${category.name}" has ${productGroups.length} product groups');
+                              print(
+                                  '🎯 UI: Category "${category.name}" has ${productGroups.length} product groups');
                               for (var group in productGroups) {
-                                print('  • ${group.groupName} (${group.variations.length} variations)');
+                                print(
+                                    '  • ${group.groupName} (${group.variations.length} variations)');
                               }
                             }
-                            
+
                             // Combine groups and ungrouped products into a single list
                             // We'll use a list of dynamic items (either Product or ProductGroup)
                             List<dynamic> displayItems = [];
-                            
+
                             // Separate pinned and non-pinned products
-                            List<Product> pinnedProducts = ungroupedProducts.where((p) => p.isPinned).toList();
-                            List<Product> nonPinnedProducts = ungroupedProducts.where((p) => !p.isPinned).toList();
-                            
+                            List<Product> pinnedProducts = ungroupedProducts
+                                .where((p) => p.isPinned)
+                                .toList();
+                            List<Product> nonPinnedProducts = ungroupedProducts
+                                .where((p) => !p.isPinned)
+                                .toList();
+
                             // Add items in priority order: pinned products first, then groups, then other products
                             displayItems.addAll(pinnedProducts);
                             displayItems.addAll(productGroups);
                             displayItems.addAll(nonPinnedProducts);
-                            
+
                             return Container(
                               key: ValueKey<int>(category.id),
                               child: ListView.builder(
@@ -883,7 +946,7 @@ class _HomeNewState extends State<HomeNew>
                                 itemCount: displayItems.length,
                                 itemBuilder: (context, itemIndex) {
                                   final item = displayItems[itemIndex];
-                                  
+
                                   // Check if this is a ProductGroup or a regular Product
                                   if (item is ProductGroup) {
                                     return _buildProductGroupCard(
@@ -900,7 +963,7 @@ class _HomeNewState extends State<HomeNew>
                                       itemIndex,
                                     );
                                   }
-                                  
+
                                   return const SizedBox.shrink();
                                 },
                               ),
@@ -1001,11 +1064,11 @@ class _HomeNewState extends State<HomeNew>
                 : const SizedBox(),
           ),
           // Reorder FAB (right side, mirrors the cart pill on the left)
-          Positioned(
-            bottom: 50.h,
-            right: 25.w,
-            child: const ReorderFab(),
-          ),
+          // Positioned(
+          //   bottom: 50.h,
+          //   right: 25.w,
+          //   child: const ReorderFab(),
+          // ),
         ],
       ),
     );
@@ -1077,17 +1140,20 @@ class _HomeNewState extends State<HomeNew>
     int itemIndex,
   ) {
     return VisibilityDetector(
-      key: Key('${category.id}_group_${itemIndex}_${productGroup.primaryVariation.id}'),
+      key: Key(
+          '${category.id}_group_${itemIndex}_${productGroup.primaryVariation.id}'),
       onVisibilityChanged: (visibilityInfo) {
         if (visibilityInfo.visibleFraction == 1) {
           selectedCategoryId.value = productGroup.categoryId;
         }
       },
       child: GestureDetector(
-        onTap: productGroup.allOutOfStock ? null : () {
-          // Show variation selector bottom sheet
-          VariationSelectorSheet.show(context, productGroup);
-        },
+        onTap: productGroup.allOutOfStock
+            ? null
+            : () {
+                // Show variation selector bottom sheet
+                VariationSelectorSheet.show(context, productGroup);
+              },
         child: Opacity(
           opacity: productGroup.allOutOfStock ? 0.5 : 1.0,
           child: Container(
@@ -1149,73 +1215,73 @@ class _HomeNewState extends State<HomeNew>
                     ],
                   ),
                 ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            productGroup.groupName,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              productGroup.groupName,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16.sp,
+                              ),
                             ),
                           ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios,
-                          size: 14.w,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 5.h),
-                    Consumer<LocaleProvider>(
-                      builder: (context, localeProvider, _) {
-                        final description = productGroup.primaryVariation
-                            .getDescriptionInLanguage(
-                                localeProvider.locale.languageCode);
-
-                        return Text(
-                          description != null && description.isNotEmpty
-                              ? description
-                              : 'Multiple variations available',
-                          style: const TextStyle(
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 14.w,
                             color: Colors.grey,
-                            fontWeight: FontWeight.bold,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 5.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 35.w,
-                        vertical: 5.h,
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.r),
-                        color: const Color(0xFFFEC700),
+                      SizedBox(height: 5.h),
+                      Consumer<LocaleProvider>(
+                        builder: (context, localeProvider, _) {
+                          final description = productGroup.primaryVariation
+                              .getDescriptionInLanguage(
+                                  localeProvider.locale.languageCode);
+
+                          return Text(
+                            description != null && description.isNotEmpty
+                                ? description
+                                : 'Multiple variations available',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
                       ),
-                      child: Text(
-                        '${productGroup.getPriceRange().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color.fromARGB(255, 11, 11, 11),
+                      SizedBox(height: 5.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 35.w,
+                          vertical: 5.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.r),
+                          color: const Color(0xFFFEC700),
+                        ),
+                        child: Text(
+                          '${productGroup.getPriceRange().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color.fromARGB(255, 11, 11, 11),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -1236,14 +1302,16 @@ class _HomeNewState extends State<HomeNew>
         }
       },
       child: GestureDetector(
-        onTap: product.outOfStock ? null : () {
-          Navigator.push(
-            context,
-            CupertinoPageRoute(
-              builder: (context) => Details(product: product),
-            ),
-          );
-        },
+        onTap: product.outOfStock
+            ? null
+            : () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => Details(product: product),
+                  ),
+                );
+              },
         child: Opacity(
           opacity: product.outOfStock ? 0.5 : 1.0,
           child: Container(
@@ -1329,61 +1397,61 @@ class _HomeNewState extends State<HomeNew>
                     ],
                   ),
                 ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.sp,
-                      ),
-                    ),
-                    SizedBox(height: 5.h),
-                    Consumer<LocaleProvider>(
-                      builder: (context, localeProvider, _) {
-                        final description = product.getDescriptionInLanguage(
-                            localeProvider.locale.languageCode);
-
-                        return Text(
-                          description != null && description.isNotEmpty
-                              ? description
-                              : 'No Description',
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        );
-                      },
-                    ),
-                    SizedBox(height: 5.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 35.w,
-                        vertical: 5.h,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.r),
-                        color: const Color(0xFFFEC700),
-                      ),
-                      child: Text(
-                        '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
                         style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: const Color.fromARGB(255, 11, 11, 11),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.sp,
                         ),
                       ),
-                    ),
-                  ],
+                      SizedBox(height: 5.h),
+                      Consumer<LocaleProvider>(
+                        builder: (context, localeProvider, _) {
+                          final description = product.getDescriptionInLanguage(
+                              localeProvider.locale.languageCode);
+
+                          return Text(
+                            description != null && description.isNotEmpty
+                                ? description
+                                : 'No Description',
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          );
+                        },
+                      ),
+                      SizedBox(height: 5.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 35.w,
+                          vertical: 5.h,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.r),
+                          color: const Color(0xFFFEC700),
+                        ),
+                        child: Text(
+                          '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: const Color.fromARGB(255, 11, 11, 11),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
