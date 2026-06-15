@@ -828,9 +828,22 @@ class _CheckoutState extends State<Checkout> {
     await prefs.setString('carDetails', details);
   }
 
+  /// Removes characters the backend's utf8mb3 columns can't store
+  /// (4-byte UTF-8 sequences, i.e. emojis / astral-plane code points).
+  /// These trigger "Incorrect string value" SQL errors on the server.
+  String _stripEmojis(String input) {
+    final cleaned = input.runes
+        .where((rune) => rune <= 0xFFFF)
+        .map((rune) => String.fromCharCode(rune))
+        .join();
+    // Collapse any whitespace left behind by removed emojis.
+    return cleaned.replaceAll(RegExp(r'[ \t]{2,}'), ' ').trim();
+  }
+
   void _updateCommented() {
     setState(() {
-      commented = (clientComment.isNotEmpty ? clientComment + ', ' : '') +
+      final cleanComment = _stripEmojis(clientComment);
+      commented = (cleanComment.isNotEmpty ? cleanComment + ', ' : '') +
           (clientCommentPhone.isNotEmpty
               ? 'Additional Number: ' + clientCommentPhone
               : '');

@@ -37,6 +37,7 @@ class ReorderController extends ChangeNotifier with WidgetsBindingObserver {
 
   ReorderLoadState _state = ReorderLoadState.idle;
   LastOrder? _lastOrder;
+  List<LastOrder> _lastOrders = const [];
   bool _hasHistoryHint = false;
 
   /// Payload staged by the reorder bottom sheet so Cart can route the user
@@ -47,6 +48,10 @@ class ReorderController extends ChangeNotifier with WidgetsBindingObserver {
 
   ReorderLoadState get state => _state;
   LastOrder? get lastOrder => _lastOrder;
+
+  /// The user's most recent reorder-eligible orders (newest first, up to 5),
+  /// powering the reorder picker. Empty until [load] resolves.
+  List<LastOrder> get lastOrders => _lastOrders;
   bool get hasPendingPrefill => _pendingPrefill != null;
 
   void stagePrefill(ReorderPayload payload) {
@@ -75,9 +80,10 @@ class ReorderController extends ChangeNotifier with WidgetsBindingObserver {
     _state = ReorderLoadState.loading;
     notifyListeners();
 
-    final order = await _repository.fetchLastOrder(forceRefresh: forceRefresh);
-    _lastOrder = order;
-    if (order == null) {
+    final orders = await _repository.fetchLastOrders(forceRefresh: forceRefresh);
+    _lastOrders = orders;
+    _lastOrder = orders.isEmpty ? null : orders.first;
+    if (_lastOrder == null) {
       _state = _hasHistoryHint ? ReorderLoadState.error : ReorderLoadState.empty;
     } else {
       _state = ReorderLoadState.ready;
@@ -165,6 +171,7 @@ class ReorderController extends ChangeNotifier with WidgetsBindingObserver {
   /// Forget cached state, e.g. on logout.
   void clear() {
     _lastOrder = null;
+    _lastOrders = const [];
     _state = ReorderLoadState.idle;
     _hasHistoryHint = false;
     _pendingPrefill = null;

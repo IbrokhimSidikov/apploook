@@ -2,7 +2,7 @@ name: apploook
 description: "LOOOK Mobile Application"
 publish_to: "none"
 
-version: 3.0.0+49
+version: 3.1.0+50
 
 environment:
   sdk: ">=3.3.4 <4.0.0"

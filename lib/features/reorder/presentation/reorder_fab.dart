@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../../widget/app_bottom_sheet.dart';
 import '../application/reorder_controller.dart';
-import 'reorder_bottom_sheet.dart';
+import 'reorder_list_sheet.dart';
 
 /// Floating "Reorder last order" pill, designed to sit on the right side of
 /// the home screen — mirror to the existing cart pill on the left.
@@ -67,11 +66,6 @@ class ReorderFab extends StatelessWidget {
   }
 
   void _openSheet(BuildContext context, ReorderController controller) {
-    final order = controller.lastOrder;
-    if (order == null) return;
-    AppBottomSheet.show(
-      context: context,
-      child: ReorderBottomSheet(order: order),
-    );
+    ReorderListSheet.open(context, controller.lastOrders);
   }
 }

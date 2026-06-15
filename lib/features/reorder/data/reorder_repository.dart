@@ -50,30 +50,47 @@ class ReorderRepository {
   /// Returns null if there's no eligible order, no phone on device, or
   /// the network call fails with no cache.
   Future<LastOrder?> fetchLastOrder({bool forceRefresh = false}) async {
+    final orders = await fetchLastOrders(limit: 1, forceRefresh: forceRefresh);
+    return orders.isEmpty ? null : orders.first;
+  }
+
+  /// Fetch up to [limit] of the user's most recent reorder-eligible orders
+  /// (status Delivered or Closed), newest first. Pending / cancelled orders
+  /// are skipped so the picker never offers an in-flight or aborted order as
+  /// a template. Returns an empty list if there's no eligible order, no phone
+  /// on device, or the network call fails with no cache.
+  Future<List<LastOrder>> fetchLastOrders({
+    int limit = 5,
+    bool forceRefresh = false,
+  }) async {
     try {
       final response = await _history.fetchOrderHistory(
         page: 1,
-        limit: 10,
+        limit: 20,
         forceRefresh: forceRefresh,
       );
       final list = response['data'] as List<dynamic>? ?? const [];
       if (list.isEmpty) {
         await _setHistoryHint(false);
-        return null;
+        return const [];
       }
       await _setHistoryHint(true);
 
+      final eligible = <LastOrder>[];
       for (final raw in list) {
         if (raw is! Map<String, dynamic>) continue;
         final order = LastOrder.fromJson(raw);
-        if (order.isReorderEligible) return order;
+        if (order.isReorderEligible) {
+          eligible.add(order);
+          if (eligible.length >= limit) break;
+        }
       }
-      // History exists but nothing is finished yet.
-      return null;
+      // History exists but nothing is finished yet → empty list.
+      return eligible;
     } catch (e) {
-      // Surface as null — controller decides whether to retry or stay silent.
-      print('ReorderRepository: failed to fetch last order: $e');
-      return null;
+      // Surface as empty — controller decides whether to retry or stay silent.
+      print('ReorderRepository: failed to fetch last orders: $e');
+      return const [];
     }
   }
 

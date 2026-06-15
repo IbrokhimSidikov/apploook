@@ -26,14 +26,13 @@ import 'dart:convert';
 import '../constants/app_colors.dart';
 import '../models/modifier_models.dart';
 import '../models/product_group.dart';
-import '../widget/app_bottom_sheet.dart';
 import '../widget/banner_widget.dart';
 import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../widgets/announcement_story_dialog.dart';
 import '../features/reorder/application/reorder_controller.dart';
-import '../features/reorder/presentation/reorder_bottom_sheet.dart';
+import '../features/reorder/presentation/reorder_list_sheet.dart';
 import '../features/reorder/presentation/reorder_fab.dart';
 
 class Category {
@@ -578,9 +577,9 @@ class _HomeNewState extends State<HomeNew>
                             color: Colors.transparent,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(50.r),
-                              onTap: () => AppBottomSheet.show(
-                                context: context,
-                                child: ReorderBottomSheet(order: order),
+                              onTap: () => ReorderListSheet.open(
+                                context,
+                                reorderController.lastOrders,
                               ),
                               child: Container(
                                 padding: EdgeInsets.symmetric(

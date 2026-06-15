@@ -223,6 +223,7 @@ class AppLocalizations {
       'reorder': 'Reorder',
       'reorderNoItemsAvailable':
           'Sorry, none of these items are available right now.',
+      'reorderSelectPrompt': 'Pick an order to repeat',
       'addressReconfirmAtCheckout':
           'Address will be re-confirmed at checkout',
     },
@@ -441,6 +442,7 @@ class AppLocalizations {
       'reorder': 'Qayta buyurtma',
       'reorderNoItemsAvailable':
           'Kechirasiz, hozir bu mahsulotlardan birortasi mavjud emas.',
+      'reorderSelectPrompt': 'Takrorlash uchun buyurtmani tanlang',
       'addressReconfirmAtCheckout':
           'Manzilni to\'lov sahifasida tasdiqlaysiz',
     },
@@ -656,6 +658,7 @@ class AppLocalizations {
       'reorder': 'Повторить заказ',
       'reorderNoItemsAvailable':
           'К сожалению, эти товары сейчас недоступны.',
+      'reorderSelectPrompt': 'Выберите заказ для повтора',
       'addressReconfirmAtCheckout':
           'Адрес будет подтверждён при оформлении заказа',
     },
@@ -1028,6 +1031,8 @@ class AppLocalizations {
   String get reorder => _localizedValues[locale.languageCode]!['reorder']!;
   String get reorderNoItemsAvailable =>
       _localizedValues[locale.languageCode]!['reorderNoItemsAvailable']!;
+  String get reorderSelectPrompt =>
+      _localizedValues[locale.languageCode]!['reorderSelectPrompt']!;
   String get addressReconfirmAtCheckout =>
       _localizedValues[locale.languageCode]!['addressReconfirmAtCheckout']!;
   String cartWillBeReplaced(int count) =>
