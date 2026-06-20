@@ -1,13 +1,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
-import 'dart:async';
-import 'dart:ui' as ui;
-
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 /// ---------------------------------------------------------------------------
 /// Design tokens — kept in sync with the rest of the app.
@@ -38,7 +35,7 @@ class Branch {
     required this.lng,
   });
 
-  Point get point => Point(latitude: lat, longitude: lng);
+  LatLng get point => LatLng(lat, lng);
 }
 
 const List<Branch> _kBranches = [
@@ -111,7 +108,7 @@ const List<Branch> _kBranches = [
 ];
 
 /// Tashkent overview camera position (shows all branches at once).
-const Point _kTashkentCenter = Point(latitude: 41.3137916, longitude: 69.242771);
+final LatLng _kTashkentCenter = LatLng(41.3137916, 69.242771);
 
 /// ---------------------------------------------------------------------------
 /// Shared actions — pure functions so both the list and the map reuse them.
@@ -482,13 +479,14 @@ class _BranchCard extends StatelessWidget {
 /// ---------------------------------------------------------------------------
 /// MAP TAB
 ///
-/// Performance-critical. This widget:
-///   • is kept alive so swapping tabs never re-creates the native map engine;
-///   • only mounts the [YandexMap] after [initState] resolves its marker icons,
-///     so the first frame is cheap;
+/// Uses [FlutterMap] (OpenStreetMap tiles) instead of a native map engine, so
+/// there is no platform GL view that can crash. This widget:
+///   • is kept alive so swapping tabs preserves the camera + cached tiles;
+///   • renders markers as plain Flutter widgets (no SVG→bitmap step), so the
+///     first frame is immediate;
 ///   • drives selection through a [ValueNotifier] so swiping cards or
 ///     highlighting a marker rebuilds ONLY the affected sub-tree — never the
-///     whole page.
+///     tile layer.
 /// ---------------------------------------------------------------------------
 class _BranchMapView extends StatefulWidget {
   final List<Branch> branches;
@@ -499,17 +497,17 @@ class _BranchMapView extends StatefulWidget {
 }
 
 class _BranchMapViewState extends State<_BranchMapView>
-    with AutomaticKeepAliveClientMixin {
-  final Completer<YandexMapController> _controller = Completer();
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  final MapController _mapController = MapController();
   final PageController _pageController =
       PageController(viewportFraction: 0.88);
 
   /// -1 means "no branch selected" → overview, no marker highlighted.
   final ValueNotifier<int> _selected = ValueNotifier<int>(-1);
 
-  BitmapDescriptor? _normalIcon;
-  BitmapDescriptor? _selectedIcon;
-  bool _iconsLoaded = false;
+  /// Drives smooth camera fly-to animations (flutter_map has no built-in one).
+  late final AnimationController _camAnim;
+  VoidCallback? _camTick;
 
   @override
   bool get wantKeepAlive => true;
@@ -517,111 +515,58 @@ class _BranchMapViewState extends State<_BranchMapView>
   @override
   void initState() {
     super.initState();
+    _camAnim = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
     _selected.addListener(_onSelectionChanged);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_iconsLoaded) {
-      _iconsLoaded = true;
-      _loadIcons();
-    }
   }
 
   @override
   void dispose() {
     _selected.removeListener(_onSelectionChanged);
     _selected.dispose();
+    if (_camTick != null) _camAnim.removeListener(_camTick!);
+    _camAnim.dispose();
     _pageController.dispose();
+    _mapController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadIcons() async {
-    final dpr = View.of(context).devicePixelRatio;
-    final normal = await _bitmapFromSvg('images/metkaa.svg', 46, dpr);
-    final selected = await _bitmapFromSvg('images/metkaa.svg', 66, dpr);
-    if (!mounted) return;
-    setState(() {
-      _normalIcon = normal;
-      _selectedIcon = selected;
-    });
-  }
-
-  /// Rasterises an SVG into a [BitmapDescriptor] once, at the device's pixel
-  /// ratio, so the map never re-decodes vectors while panning.
-  Future<BitmapDescriptor> _bitmapFromSvg(
-      String asset, int width, double dpr) async {
-    final picture = await vg.loadPicture(SvgAssetLoader(asset), null);
-    final scaledWidth = (width * dpr).toInt();
-    final scaledHeight =
-        (scaledWidth * picture.size.height / picture.size.width).toInt();
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder)
-      ..scale(scaledWidth / picture.size.width);
-    canvas.drawPicture(picture.picture);
-    picture.picture.dispose();
-
-    final image =
-        await recorder.endRecording().toImage(scaledWidth, scaledHeight);
-    final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-    image.dispose();
-    return BitmapDescriptor.fromBytes(bytes!.buffer.asUint8List());
   }
 
   void _onSelectionChanged() {
     final index = _selected.value;
     if (index < 0) return;
-    _animateCameraTo(widget.branches[index].point, zoom: 15);
+    _flyTo(widget.branches[index].point, 15);
   }
 
-  /// Builds the placemark list for the current selection. Rebuilt only when
-  /// [_selected] changes (via [ValueListenableBuilder]) — not on camera moves.
-  List<PlacemarkMapObject> _buildPlacemarks(int selectedIndex) {
-    if (_normalIcon == null || _selectedIcon == null) return const [];
-    return [
-      for (int i = 0; i < widget.branches.length; i++)
-        PlacemarkMapObject(
-          mapId: MapObjectId('branch_$i'),
-          point: widget.branches[i].point,
-          opacity: 1,
-          icon: PlacemarkIcon.single(
-            PlacemarkIconStyle(
-              image: i == selectedIndex ? _selectedIcon! : _normalIcon!,
-              scale: 1.0,
-            ),
-          ),
-          onTap: (_, __) => _pageController.animateToPage(
-            i,
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutCubic,
-          ),
-        ),
-    ];
+  /// Animates the camera from its current position to [dest]/[zoom] with an
+  /// eased tween — the "pro app" smooth glide between branches.
+  void _flyTo(LatLng dest, double zoom) {
+    final camera = _mapController.camera;
+    final latTween =
+        Tween<double>(begin: camera.center.latitude, end: dest.latitude);
+    final lngTween =
+        Tween<double>(begin: camera.center.longitude, end: dest.longitude);
+    final zoomTween = Tween<double>(begin: camera.zoom, end: zoom);
+    final curved =
+        CurvedAnimation(parent: _camAnim, curve: Curves.easeOutCubic);
+
+    if (_camTick != null) _camAnim.removeListener(_camTick!);
+    _camTick = () {
+      _mapController.move(
+        LatLng(latTween.evaluate(curved), lngTween.evaluate(curved)),
+        zoomTween.evaluate(curved),
+      );
+    };
+    _camAnim
+      ..reset()
+      ..addListener(_camTick!)
+      ..forward();
   }
 
-  Future<void> _animateCameraTo(Point target, {double zoom = 15}) async {
-    final controller = await _controller.future;
-    await controller.moveCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: target, zoom: zoom),
-      ),
-      animation:
-          const MapAnimation(type: MapAnimationType.smooth, duration: 0.6),
-    );
-  }
-
-  Future<void> _showAllBranches() async {
+  void _showAllBranches() {
     _selected.value = -1;
-    final controller = await _controller.future;
-    await controller.moveCamera(
-      CameraUpdate.newCameraPosition(
-        const CameraPosition(target: _kTashkentCenter, zoom: 10.5),
-      ),
-      animation:
-          const MapAnimation(type: MapAnimationType.smooth, duration: 0.8),
-    );
+    _flyTo(_kTashkentCenter, 10.5);
   }
 
   @override
@@ -630,41 +575,57 @@ class _BranchMapViewState extends State<_BranchMapView>
 
     return Stack(
       children: [
-        // The native map mounts once and is preserved for the page's lifetime.
-        // Only its placemark layer reacts to selection changes.
+        // Pure-Dart map: rendered on Flutter's own canvas, so there is no
+        // native GL view to crash and the first frame is immediate.
         Positioned.fill(
-          child: ValueListenableBuilder<int>(
-            valueListenable: _selected,
-            builder: (context, selectedIndex, _) {
-              return YandexMap(
-                mapObjects: _buildPlacemarks(selectedIndex),
-                onMapCreated: (controller) {
-                  if (!_controller.isCompleted) {
-                    _controller.complete(controller);
-                    controller.moveCamera(
-                      CameraUpdate.newCameraPosition(
-                        const CameraPosition(
-                            target: _kTashkentCenter, zoom: 10.5),
-                      ),
-                    );
-                  }
+          child: FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: _kTashkentCenter,
+              initialZoom: 10.5,
+              minZoom: 4,
+              maxZoom: 18,
+              backgroundColor: _kBackground,
+              interactionOptions: const InteractionOptions(
+                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+              ),
+              // Tapping empty map clears the highlight.
+              onTap: (_, __) => _selected.value = -1,
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.loook.v1',
+              ),
+              // Only the marker layer rebuilds on selection — the tile layer
+              // underneath is untouched, so panning/zoom stays smooth.
+              ValueListenableBuilder<int>(
+                valueListenable: _selected,
+                builder: (context, selectedIndex, _) {
+                  return MarkerLayer(
+                    markers: [
+                      for (int i = 0; i < widget.branches.length; i++)
+                        Marker(
+                          point: widget.branches[i].point,
+                          width: 56,
+                          height: 56,
+                          alignment: Alignment.bottomCenter,
+                          child: _MapMarker(
+                            selected: i == selectedIndex,
+                            onTap: () => _pageController.animateToPage(
+                              i,
+                              duration: const Duration(milliseconds: 350),
+                              curve: Curves.easeOutCubic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
                 },
-              );
-            },
+              ),
+            ],
           ),
         ),
-
-        // Loading veil until the marker icons are ready — avoids a flash of an
-        // empty map and a janky first interaction.
-        if (_normalIcon == null)
-          const Positioned.fill(
-            child: ColoredBox(
-              color: Color(0x11000000),
-              child: Center(
-                child: CircularProgressIndicator(color: _kAccent),
-              ),
-            ),
-          ),
 
         _MapTopBar(
           count: widget.branches.length,
@@ -768,6 +729,60 @@ class _MapTopBar extends StatelessWidget {
                   child: Icon(Icons.my_location_rounded,
                       color: Colors.black, size: 20),
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A map pin built entirely from Flutter widgets. The tip sits at the bottom
+/// center (the marker is anchored with [Alignment.bottomCenter]); selecting it
+/// scales it up around that tip so the point stays put.
+class _MapMarker extends StatelessWidget {
+  final bool selected;
+  final VoidCallback onTap;
+  const _MapMarker({required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutBack,
+        alignment: Alignment.bottomCenter,
+        scale: selected ? 1.0 : 0.78,
+        child: Stack(
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.none,
+          children: [
+            Icon(
+              Icons.location_on,
+              size: 56,
+              color: _kAccent,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.30),
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            Positioned(
+              top: 8,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.restaurant_rounded,
+                    size: 13, color: _kAccent),
               ),
             ),
           ],
