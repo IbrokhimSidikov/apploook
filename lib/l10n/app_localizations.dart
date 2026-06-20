@@ -226,6 +226,19 @@ class AppLocalizations {
       'reorderSelectPrompt': 'Pick an order to repeat',
       'addressReconfirmAtCheckout':
           'Address will be re-confirmed at checkout',
+      // Branches page
+      'branchesListTab': 'List',
+      'branchesMapTab': 'Map',
+      'findOurLocations': 'Find Our Locations',
+      'branchesAcrossTashkent': '{count} branches across Tashkent',
+      'branchesCountLabel': '{count} Branches',
+      'tapMarkerHint': 'Tap a marker or swipe the cards',
+      'openNow': 'Open Now',
+      'closedNow': 'Closed',
+      'directions': 'Directions',
+      'callBranch': 'Call',
+      'couldNotOpenMap': 'Could not open the map',
+      'couldNotCall': 'Could not start the call',
     },
     'uz': {
       // Onboard Page
@@ -445,6 +458,19 @@ class AppLocalizations {
       'reorderSelectPrompt': 'Takrorlash uchun buyurtmani tanlang',
       'addressReconfirmAtCheckout':
           'Manzilni to\'lov sahifasida tasdiqlaysiz',
+      // Branches page
+      'branchesListTab': 'Ro\'yxat',
+      'branchesMapTab': 'Xarita',
+      'findOurLocations': 'Filiallarimizni toping',
+      'branchesAcrossTashkent': 'Toshkent bo\'ylab {count} ta filial',
+      'branchesCountLabel': '{count} ta filial',
+      'tapMarkerHint': 'Belgini bosing yoki kartalarni suring',
+      'openNow': 'Hozir ochiq',
+      'closedNow': 'Yopiq',
+      'directions': 'Yo\'nalish',
+      'callBranch': 'Qo\'ng\'iroq',
+      'couldNotOpenMap': 'Xaritani ochib bo\'lmadi',
+      'couldNotCall': 'Qo\'ng\'iroqni amalga oshirib bo\'lmadi',
     },
     'ru': {
       // Onboard Page
@@ -661,6 +687,19 @@ class AppLocalizations {
       'reorderSelectPrompt': 'Выберите заказ для повтора',
       'addressReconfirmAtCheckout':
           'Адрес будет подтверждён при оформлении заказа',
+      // Branches page
+      'branchesListTab': 'Список',
+      'branchesMapTab': 'Карта',
+      'findOurLocations': 'Найдите наши филиалы',
+      'branchesAcrossTashkent': '{count} филиалов по Ташкенту',
+      'branchesCountLabel': '{count} филиалов',
+      'tapMarkerHint': 'Нажмите на метку или листайте карточки',
+      'openNow': 'Открыто',
+      'closedNow': 'Закрыто',
+      'directions': 'Маршрут',
+      'callBranch': 'Позвонить',
+      'couldNotOpenMap': 'Не удалось открыть карту',
+      'couldNotCall': 'Не удалось совершить звонок',
     },
   };
 
@@ -1038,5 +1077,31 @@ class AppLocalizations {
   String cartWillBeReplaced(int count) =>
       _localizedValues[locale.languageCode]!['cartWillBeReplaced']!
           .replaceAll('{count}', count.toString());
+
+  // Branches page
+  String get branchesListTab =>
+      _localizedValues[locale.languageCode]!['branchesListTab']!;
+  String get branchesMapTab =>
+      _localizedValues[locale.languageCode]!['branchesMapTab']!;
+  String get findOurLocations =>
+      _localizedValues[locale.languageCode]!['findOurLocations']!;
+  String branchesAcrossTashkent(int count) =>
+      _localizedValues[locale.languageCode]!['branchesAcrossTashkent']!
+          .replaceAll('{count}', count.toString());
+  String branchesCountLabel(int count) =>
+      _localizedValues[locale.languageCode]!['branchesCountLabel']!
+          .replaceAll('{count}', count.toString());
+  String get tapMarkerHint =>
+      _localizedValues[locale.languageCode]!['tapMarkerHint']!;
+  String get openNow => _localizedValues[locale.languageCode]!['openNow']!;
+  String get closedNow => _localizedValues[locale.languageCode]!['closedNow']!;
+  String get directions =>
+      _localizedValues[locale.languageCode]!['directions']!;
+  String get callBranch =>
+      _localizedValues[locale.languageCode]!['callBranch']!;
+  String get couldNotOpenMap =>
+      _localizedValues[locale.languageCode]!['couldNotOpenMap']!;
+  String get couldNotCall =>
+      _localizedValues[locale.languageCode]!['couldNotCall']!;
 
 }

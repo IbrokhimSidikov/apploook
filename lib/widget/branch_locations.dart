@@ -8,6 +8,8 @@ class BranchLocations {
     "Loook Maksim Gorkiy": "41.326421, 69.327426",
     "Loook Chilanzar": "41.276810, 69.201880",
     "Loook YangiYo'l": "41.120050, 69.060309",
+    "Chicken by Loook High Town": "41.356380, 69.310698",
+    "Chicken by Loook Ava": "41.276810, 69.201880",
   };
 
   static String? getBranchCoordinates(String? branch) {
