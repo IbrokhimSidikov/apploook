@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:apploook/services/api_service.dart';
+import 'package:apploook/services/live_activity_service.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class OrderTrackingService {
@@ -142,12 +143,23 @@ class OrderTrackingService {
         }
       }
       
+      // Reflect the new status on the iOS Live Activity (Lock Screen card).
+      // Safe no-op if there's no activity for this order / not on iOS.
+      final etaMinutes = (statusResponse['etaMinutes'] is int)
+          ? statusResponse['etaMinutes'] as int
+          : 0;
+      await LiveActivityService.instance.updateForOrder(
+        orderId: orderId,
+        rawStatus: status,
+        etaMinutes: etaMinutes,
+      );
+
       final result = {
         'status': status,
         'statusDetails': statusResponse,
         'timestamp': DateTime.now().toIso8601String(),
       };
-      
+
       print('ORDER TRACKING: OrderTrackingService: Returning result: $result');
       return result;
     } catch (e) {

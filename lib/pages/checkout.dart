@@ -7,6 +7,7 @@ import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/order_tracking_service.dart';
+import 'package:apploook/services/live_activity_service.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
@@ -2383,6 +2384,15 @@ class _CheckoutState extends State<Checkout> {
         title: "New Order",
         body: "Your order has been placed successfully!",
         messageId: orderId,
+      );
+
+      // Start the iOS Live Activity (Lock Screen / Dynamic Island order tracker).
+      // No-op on Android or iOS < 16.1.
+      await LiveActivityService.instance.startForOrder(
+        orderId: orderId,
+        branchName: 'LOOOK',
+        rawStatus: 'new',
+        etaMinutes: 30,
       );
 
       // Clear the cart
