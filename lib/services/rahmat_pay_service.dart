@@ -386,22 +386,22 @@ class RahmatPayService {
   }
 
   /// Determines the order type ID based on the selected index
-  /// 0: Delivery (order_type_id: 2)
-  /// 1: Self-Pickup (order_type_id: 1)
+  /// 0: Delivery (order_type_id: 3)
+  /// 1: Self-Pickup (order_type_id: 2)
   /// 2: Carhop (order_type_id: 8)
-  /// 3: In-Restaurant (order_type_id: 3)
+  /// 3: In-Restaurant (order_type_id: 1)
   static int getOrderTypeId(int selectedIndex) {
     switch (selectedIndex) {
       case 0:
         return 3; // Delivery
       case 1:
-        return 7; // Self-Pickup
+        return 2; // Self-Pickup
       case 2:
         return 8; // Carhop
       case 3:
         return 1; // In-Restaurant
       default:
-        return 7; // Default to delivery
+        return 3; // Default to delivery
     }
   }
 
