@@ -1,7 +1,6 @@
 import 'package:apploook/pages/homenew.dart';
 import 'package:flutter/material.dart';
 import 'package:apploook/models/cart_item.dart';
-import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/models/app_lat_long.dart';
 
 class CartProvider extends ChangeNotifier {
@@ -13,61 +12,35 @@ class CartProvider extends ChangeNotifier {
   double latitude = 0.0;
   double longitude = 0.0;
 
+  /// Add a plain (unconfigured) product. Merges with an existing line of the
+  /// same product that has no modifiers.
   void addToCart(Product product, int quantity) {
-    // Check if the product is already in the cart
-    var existingItem = _cartItems.firstWhere(
-      (item) => item.product.id == product.id && item.selectedModifiers.isEmpty,
-      orElse: () => CartItem(product: product, quantity: 0),
-    );
-
-    // If the product is already in the cart, update its quantity
-    if (existingItem.quantity > 0) {
-      existingItem.quantity += quantity;
-    } else {
-      // Otherwise, add a new item to the cart
-      _cartItems.add(CartItem(product: product, quantity: quantity));
-    }
-
-    notifyListeners();
+    addToCartWithModifiers(CartItem(product: product, quantity: quantity));
   }
 
+  /// Add a configured product. Lines whose [CartItem.configurationKey] matches
+  /// (same product, same modifier IDs, same modifier quantities) are merged by
+  /// bumping the quantity; any other configuration becomes its own line.
   void addToCartWithModifiers(CartItem cartItem) {
-    // For products with modifiers, we need to check if the exact same combination exists
-    var existingItem = _cartItems.firstWhere(
-      (item) => item.product.id == cartItem.product.id && 
-                _areModifiersSame(item.selectedModifiers, cartItem.selectedModifiers),
-      orElse: () => CartItem(product: cartItem.product, quantity: 0),
-    );
+    if (cartItem.quantity < 1) return;
 
-    // If the exact same product with same modifiers exists, update quantity
-    if (existingItem.quantity > 0) {
-      existingItem.quantity += cartItem.quantity;
+    final existing = findByConfiguration(cartItem);
+    if (existing != null) {
+      existing.quantity += cartItem.quantity;
     } else {
-      // Otherwise, add as a new item
       _cartItems.add(cartItem);
     }
 
     notifyListeners();
   }
 
-  bool _areModifiersSame(List<SelectedModifier> modifiers1, List<SelectedModifier> modifiers2) {
-    if (modifiers1.length != modifiers2.length) return false;
-    
-    // Sort both lists by modifier ID for comparison
-    var sorted1 = List<SelectedModifier>.from(modifiers1);
-    var sorted2 = List<SelectedModifier>.from(modifiers2);
-    
-    sorted1.sort((a, b) => a.modifier.id.compareTo(b.modifier.id));
-    sorted2.sort((a, b) => a.modifier.id.compareTo(b.modifier.id));
-    
-    for (int i = 0; i < sorted1.length; i++) {
-      if (sorted1[i].modifier.id != sorted2[i].modifier.id ||
-          sorted1[i].quantity != sorted2[i].quantity) {
-        return false;
-      }
+  /// The cart line with exactly the same product configuration, if any.
+  CartItem? findByConfiguration(CartItem cartItem) {
+    final key = cartItem.configurationKey;
+    for (final item in _cartItems) {
+      if (item.configurationKey == key) return item;
     }
-    
-    return true;
+    return null;
   }
 
   void removeFromCart(CartItem item) {

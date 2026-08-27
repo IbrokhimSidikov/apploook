@@ -2116,7 +2116,7 @@ class _CheckoutState extends State<Checkout> {
                             ],
                           ),
                         );
-                      } catch (e) {
+                      } catch (e, stackTrace) {
                         // Reset processing state
                         setState(() {
                           _isProcessing = false;
@@ -2124,22 +2124,8 @@ class _CheckoutState extends State<Checkout> {
 
                         // Handle error
                         print('Error during order submission: $e');
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: const Text('Order Error'),
-                            content: Text(
-                                'Failed to place your order: ${e.toString().length > 100 ? e.toString().substring(0, 100) + '...' : e.toString()}\n\nPlease try again later.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text('OK'),
-                              ),
-                            ],
-                          ),
-                        );
+                        print(stackTrace);
+                        _showOrderErrorDialog(e, stackTrace);
                       } finally {
                         setState(() {
                           _isProcessing = false;
@@ -2408,6 +2394,65 @@ class _CheckoutState extends State<Checkout> {
       print('Error submitting order to API: $e');
       return false;
     }
+  }
+
+  // Show the full order error for debugging.
+  //
+  // Deliberately untruncated: the dialog is sized to most of the screen and
+  // scrolls, so long backend exceptions and stack traces are readable in full.
+  // The text is selectable and there is a Copy button for pasting elsewhere.
+  void _showOrderErrorDialog(Object error, [StackTrace? stackTrace]) {
+    final details =
+        stackTrace == null ? '$error' : '$error\n\nStack trace:\n$stackTrace';
+    final scrollController = ScrollController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        final Size screen = MediaQuery.of(context).size;
+        return AlertDialog(
+          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
+          titlePadding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+          contentPadding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+          title: const Text('Order Error'),
+          content: SizedBox(
+            width: screen.width * 0.95,
+            height: screen.height * 0.6,
+            child: Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              child: SingleChildScrollView(
+                controller: scrollController,
+                child: SelectableText(
+                  details,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    height: 1.35,
+                    fontFamily: 'Menlo',
+                  ),
+                ),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                final messenger = ScaffoldMessenger.of(context);
+                await Clipboard.setData(ClipboardData(text: details));
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Error copied to clipboard')),
+                );
+              },
+              child: const Text('Copy'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    ).whenComplete(scrollController.dispose);
   }
 
   // Show order success dialog with tracking option

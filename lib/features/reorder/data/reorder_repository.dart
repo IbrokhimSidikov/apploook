@@ -176,6 +176,7 @@ class ReorderRepository {
     final result = <SelectedModifier>[];
     for (final hist in historical) {
       Modifier? match;
+      ModifierGroup? matchGroup;
 
       // Prefer uuid match — one historical modifier inventory row can map
       // to several Delever modifier IDs, so try each.
@@ -185,6 +186,7 @@ class ReorderRepository {
           for (final modifier in group.modifiers) {
             if (wanted.contains(modifier.id)) {
               match = modifier;
+              matchGroup = group;
               break;
             }
           }
@@ -199,6 +201,7 @@ class ReorderRepository {
           for (final modifier in group.modifiers) {
             if (modifier.name == hist.name) {
               match = modifier;
+              matchGroup = group;
               break;
             }
           }
@@ -207,7 +210,11 @@ class ReorderRepository {
       }
 
       if (match != null) {
-        result.add(SelectedModifier(modifier: match, quantity: hist.quantity));
+        result.add(SelectedModifier(
+          modifier: match,
+          quantity: hist.quantity,
+          groupId: matchGroup?.id ?? '',
+        ));
       }
     }
     return result;

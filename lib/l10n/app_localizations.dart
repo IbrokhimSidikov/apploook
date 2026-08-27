@@ -43,6 +43,13 @@ class AppLocalizations {
       // Details page
       'totalPrice': 'Total Price',
       'addToCart': 'Add to cart',
+      'required': 'Required',
+      'optional': 'Optional',
+      'chooseExactly': 'Choose {n}',
+      'chooseUpTo': 'Choose up to {n}',
+      'chooseBetween': 'Choose {min}–{max}',
+      'chooseAtLeast': 'Choose at least {n}',
+      'selectRequiredOptions': 'Please select the required options',
       // Cart page
       'cart': 'Cart',
       'items': 'items',
@@ -273,6 +280,13 @@ class AppLocalizations {
       // Details page
       'totalPrice': 'Umumiy',
       'addToCart': 'Qo\'shish',
+      'required': 'Majburiy',
+      'optional': 'Ixtiyoriy',
+      'chooseExactly': '{n} tasini tanlang',
+      'chooseUpTo': 'Ko\'pi bilan {n} tasini tanlang',
+      'chooseBetween': '{min}–{max} tasini tanlang',
+      'chooseAtLeast': 'Kamida {n} tasini tanlang',
+      'selectRequiredOptions': 'Iltimos, majburiy variantlarni tanlang',
       // Cart page
       'cart': 'Savatcha',
       'items': 'dona',
@@ -504,6 +518,13 @@ class AppLocalizations {
       // Details page
       'totalPrice': 'Общая стоимость',
       'addToCart': 'Добавить в корзину',
+      'required': 'Обязательно',
+      'optional': 'Необязательно',
+      'chooseExactly': 'Выберите {n}',
+      'chooseUpTo': 'Выберите до {n}',
+      'chooseBetween': 'Выберите {min}–{max}',
+      'chooseAtLeast': 'Выберите минимум {n}',
+      'selectRequiredOptions': 'Пожалуйста, выберите обязательные опции',
       // Cart page
       'cart': 'Корзина',
       'items': 'элементы',
@@ -749,6 +770,23 @@ class AppLocalizations {
   String get totalPrice =>
       _localizedValues[locale.languageCode]!['totalPrice']!;
   String get addToCart => _localizedValues[locale.languageCode]!['addToCart']!;
+  String get required => _localizedValues[locale.languageCode]!['required']!;
+  String get optional => _localizedValues[locale.languageCode]!['optional']!;
+  String chooseExactly(int n) => _localizedValues[locale.languageCode]![
+          'chooseExactly']!
+      .replaceAll('{n}', '$n');
+  String chooseUpTo(int n) =>
+      _localizedValues[locale.languageCode]!['chooseUpTo']!
+          .replaceAll('{n}', '$n');
+  String chooseBetween(int min, int max) =>
+      _localizedValues[locale.languageCode]!['chooseBetween']!
+          .replaceAll('{min}', '$min')
+          .replaceAll('{max}', '$max');
+  String chooseAtLeast(int n) =>
+      _localizedValues[locale.languageCode]!['chooseAtLeast']!
+          .replaceAll('{n}', '$n');
+  String get selectRequiredOptions =>
+      _localizedValues[locale.languageCode]!['selectRequiredOptions']!;
 
   // Cart page
   String get cart => _localizedValues[locale.languageCode]!['cart']!;
