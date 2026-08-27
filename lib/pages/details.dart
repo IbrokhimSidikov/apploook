@@ -29,6 +29,11 @@ const _kDivider = Color(0xFFE0E0E0);
 const _kError = AppColors.cxC62828;
 const _kFont = 'Poppins';
 
+/// The hero artwork is authored at 600×400, so the frame is a 3:2 box that
+/// spans the full width and sits on the same white as the rest of the screen —
+/// images with a white matte then have no visible edge.
+const double _kHeroAspectRatio = 600 / 400;
+
 class Details extends StatefulWidget {
   final dynamic product;
 
@@ -43,6 +48,12 @@ class _DetailsState extends State<Details> {
 
   /// One anchor per modifier group so validation can scroll to the offender.
   final Map<String, GlobalKey> _groupKeys = {};
+
+  final ScrollController _scrollController = ScrollController();
+
+  /// 0 while the hero is on screen, 1 once it has scrolled past the app bar —
+  /// drives the title and the hairline that replace it.
+  final ValueNotifier<double> _appBarReveal = ValueNotifier<double>(0);
 
   Product get _product => widget.product as Product;
 
@@ -88,12 +99,30 @@ class _DetailsState extends State<Details> {
     for (final group in _configuration.groups) {
       _groupKeys[group.id] = GlobalKey();
     }
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _appBarReveal.dispose();
     _configuration.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final heroHeight = 1.sw / _kHeroAspectRatio;
+    final start = heroHeight * 0.45;
+    final end = heroHeight * 0.85;
+    final value =
+        ((_scrollController.offset - start) / (end - start)).clamp(0.0, 1.0);
+    if ((value - _appBarReveal.value).abs() > 0.01 ||
+        value == 0 ||
+        value == 1) {
+      _appBarReveal.value = value;
+    }
   }
 
   // Check if current time is within allowed ordering hours
@@ -181,59 +210,92 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  // ── Hero ──────────────────────────────────────────────────────────────────
+  // ── App bar ───────────────────────────────────────────────────────────────
 
-  Widget _buildHero(BuildContext context) {
-    final topInset = MediaQuery.paddingOf(context).top;
-
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
-          child: Container(
-            width: double.infinity,
-            color: _kSurface,
-            padding: EdgeInsets.fromLTRB(20.w, topInset + 56.h, 20.w, 20.h),
-            child: AspectRatio(
-              aspectRatio: 4 / 3,
-              child: CachedNetworkImage(
-                imageUrl: widget.product.imagePath ?? '',
-                fit: BoxFit.contain,
-                // Detail screen is full-width; cap decode at 1200×900 physical
-                // px — enough for any phone screen.
-                memCacheWidth: 1200,
-                memCacheHeight: 900,
-                errorWidget: (context, url, error) => Center(
-                  child: Icon(
-                    Icons.image_not_supported_outlined,
-                    size: 48.w,
-                    color: _kTextSecondary,
-                  ),
-                ),
-                placeholder: (context, url) => Shimmer.fromColors(
-                  baseColor: const Color(0xFFE6E7EC),
-                  highlightColor: Colors.white,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          top: topInset + 8.h,
-          left: 16.w,
+  /// Pinned, white and flat while the hero is visible; once the artwork has
+  /// scrolled away the product name and a hairline fade in so the user keeps
+  /// their place in a long modifier list.
+  Widget _buildAppBar() {
+    return SliverAppBar(
+      pinned: true,
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      toolbarHeight: 56.h,
+      titleSpacing: 8.w,
+      leadingWidth: 60.w,
+      leading: Padding(
+        padding: EdgeInsets.only(left: 16.w),
+        child: Align(
+          alignment: Alignment.centerLeft,
           child: _CircleIconButton(
             icon: Icons.arrow_back_ios_new_rounded,
             tooltip: MaterialLocalizations.of(context).backButtonTooltip,
             onTap: () => Navigator.pop(context),
           ),
         ),
-      ],
+      ),
+      title: ValueListenableBuilder<double>(
+        valueListenable: _appBarReveal,
+        builder: (context, reveal, _) => Opacity(
+          opacity: reveal,
+          child: Text(
+            widget.product.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: _kFont,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ),
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(1.h),
+        child: ValueListenableBuilder<double>(
+          valueListenable: _appBarReveal,
+          builder: (context, reveal, _) => Container(
+            height: 1.h,
+            color: _kDivider.withValues(alpha: reveal),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Hero ──────────────────────────────────────────────────────────────────
+
+  Widget _buildHero() {
+    return Container(
+      width: double.infinity,
+      color: Colors.white,
+      alignment: Alignment.center,
+      child: AspectRatio(
+        aspectRatio: _kHeroAspectRatio,
+        child: CachedNetworkImage(
+          imageUrl: widget.product.imagePath ?? '',
+          fit: BoxFit.contain,
+          // Artwork is 600×400; cap the decode at 2× that so it stays crisp on
+          // 3x screens without holding a needlessly large bitmap.
+          memCacheWidth: 1200,
+          memCacheHeight: 800,
+          errorWidget: (context, url, error) => Center(
+            child: Icon(
+              Icons.image_not_supported_outlined,
+              size: 48.w,
+              color: _kTextSecondary,
+            ),
+          ),
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: const Color(0xFFEDEEF2),
+            highlightColor: Colors.white,
+            child: Container(color: Colors.white),
+          ),
+        ),
+      ),
     );
   }
 
@@ -247,30 +309,33 @@ class _DetailsState extends State<Details> {
           widget.product.categoryTitle.toString().toUpperCase(),
           style: TextStyle(
             fontFamily: _kFont,
-            fontSize: 12.sp,
+            fontSize: 11.sp,
             fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
+            letterSpacing: 1.4,
+            height: 1.2,
             color: _kTextSecondary,
           ),
         ),
-        SizedBox(height: 6.h),
+        SizedBox(height: 8.h),
         Text(
           widget.product.name,
           style: TextStyle(
             fontFamily: _kFont,
             fontSize: 24.sp,
             fontWeight: FontWeight.w700,
-            height: 1.2,
+            height: 1.25,
+            letterSpacing: -0.3,
             color: Colors.black,
           ),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 10.h),
         Text(
           '${_priceFormat.format(_configuration.basePrice)} UZS',
           style: TextStyle(
             fontFamily: _kFont,
-            fontSize: 20.sp,
+            fontSize: 19.sp,
             fontWeight: FontWeight.w700,
+            height: 1.2,
             color: Colors.black,
           ),
         ),
@@ -288,7 +353,7 @@ class _DetailsState extends State<Details> {
           return const SizedBox.shrink();
         }
         return Padding(
-          padding: EdgeInsets.only(top: 16.h),
+          padding: EdgeInsets.only(top: 12.h),
           child: Text(
             description,
             style: TextStyle(
@@ -328,7 +393,7 @@ class _DetailsState extends State<Details> {
   Widget _buildQuantitySelector() {
     final quantity = _configuration.quantity;
     return Container(
-      height: 52.h,
+      height: 56.h,
       padding: EdgeInsets.symmetric(horizontal: 6.w),
       decoration: BoxDecoration(
         color: _kStepperBg,
@@ -342,7 +407,7 @@ class _DetailsState extends State<Details> {
             onTap: quantity > 1 ? _configuration.decrementQuantity : null,
           ),
           SizedBox(
-            width: 40.w,
+            width: 36.w,
             child: Text(
               '$quantity',
               textAlign: TextAlign.center,
@@ -364,48 +429,51 @@ class _DetailsState extends State<Details> {
   }
 
   Widget _buildAddToCartButton(bool canOrder) {
-    return SizedBox(
-      height: 52.h,
-      child: ElevatedButton(
-        onPressed: canOrder ? _addToCart : null, // Disabled after cutoff time
-        style: ElevatedButton.styleFrom(
-          backgroundColor: _kPrimary,
-          foregroundColor: Colors.black,
-          disabledBackgroundColor: _kDivider,
-          disabledForegroundColor: Colors.black38,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50.r),
-          ),
+    // The label wraps to a second line rather than being truncated — some
+    // locales are far longer than "Add to cart", and the button grows with it.
+    return ElevatedButton(
+      onPressed: canOrder ? _addToCart : null, // Disabled after cutoff time
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _kPrimary,
+        foregroundColor: Colors.black,
+        disabledBackgroundColor: _kDivider,
+        disabledForegroundColor: Colors.black38,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        minimumSize: Size(0, 56.h),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50.r),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Text(
-                AppLocalizations.of(context).addToCart,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: _kFont,
-                  fontSize: 15.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              '${_priceFormat.format(_configuration.totalPrice)} UZS',
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              AppLocalizations.of(context).addToCart,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: _kFont,
                 fontSize: 15.sp,
-                fontWeight: FontWeight.w700,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
               ),
             ),
-          ],
-        ),
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            '${_priceFormat.format(_configuration.totalPrice)} UZS',
+            style: TextStyle(
+              fontFamily: _kFont,
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -417,7 +485,7 @@ class _DetailsState extends State<Details> {
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: _kError.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Row(
         children: [
@@ -430,6 +498,7 @@ class _DetailsState extends State<Details> {
                 fontFamily: _kFont,
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
+                height: 1.35,
                 color: _kError,
               ),
             ),
@@ -453,18 +522,19 @@ class _DetailsState extends State<Details> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
+        border: Border(top: BorderSide(color: _kDivider.withValues(alpha: 0.7))),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, -6),
           ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 12.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -493,13 +563,15 @@ class _DetailsState extends State<Details> {
       body: ListenableBuilder(
         listenable: _configuration,
         builder: (context, _) => CustomScrollView(
+          controller: _scrollController,
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            SliverToBoxAdapter(child: _buildHero(context)),
+            _buildAppBar(),
+            SliverToBoxAdapter(child: _buildHero()),
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 24.h),
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   _buildHeader(),
@@ -536,19 +608,17 @@ class _CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: _kSurface,
       shape: const CircleBorder(),
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.15),
       clipBehavior: Clip.antiAlias,
       child: Tooltip(
         message: tooltip,
         child: InkWell(
           onTap: onTap,
           child: SizedBox(
-            width: 44.w,
-            height: 44.w,
-            child: Icon(icon, size: 18.sp, color: Colors.black),
+            width: 40.w,
+            height: 40.w,
+            child: Icon(icon, size: 17.sp, color: Colors.black),
           ),
         ),
       ),
@@ -572,8 +642,8 @@ class _StepperButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          width: 40.w,
-          height: 40.w,
+          width: 42.w,
+          height: 42.w,
           child: Icon(
             icon,
             size: 20.sp,
