@@ -26,6 +26,9 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/models/loyalty.dart';
+import 'package:apploook/providers/loyalty_provider.dart';
+import 'package:apploook/widgets/loyalty_checkout_section.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
@@ -51,6 +54,99 @@ class Checkout extends StatefulWidget {
 class _CheckoutState extends State<Checkout> {
   int _selectedIndex = 0;
   late double orderPrice = 0;
+
+  // Last basket the loyalty quote was refreshed for, so the post-frame sync
+  // fires on a real change instead of on every rebuild.
+  int _loyaltyQuotedSubtotal = -1;
+  int _loyaltyQuotedFee = -1;
+  int _loyaltyQuotedOrderTypeId = -1;
+
+  /// The POS order type for the currently selected tab.
+  ///
+  /// 0 delivery -> 3, 1 self-pickup -> 2, 2 carhop -> 8, 3 in-restaurant -> 1.
+  /// These are t_order.order_type_id values; the server decides from this
+  /// which order types the cashback programme covers.
+  int get _posOrderTypeId {
+    switch (_selectedIndex) {
+      case 1:
+        return 2;
+      case 2:
+        return 8;
+      case 3:
+        return 1;
+      default:
+        return 3; // delivery
+    }
+  }
+
+  /// Delivery is excluded from cashback entirely - it neither earns nor spends.
+  bool get _loyaltyEligibleOrderType => _selectedIndex != 0;
+
+  /// Points may only be spent when the customer pays cash.
+  ///
+  /// A card order is charged through RahmatPay, whose invoice carries fiscal
+  /// (OFD) line items that have to sum to the amount charged. Discounting the
+  /// charge without a matching OFD line would produce an invalid receipt, so
+  /// redemption stays off there until that line is agreed with the provider.
+  /// Earning is unaffected and works on every payment method.
+  bool get _canRedeemLoyalty =>
+      _loyaltyEligibleOrderType &&
+      (selectedOption ?? '').toLowerCase() == 'cash';
+
+  void _syncLoyaltyQuote(int subtotal, int fee) {
+    if (subtotal <= 0) return;
+    final typeId = _posOrderTypeId;
+    if (subtotal == _loyaltyQuotedSubtotal &&
+        fee == _loyaltyQuotedFee &&
+        typeId == _loyaltyQuotedOrderTypeId) {
+      return;
+    }
+    _loyaltyQuotedSubtotal = subtotal;
+    _loyaltyQuotedFee = fee;
+    _loyaltyQuotedOrderTypeId = typeId;
+    context.read<LoyaltyProvider>().beginCheckout(
+          subtotal: subtotal,
+          orderTypeId: typeId,
+          deliveryFee: fee,
+        );
+  }
+
+  /// Reserves points before the order is sent.
+  ///
+  /// Reserving first is what makes the flow safe: the order carries the hold's
+  /// reference in its comment, and the points are only actually spent once the
+  /// order comes back accepted. If anything below fails, the hold is released
+  /// (and expires on its own within the TTL even if the app dies here).
+  Future<({LoyaltyHold? hold, bool aborted})> _reserveLoyalty(
+      LoyaltyProvider loyalty) async {
+    if (!loyalty.hasSession) return (hold: null, aborted: false);
+    if (!_canRedeemLoyalty && loyalty.useCashback) {
+      await loyalty.setUseCashback(false);
+    }
+    try {
+      return (hold: await loyalty.reserve(), aborted: false);
+    } on LoyaltyQuoteStaleException {
+      // The balance moved between the quote and the reservation. This is
+      // recoverable and expected, not an error: show the new figures and let
+      // the customer confirm again rather than placing the order at a price
+      // they did not agree to.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).checkoutCashbackChanged),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      return (hold: null, aborted: true);
+    } catch (e) {
+      // Loyalty must never block an order. Fall through and place it at the
+      // undiscounted price.
+      print('Loyalty reserve failed, continuing without cashback: $e');
+      return (hold: null, aborted: false);
+    }
+  }
+
   double deliveryFee = 0;
   String firstName = '';
   String phoneNumber = '';
@@ -873,7 +969,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -886,6 +982,17 @@ class _CheckoutState extends State<Checkout> {
     var cartProvider = Provider.of<CartProvider>(context);
 
     orderPrice = cartProvider.getTotalPrice();
+
+    // Refresh the server-side quote whenever the basket or the delivery fee
+    // moves. Post-frame so it never fires mid-build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncLoyaltyQuote(orderPrice.round(), deliveryFee.round());
+    });
+
+    // What the points actually take off this bill. Zero unless redemption is
+    // allowed for the chosen payment method.
+    final int loyaltyDiscount =
+        _canRedeemLoyalty ? context.watch<LoyaltyProvider>().appliedPoints : 0;
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
       var itemTotal = item.totalPrice;
@@ -1718,9 +1825,9 @@ class _CheckoutState extends State<Checkout> {
                             _selectedIndex == 0
                                 ? (_nearestBranch != null &&
                                         _nearestBranch!['deliveryFee'] != null
-                                    ? '${NumberFormat('#,##0').format(orderPrice + (_nearestBranch!['deliveryFee'] as num))} UZS'
-                                    : '${NumberFormat('#,##0').format(orderPrice)} UZS')
-                                : '${NumberFormat('#,##0').format(orderPrice)} UZS',
+                                    ? '${NumberFormat('#,##0').format(orderPrice + (_nearestBranch!['deliveryFee'] as num) - loyaltyDiscount)} UZS'
+                                    : '${NumberFormat('#,##0').format(orderPrice - loyaltyDiscount)} UZS')
+                                : '${NumberFormat('#,##0').format(orderPrice - loyaltyDiscount)} UZS',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1768,9 +1875,21 @@ class _CheckoutState extends State<Checkout> {
                   setState(() {
                     selectedOption = value;
                   });
+                  // Card cannot carry a discount (see _canRedeemLoyalty), so
+                  // drop any points the customer had already dialled in rather
+                  // than showing a reduction the invoice will not honour.
+                  if ((value ?? '').toLowerCase() != 'cash') {
+                    context.read<LoyaltyProvider>().setUseCashback(false);
+                  }
                 },
               ),
             ),
+            if (_loyaltyEligibleOrderType)
+              LoyaltyCheckoutSection(
+                subtotal: orderPrice.round(),
+                deliveryFee: 0,
+                allowRedeem: _canRedeemLoyalty,
+              ),
             const SizedBox(height: 40),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -1987,9 +2106,35 @@ class _CheckoutState extends State<Checkout> {
                       }
 
 
+                      // Resolved before the try so the catch below can still
+                      // release the hold: reading it off `context` after the
+                      // order round-trip throws if the screen was disposed.
+                      final loyaltyProvider = context.read<LoyaltyProvider>();
+
                       try {
                         // First try to use the new API endpoint
                         bool apiSuccess = false;
+
+                        // Reserve cashback before the order goes out. The hold
+                        // reference rides along in the order comment so the
+                        // backend can match the order when it comes back from
+                        // the POS; the points are only spent once we commit.
+                        final reservation =
+                            await _reserveLoyalty(loyaltyProvider);
+                        if (reservation.aborted) {
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                          return;
+                        }
+                        final loyaltyHold = reservation.hold;
+                        final int loyaltyPoints = loyaltyHold?.appliedPoints ?? 0;
+                        final String loyaltyComment = loyaltyHold == null
+                            ? commented
+                            : (commented.isEmpty
+                                ? loyaltyHold.orderNoteRef
+                                : '$commented\n${loyaltyHold.orderNoteRef}');
+                        final double loyaltyTotal = orderPrice - loyaltyPoints;
 
                         // Handle different order types
                         if (_selectedIndex == 0) {
@@ -2000,8 +2145,8 @@ class _CheckoutState extends State<Checkout> {
                               firstName, // name
                               phoneNumber, // phone
                               selectedOption!, // paymentType
-                              commented, // comment
-                              orderPrice, // total
+                              loyaltyComment, // comment + loyalty ref
+                              loyaltyTotal, // total
                               cartProvider.showLat(), // latitude
                               cartProvider.showLong(), // longitude
                               cartProvider,
@@ -2022,8 +2167,9 @@ class _CheckoutState extends State<Checkout> {
                             name: firstName,
                             phone: phoneNumber,
                             paymentType: selectedOption!,
-                            comment: commented,
-                            total: orderPrice,
+                            comment: loyaltyComment,
+                            total: loyaltyTotal,
+                            cashbackAmount: loyaltyPoints,
                             cartProvider: cartProvider,
                             isInRestaurant: false,
                           );
@@ -2039,8 +2185,9 @@ class _CheckoutState extends State<Checkout> {
                             name: firstName,
                             phone: phoneNumber,
                             paymentType: selectedOption!,
-                            comment: "$commented\nCar Details: $carDetails",
-                            total: orderPrice,
+                            comment: "$loyaltyComment\nCar Details: $carDetails",
+                            total: loyaltyTotal,
+                            cashbackAmount: loyaltyPoints,
                             cartProvider: cartProvider,
                             isInRestaurant: false,
                             isCarhop: true, // Mark as carhop order
@@ -2059,21 +2206,53 @@ class _CheckoutState extends State<Checkout> {
                           final packagePrice = packageItem.product.name == 'Пакет' 
                               ? packageItem.totalPrice 
                               : 0.0;
-                          final adjustedTotal = orderPrice - packagePrice;
-                          
+                          final adjustedTotal =
+                              orderPrice - packagePrice - loyaltyPoints;
+
                           await sendSelfPickupOrderToSieves(
                             branchName: selectedBranch!,
                             name: firstName,
                             phone: phoneNumber,
                             paymentType: selectedOption!,
-                            comment: commented,
+                            comment: loyaltyComment,
                             total: adjustedTotal,
+                            cashbackAmount: loyaltyPoints,
                             cartProvider: cartProvider,
                             isInRestaurant: true,
                           );
                           apiSuccess = true;
                         }
-                        
+
+                        // The order was accepted: spend the reserved points and
+                        // book the cashback as pending. It only becomes
+                        // spendable once the order is actually delivered.
+                        if (loyaltyHold != null) {
+                          try {
+                            await loyaltyProvider.confirm();
+                          } catch (e) {
+                            // Must not fail an order that already went through.
+                            // But this is not harmless either: the order left
+                            // at the discounted price, and until the hold is
+                            // committed the points have not actually been
+                            // taken. The server reconciles open holds against
+                            // t_order on its own, so this self-heals - log it
+                            // at a level that gets noticed, and tell the user
+                            // their balance will update shortly.
+                            debugPrint('╔══ LOYALTY: commit FAILED after order ══');
+                            debugPrint('║ hold ${loyaltyHold.id}: $e');
+                            debugPrint('╚════════════════════════════════════════');
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(AppLocalizations.of(context)
+                                      .checkoutCashbackSyncing),
+                                  backgroundColor: Colors.orange,
+                                ),
+                              );
+                            }
+                          }
+                        }
+
                         // Reset processing state
                         setState(() {
                           _isProcessing = false;
@@ -2121,6 +2300,10 @@ class _CheckoutState extends State<Checkout> {
                         setState(() {
                           _isProcessing = false;
                         });
+
+                        // The order did not go out - hand the points straight
+                        // back rather than making the customer wait out the TTL.
+                        await loyaltyProvider.abandon();
 
                         // Handle error
                         print('Error during order submission: $e');
@@ -2517,7 +2700,12 @@ class _CheckoutState extends State<Checkout> {
     required CartProvider cartProvider,
     bool isInRestaurant = false,
     bool isCarhop = false,
+    // Points applied to this order. [total] is the cash still due; the POS
+    // order's value is the sum of the two.
+    int cashbackAmount = 0,
   }) async {
+    final loyaltyProgram = context.read<LoyaltyProvider>().program;
+    final double orderValue = total + cashbackAmount;
     try {
       if (branchName.isEmpty) {
         throw Exception('Please select a branch first');
@@ -2574,17 +2762,19 @@ class _CheckoutState extends State<Checkout> {
         "branch_id": branchConfig.branchId,
         "order_type_id": isCarhop ? 8 : (isInRestaurant ? 1 : 2), // 8 for carhop, 1 for in-restaurant, 2 for self-pickup
         "orderItems": formattedOrderItems,
-        "transactions": [
-          {
-            "account_id": 1,
-            "amount": total,
-            "payment_type_id": paymentType.toLowerCase() == 'card'
-                ? 1
-                : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
-            "type": "deposit"
-          }
-        ],
-        "value": total,
+        // Full price on the order; the split lives in the transaction lines.
+        // A points-only order carries a single loyalty line, a partial one
+        // carries cash + loyalty, so accounting sees what was settled how.
+        "transactions": LoyaltyPos.transactions(
+          cashAmount: total,
+          cashbackAmount: cashbackAmount,
+          cashPaymentTypeId: paymentType.toLowerCase() == 'card'
+              ? 1
+              : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
+          loyaltyAccountId: loyaltyProgram.posAccountId,
+          loyaltyPaymentTypeId: loyaltyProgram.posPaymentTypeId,
+        ),
+        "value": orderValue,
         "note": isCarhop
             ? comment // Carhop comment already includes car details
             : (isInRestaurant
@@ -2596,6 +2786,9 @@ class _CheckoutState extends State<Checkout> {
         "pos_session_id": null,
         "delivery_amount": null
       };
+
+      debugPrint('LOYALTY POS: value=$orderValue cash=$total points=$cashbackAmount '
+          'transactions=${json.encode(requestBody["transactions"])}');
 
       // If payment type is CASH, send to custom API endpoint
       if (paymentType.toLowerCase() == 'cash') {

@@ -8,7 +8,6 @@ import 'package:apploook/widget/cached_product_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -17,7 +16,6 @@ import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/payme_transaction_service.dart';
-import 'package:apploook/services/order_tracking_service.dart';
 import 'package:apploook/services/order_history_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/services/location_permission_guard.dart';
@@ -513,7 +511,7 @@ class _HomeNewState extends State<HomeNew>
             physics: const BouncingScrollPhysics(),
             slivers: [
               SliverAppBar(
-                expandedHeight: 270.h,
+                expandedHeight: 250.h,
                 floating: false,
                 pinned: true,
                 backgroundColor: const Color(0xFFF1F2F7),
@@ -616,132 +614,6 @@ class _HomeNewState extends State<HomeNew>
                     },
                   ),
                   8.horizontalSpace,
-                  // Language selection dropdown
-                  PopupMenuButton<String>(
-                    offset: const Offset(0, 25),
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Container(
-                      margin: EdgeInsets.only(right: 10.w),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFEC700),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            context
-                                .watch<LocaleProvider>()
-                                .locale
-                                .languageCode
-                                .toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
-                            ),
-                          ),
-                          const Icon(Icons.arrow_drop_down,
-                              color: Colors.black),
-                        ],
-                      ),
-                    ),
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
-                        value: 'uz',
-                        child: Row(
-                          children: [
-                            Text('🇺🇿', style: TextStyle(fontSize: 20)),
-                            SizedBox(width: 8),
-                            Text('O\'zbekcha'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'en',
-                        child: Row(
-                          children: [
-                            Text('🇬🇧', style: TextStyle(fontSize: 20)),
-                            SizedBox(width: 8),
-                            Text('English'),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuItem(
-                        value: 'ru',
-                        child: Row(
-                          children: [
-                            Text('🇷🇺', style: TextStyle(fontSize: 20)),
-                            SizedBox(width: 8),
-                            Text('Русский'),
-                          ],
-                        ),
-                      ),
-                    ],
-                    onSelected: (String newLocale) async {
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setString('selected_language', newLocale);
-                      if (!mounted) return;
-                      context
-                          .read<LocaleProvider>()
-                          .setLocale(Locale(newLocale));
-                    },
-                  ),
-                  // Order tracking button
-                  8.horizontalSpace,
-                  Builder(
-                    builder: (context) {
-                      final orderTrackingService = OrderTrackingService();
-                      return GestureDetector(
-                        onTap: () {
-                          // Mark orders as read when navigating to tracking page
-                          orderTrackingService.markOrdersAsRead();
-                          Navigator.pushNamed(context, '/unifiedOrderTracking');
-                        },
-                        child: Stack(
-                          children: [
-                            Icon(
-                              Icons.receipt_long,
-                              size: 24.w,
-                              color: Colors.black,
-                            ),
-                            // Show notification badge if there are new orders
-                            if (orderTrackingService.hasNewOrders)
-                              Positioned(
-                                right: 10,
-                                top: 10,
-                                child: Container(
-                                  padding: EdgeInsets.all(4.r),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  constraints: BoxConstraints(
-                                    minWidth: 16.w,
-                                    minHeight: 16.h,
-                                  ),
-                                  child: Text(
-                                    '${orderTrackingService.newOrdersCount}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                  8.horizontalSpace,
                   Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
                       return GestureDetector(
@@ -793,7 +665,7 @@ class _HomeNewState extends State<HomeNew>
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
                     children: [
-                      SizedBox(height: 100.h),
+                      SizedBox(height: 110.h),
                       Padding(
                         padding: EdgeInsets.only(left: 15.w),
                         child: Align(

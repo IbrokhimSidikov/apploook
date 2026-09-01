@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/branches.dart';
+import 'package:apploook/pages/wallet.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/splash_screen.dart';
@@ -26,6 +27,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations_delegate.dart';
 import 'providers/locale_provider.dart';
 import 'providers/notification_provider.dart';
+import 'providers/loyalty_provider.dart';
 import 'features/reorder/application/reorder_controller.dart';
 
 // Global navigator key to access context from anywhere
@@ -102,7 +104,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
   }
 
   // Handle privacy policy acceptance and ensure it persists
-  void _handlePrivacyPolicyAcceptance() async {
+  Future<void> _handlePrivacyPolicyAcceptance() async {
     // Save to SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('accepted_privacy_policy', true);
@@ -120,6 +122,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => LoyaltyProvider()),
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: notificationProvider),
         ChangeNotifierProvider(create: (_) => ReorderController()),
@@ -137,26 +140,10 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
           : _acceptedPrivacyPolicy == true
               ? const MyApp()
               : ConsentScreen(onAccept: () async {
-                // Handle privacy policy acceptance
-                _handlePrivacyPolicyAcceptance();
-                
-                // Wait a moment to ensure the preference is saved
-                await Future.delayed(const Duration(milliseconds: 100));
-                
-                // Then run the app with the updated state
-                if (mounted) {
-                  runApp(
-                    MultiProvider(
-                      providers: [
-                        ChangeNotifierProvider(create: (_) => CartProvider()),
-                        ChangeNotifierProvider.value(value: localeProvider),
-                        ChangeNotifierProvider.value(value: notificationProvider),
-                      ],
-                      child: const MyApp(),
-                    ),
-                  );
-                }
-              }),
+                  // Persist acceptance; setState inside rebuilds this subtree
+                  // into MyApp under the providers declared above.
+                  await _handlePrivacyPolicyAcceptance();
+                }),
     );
   }
 }
@@ -279,6 +266,7 @@ class _MyAppState extends State<MyApp> {
             '/unifiedOrderTracking': (context) =>
                 const UnifiedOrderTrackingPage(),
             '/branches': (context) => const Branches(),
+            '/wallet': (context) => const Wallet(),
           },
         );
       },

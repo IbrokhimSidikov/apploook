@@ -6,7 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../l10n/app_localizations.dart';
+import '../providers/locale_provider.dart';
 import '../services/auth_service.dart'; // Import AuthService
+import '../services/loyalty_service.dart';
+import '../providers/loyalty_provider.dart';
+import '../widgets/loyalty_profile_card.dart';
 import '../widgets/announcement_story_dialog.dart';
 
 class Profile extends StatefulWidget {
@@ -26,6 +30,9 @@ class _ProfileState extends State<Profile> {
     super.initState();
     _loadPhoneNumber();
     _loadCustomerName();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<LoyaltyProvider>().refresh(silent: true);
+    });
   }
 
   Future<void> _clearUserData() async {
@@ -37,6 +44,11 @@ class _ProfileState extends State<Profile> {
       final authService = AuthService();
       await authService.logout(individualId.toString());
     }
+
+    // Revoke the loyalty session server-side too. prefs.clear() below would
+    // drop the local token either way, but leaving a live session on the
+    // server means a copied token keeps working after the customer logs out.
+    await LoyaltyService().endSession();
 
     // Clear all preferences
     await prefs.clear();
@@ -202,7 +214,16 @@ class _ProfileState extends State<Profile> {
             ),
           ),
           Positioned(
-            top: 200.h,
+            top: 145.h,
+            left: 25.w,
+            right: 25.w,
+            child: const LoyaltyProfileCard(),
+          ),
+          // Pushed down to clear the cashback card. This Stack is fixed
+          // position and does not scroll, so the offsets have to be kept in
+          // step by hand; the menu still ends around 615h of the 844h design.
+          Positioned(
+            top: 265.h,
             left: 40.w,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,6 +240,8 @@ class _ProfileState extends State<Profile> {
                   title: AppLocalizations.of(context).branches,
                   route: '/branches',
                 ),
+                40.verticalSpace,
+                const LanguageMenuItem(),
                 if (kDebugMode) ...[
                   40.verticalSpace,
                   GestureDetector(
@@ -482,6 +505,98 @@ class _ProfileState extends State<Profile> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [Text('Version 3.0.0')],
         ),
+      ),
+    );
+  }
+}
+
+class _LanguageOption {
+  final String code;
+  final String flag;
+  final String label;
+
+  const _LanguageOption(this.code, this.flag, this.label);
+}
+
+const List<_LanguageOption> _kLanguages = [
+  _LanguageOption('uz', '\u{1F1FA}\u{1F1FF}', "O'zbekcha"),
+  _LanguageOption('en', '\u{1F1EC}\u{1F1E7}', 'English'),
+  _LanguageOption('ru', '\u{1F1F7}\u{1F1FA}', '\u0420\u0443\u0441\u0441\u043A\u0438\u0439'),
+];
+
+/// Language picker, styled to sit in the profile menu alongside
+/// [ProfileMenuItem]. Moved here from the home app bar, which had run out of
+/// room for it. The selection is persisted under `selected_language` so it
+/// survives a restart, same key the app has always used.
+class LanguageMenuItem extends StatelessWidget {
+  const LanguageMenuItem({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final currentCode = context.watch<LocaleProvider>().locale.languageCode;
+
+    return PopupMenuButton<String>(
+      offset: Offset(0, 30.h),
+      color: Colors.white,
+      tooltip: AppLocalizations.of(context).chooseLanguage,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      onSelected: (String newLocale) async {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('selected_language', newLocale);
+        if (!context.mounted) return;
+        context.read<LocaleProvider>().setLocale(Locale(newLocale));
+      },
+      itemBuilder: (context) => [
+        for (final language in _kLanguages)
+          PopupMenuItem<String>(
+            value: language.code,
+            child: Row(
+              children: [
+                Text(language.flag, style: const TextStyle(fontSize: 20)),
+                const SizedBox(width: 8),
+                Text(language.label),
+                if (language.code == currentCode) ...[
+                  const Spacer(),
+                  Icon(Icons.check_rounded, size: 18.sp),
+                ],
+              ],
+            ),
+          ),
+      ],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.language_outlined, size: 24.sp),
+          10.horizontalSpace,
+          Text(
+            AppLocalizations.of(context).language,
+            style: TextStyle(fontSize: 18.sp),
+          ),
+          12.horizontalSpace,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEC700),
+              borderRadius: BorderRadius.circular(6.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  currentCode.toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
+                const Icon(Icons.arrow_drop_down, color: Colors.black),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

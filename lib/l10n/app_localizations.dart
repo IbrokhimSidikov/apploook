@@ -121,6 +121,35 @@ class AppLocalizations {
       'arrived': 'Arrived',
       'totalAmount': 'Total Amount',
       'currency': 'UZS',
+
+      // Loyalty / cashback
+      'walletTitle': 'Cashback',
+      'walletAvailable': 'Available',
+      'walletPending': 'Pending',
+      'walletHistory': 'History',
+      'walletNoHistory': 'No cashback activity yet.\nYour first order will start it off.',
+      'walletSignInRequired': 'Sign in to see your cashback balance.',
+      'walletEarnRateLead': 'You get',
+      'walletEarnRateTrail': 'cashback on every order you pay for.',
+      'walletEntryEarned': 'Cashback earned',
+      'walletEntrySpent': 'Cashback spent',
+      'walletEntryCancelled': 'Cashback cancelled',
+      'walletEntryReturned': 'Cashback returned',
+      'walletEntryExpired': 'Cashback expired',
+      'walletEntryAdjusted': 'Balance adjusted',
+      'checkoutUseCashback': 'Use cashback',
+      'checkoutCashbackApplied': 'Cashback applied',
+      'checkoutYouWillEarn': 'You will earn',
+      'checkoutCashbackAll': 'All',
+      'checkoutCashbackChanged': 'Your cashback balance changed. Please check the total and try again.',
+      'checkoutCashbackAvailable': 'available',
+      'checkoutCashbackSyncing': 'Cashback is syncing — your balance will update shortly.',
+      'loyaltyInfoTitle': 'How cashback works',
+      'loyaltyInfoAppliesTo': 'Earned on these order types:',
+      'loyaltyInfoNotOnDelivery': 'Not available on delivery orders.',
+      'loyaltyInfoSpend': 'Pay with your cashback at checkout — use as much as you like.',
+      'loyaltyInfoPending': 'Cashback becomes available once your order is completed.',
+      'loyaltyCardHint': 'Tap to see your cashback history',
       'updating': 'Updating',
       'orderHistory': 'Order History',
       // Map Screen
@@ -359,6 +388,35 @@ class AppLocalizations {
       'arrived': 'Yetib keldim',
       'totalAmount': 'Umumiy summa',
       'currency': 'UZS',
+
+      // Loyalty / cashback
+      'walletTitle': 'Keshbek',
+      'walletAvailable': 'Mavjud',
+      'walletPending': 'Kutilmoqda',
+      'walletHistory': 'Tarix',
+      'walletNoHistory': 'Hozircha keshbek harakati yoʻq.\nBirinchi buyurtmangiz uni boshlaydi.',
+      'walletSignInRequired': 'Keshbek balansini koʻrish uchun tizimga kiring.',
+      'walletEarnRateLead': 'Siz toʻlagan har bir buyurtma uchun',
+      'walletEarnRateTrail': 'keshbek olasiz.',
+      'walletEntryEarned': 'Keshbek olindi',
+      'walletEntrySpent': 'Keshbek ishlatildi',
+      'walletEntryCancelled': 'Keshbek bekor qilindi',
+      'walletEntryReturned': 'Keshbek qaytarildi',
+      'walletEntryExpired': 'Keshbek muddati tugadi',
+      'walletEntryAdjusted': 'Balans oʻzgartirildi',
+      'checkoutUseCashback': 'Keshbekni ishlatish',
+      'checkoutCashbackApplied': 'Keshbek qoʻllanildi',
+      'checkoutYouWillEarn': 'Siz olasiz',
+      'checkoutCashbackAll': 'Hammasi',
+      'checkoutCashbackChanged': 'Keshbek balansingiz oʻzgardi. Iltimos, summani tekshirib, qayta urinib koʻring.',
+      'checkoutCashbackAvailable': 'mavjud',
+      'checkoutCashbackSyncing': 'Keshbek sinxronlanmoqda — balansingiz tez orada yangilanadi.',
+      'loyaltyInfoTitle': 'Keshbek qanday ishlaydi',
+      'loyaltyInfoAppliesTo': 'Quyidagi buyurtma turlarida beriladi:',
+      'loyaltyInfoNotOnDelivery': 'Yetkazib berish buyurtmalarida ishlamaydi.',
+      'loyaltyInfoSpend': 'Buyurtma rasmiylashtirishda keshbek bilan toʻlang — xohlagancha ishlating.',
+      'loyaltyInfoPending': 'Keshbek buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
+      'loyaltyCardHint': 'Keshbek tarixini koʻrish uchun bosing',
       'updating': 'Yopish',
       'orderHistory': 'Buyurtma tarihi',
       // Map Screen
@@ -597,6 +655,35 @@ class AppLocalizations {
       'arrived': 'Прибыл',
       'totalAmount': 'Общая сумма',
       'currency': 'UZS',
+
+      // Loyalty / cashback
+      'walletTitle': 'Кэшбэк',
+      'walletAvailable': 'Доступно',
+      'walletPending': 'Ожидается',
+      'walletHistory': 'История',
+      'walletNoHistory': 'Пока нет операций с кэшбэком.\nПервый заказ всё начнёт.',
+      'walletSignInRequired': 'Войдите, чтобы увидеть баланс кэшбэка.',
+      'walletEarnRateLead': 'Вы получаете',
+      'walletEarnRateTrail': 'кэшбэка с каждого оплаченного заказа.',
+      'walletEntryEarned': 'Кэшбэк начислен',
+      'walletEntrySpent': 'Кэшбэк списан',
+      'walletEntryCancelled': 'Кэшбэк отменён',
+      'walletEntryReturned': 'Кэшбэк возвращён',
+      'walletEntryExpired': 'Срок кэшбэка истёк',
+      'walletEntryAdjusted': 'Баланс скорректирован',
+      'checkoutUseCashback': 'Использовать кэшбэк',
+      'checkoutCashbackApplied': 'Кэшбэк применён',
+      'checkoutYouWillEarn': 'Вы получите',
+      'checkoutCashbackAll': 'Всё',
+      'checkoutCashbackChanged': 'Ваш баланс кэшбэка изменился. Проверьте сумму и попробуйте снова.',
+      'checkoutCashbackAvailable': 'доступно',
+      'checkoutCashbackSyncing': 'Кэшбэк синхронизируется — баланс скоро обновится.',
+      'loyaltyInfoTitle': 'Как работает кэшбэк',
+      'loyaltyInfoAppliesTo': 'Начисляется на эти типы заказов:',
+      'loyaltyInfoNotOnDelivery': 'Не действует на заказы с доставкой.',
+      'loyaltyInfoSpend': 'Оплачивайте кэшбэком при оформлении — используйте сколько хотите.',
+      'loyaltyInfoPending': 'Кэшбэк станет доступен после завершения заказа.',
+      'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кэшбэка',
       'updating': 'Обновление',
       'orderHistory': 'История заказов',
       // Map Screen
@@ -910,6 +997,62 @@ class AppLocalizations {
   String get totalAmount =>
       _localizedValues[locale.languageCode]!['totalAmount']!;
   String get currency => _localizedValues[locale.languageCode]!['currency']!;
+
+  // Loyalty / cashback
+  String get walletTitle =>
+      _localizedValues[locale.languageCode]!['walletTitle']!;
+  String get walletAvailable =>
+      _localizedValues[locale.languageCode]!['walletAvailable']!;
+  String get walletPending =>
+      _localizedValues[locale.languageCode]!['walletPending']!;
+  String get walletHistory =>
+      _localizedValues[locale.languageCode]!['walletHistory']!;
+  String get walletNoHistory =>
+      _localizedValues[locale.languageCode]!['walletNoHistory']!;
+  String get walletSignInRequired =>
+      _localizedValues[locale.languageCode]!['walletSignInRequired']!;
+  String get walletEarnRateLead =>
+      _localizedValues[locale.languageCode]!['walletEarnRateLead']!;
+  String get walletEarnRateTrail =>
+      _localizedValues[locale.languageCode]!['walletEarnRateTrail']!;
+  String get walletEntryEarned =>
+      _localizedValues[locale.languageCode]!['walletEntryEarned']!;
+  String get walletEntrySpent =>
+      _localizedValues[locale.languageCode]!['walletEntrySpent']!;
+  String get walletEntryCancelled =>
+      _localizedValues[locale.languageCode]!['walletEntryCancelled']!;
+  String get walletEntryReturned =>
+      _localizedValues[locale.languageCode]!['walletEntryReturned']!;
+  String get walletEntryExpired =>
+      _localizedValues[locale.languageCode]!['walletEntryExpired']!;
+  String get walletEntryAdjusted =>
+      _localizedValues[locale.languageCode]!['walletEntryAdjusted']!;
+  String get checkoutUseCashback =>
+      _localizedValues[locale.languageCode]!['checkoutUseCashback']!;
+  String get checkoutCashbackApplied =>
+      _localizedValues[locale.languageCode]!['checkoutCashbackApplied']!;
+  String get checkoutYouWillEarn =>
+      _localizedValues[locale.languageCode]!['checkoutYouWillEarn']!;
+  String get checkoutCashbackAll =>
+      _localizedValues[locale.languageCode]!['checkoutCashbackAll']!;
+  String get checkoutCashbackChanged =>
+      _localizedValues[locale.languageCode]!['checkoutCashbackChanged']!;
+  String get checkoutCashbackAvailable =>
+      _localizedValues[locale.languageCode]!['checkoutCashbackAvailable']!;
+  String get checkoutCashbackSyncing =>
+      _localizedValues[locale.languageCode]!['checkoutCashbackSyncing']!;
+  String get loyaltyInfoTitle =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoTitle']!;
+  String get loyaltyInfoAppliesTo =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoAppliesTo']!;
+  String get loyaltyInfoNotOnDelivery =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoNotOnDelivery']!;
+  String get loyaltyInfoSpend =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoSpend']!;
+  String get loyaltyInfoPending =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoPending']!;
+  String get loyaltyCardHint =>
+      _localizedValues[locale.languageCode]!['loyaltyCardHint']!;
   String get arrivedButtonHint =>
       _localizedValues[locale.languageCode]!['arrivedButtonHint']!;
   String get arrivedButtonTooltip =>

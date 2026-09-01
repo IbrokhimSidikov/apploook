@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
+import '../services/loyalty_service.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -47,6 +48,17 @@ class _VerificationScreenState extends State<VerificationScreen> {
         if (response['status_code'] == 200) {
           // Save credentials only after successful verification
           await _saveUserData();
+
+          // Mint the loyalty session while the SMS code is still the one the
+          // server has on file - this is the only moment the app can prove who
+          // the customer is, and loyalty will not accept a phone number alone.
+          // A failure here is not fatal: the wallet simply prompts to sign in
+          // again, and the order flow is unaffected.
+          await LoyaltyService().createSession(
+            phone: widget.phoneNumber,
+            verificationCode: _codeController.text.trim(),
+          );
+
           // Clear verification code after successful login
           _authService.clearVerificationCode();
           Navigator.pushNamed(context, '/homeNew');

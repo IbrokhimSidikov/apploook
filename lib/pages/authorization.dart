@@ -1,6 +1,7 @@
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/pages/verification_screen.dart';
 import 'package:apploook/services/auth_service.dart';
+import 'package:apploook/services/loyalty_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:phone_form_field/phone_form_field.dart';
@@ -78,6 +79,21 @@ class _AuthorizationState extends State<Authorization> {
           if (response['is_verified'] == true) {
             // If already verified, save credentials and go to home
             await _savePhoneNumber(phone, _firstNameController.text);
+
+            // This branch skips the verification screen, which is the only
+            // other place the cashback session is minted. Without this the
+            // "Turn on cashback" prompt would bounce a returning customer
+            // straight back to the home screen with still no session.
+            // authorize-individual echoes the stored code back, so the mint
+            // can be completed here without another SMS.
+            final code = response['verification_code']?.toString();
+            if (code != null && code.isNotEmpty) {
+              await LoyaltyService().createSession(
+                phone: phone,
+                verificationCode: code,
+              );
+            }
+
             Navigator.pushNamed(context, '/homeNew');
           } else {
             // If not verified, pass credentials to verification screen without saving
