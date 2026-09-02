@@ -105,6 +105,22 @@ const List<Branch> _kBranches = [
     lat: 41.276810,
     lng: 69.201880,
   ),
+  Branch(
+    name: 'Chicken by Loook GANGA',
+    address: 'Toshkent, Abdulla Qodiriy 11D',
+    hours: '09:00 - 00:00',
+    isOpen: true,
+    lat: 41.328603,
+    lng: 69.249466,
+  ),
+  Branch(
+    name: 'Chicken by Loook SERGELI',
+    address: 'Toshkent, Sergeli Metro bekati',
+    hours: '09:00 - 00:00',
+    isOpen: true,
+    lat: 41.22274,
+    lng: 69.207342,
+  ),
 ];
 
 /// Tashkent overview camera position (shows all branches at once).

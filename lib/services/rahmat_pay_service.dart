@@ -52,6 +52,13 @@ class RahmatPayService {
     String? additionalPhone,
     String? restaurantId,
     double? deliveryFee,
+    // Cashback points applied to this order, in UZS. [amount] is what the
+    // card is actually charged (already net of the points, in tiyin); the POS
+    // order keeps its full value and the payment splits into a card line and
+    // a loyalty line so accounting sees both.
+    int cashbackAmount = 0,
+    int loyaltyAccountId = LoyaltyPos.defaultAccountId,
+    int loyaltyPaymentTypeId = LoyaltyPos.defaultPaymentTypeId,
   }) async {
     try {
       // Get branch configuration
@@ -117,6 +124,30 @@ class RahmatPayService {
         };
       }).toList();
 
+      // The OFD lines above sum to the full basket value, but the card is
+      // charged [amount] - the value net of cashback. The fiscal lines have
+      // to sum to the amount actually charged, so spread the discount across
+      // them pro-rata; the last line absorbs the rounding remainder so the
+      // sum matches exactly.
+      final int discountTiyin = cashbackAmount * 100;
+      if (discountTiyin > 0 && rahmatOfdItems.isNotEmpty) {
+        final int grossTotal = rahmatOfdItems.fold<int>(
+            0, (sum, line) => sum + (line['total'] as int));
+        int remaining = discountTiyin;
+        for (var i = 0; i < rahmatOfdItems.length; i++) {
+          final line = rahmatOfdItems[i];
+          final int lineTotal = line['total'] as int;
+          final int share = i == rahmatOfdItems.length - 1
+              ? remaining
+              : (grossTotal <= 0 ? 0 : discountTiyin * lineTotal ~/ grossTotal);
+          remaining -= share;
+          final int qty = line['qty'] as int;
+          final int newTotal = lineTotal - share;
+          line['total'] = newTotal;
+          line['price'] = newTotal ~/ qty;
+        }
+      }
+
       // Prepare request body with new structure
       final Map<String, dynamic> requestBody = {
         "sieves_payload": {
@@ -136,15 +167,14 @@ class RahmatPayService {
           "pager_number": pagerNumber,
           "note": note,
           "orderItems": sievesOrderItems,
-          "transactions": [
-            {
-              "account_id": 1,
-              "payment_type_id": paymentTypeId,
-              "amount": amount / 100,
-              "type": "deposit"
-            }
-          ],
-          "value": amount / 100,
+          "transactions": LoyaltyPos.transactions(
+            cashAmount: amount / 100,
+            cashbackAmount: cashbackAmount,
+            cashPaymentTypeId: paymentTypeId,
+            loyaltyAccountId: loyaltyAccountId,
+            loyaltyPaymentTypeId: loyaltyPaymentTypeId,
+          ),
+          "value": amount / 100 + cashbackAmount,
           "customer_quantity": customerQuantity,
         },
         "rahmat_payload": {

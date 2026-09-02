@@ -55,6 +55,17 @@ class _CheckoutState extends State<Checkout> {
   int _selectedIndex = 0;
   late double orderPrice = 0;
 
+  /// Total of any "Пакет" (package) lines in the cart, refreshed each build.
+  double _packagePrice = 0;
+
+  /// What this order actually costs for the selected tab: the package is only
+  /// charged on delivery, so every other tab excludes it. The totals card,
+  /// the loyalty quote and the cash submission all read this figure so the
+  /// price shown, the points quoted and the amount charged can never
+  /// disagree - and switching tabs re-renders it immediately.
+  double get _effectiveOrderPrice =>
+      _selectedIndex == 0 ? orderPrice : orderPrice - _packagePrice;
+
   // Last basket the loyalty quote was refreshed for, so the post-frame sync
   // fires on a real change instead of on every rebuild.
   int _loyaltyQuotedSubtotal = -1;
@@ -82,16 +93,16 @@ class _CheckoutState extends State<Checkout> {
   /// Delivery is excluded from cashback entirely - it neither earns nor spends.
   bool get _loyaltyEligibleOrderType => _selectedIndex != 0;
 
-  /// Points may only be spent when the customer pays cash.
+  /// Points can be spent on cash and card orders alike.
   ///
-  /// A card order is charged through RahmatPay, whose invoice carries fiscal
-  /// (OFD) line items that have to sum to the amount charged. Discounting the
-  /// charge without a matching OFD line would produce an invalid receipt, so
-  /// redemption stays off there until that line is agreed with the provider.
-  /// Earning is unaffected and works on every payment method.
+  /// A card order is charged through RahmatPay for the amount left after the
+  /// points; the invoice's fiscal (OFD) lines are discounted pro-rata inside
+  /// createInvoice so they still sum to the amount actually charged. Delivery
+  /// stays excluded via [_loyaltyEligibleOrderType]. Earning is unaffected
+  /// and works on every payment method.
   bool get _canRedeemLoyalty =>
       _loyaltyEligibleOrderType &&
-      (selectedOption ?? '').toLowerCase() == 'cash';
+      const ['cash', 'card'].contains((selectedOption ?? '').toLowerCase());
 
   void _syncLoyaltyQuote(int subtotal, int fee) {
     if (subtotal <= 0) return;
@@ -511,6 +522,10 @@ class _CheckoutState extends State<Checkout> {
     String? address,
     String? additionalPhone,
   }) async {
+    // Read before any await: context lookups throw once the screen is gone,
+    // and the catch below still needs the provider to release the hold.
+    final loyaltyProvider = context.read<LoyaltyProvider>();
+    LoyaltyHold? loyaltyHold;
     try {
       setState(() {
         _isProcessing = true;
@@ -582,8 +597,26 @@ class _CheckoutState extends State<Checkout> {
       }
       
       print('Filtered cart items count: ${filteredCartItems.length}');
-      print('Final amount to charge: $adjustedTotal UZS');
-      
+      print('Order value before cashback: $adjustedTotal UZS');
+
+      // Reserve cashback before the invoice is created - same contract as the
+      // cash flow: the hold's reference rides in the order note, and the
+      // points are only actually spent once the payment is confirmed.
+      final reservation = await _reserveLoyalty(loyaltyProvider);
+      if (reservation.aborted) return;
+      loyaltyHold = reservation.hold;
+      final int loyaltyPoints = loyaltyHold?.appliedPoints ?? 0;
+      if (loyaltyHold != null) {
+        finalNote = finalNote.isEmpty
+            ? loyaltyHold.orderNoteRef
+            : '$finalNote\n${loyaltyHold.orderNoteRef}';
+      }
+
+      // Rahmat is charged only what is left after the points; the POS order
+      // keeps its full value through the split transaction lines.
+      final double chargedTotal = adjustedTotal - loyaltyPoints;
+      print('Charging Rahmat: $chargedTotal UZS (cashback: $loyaltyPoints)');
+
       final invoiceResult = await RahmatPayService.createInvoice(
         branchName: branchName,
         orderTypeId: orderTypeId,
@@ -591,7 +624,10 @@ class _CheckoutState extends State<Checkout> {
         customerQuantity: 1,
         pagerNumber: pagerNumber,
         note: finalNote,
-        amount: (adjustedTotal * 100).toInt(), // Convert to tiyin (multiply by 100)
+        amount: (chargedTotal * 100).toInt(), // Convert to tiyin (multiply by 100)
+        cashbackAmount: loyaltyPoints,
+        loyaltyAccountId: loyaltyProvider.program.posAccountId,
+        loyaltyPaymentTypeId: loyaltyProvider.program.posPaymentTypeId,
         lang: 'ru', // TODO: Get from app locale
         cartItems: filteredCartItems,
         bearerToken: bearerToken,
@@ -623,7 +659,8 @@ class _CheckoutState extends State<Checkout> {
               'phone': phone,
               'branch': branchName,
               'comment': finalNote,
-              'total': adjustedTotal,
+              'total': chargedTotal,
+              'cashback': loyaltyPoints,
               'cart_items': filteredCartItems.map((item) => {
                 'name': item.product.name,
                 'quantity': item.quantity,
@@ -639,6 +676,12 @@ class _CheckoutState extends State<Checkout> {
               context,
               invoiceId,
               branchName,
+              // Settle the loyalty hold once the payment outcome is known.
+              // On timeout or a cancelled status check nothing is called: the
+              // payment may still complete in the browser, so the hold is
+              // left for the TTL / server reconciliation to settle.
+              onPaymentConfirmed: () => loyaltyProvider.confirm(),
+              onPaymentFailed: () => loyaltyProvider.abandon(),
             );
           }
 
@@ -663,6 +706,11 @@ class _CheckoutState extends State<Checkout> {
       }
     } catch (e) {
       print('Error handling card payment: $e');
+      // The payment page never reached the customer - hand any reserved
+      // points straight back instead of waiting out the hold's TTL.
+      if (loyaltyHold != null) {
+        await loyaltyProvider.abandon();
+      }
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -672,9 +720,11 @@ class _CheckoutState extends State<Checkout> {
         );
       }
     } finally {
-      setState(() {
-        _isProcessing = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
     }
   }
 
@@ -982,11 +1032,17 @@ class _CheckoutState extends State<Checkout> {
     var cartProvider = Provider.of<CartProvider>(context);
 
     orderPrice = cartProvider.getTotalPrice();
+    _packagePrice = cartProvider.cartItems
+        .where((item) => item.product.name == 'Пакет')
+        .fold<double>(0, (sum, item) => sum + item.totalPrice);
 
-    // Refresh the server-side quote whenever the basket or the delivery fee
-    // moves. Post-frame so it never fires mid-build.
+    // Refresh the server-side quote whenever the basket, the selected tab or
+    // the delivery fee moves. Post-frame so it never fires mid-build. Quoted
+    // on the effective price so the points offered match the real charge.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _syncLoyaltyQuote(orderPrice.round(), deliveryFee.round());
+      if (mounted) {
+        _syncLoyaltyQuote(_effectiveOrderPrice.round(), deliveryFee.round());
+      }
     });
 
     // What the points actually take off this bill. Zero unless redemption is
@@ -1778,7 +1834,7 @@ class _CheckoutState extends State<Checkout> {
                             style: TextStyle(fontSize: 16.sp),
                           ),
                           Text(
-                              '${NumberFormat('#,##0').format(orderPrice)} UZS'),
+                              '${NumberFormat('#,##0').format(_effectiveOrderPrice)} UZS'),
                         ],
                       ),
                     ),
@@ -1825,9 +1881,9 @@ class _CheckoutState extends State<Checkout> {
                             _selectedIndex == 0
                                 ? (_nearestBranch != null &&
                                         _nearestBranch!['deliveryFee'] != null
-                                    ? '${NumberFormat('#,##0').format(orderPrice + (_nearestBranch!['deliveryFee'] as num) - loyaltyDiscount)} UZS'
-                                    : '${NumberFormat('#,##0').format(orderPrice - loyaltyDiscount)} UZS')
-                                : '${NumberFormat('#,##0').format(orderPrice - loyaltyDiscount)} UZS',
+                                    ? '${NumberFormat('#,##0').format(_effectiveOrderPrice + (_nearestBranch!['deliveryFee'] as num) - loyaltyDiscount)} UZS'
+                                    : '${NumberFormat('#,##0').format(_effectiveOrderPrice - loyaltyDiscount)} UZS')
+                                : '${NumberFormat('#,##0').format(_effectiveOrderPrice - loyaltyDiscount)} UZS',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ],
@@ -1875,10 +1931,9 @@ class _CheckoutState extends State<Checkout> {
                   setState(() {
                     selectedOption = value;
                   });
-                  // Card cannot carry a discount (see _canRedeemLoyalty), so
-                  // drop any points the customer had already dialled in rather
-                  // than showing a reduction the invoice will not honour.
-                  if ((value ?? '').toLowerCase() != 'cash') {
+                  // Drop any dialled-in points when switching to a payment
+                  // method that cannot redeem them (see _canRedeemLoyalty).
+                  if (!_canRedeemLoyalty) {
                     context.read<LoyaltyProvider>().setUseCashback(false);
                   }
                 },
@@ -1886,7 +1941,7 @@ class _CheckoutState extends State<Checkout> {
             ),
             if (_loyaltyEligibleOrderType)
               LoyaltyCheckoutSection(
-                subtotal: orderPrice.round(),
+                subtotal: _effectiveOrderPrice.round(),
                 deliveryFee: 0,
                 allowRedeem: _canRedeemLoyalty,
               ),
@@ -2134,7 +2189,10 @@ class _CheckoutState extends State<Checkout> {
                             : (commented.isEmpty
                                 ? loyaltyHold.orderNoteRef
                                 : '$commented\n${loyaltyHold.orderNoteRef}');
-                        final double loyaltyTotal = orderPrice - loyaltyPoints;
+                        // Effective price already excludes the package on
+                        // non-delivery tabs, matching what is shown above.
+                        final double loyaltyTotal =
+                            _effectiveOrderPrice - loyaltyPoints;
 
                         // Handle different order types
                         if (_selectedIndex == 0) {
@@ -2198,24 +2256,13 @@ class _CheckoutState extends State<Checkout> {
                           if (selectedBranch == null) {
                             throw Exception('Please select a branch for in-restaurant order');
                           }
-                          // Calculate total excluding "Пакет" (package)
-                          final packageItem = cartProvider.cartItems.firstWhere(
-                            (item) => item.product.name == 'Пакет',
-                            orElse: () => cartProvider.cartItems.first,
-                          );
-                          final packagePrice = packageItem.product.name == 'Пакет' 
-                              ? packageItem.totalPrice 
-                              : 0.0;
-                          final adjustedTotal =
-                              orderPrice - packagePrice - loyaltyPoints;
-
                           await sendSelfPickupOrderToSieves(
                             branchName: selectedBranch!,
                             name: firstName,
                             phone: phoneNumber,
                             paymentType: selectedOption!,
                             comment: loyaltyComment,
-                            total: adjustedTotal,
+                            total: loyaltyTotal,
                             cashbackAmount: loyaltyPoints,
                             cartProvider: cartProvider,
                             isInRestaurant: true,
@@ -2783,11 +2830,13 @@ class _CheckoutState extends State<Checkout> {
 
       final branchConfig = await BranchConfigs.getConfig(branchName);
       
-      // Format order items for Sieves API
-      // Filter out "Пакет" (package) for in-restaurant orders
-      final itemsToProcess = isInRestaurant
-          ? cartProvider.cartItems.where((item) => item.product.name != 'Пакет').toList()
-          : cartProvider.cartItems;
+      // Format order items for Sieves API. This function only serves
+      // non-delivery orders, and the package ("Пакет") is only charged on
+      // delivery - so it is always excluded here, keeping the POS lines in
+      // step with the total, which excludes it too.
+      final itemsToProcess = cartProvider.cartItems
+          .where((item) => item.product.name != 'Пакет')
+          .toList();
       
       // NOTE: the order payload is built inside
       // RahmatPayService.sendCashOrderToApi below. A full payload used to be

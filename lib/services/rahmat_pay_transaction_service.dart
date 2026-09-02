@@ -10,11 +10,20 @@ import 'package:apploook/cart_provider.dart';
 class RahmatPayTransactionService {
   /// Shows a dialog that polls for payment status
   /// Checks every 3 seconds for up to 5 minutes
+  ///
+  /// [onPaymentConfirmed] runs once the payment is confirmed successful and
+  /// [onPaymentFailed] once it is definitively failed/cancelled - used by the
+  /// checkout to commit or release a loyalty (cashback) hold. Neither runs on
+  /// a timeout or when the user closes the status dialog, because the payment
+  /// may still complete in the browser; the hold's TTL and the server's
+  /// reconciliation settle those cases.
   static void startPaymentStatusCheck(
     BuildContext context,
     String invoiceId,
-    String branchName,
-  ) {
+    String branchName, {
+    Future<void> Function()? onPaymentConfirmed,
+    Future<void> Function()? onPaymentFailed,
+  }) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -22,6 +31,8 @@ class RahmatPayTransactionService {
         invoiceId: invoiceId,
         branchName: branchName,
         parentContext: context,
+        onPaymentConfirmed: onPaymentConfirmed,
+        onPaymentFailed: onPaymentFailed,
       ),
     );
   }
@@ -32,11 +43,15 @@ class _PaymentStatusDialog extends StatefulWidget {
   final String invoiceId;
   final String branchName;
   final BuildContext parentContext;
+  final Future<void> Function()? onPaymentConfirmed;
+  final Future<void> Function()? onPaymentFailed;
 
   const _PaymentStatusDialog({
     required this.invoiceId,
     required this.branchName,
     required this.parentContext,
+    this.onPaymentConfirmed,
+    this.onPaymentFailed,
   });
 
   @override
@@ -147,9 +162,18 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
 
   void _handlePaymentSuccess() async {
     print('✅ Payment successful! Clearing cart and navigating to home');
-    
+
     // Clear pending payment
     await RahmatPayService.clearPendingCardPayment();
+
+    // Settle the loyalty hold (spend the reserved points, book the pending
+    // cashback). Must never block the success flow: if the commit fails the
+    // server reconciles open holds against the order on its own.
+    try {
+      await widget.onPaymentConfirmed?.call();
+    } catch (e) {
+      print('⚠️ Loyalty commit after card payment failed (self-heals): $e');
+    }
     
     // Clear the cart
     if (widget.parentContext.mounted) {
@@ -301,9 +325,17 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
 
   void _handlePaymentFailure(String? status) async {
     print('❌ Payment failed with status: $status');
-    
+
     // Clear pending payment
     await RahmatPayService.clearPendingCardPayment();
+
+    // The payment definitively failed - hand any reserved cashback points
+    // straight back instead of waiting out the hold's TTL.
+    try {
+      await widget.onPaymentFailed?.call();
+    } catch (e) {
+      print('⚠️ Loyalty release after failed payment failed (TTL covers it): $e');
+    }
     
     // Close the status dialog
     if (mounted) {
