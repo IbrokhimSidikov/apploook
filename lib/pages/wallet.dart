@@ -3,10 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import 'package:shimmer/shimmer.dart';
+
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
+import 'package:apploook/widgets/loyalty_info_sheet.dart';
 
 /// The cashback wallet: card, balance, and the ledger behind it.
 ///
@@ -29,13 +32,18 @@ class _WalletState extends State<Wallet> {
   @override
   void initState() {
     super.initState();
-    _history = Future.value(const []);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    // The provider already holds the balance the profile screen fetched -
+    // paint it on the first frame and refresh quietly underneath. History is
+    // the only thing this screen genuinely has to load, so it starts now and
+    // shimmers while in flight.
+    final provider = context.read<LoyaltyProvider>();
+    _history = provider.fetchHistory();
+    provider.refresh(silent: true);
   }
 
   Future<void> _load() async {
     final provider = context.read<LoyaltyProvider>();
-    await provider.refresh();
+    await provider.refresh(silent: true);
     if (!mounted) return;
     setState(() {
       _history = provider.fetchHistory();
@@ -65,8 +73,14 @@ class _WalletState extends State<Wallet> {
           ),
         ),
         iconTheme: const IconThemeData(color: AppColors.cx0B0B0B),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline_rounded),
+            onPressed: () => showLoyaltyInfoSheet(context, provider),
+          ),
+        ],
       ),
-      body: !provider.hasSession
+      body: !provider.hasSession && provider.sessionKnown
           ? _SignInPrompt(message: _l10n.walletSignInRequired)
           : RefreshIndicator(
               color: AppColors.cxFEC700,
@@ -81,7 +95,7 @@ class _WalletState extends State<Wallet> {
                     money: _soum,
                     availableLabel: _l10n.walletAvailable,
                     pendingLabel: _l10n.walletPending,
-                    isLoading: provider.isLoadingSummary,
+                    isLoading: !provider.balanceLoaded,
                   ),
                   SizedBox(height: 16.h),
                   _RateStrip(
@@ -103,14 +117,7 @@ class _WalletState extends State<Wallet> {
                     future: _history,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32.h),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.cxFEC700,
-                            ),
-                          ),
-                        );
+                        return const _HistoryShimmer();
                       }
                       final rows = snapshot.data ?? const <LoyaltyTransaction>[];
                       if (rows.isEmpty) {
@@ -211,15 +218,8 @@ class _CardTile extends StatelessWidget {
           SizedBox(height: 6.h),
           if (isLoading)
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              child: SizedBox(
-                height: 26.h,
-                width: 26.h,
-                child: const CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: AppColors.cxFEC700,
-                ),
-              ),
+              padding: EdgeInsets.symmetric(vertical: 6.h),
+              child: _DarkShimmerBar(width: 140.w, height: 26.h),
             )
           else
             Text(
@@ -487,6 +487,90 @@ class _SignInPrompt extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Placeholder bar for a figure on its way, tuned for the dark card.
+class _DarkShimmerBar extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const _DarkShimmerBar({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.white.withOpacity(0.12),
+      highlightColor: Colors.white.withOpacity(0.35),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+        ),
+      ),
+    );
+  }
+}
+
+/// The history list while it loads: rows the same shape as the real ones, so
+/// nothing jumps when the data lands.
+class _HistoryShimmer extends StatelessWidget {
+  const _HistoryShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget bar(double w, double h) => Container(
+          width: w,
+          height: h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+
+    return Column(
+      children: List.generate(
+        4,
+        (_) => Container(
+          margin: EdgeInsets.only(bottom: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey.shade200,
+            highlightColor: Colors.grey.shade50,
+            child: Row(
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      bar(120.w, 12.h),
+                      SizedBox(height: 6.h),
+                      bar(80.w, 10.h),
+                    ],
+                  ),
+                ),
+                bar(56.w, 12.h),
+              ],
+            ),
+          ),
         ),
       ),
     );

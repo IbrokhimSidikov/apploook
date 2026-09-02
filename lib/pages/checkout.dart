@@ -2223,6 +2223,14 @@ class _CheckoutState extends State<Checkout> {
                           apiSuccess = true;
                         }
 
+                        // A delivery order that failed inside sendOrderToApi
+                        // returns false rather than throwing. Bail out through
+                        // the catch below so the hold is released and the user
+                        // sees the error - not a success dialog.
+                        if (!apiSuccess) {
+                          throw Exception('Order could not be submitted');
+                        }
+
                         // The order was accepted: spend the reserved points and
                         // book the cashback as pending. It only becomes
                         // spendable once the order is actually delivered.
@@ -2254,52 +2262,112 @@ class _CheckoutState extends State<Checkout> {
                         }
 
                         // Reset processing state
-                        setState(() {
-                          _isProcessing = false;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                        }
 
-                        // Show success message
-                        showDialog(
-                          // ignore: use_build_context_synchronously
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text(
-                              AppLocalizations.of(context).orderSuccess,
-                              style: const TextStyle(fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                            content: Text(AppLocalizations.of(context)
-                                .orderSuccessSubTitle),
-                            contentPadding: const EdgeInsets.only(
-                                top: 30, left: 30, right: 30),
-                            actions: [
-                              const SizedBox(height: 20),
-                              Center(
-                                child: TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushNamed(context, '/homeNew');
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25),
+                        // Show success message. Not dismissible via the
+                        // barrier: the cart is already cleared, so the only
+                        // way forward is home.
+                        if (mounted) {
+                          showDialog(
+                            // ignore: use_build_context_synchronously
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (dialogContext) => Dialog(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24.r),
+                              ),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 20.h),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 64.w,
+                                      height: 64.w,
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFFE8F5EE),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.check_rounded,
+                                        color: const Color(0xFF1B8A4C),
+                                        size: 36.sp,
+                                      ),
                                     ),
-                                  ),
-                                  child: const Text(
-                                    'OK',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      AppLocalizations.of(dialogContext)
+                                          .orderSuccess,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 17.sp,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8.h),
+                                    Text(
+                                      AppLocalizations.of(dialogContext)
+                                          .orderSuccessSubTitle,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        height: 1.4,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                    SizedBox(height: 24.h),
+                                    SizedBox(
+                                      width: double.infinity,
+                                      child: TextButton(
+                                        onPressed: () {
+                                          // Clears the dialog and the whole
+                                          // stack in one go so back can't
+                                          // land on a spent checkout.
+                                          Navigator.of(dialogContext)
+                                              .pushNamedAndRemoveUntil(
+                                            '/homeNew',
+                                            (route) => false,
+                                          );
+                                        },
+                                        style: TextButton.styleFrom(
+                                          backgroundColor:
+                                              const Color(0xFFFEC700),
+                                          foregroundColor: Colors.black,
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 14.h),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(14.r),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'OK',
+                                          style: TextStyle(
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        );
+                            ),
+                          );
+                        }
                       } catch (e, stackTrace) {
                         // Reset processing state
-                        setState(() {
-                          _isProcessing = false;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                        }
 
                         // The order did not go out - hand the points straight
                         // back rather than making the customer wait out the TTL.
@@ -2310,9 +2378,11 @@ class _CheckoutState extends State<Checkout> {
                         print(stackTrace);
                         _showOrderErrorDialog(e, stackTrace);
                       } finally {
-                        setState(() {
-                          _isProcessing = false;
-                        });
+                        if (mounted) {
+                          setState(() {
+                            _isProcessing = false;
+                          });
+                        }
                       }
                     }
                   : null,
@@ -2793,11 +2863,12 @@ class _CheckoutState extends State<Checkout> {
 
         // Clear cart
         cartProvider.clearCart();
-        
-        // Navigate to home page
-        if (mounted) {
-          Navigator.of(context).pushNamedAndRemoveUntil('/homeNew', (route) => false);
-        }
+
+        // No navigation here: the caller still has to commit the loyalty hold
+        // and show the success dialog. Navigating away at this point disposed
+        // the checkout screen while confirm() was in flight, which left the
+        // success dialog with a dead context - it never appeared on cashback
+        // orders. The success dialog's OK button does the navigation instead.
         return;
       }
     } catch (e) {

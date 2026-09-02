@@ -12,6 +12,7 @@ import '../services/loyalty_service.dart';
 import '../providers/loyalty_provider.dart';
 import '../widgets/loyalty_profile_card.dart';
 import '../widgets/announcement_story_dialog.dart';
+import '../widgets/confirm_action_sheet.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -261,50 +262,13 @@ class _ProfileState extends State<Profile> {
                 40.verticalSpace,
                 GestureDetector(
                   onTap: () async {
-                    bool? confirmLogout = await showDialog<bool>(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          title: Text(
-                            AppLocalizations.of(context).logout,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.sp,
-                            ),
-                          ),
-                          content: Text(
-                            AppLocalizations.of(context).logoutConfirmation,
-                            style: TextStyle(fontSize: 16.sp),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: Text(
-                                AppLocalizations.of(context).cancel,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: Text(
-                                AppLocalizations.of(context).confirm,
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                    bool? confirmLogout = await showConfirmActionSheet(
+                      context,
+                      icon: Icons.logout_rounded,
+                      title: AppLocalizations.of(context).logout,
+                      message: AppLocalizations.of(context).logoutConfirmation,
+                      confirmLabel: AppLocalizations.of(context).confirm,
+                      cancelLabel: AppLocalizations.of(context).cancel,
                     );
 
                     if (confirmLogout == true) {
@@ -379,50 +343,14 @@ class _ProfileState extends State<Profile> {
                 40.verticalSpace,
                 GestureDetector(
                   onTap: () async {
-                    bool? confirmDelete = await showDialog<bool>(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          title: Text(
-                            AppLocalizations.of(context).confirmDelete,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.sp,
-                            ),
-                          ),
-                          content: Text(
-                            AppLocalizations.of(context).confirmDialog,
-                            style: TextStyle(fontSize: 16.sp),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(false),
-                              child: Text(
-                                AppLocalizations.of(context).cancel,
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(true),
-                              child: Text(
-                                AppLocalizations.of(context).delete,
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                    bool? confirmDelete = await showConfirmActionSheet(
+                      context,
+                      icon: Icons.delete_outline_rounded,
+                      title: AppLocalizations.of(context).confirmDelete,
+                      message: AppLocalizations.of(context).confirmDialog,
+                      confirmLabel: AppLocalizations.of(context).delete,
+                      cancelLabel: AppLocalizations.of(context).cancel,
+                      destructive: true,
                     );
 
                     if (confirmDelete == true) {
@@ -503,7 +431,7 @@ class _ProfileState extends State<Profile> {
         color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Version 3.0.0')],
+          children: [Text('Version 3.3.0')],
         ),
       ),
     );
