@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/l10n/app_localizations.dart';
@@ -11,10 +10,11 @@ import 'package:apploook/providers/loyalty_provider.dart';
 
 /// The customer's cashback card on the profile screen.
 ///
-/// The card is created server-side the moment the OTP is accepted, so this is
-/// visible from a customer's very first sign-in - showing a real card with a
-/// zero balance rather than an empty state, which is what makes the programme
-/// feel active from day one.
+/// The board itself renders on the first frame, every time - only the figures
+/// wait for the network, behind a shimmer. Painting the frame instantly and
+/// letting numbers arrive is what makes the screen feel fast; it also avoids
+/// the earlier trap of showing a confident-looking 0 that really meant
+/// "not fetched yet".
 class LoyaltyProfileCard extends StatelessWidget {
   const LoyaltyProfileCard({super.key});
 
@@ -25,22 +25,37 @@ class LoyaltyProfileCard extends StatelessWidget {
     final loyalty = context.watch<LoyaltyProvider>();
     final l10n = AppLocalizations.of(context);
 
-    // Not signed in to the app at all: nothing to show.
-    if (!loyalty.hasSession && !loyalty.needsActivation) {
+    // Hide only when it is KNOWN there is no signed-in customer. Before the
+    // bootstrap answers - a cold-start window of milliseconds - render the
+    // board shimmering rather than nothing: returning shrink here is exactly
+    // the blank gap that used to flash before the card popped in.
+    final bool known = loyalty.sessionKnown;
+    if (known && !loyalty.hasSession && !loyalty.needsActivation) {
       return const SizedBox.shrink();
     }
 
-    // Signed in but the session is still being established (the provider
-    // resumes it automatically). Show the same card in a quiet state rather
-    // than a button - the customer has nothing to do.
-    final activating = !loyalty.hasSession;
+    // Figures are trustworthy only once a summary has arrived. While the
+    // fetch (or the automatic session resume) is in flight, shimmer; if the
+    // resume failed outright, show a dash and let a tap retry.
+    final bool loading = !known ||
+        (loyalty.hasSession ? !loyalty.balanceLoaded : loyalty.isActivating);
+    final bool unavailable =
+        known && !loyalty.hasSession && !loyalty.isActivating;
+
     final card = loyalty.card;
     final rate = loyalty.program.earnRatePercent;
     final rateLabel =
         rate == rate.roundToDouble() ? rate.toStringAsFixed(0) : '$rate';
 
     return GestureDetector(
-      onTap: activating ? null : () => Navigator.pushNamed(context, '/wallet'),
+      onTap: () {
+        if (unavailable) {
+          // The automatic resume did not get a session - retry it.
+          context.read<LoyaltyProvider>().refresh();
+        } else {
+          Navigator.pushNamed(context, '/wallet');
+        }
+      },
       child: Container(
         padding: EdgeInsets.fromLTRB(16.w, 12.h, 12.w, 12.h),
         decoration: BoxDecoration(
@@ -94,8 +109,6 @@ class LoyaltyProfileCard extends StatelessWidget {
                   ),
                 ),
                 const Spacer(),
-                // Generous hit target: the icon itself is far too small to be
-                // a comfortable tap on a card that is also tappable.
                 InkWell(
                   onTap: () => _showInfoSheet(context, loyalty),
                   borderRadius: BorderRadius.circular(20.r),
@@ -110,25 +123,16 @@ class LoyaltyProfileCard extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                if (activating)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    child: SizedBox(
-                      height: 18.h,
-                      width: 18.h,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.cxFEC700,
-                      ),
-                    ),
-                  )
-                else
+            SizedBox(height: 2.h),
+            if (loading)
+              _ShimmerBar(width: 120.w, height: 24.h)
+            else
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
                   Text(
-                    _money.format(card.spendable),
+                    unavailable ? '—' : _money.format(card.spendable),
                     style: TextStyle(
                       fontSize: 26.sp,
                       fontWeight: FontWeight.w800,
@@ -136,47 +140,50 @@ class LoyaltyProfileCard extends StatelessWidget {
                       fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                   ),
-                SizedBox(width: 5.w),
-                Text(
-                  l10n.currency,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.55),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 6.h),
-            Row(
-              children: [
-                if (card.pendingBalance > 0) ...[
-                  Icon(Icons.schedule_rounded,
-                      size: 12.sp, color: AppColors.cxFEC700),
-                  SizedBox(width: 4.w),
+                  SizedBox(width: 5.w),
                   Text(
-                    '${l10n.walletPending} '
-                    '${_money.format(card.pendingBalance)}',
+                    unavailable ? '' : l10n.currency,
                     style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColors.cxFEC700,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.55),
                     ),
                   ),
-                ] else
-                  Text(
-                    card.number.isEmpty ? '' : card.number,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      letterSpacing: 1.4,
-                      color: Colors.white.withOpacity(0.5),
+                ],
+              ),
+            SizedBox(height: 8.h),
+            if (loading)
+              _ShimmerBar(width: 90.w, height: 11.h)
+            else
+              Row(
+                children: [
+                  if (card.pendingBalance > 0) ...[
+                    Icon(Icons.schedule_rounded,
+                        size: 12.sp, color: AppColors.cxFEC700),
+                    SizedBox(width: 4.w),
+                    Text(
+                      '${l10n.walletPending} '
+                      '${_money.format(card.pendingBalance)}',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: AppColors.cxFEC700,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                const Spacer(),
-                Icon(Icons.chevron_right_rounded,
-                    size: 16.sp, color: Colors.white.withOpacity(0.5)),
-              ],
-            ),
+                  ] else
+                    Text(
+                      card.number,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        letterSpacing: 1.4,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    ),
+                  const Spacer(),
+                  Icon(Icons.chevron_right_rounded,
+                      size: 16.sp, color: Colors.white.withOpacity(0.5)),
+                ],
+              ),
           ],
         ),
       ),
@@ -307,6 +314,30 @@ class LoyaltyProfileCard extends StatelessWidget {
               SizedBox(height: 8.h),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A placeholder bar for a figure still on its way, tuned for the dark card.
+class _ShimmerBar extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const _ShimmerBar({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.white.withOpacity(0.12),
+      highlightColor: Colors.white.withOpacity(0.35),
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
         ),
       ),
     );

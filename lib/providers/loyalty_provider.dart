@@ -15,15 +15,31 @@ class LoyaltyProvider extends ChangeNotifier {
   final LoyaltyService _service;
 
   LoyaltyProvider({LoyaltyService? service})
-      : _service = service ?? LoyaltyService();
+      : _service = service ?? LoyaltyService() {
+    _bootstrap();
+  }
+
+  /// Answers "is there a session?" from local prefs the moment the provider
+  /// exists - milliseconds, at app launch - then fetches the summary. By the
+  /// time any screen shows the card, the state is long known, so the board
+  /// paints on that screen's first frame instead of popping in after a gap.
+  Future<void> _bootstrap() async {
+    _hasSession = await _service.hasSession();
+    _needsActivation = await _service.needsActivation();
+    _sessionKnown = true;
+    notifyListeners();
+    await refresh(silent: true);
+  }
 
   // Wallet -----------------------------------------------------------------
 
   LoyaltySummary _summary = LoyaltySummary.empty;
+  bool _summaryLoaded = false;
   bool _isLoadingSummary = false;
   bool _hasSession = false;
   bool _needsActivation = false;
   bool _isActivating = false;
+  bool _sessionKnown = false;
   String? _error;
 
   LoyaltySummary get summary => _summary;
@@ -38,6 +54,15 @@ class LoyaltyProvider extends ChangeNotifier {
 
   /// A resume attempt is in flight.
   bool get isActivating => _isActivating;
+
+  /// False only in the first instants after a cold start, before the local
+  /// prefs read in [_bootstrap] has answered whether a session exists.
+  bool get sessionKnown => _sessionKnown;
+
+  /// True once a summary has actually arrived this session. Until then the
+  /// figures in [summary] are the empty placeholder, and showing them would
+  /// display a confident-looking 0 that is really "not fetched yet".
+  bool get balanceLoaded => _summaryLoaded;
 
   /// Set when the last activation attempt failed, rather than the customer
   /// simply never having tried.
@@ -124,10 +149,12 @@ class LoyaltyProvider extends ChangeNotifier {
 
     try {
       _summary = await _service.fetchSummary();
+      _summaryLoaded = true;
       _error = null;
     } on LoyaltySessionExpiredException {
       _hasSession = false;
       _summary = LoyaltySummary.empty;
+      _summaryLoaded = false;
     } catch (e) {
       _error = e.toString();
     } finally {
