@@ -1112,8 +1112,8 @@ class _CheckoutState extends State<Checkout> {
                               border: Border.all(
                                 color: _selectedIndex == 0
                                     ? const Color(0xffFEC700)
-                                    : Colors.grey.withOpacity(0.3),
-                                width: 2,
+                                    : Colors.grey.withOpacity(0.2),
+                                width: 1.5,
                               ),
                             ),
                             child: Column(
@@ -1161,8 +1161,8 @@ class _CheckoutState extends State<Checkout> {
                               border: Border.all(
                                 color: _selectedIndex == 1
                                     ? const Color(0xffFEC700)
-                                    : Colors.grey.withOpacity(0.3),
-                                width: 2,
+                                    : Colors.grey.withOpacity(0.2),
+                                width: 1.5,
                               ),
                             ),
                             child: Column(
@@ -1213,8 +1213,8 @@ class _CheckoutState extends State<Checkout> {
                               border: Border.all(
                                 color: _selectedIndex == 2
                                     ? const Color(0xffFEC700)
-                                    : Colors.grey.withOpacity(0.3),
-                                width: 2,
+                                    : Colors.grey.withOpacity(0.2),
+                                width: 1.5,
                               ),
                             ),
                             child: Column(
@@ -1263,8 +1263,8 @@ class _CheckoutState extends State<Checkout> {
                               border: Border.all(
                                 color: _selectedIndex == 3
                                     ? const Color(0xffFEC700)
-                                    : Colors.grey.withOpacity(0.3),
-                                width: 2,
+                                    : Colors.grey.withOpacity(0.2),
+                                width: 1.5,
                               ),
                             ),
                             child: Column(
@@ -1350,10 +1350,9 @@ class _CheckoutState extends State<Checkout> {
                             color: const Color(0xFFF1F2F7),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 1,
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 14,
+                                offset: const Offset(0, 4),
                               ),
                             ],
                           ),
@@ -1413,10 +1412,9 @@ class _CheckoutState extends State<Checkout> {
                           color: const Color(0xFFF1F2F7),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 1,
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
@@ -1470,10 +1468,9 @@ class _CheckoutState extends State<Checkout> {
                                 color: const Color(0xFFF1F2F7),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 1,
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
+                                    color: Colors.black.withOpacity(0.05),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
                                   ),
                                 ],
                               ),
@@ -1756,10 +1753,9 @@ class _CheckoutState extends State<Checkout> {
                           color: const Color(0xFFF1F2F7),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 1,
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 14,
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
@@ -1809,16 +1805,15 @@ class _CheckoutState extends State<Checkout> {
               padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 200.h,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15.r),
                   color: Colors.white,
-                  boxShadow: const [
+                  border: Border.all(color: const Color(0xFFF1F2F7)),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0xFFD9D9D9),
-                      offset: Offset(0, 7),
-                      blurRadius: 10.0,
-                      spreadRadius: 2.0,
+                      color: Colors.black.withOpacity(0.05),
+                      offset: const Offset(0, 4),
+                      blurRadius: 14,
                     ),
                   ],
                 ),
@@ -1838,34 +1833,44 @@ class _CheckoutState extends State<Checkout> {
                         ],
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(15.r),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            '${AppLocalizations.of(context).deliveryPrice} :',
-                            style: TextStyle(fontSize: 16.sp),
-                          ),
-                          _selectedIndex == 0 && _isCalculatingDistance
-                              ? SizedBox(
-                                  width: 20.w,
-                                  height: 20.h,
-                                  child: const CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.amber),
+                    // The delivery fee only exists on the delivery tab; the
+                    // other tabs hide the row instead of showing "Unknown".
+                    if (_selectedIndex == 0)
+                      Padding(
+                        padding: EdgeInsets.all(15.r),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${AppLocalizations.of(context).deliveryPrice} :',
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                            _isCalculatingDistance
+                                ? SizedBox(
+                                    width: 20.w,
+                                    height: 20.h,
+                                    child: const CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.amber),
+                                    ),
+                                  )
+                                : Text(
+                                    _nearestBranch != null &&
+                                            _nearestBranch!['deliveryFee'] !=
+                                                null
+                                        ? '${_nearestBranch!['deliveryFee'].toString()} UZS'
+                                        : AppLocalizations.of(context).unknown,
                                   ),
-                                )
-                              : Text(
-                                  _selectedIndex == 0 &&
-                                          _nearestBranch != null &&
-                                          _nearestBranch!['deliveryFee'] != null
-                                      ? '${_nearestBranch!['deliveryFee'].toString()} UZS'
-                                      : AppLocalizations.of(context).unknown,
-                                ),
-                        ],
+                          ],
+                        ),
                       ),
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      color: const Color(0xFFF1F2F7),
+                      indent: 15.w,
+                      endIndent: 15.w,
                     ),
                     Padding(
                       padding: EdgeInsets.all(15.r),
@@ -1884,7 +1889,8 @@ class _CheckoutState extends State<Checkout> {
                                     ? '${NumberFormat('#,##0').format(_effectiveOrderPrice + (_nearestBranch!['deliveryFee'] as num) - loyaltyDiscount)} UZS'
                                     : '${NumberFormat('#,##0').format(_effectiveOrderPrice - loyaltyDiscount)} UZS')
                                 : '${NumberFormat('#,##0').format(_effectiveOrderPrice - loyaltyDiscount)} UZS',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 16.sp, fontWeight: FontWeight.w700),
                           ),
                         ],
                       ),
@@ -1895,13 +1901,32 @@ class _CheckoutState extends State<Checkout> {
             ),
             const SizedBox(height: 40),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 15.w),
               child: DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context).paymentMethod,
                   labelStyle: const TextStyle(color: Colors.black),
+                  contentPadding: EdgeInsets.symmetric(
+                      horizontal: 14.w, vertical: 12.h),
+                  // Rounded outline to match the phone and comment fields
+                  // below, instead of the bare material underline.
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(color: Colors.black26),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    borderSide: const BorderSide(
+                        color: Color(0xFFFEC700), width: 1.5),
+                  ),
                 ),
-                dropdownColor: const Color(0xFFF1F2F7),
+                dropdownColor: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+                icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                    color: Colors.black54),
                 value: selectedOption,
                 isExpanded: true,
                 items: [
