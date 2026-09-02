@@ -2719,76 +2719,13 @@ class _CheckoutState extends State<Checkout> {
           ? cartProvider.cartItems.where((item) => item.product.name != 'Пакет').toList()
           : cartProvider.cartItems;
       
-      final List<Map<String, dynamic>> formattedOrderItems =
-          itemsToProcess.map((item) {
-        final String? productUuid = item.product.uuid;
-        if (productUuid == null || productUuid.isEmpty) {
-          print(
-              'WARNING: Missing UUID for product ${item.product.name} (ID: ${item.product.id})');
-        }
-        final String productIdentifier =
-            productUuid ?? item.product.id.toString();
-        print(
-            'Self-Pickup: Using product identifier: $productIdentifier for ${item.product.name}');
-
-        return {
-          "actual_price": item.totalPrice / item.quantity,
-          "product_id": productIdentifier,
-          "quantity": item.quantity,
-          "note": item.selectedModifiers.isNotEmpty
-              ? "Modifiers: ${item.selectedModifiers.map((m) => m.modifier.name).join(", ")}"
-              : null,
-          "selectedModifiers": item.selectedModifiers
-              .map((modifier) => {
-                    "modifierId": modifier.modifier.id,
-                    "modifierName": modifier.modifier.name,
-                    "modifierPrice": modifier.modifier.price,
-                    "quantity": modifier.quantity,
-                  })
-              .toList(),
-        };
-      }).toList();
-
-      // Prepare the request body for Sieves API
-      final Map<String, dynamic> requestBody = {
-        "customer_quantity": 1,
-        "customer_id": null,
-        "is_fast": 0,
-        "queue_type": "sync",
-        "start_time": "now",
-        "isSynchronous": "sync",
-        "delivery_employee_id": null,
-        "employee_id": branchConfig.employeeId,
-        "branch_id": branchConfig.branchId,
-        "order_type_id": isCarhop ? 8 : (isInRestaurant ? 1 : 2), // 8 for carhop, 1 for in-restaurant, 2 for self-pickup
-        "orderItems": formattedOrderItems,
-        // Full price on the order; the split lives in the transaction lines.
-        // A points-only order carries a single loyalty line, a partial one
-        // carries cash + loyalty, so accounting sees what was settled how.
-        "transactions": LoyaltyPos.transactions(
-          cashAmount: total,
-          cashbackAmount: cashbackAmount,
-          cashPaymentTypeId: paymentType.toLowerCase() == 'card'
-              ? 1
-              : (paymentType.toLowerCase() == 'payme' ? 3 : 2),
-          loyaltyAccountId: loyaltyProgram.posAccountId,
-          loyaltyPaymentTypeId: loyaltyProgram.posPaymentTypeId,
-        ),
-        "value": orderValue,
-        "note": isCarhop
-            ? comment // Carhop comment already includes car details
-            : (isInRestaurant
-                ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
-                : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой")),
-        "day_session_id": null,
-        "pager_number": phone.replaceFirst('+998', ''),
-        "pos_id": null,
-        "pos_session_id": null,
-        "delivery_amount": null
-      };
-
-      debugPrint('LOYALTY POS: value=$orderValue cash=$total points=$cashbackAmount '
-          'transactions=${json.encode(requestBody["transactions"])}');
+      // NOTE: the order payload is built inside
+      // RahmatPayService.sendCashOrderToApi below. A full payload used to be
+      // assembled here as well, but it was never sent - every call into this
+      // function is a cash order and returns inside the cash branch - and its
+      // realistic-looking dead code cost a debugging round.
+      debugPrint(
+          'LOYALTY POS: value=$orderValue cash=$total points=$cashbackAmount');
 
       // If payment type is CASH, send to custom API endpoint
       if (paymentType.toLowerCase() == 'cash') {
@@ -2816,6 +2753,9 @@ class _CheckoutState extends State<Checkout> {
                   ? (comment.isNotEmpty ? "В ресторане\n$comment" : "В ресторане")
                   : (comment.isNotEmpty ? "С Сабой\n$comment" : "С Сабой")),
           amount: total,
+          cashbackAmount: cashbackAmount,
+          loyaltyAccountId: loyaltyProgram.posAccountId,
+          loyaltyPaymentTypeId: loyaltyProgram.posPaymentTypeId,
           cartItems: itemsToProcess,
         );
         

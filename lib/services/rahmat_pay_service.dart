@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:apploook/models/loyalty.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -492,6 +493,12 @@ class RahmatPayService {
     required double amount,
     required List<dynamic> cartItems,
     Map<String, String>? additionalHeaders,
+    // Points applied to this order. [amount] is the cash still due; the POS
+    // order's value is the sum of the two, and the payment splits into a
+    // cash line and a loyalty line so accounting sees both.
+    int cashbackAmount = 0,
+    int loyaltyAccountId = LoyaltyPos.defaultAccountId,
+    int loyaltyPaymentTypeId = LoyaltyPos.defaultPaymentTypeId,
   }) async {
     try {
       // Get branch configuration
@@ -547,15 +554,14 @@ class RahmatPayService {
         "pager_number": pagerNumber,
         "note": note,
         "orderItems": sievesOrderItems,
-        "transactions": [
-          {
-            "account_id": 1,
-            "payment_type_id": 2,
-            "amount": amount,
-            "type": "deposit"
-          }
-        ],
-        "value": amount,
+        "transactions": LoyaltyPos.transactions(
+          cashAmount: amount,
+          cashbackAmount: cashbackAmount,
+          cashPaymentTypeId: 2,
+          loyaltyAccountId: loyaltyAccountId,
+          loyaltyPaymentTypeId: loyaltyPaymentTypeId,
+        ),
+        "value": amount + cashbackAmount,
         "customer_quantity": customerQuantity,
       };
 
