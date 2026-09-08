@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:apploook/consent_screen.dart';
 import 'package:apploook/models/view/notifications_view.dart';
 import 'package:apploook/pages/branches.dart';
+import 'package:apploook/features/loyalty_qr/presentation/qr_pay_page.dart';
 import 'package:apploook/pages/wallet.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
@@ -267,6 +268,7 @@ class _MyAppState extends State<MyApp> {
                 const UnifiedOrderTrackingPage(),
             '/branches': (context) => const Branches(),
             '/wallet': (context) => const Wallet(),
+            '/qr-pay': (context) => const QrPayPage(),
           },
         );
       },

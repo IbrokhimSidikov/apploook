@@ -360,4 +360,9 @@ class LoyaltyService {
   Future<void> releaseHold(int holdId) async {
     await _request('POST', '/loyalty/holds/$holdId/release');
   }
+
+  /// Mints an in-store payment QR. Raw map on purpose: the shape belongs to
+  /// the loyalty_qr feature, whose repository turns it into a domain model.
+  Future<Map<String, dynamic>> createQrToken() =>
+      _request('POST', '/loyalty/qr');
 }

@@ -97,6 +97,16 @@ class _WalletState extends State<Wallet> {
                     pendingLabel: _l10n.walletPending,
                     isLoading: !provider.balanceLoaded,
                   ),
+                  SizedBox(height: 12.h),
+                  _PayInStoreButton(
+                    label: _l10n.qrPayTitle,
+                    onPressed: () async {
+                      await Navigator.pushNamed(context, '/qr-pay');
+                      // Points may have been redeemed at the till while the
+                      // QR page was up - come back showing the real balance.
+                      if (mounted) _load();
+                    },
+                  ),
                   SizedBox(height: 16.h),
                   _RateStrip(
                     text: _l10n.walletEarnRateLead,
@@ -259,6 +269,37 @@ class _CardTile extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PayInStoreButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _PayInStoreButton({required this.label, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.cxFEC700,
+          foregroundColor: AppColors.cx0B0B0B,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+        ),
+        onPressed: onPressed,
+        icon: Icon(Icons.qr_code_2_rounded, size: 22.sp),
+        label: Text(
+          label,
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.sp),
+        ),
       ),
     );
   }

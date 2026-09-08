@@ -150,6 +150,11 @@ class AppLocalizations {
       'loyaltyInfoSpend': 'Pay with your cashback at checkout — use as much as you like.',
       'loyaltyInfoPending': 'Cashback becomes available once your order is completed.',
       'loyaltyCardHint': 'Tap to see your cashback history',
+      'qrPayTitle': 'Pay in store',
+      'qrPayHint': 'Show this code to the cashier to pay with your cashback.',
+      'qrPayUpdatesIn': 'Code updates in',
+      'qrPayError': 'Could not get a code. Check your connection and try again.',
+      'qrPayRetry': 'Try again',
       'updating': 'Updating',
       'orderHistory': 'Order History',
       // Map Screen
@@ -417,6 +422,11 @@ class AppLocalizations {
       'loyaltyInfoSpend': 'Buyurtma rasmiylashtirishda keshbek bilan toʻlang — xohlagancha ishlating.',
       'loyaltyInfoPending': 'Keshbek buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
       'loyaltyCardHint': 'Keshbek tarixini koʻrish uchun bosing',
+      'qrPayTitle': 'Restoranda toʻlash',
+      'qrPayHint': 'Keshbek bilan toʻlash uchun bu kodni kassirga koʻrsating.',
+      'qrPayUpdatesIn': 'Kod yangilanadi',
+      'qrPayError': 'Kod olinmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
+      'qrPayRetry': 'Qayta urinish',
       'updating': 'Yopish',
       'orderHistory': 'Buyurtma tarihi',
       // Map Screen
@@ -684,6 +694,11 @@ class AppLocalizations {
       'loyaltyInfoSpend': 'Оплачивайте кэшбэком при оформлении — используйте сколько хотите.',
       'loyaltyInfoPending': 'Кэшбэк станет доступен после завершения заказа.',
       'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кэшбэка',
+      'qrPayTitle': 'Оплата в ресторане',
+      'qrPayHint': 'Покажите этот код кассиру, чтобы оплатить кэшбэком.',
+      'qrPayUpdatesIn': 'Код обновится через',
+      'qrPayError': 'Не удалось получить код. Проверьте соединение и попробуйте снова.',
+      'qrPayRetry': 'Повторить',
       'updating': 'Обновление',
       'orderHistory': 'История заказов',
       // Map Screen
@@ -1053,6 +1068,15 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['loyaltyInfoPending']!;
   String get loyaltyCardHint =>
       _localizedValues[locale.languageCode]!['loyaltyCardHint']!;
+  String get qrPayTitle =>
+      _localizedValues[locale.languageCode]!['qrPayTitle']!;
+  String get qrPayHint => _localizedValues[locale.languageCode]!['qrPayHint']!;
+  String get qrPayUpdatesIn =>
+      _localizedValues[locale.languageCode]!['qrPayUpdatesIn']!;
+  String get qrPayError =>
+      _localizedValues[locale.languageCode]!['qrPayError']!;
+  String get qrPayRetry =>
+      _localizedValues[locale.languageCode]!['qrPayRetry']!;
   String get arrivedButtonHint =>
       _localizedValues[locale.languageCode]!['arrivedButtonHint']!;
   String get arrivedButtonTooltip =>

@@ -47,6 +47,7 @@ dependencies:
   package_info_plus: ^8.3.0
   image_picker: ^1.2.1
   flutter_screenutil: ^5.9.3
+  qr_flutter: ^4.1.0
   
 
 dev_dependencies:
