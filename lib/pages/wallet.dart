@@ -95,6 +95,7 @@ class _WalletState extends State<Wallet> {
                     money: _soum,
                     availableLabel: _l10n.walletAvailable,
                     pendingLabel: _l10n.walletPending,
+                    pendingHint: _l10n.walletPendingHint,
                     isLoading: !provider.balanceLoaded,
                   ),
                   SizedBox(height: 12.h),
@@ -176,6 +177,10 @@ class _CardTile extends StatelessWidget {
   final String Function(int) money;
   final String availableLabel;
   final String pendingLabel;
+
+  /// Why pending points are not spendable yet: they mature at the next
+  /// local midnight, not after a fixed delay.
+  final String pendingHint;
   final bool isLoading;
 
   const _CardTile({
@@ -184,6 +189,7 @@ class _CardTile extends StatelessWidget {
     required this.money,
     required this.availableLabel,
     required this.pendingLabel,
+    required this.pendingHint,
     required this.isLoading,
   });
 
@@ -256,6 +262,17 @@ class _CardTile extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+            SizedBox(height: 2.h),
+            Padding(
+              padding: EdgeInsets.only(left: 20.w),
+              child: Text(
+                pendingHint,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Colors.white.withOpacity(0.55),
+                ),
+              ),
             ),
           ],
           SizedBox(height: 20.h),

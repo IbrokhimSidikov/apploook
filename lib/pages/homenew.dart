@@ -29,6 +29,7 @@ import '../widget/review_bottom_sheet.dart';
 import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../widgets/announcement_story_dialog.dart';
+import '../widgets/cashback_badge.dart';
 import '../features/reorder/application/reorder_controller.dart';
 import '../features/reorder/presentation/reorder_list_sheet.dart';
 import '../features/reorder/presentation/reorder_fab.dart';
@@ -523,6 +524,14 @@ class _HomeNewState extends State<HomeNew>
                     padding: EdgeInsets.all(10.r),
                     child: SvgPicture.asset('images/profileIconHome.svg'),
                   ),
+                ),
+                // Cashback balance sits right after the profile icon; the
+                // title slot is otherwise unused on this screen.
+                titleSpacing: 0,
+                centerTitle: false,
+                title: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: CashbackBadge(),
                 ),
                 actions: [
                   // ElevatedButton(

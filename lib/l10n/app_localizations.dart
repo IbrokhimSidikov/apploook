@@ -126,6 +126,7 @@ class AppLocalizations {
       'walletTitle': 'Cashback',
       'walletAvailable': 'Available',
       'walletPending': 'Pending',
+      'walletPendingHint': 'Available tomorrow from 00:00',
       'walletHistory': 'History',
       'walletNoHistory': 'No cashback activity yet.\nYour first order will start it off.',
       'walletSignInRequired': 'Sign in to see your cashback balance.',
@@ -398,6 +399,7 @@ class AppLocalizations {
       'walletTitle': 'Keshbek',
       'walletAvailable': 'Mavjud',
       'walletPending': 'Kutilmoqda',
+      'walletPendingHint': 'Ertaga 00:00 dan mavjud boʻladi',
       'walletHistory': 'Tarix',
       'walletNoHistory': 'Hozircha keshbek harakati yoʻq.\nBirinchi buyurtmangiz uni boshlaydi.',
       'walletSignInRequired': 'Keshbek balansini koʻrish uchun tizimga kiring.',
@@ -670,6 +672,7 @@ class AppLocalizations {
       'walletTitle': 'Кэшбэк',
       'walletAvailable': 'Доступно',
       'walletPending': 'Ожидается',
+      'walletPendingHint': 'Будут доступны завтра с 00:00',
       'walletHistory': 'История',
       'walletNoHistory': 'Пока нет операций с кэшбэком.\nПервый заказ всё начнёт.',
       'walletSignInRequired': 'Войдите, чтобы увидеть баланс кэшбэка.',
@@ -1020,6 +1023,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['walletAvailable']!;
   String get walletPending =>
       _localizedValues[locale.languageCode]!['walletPending']!;
+  String get walletPendingHint =>
+      _localizedValues[locale.languageCode]!['walletPendingHint']!;
   String get walletHistory =>
       _localizedValues[locale.languageCode]!['walletHistory']!;
   String get walletNoHistory =>
