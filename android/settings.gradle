@@ -19,8 +19,8 @@ pluginManagement {
 
 plugins {
     id "dev.flutter.flutter-plugin-loader" version "1.0.0"
-    id "com.android.application" version "8.9.1" apply false
-    id "org.jetbrains.kotlin.android" version "2.1.0" apply false
+    id "com.android.application" version "8.11.1" apply false
+    id "org.jetbrains.kotlin.android" version "2.2.20" apply false
 
     // START: FlutterFire Configuration
     id "com.google.gms.google-services" version "4.4.2" apply false
@@ -30,12 +30,12 @@ plugins {
 include ":app"
 
 // Force Kotlin version for all subproject buildscript classpaths
-// to avoid Gradle 8.11.1 instrumentation failure with older Kotlin jars
+// to avoid Gradle 8.14 instrumentation failure with older Kotlin jars
 gradle.beforeProject { proj ->
     proj.buildscript.configurations.configureEach { conf ->
         conf.resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'org.jetbrains.kotlin') {
-                details.useVersion '2.1.0'
+                details.useVersion '2.2.20'
             }
         }
     }
