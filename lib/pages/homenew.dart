@@ -60,6 +60,19 @@ class Product {
   final bool isPinned;
   final bool outOfStock;
 
+  /// Sieves inventory id for this Delever product, resolved by the backend.
+  /// Null when the backend knows of no link.
+  final int? sievesId;
+
+  /// Whether the backend included mapping info at all (`sieves_id` key). When
+  /// false the menu came from an older backend or straight from Delever, and
+  /// the app must not block POS orders on it.
+  final bool hasPosMapping;
+
+  /// Backend verdict: can this product be sent to the Sieves POS (self-pickup,
+  /// carhop, in-restaurant)? Null when the backend did not say.
+  final bool? posOrderable;
+
   Product({
     required this.name,
     required this.id,
@@ -77,7 +90,19 @@ class Product {
     this.images,
     this.isPinned = false,
     this.outOfStock = false,
+    this.sievesId,
+    this.hasPosMapping = false,
+    this.posOrderable,
   });
+
+  /// True when a self-pickup / carhop / in-restaurant order of this product
+  /// can be built for the Sieves POS. Only ever false when the backend
+  /// supplied mapping info and found nothing; otherwise the server decides.
+  bool get isPosOrderable {
+    if (!hasPosMapping) return true;
+    if (posOrderable != null) return posOrderable!;
+    return sievesId != null;
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
     dynamic description = json['description'];
@@ -145,7 +170,20 @@ class Product {
       images: images,
       isPinned: json['isPinned'] ?? false,
       outOfStock: json['outOfStock'] ?? false,
+      sievesId: parseSievesId(json['sieves_id'] ?? json['sievesId']),
+      hasPosMapping:
+          json.containsKey('sieves_id') || json.containsKey('sievesId'),
+      posOrderable: json['pos_orderable'] is bool
+          ? json['pos_orderable'] as bool
+          : (json['posOrderable'] is bool ? json['posOrderable'] as bool : null),
     );
+  }
+
+  static int? parseSievesId(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   String? getDescriptionInLanguage(String languageCode) {

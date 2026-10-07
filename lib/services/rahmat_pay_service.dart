@@ -83,6 +83,7 @@ class RahmatPayService {
         
         return {
           "product_id": productIdentifier,
+          "product_name": item.product.name,
           "total_price": item.totalPrice,
           "quantity": item.quantity,
           "actual_price": (item.totalPrice / item.quantity).toString(),
@@ -92,6 +93,10 @@ class RahmatPayService {
                     "modifierName": modifier.modifier.name,
                     "modifierPrice": modifier.modifier.price,
                     "quantity": modifier.quantity,
+                    // A variant ("Хот шотс мини.") replaces the parent as
+                    // the POS line; add-ons stay children. See
+                    // CartItem.isVariantModifier.
+                    "isVariant": item.isVariantModifier(modifier),
                   })
               .toList(),
         };
@@ -552,6 +557,7 @@ class RahmatPayService {
         
         return {
           "product_id": productIdentifier,
+          "product_name": item.product.name,
           "total_price": item.totalPrice,
           "quantity": item.quantity,
           "actual_price": (item.totalPrice / item.quantity).toString(),
@@ -561,6 +567,10 @@ class RahmatPayService {
                     "modifierName": modifier.modifier.name,
                     "modifierPrice": modifier.modifier.price,
                     "quantity": modifier.quantity,
+                    // A variant ("Хот шотс мини.") replaces the parent as
+                    // the POS line; add-ons stay children. See
+                    // CartItem.isVariantModifier.
+                    "isVariant": item.isVariantModifier(modifier),
                   })
               .toList(),
         };

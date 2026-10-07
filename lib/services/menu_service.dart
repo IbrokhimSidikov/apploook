@@ -575,6 +575,8 @@ class MenuService {
 
       _groupProductVariations();
 
+      _logPosUnavailableItems();
+
       if (_categories.isEmpty) {
         print(
             'MenuService: No categories found at all, creating default category');
@@ -798,6 +800,10 @@ class MenuService {
         images: images,
         isPinned: isPinned,  // Use backend value
         outOfStock: outOfStock,  // Use backend value
+        sievesId: Product.parseSievesId(item['sieves_id']),
+        hasPosMapping: item.containsKey('sieves_id'),
+        posOrderable:
+            item['pos_orderable'] is bool ? item['pos_orderable'] as bool : null,
       );
 
       // print(
@@ -810,6 +816,49 @@ class MenuService {
       // print('MenuService: Item data: $item');
       print('MenuService: Stack trace: $stackTrace');
     }
+  }
+
+  /// Prints every menu item the Sieves POS cannot take for self-pickup,
+  /// carhop and in-restaurant orders, as reported by the backend
+  /// (`sieves_id` / `pos_orderable`). Delivery is never affected. Products
+  /// without mapping info are skipped: nothing is known about them.
+  void _logPosUnavailableItems() {
+    final List<String> lines = [];
+
+    for (final product in _allProducts) {
+      if (!product.hasPosMapping) continue;
+
+      final unlinkedModifiers = <String>[];
+      for (final group in product.modifierGroups) {
+        for (final modifier in group.modifiers) {
+          if (modifier.hasPosMapping && modifier.sievesId == null) {
+            unlinkedModifiers.add('${modifier.name} [${modifier.id}]');
+          }
+        }
+      }
+
+      final productBlocked = !product.isPosOrderable;
+      if (!productBlocked && unlinkedModifiers.isEmpty) continue;
+
+      final status = productBlocked
+          ? 'NOT ORDERABLE (no inventory link)'
+          : 'orderable, but some modifiers are unlinked';
+      lines.add('• ${product.name} [${product.uuid}] - $status');
+      for (final name in unlinkedModifiers) {
+        lines.add('    ↳ modifier not linked: $name');
+      }
+    }
+
+    print('\n======== POS MAPPING CHECK (pickup / carhop / in-restaurant) ========');
+    if (lines.isEmpty) {
+      print('All ${_allProducts.length} products are linked to Sieves inventory.');
+    } else {
+      print('${lines.length} issue(s) - set delever_id on the matching Sieves product:');
+      for (final line in lines) {
+        print(line);
+      }
+    }
+    print('======== END POS MAPPING CHECK ========\n');
   }
 
   void _createDefaultData() {

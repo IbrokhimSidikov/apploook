@@ -1019,7 +1019,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -2121,6 +2121,24 @@ class _CheckoutState extends State<Checkout> {
                                       !_isProcessing
                                   : false)
                   ? () async {
+                      // Self-pickup, carhop and in-restaurant orders go to the
+                      // Sieves POS, which only knows products linked to its
+                      // inventory. Stop here, before any payment or loyalty
+                      // hold, if a cart line cannot be built for it. Delivery
+                      // (index 0) goes to Delever and is never checked.
+                      if (_selectedIndex != 0) {
+                        final blocked = cartProvider.cartItems
+                            .where((item) =>
+                                item.product.name != 'Пакет' &&
+                                !item.isPosOrderable)
+                            .map((item) => item.displayName)
+                            .toList();
+                        if (blocked.isNotEmpty) {
+                          _showPosUnavailableDialog(blocked);
+                          return;
+                        }
+                      }
+
                       setState(() {
                         _isProcessing = true; // Start processing
                       });
@@ -2726,6 +2744,46 @@ class _CheckoutState extends State<Checkout> {
   // Deliberately untruncated: the dialog is sized to most of the screen and
   // scrolls, so long backend exceptions and stack traces are readable in full.
   // The text is selectable and there is a Copy button for pasting elsewhere.
+  /// Tells the customer which cart lines the Sieves POS cannot take for a
+  /// self-pickup / carhop / in-restaurant order.
+  void _showPosUnavailableDialog(List<String> itemNames) {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          l10n.posUnavailableTitle,
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(l10n.posUnavailableBody,
+                style: TextStyle(fontSize: 13.sp, height: 1.4)),
+            SizedBox(height: 12.h),
+            for (final name in itemNames)
+              Padding(
+                padding: EdgeInsets.only(bottom: 4.h),
+                child: Text('• $name',
+                    style: TextStyle(
+                        fontSize: 13.sp, fontWeight: FontWeight.w500)),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showOrderErrorDialog(Object error, [StackTrace? stackTrace]) {
     final details =
         stackTrace == null ? '$error' : '$error\n\nStack trace:\n$stackTrace';

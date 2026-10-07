@@ -7,6 +7,15 @@ class Modifier {
   final int maxAmount;
   final Map<String, dynamic>? serviceCodesUz;
 
+  /// Sieves inventory id for this Delever modifier, resolved by the backend.
+  /// Null when unknown. See [Product.sievesId].
+  final int? sievesId;
+
+  /// Whether the backend included mapping info for this modifier at all
+  /// (`sieves_id` key present). Older backends send none; the app must not
+  /// treat "no info" as "not mapped".
+  final bool hasPosMapping;
+
   Modifier({
     required this.id,
     required this.name,
@@ -14,6 +23,8 @@ class Modifier {
     required this.minAmount,
     required this.maxAmount,
     this.serviceCodesUz,
+    this.sievesId,
+    this.hasPosMapping = false,
   });
 
   /// Smallest quantity a selected modifier can have. `minAmount` of 0 means
@@ -35,7 +46,17 @@ class Modifier {
       minAmount: json['minAmount'] ?? 0,
       maxAmount: json['maxAmount'] ?? 1,
       serviceCodesUz: json['serviceCodesUz'],
+      sievesId: _asInt(json['sieves_id'] ?? json['sievesId']),
+      hasPosMapping:
+          json.containsKey('sieves_id') || json.containsKey('sievesId'),
     );
+  }
+
+  static int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 
   Map<String, dynamic> toJson() {
@@ -46,6 +67,7 @@ class Modifier {
       'minAmount': minAmount,
       'maxAmount': maxAmount,
       'serviceCodesUz': serviceCodesUz,
+      'sieves_id': sievesId,
     };
   }
 }

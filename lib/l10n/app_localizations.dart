@@ -97,6 +97,9 @@ class AppLocalizations {
       'orderSuccess': 'Order Success',
       'orderSuccessSubTitle': 'Your order has been placed successfully!',
       'carhopService': 'Please select your LOOOK Carhop store:',
+      'posUnavailableTitle': 'Not available for this order type',
+      'posUnavailableBody':
+          'These items can only be ordered for delivery right now. Remove them from the cart or choose delivery:',
       'carhopServiceBranchInfo': 'Park your car in the area of:',
       'carDetails': 'Your car details:',
       'selectRegion': 'Select Region',
@@ -369,6 +372,9 @@ class AppLocalizations {
       'orderSuccess': 'Buyurtma qabul qilindi',
       'orderSuccessSubTitle': 'Sizning buyurtmangiz qabul qilindi!',
       'carhopService': 'LOOOK Carhop filialini tanlang:',
+      'posUnavailableTitle': 'Bu buyurtma turi uchun mavjud emas',
+      'posUnavailableBody':
+          'Bu mahsulotlarga hozircha faqat yetkazib berish uchun buyurtma berish mumkin. Ularni savatdan olib tashlang yoki yetkazib berishni tanlang:',
       'carhopServiceBranchInfo': 'Avtomobilingizni quyidagi hududga qo\'ying:',
       'carDetails': 'Avtomobilingiz tafsilotlari:',
       'selectRegion': 'Shaxar tanlang',
@@ -642,6 +648,9 @@ class AppLocalizations {
       'orderSuccess': 'Заказ успешно оформлен',
       'orderSuccessSubTitle': 'Ваш заказ успешно оформлен!',
       'carhopService': 'Пожалуйста, выберите ваш LOOOK Carhop магазин:',
+      'posUnavailableTitle': 'Недоступно для этого типа заказа',
+      'posUnavailableBody':
+          'Эти товары сейчас можно заказать только с доставкой. Удалите их из корзины или выберите доставку:',
       'carhopServiceBranchInfo': 'Парковка автомобиля в районе:',
       'carDetails': 'Ваши данные автомобиля:',
       'selectRegion': 'Выберите Регион',
@@ -974,6 +983,10 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['notificationsPlaceholder']!;
   String get carhopService =>
       _localizedValues[locale.languageCode]!['carhopService']!;
+  String get posUnavailableTitle =>
+      _localizedValues[locale.languageCode]!['posUnavailableTitle']!;
+  String get posUnavailableBody =>
+      _localizedValues[locale.languageCode]!['posUnavailableBody']!;
   String get carhopServiceBranchInfo =>
       _localizedValues[locale.languageCode]!['carhopServiceBranchInfo']!;
   String get carDetails =>
