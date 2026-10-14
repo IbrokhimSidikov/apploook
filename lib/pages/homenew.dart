@@ -1,14 +1,11 @@
-import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:apploook/pages/details.dart';
-import 'package:apploook/pages/profile.dart';
 import 'package:apploook/widget/banner_item.dart';
 import 'package:apploook/widget/cached_product_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/locale_provider.dart';
@@ -73,6 +70,10 @@ class Product {
   /// carhop, in-restaurant)? Null when the backend did not say.
   final bool? posOrderable;
 
+  /// Crystals earned per unit, when the backend sets it. Null means "use the
+  /// price-based fallback" (see `CrystalReward`).
+  final int? crystalReward;
+
   Product({
     required this.name,
     required this.id,
@@ -93,6 +94,7 @@ class Product {
     this.sievesId,
     this.hasPosMapping = false,
     this.posOrderable,
+    this.crystalReward,
   });
 
   /// True when a self-pickup / carhop / in-restaurant order of this product
@@ -176,6 +178,8 @@ class Product {
       posOrderable: json['pos_orderable'] is bool
           ? json['pos_orderable'] as bool
           : (json['posOrderable'] is bool ? json['posOrderable'] as bool : null),
+      crystalReward: parseSievesId(
+          json['crystal_reward'] ?? json['crystalReward'] ?? json['crystals']),
     );
   }
 
@@ -530,20 +534,14 @@ class _HomeNewState extends State<HomeNew>
     }
   }
 
-  // Define scaffoldKey as a class field
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   @override
   Widget build(BuildContext context) {
-    final cartProvider = Provider.of<CartProvider>(context);
+    // The tab shell inflates MediaQuery's bottom padding to cover the
+    // floating glass nav bar, so this keeps the last product clear of it.
+    final double bottomInset = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      key: _scaffoldKey,
       backgroundColor: Colors.white,
-      drawer: Drawer(
-        width: MediaQuery.of(context).size.width * 0.85,
-        child: const Profile(),
-      ),
       body: Stack(
         children: [
           CustomScrollView(
@@ -554,18 +552,10 @@ class _HomeNewState extends State<HomeNew>
                 floating: false,
                 pinned: true,
                 backgroundColor: const Color(0xFFF1F2F7),
-                leading: GestureDetector(
-                  onTap: () {
-                    _scaffoldKey.currentState!.openDrawer();
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.all(10.r),
-                    child: SvgPicture.asset('images/profileIconHome.svg'),
-                  ),
-                ),
-                // Cashback balance sits right after the profile icon; the
-                // title slot is otherwise unused on this screen.
-                titleSpacing: 0,
+                // Profile moved to the bottom tab bar, so nothing leads the
+                // app bar; the cashback balance takes the title slot.
+                automaticallyImplyLeading: false,
+                titleSpacing: 16.w,
                 centerTitle: false,
                 title: const Align(
                   alignment: Alignment.centerLeft,
@@ -906,96 +896,9 @@ class _HomeNewState extends State<HomeNew>
                         ),
                 ),
               ),
+              // Keep the tail of the menu above the floating tab bar.
+              SliverToBoxAdapter(child: SizedBox(height: bottomInset + 16.h)),
             ],
-          ),
-          // Cart Button
-          Positioned(
-            bottom: 50.h,
-            left: 25.w,
-            child: cartProvider.showQuantity() > 0
-                ? TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0.8, end: 1.0),
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.elasticOut,
-                    builder: (context, value, child) {
-                      return Transform.scale(
-                        scale: value,
-                        child: child,
-                      );
-                    },
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/cart');
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEC700),
-                          borderRadius: BorderRadius.circular(50.r),
-                          border: Border.all(color: Colors.white),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 20.w, vertical: 10.h),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Stack(
-                              alignment: Alignment.topLeft,
-                              children: [
-                                Icon(
-                                  Icons.shopping_bag_outlined,
-                                  color: Colors.black,
-                                  size: 28.w,
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  top: -2,
-                                  child: Container(
-                                    padding: EdgeInsets.all(4.r),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${cartProvider.showQuantity()}',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10.sp,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 12.w),
-                            Text(
-                              AppLocalizations.of(context).cart,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
-                : const SizedBox(),
           ),
           // Reorder FAB (right side, mirrors the cart pill on the left)
           // Positioned(

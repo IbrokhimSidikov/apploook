@@ -52,6 +52,34 @@ class AppLocalizations {
       'selectRequiredOptions': 'Please select the required options',
       // Cart page
       'cart': 'Cart',
+      // Bottom navigation
+      'home': 'Home',
+      'shop': 'Shop',
+      'profile': 'Profile',
+      'comingSoon': 'Coming soon',
+      'crystalShopTeaser':
+          'We are putting the finishing touches on the Crystal Shop. Check back soon.',
+      'crystalRewardIntro': 'Buy this product and get',
+      'crystalRewardAmount': '+{n} {crystals}!',
+      'crystalRewardCompact': '+{n} {crystals}',
+      // Crystal shop
+      'crystalShopSubtitle': 'Turn your crystals into treats',
+      'rankings': 'Rankings',
+      'yourCrystals': 'Your crystals',
+      'redeemWithCrystals': 'Redeem with crystals',
+      'needMoreCrystals': 'Need {n} more',
+      'spendCrystals': 'Spend {n} {crystals}',
+      'balanceAfter': 'Balance after',
+      'redeemSuccessTitle': 'Yours!',
+      'redeemSuccessBody': 'Show this code at the counter to collect your reward.',
+      'redeemFailed': 'Could not redeem. Please try again.',
+      'shopEmpty': 'Rewards are on their way. Keep collecting crystals!',
+      'topCollectors': 'Top collectors',
+      'you': 'You',
+      'yourRank': 'Your rank',
+      'rankingsEmpty': 'No rankings yet. Be the first to collect crystals!',
+      'retry': 'Retry',
+      'done': 'Done',
       'items': 'items',
       'proceedToCheckout': 'Proceed to checkout',
       // Sign-in page
@@ -327,6 +355,34 @@ class AppLocalizations {
       'selectRequiredOptions': 'Iltimos, majburiy variantlarni tanlang',
       // Cart page
       'cart': 'Savatcha',
+      // Bottom navigation
+      'home': 'Asosiy',
+      'shop': 'Do\'kon',
+      'profile': 'Profil',
+      'comingSoon': 'Tez kunda',
+      'crystalShopTeaser':
+          'Crystal Shop ustida ishlayapmiz. Tez orada qaytib keling.',
+      'crystalRewardIntro': 'Bu mahsulotni xarid qilsangiz',
+      'crystalRewardAmount': '+{n} {crystals} olasiz!',
+      'crystalRewardCompact': '+{n} {crystals}',
+      // Crystal shop
+      'crystalShopSubtitle': 'Kristallaringizni sovg\'alarga almashtiring',
+      'rankings': 'Reyting',
+      'yourCrystals': 'Kristallaringiz',
+      'redeemWithCrystals': 'Kristallarga oling',
+      'needMoreCrystals': 'Yana {n} ta kerak',
+      'spendCrystals': '{n} {crystals} sarflash',
+      'balanceAfter': 'Qoladi',
+      'redeemSuccessTitle': 'Sizniki!',
+      'redeemSuccessBody': 'Sovg\'ani olish uchun bu kodni kassada ko\'rsating.',
+      'redeemFailed': 'Almashtirib bo\'lmadi. Qayta urinib ko\'ring.',
+      'shopEmpty': 'Sovg\'alar yo\'lda. Kristall to\'plashda davom eting!',
+      'topCollectors': 'Eng ko\'p to\'plaganlar',
+      'you': 'Siz',
+      'yourRank': 'Sizning o\'rningiz',
+      'rankingsEmpty': 'Reyting hali yo\'q. Birinchi bo\'lib kristall to\'plang!',
+      'retry': 'Qayta urinish',
+      'done': 'Tayyor',
       'items': 'dona',
       'proceedToCheckout': 'To\'lovga o\'tish',
       // Sign-in page
@@ -603,6 +659,34 @@ class AppLocalizations {
       'selectRequiredOptions': 'Пожалуйста, выберите обязательные опции',
       // Cart page
       'cart': 'Корзина',
+      // Bottom navigation
+      'home': 'Главная',
+      'shop': 'Магазин',
+      'profile': 'Профиль',
+      'comingSoon': 'Скоро',
+      'crystalShopTeaser':
+          'Мы готовим Crystal Shop. Загляните чуть позже.',
+      'crystalRewardIntro': 'Купите этот товар и получите',
+      'crystalRewardAmount': '+{n} {crystals}!',
+      'crystalRewardCompact': '+{n} {crystals}',
+      // Crystal shop
+      'crystalShopSubtitle': 'Обменяйте кристаллы на подарки',
+      'rankings': 'Рейтинг',
+      'yourCrystals': 'Ваши кристаллы',
+      'redeemWithCrystals': 'За кристаллы',
+      'needMoreCrystals': 'Нужно ещё {n}',
+      'spendCrystals': 'Потратить {n} {crystals}',
+      'balanceAfter': 'Останется',
+      'redeemSuccessTitle': 'Готово!',
+      'redeemSuccessBody': 'Покажите этот код на кассе, чтобы получить награду.',
+      'redeemFailed': 'Не удалось обменять. Попробуйте ещё раз.',
+      'shopEmpty': 'Награды уже в пути. Продолжайте собирать кристаллы!',
+      'topCollectors': 'Топ коллекционеров',
+      'you': 'Вы',
+      'yourRank': 'Ваше место',
+      'rankingsEmpty': 'Рейтинга пока нет. Станьте первым!',
+      'retry': 'Повторить',
+      'done': 'Готово',
       'items': 'элементы',
       'proceedToCheckout': 'Перейти к оформлению',
       // Sign-in page
@@ -904,6 +988,75 @@ class AppLocalizations {
 
   // Cart page
   String get cart => _localizedValues[locale.languageCode]!['cart']!;
+
+  // Bottom navigation
+  String get home => _localizedValues[locale.languageCode]!['home']!;
+  String get shop => _localizedValues[locale.languageCode]!['shop']!;
+  String get profile => _localizedValues[locale.languageCode]!['profile']!;
+  String get comingSoon =>
+      _localizedValues[locale.languageCode]!['comingSoon']!;
+  String get crystalShopTeaser =>
+      _localizedValues[locale.languageCode]!['crystalShopTeaser']!;
+
+  // Crystal rewards
+  String get crystalRewardIntro =>
+      _localizedValues[locale.languageCode]!['crystalRewardIntro']!;
+  String crystalRewardAmount(int n) => _fillCrystals('crystalRewardAmount', n);
+  String crystalRewardCompact(int n) =>
+      _fillCrystals('crystalRewardCompact', n);
+
+  // Crystal shop
+  String get crystalShopSubtitle =>
+      _localizedValues[locale.languageCode]!['crystalShopSubtitle']!;
+  String get rankings => _localizedValues[locale.languageCode]!['rankings']!;
+  String get yourCrystals =>
+      _localizedValues[locale.languageCode]!['yourCrystals']!;
+  String get redeemWithCrystals =>
+      _localizedValues[locale.languageCode]!['redeemWithCrystals']!;
+  String needMoreCrystals(int n) =>
+      _localizedValues[locale.languageCode]!['needMoreCrystals']!
+          .replaceAll('{n}', '$n');
+  String spendCrystals(int n) => _fillCrystals('spendCrystals', n);
+  String get balanceAfter =>
+      _localizedValues[locale.languageCode]!['balanceAfter']!;
+  String get redeemSuccessTitle =>
+      _localizedValues[locale.languageCode]!['redeemSuccessTitle']!;
+  String get redeemSuccessBody =>
+      _localizedValues[locale.languageCode]!['redeemSuccessBody']!;
+  String get redeemFailed =>
+      _localizedValues[locale.languageCode]!['redeemFailed']!;
+  String get shopEmpty => _localizedValues[locale.languageCode]!['shopEmpty']!;
+  String get topCollectors =>
+      _localizedValues[locale.languageCode]!['topCollectors']!;
+  String get you => _localizedValues[locale.languageCode]!['you']!;
+  String get yourRank => _localizedValues[locale.languageCode]!['yourRank']!;
+  String get rankingsEmpty =>
+      _localizedValues[locale.languageCode]!['rankingsEmpty']!;
+  String get retry => _localizedValues[locale.languageCode]!['retry']!;
+  String get done => _localizedValues[locale.languageCode]!['done']!;
+
+  String _fillCrystals(String key, int n) => _localizedValues[
+          locale.languageCode]![key]!
+      .replaceAll('{n}', '$n')
+      .replaceAll('{crystals}', crystalWord(n));
+
+  /// The word "crystal" declined for [n], per language.
+  String crystalWord(int n) {
+    switch (locale.languageCode) {
+      case 'ru':
+        final mod10 = n % 10;
+        final mod100 = n % 100;
+        if (mod10 == 1 && mod100 != 11) return 'кристалл';
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+          return 'кристалла';
+        }
+        return 'кристаллов';
+      case 'uz':
+        return 'kristall';
+      default:
+        return n == 1 ? 'crystal' : 'crystals';
+    }
+  }
   String get items => _localizedValues[locale.languageCode]!['items']!;
   String get proceedToCheckout =>
       _localizedValues[locale.languageCode]!['proceedToCheckout']!;

@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:apploook/models/crystal_reward.dart';
 import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/product_configuration_controller.dart';
 import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/widget/modifier_group_widget.dart';
+import 'package:apploook/widgets/crystal_reward_card.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -369,6 +371,17 @@ class _DetailsState extends State<Details> {
     );
   }
 
+  /// Crystal promo under the description. Scales with the quantity stepper
+  /// so the figure is always what this order would actually earn.
+  Widget _buildCrystalReward() {
+    return Padding(
+      padding: EdgeInsets.only(top: 18.h),
+      child: CrystalRewardCard(
+        crystals: CrystalReward.forQuantity(_product, _configuration.quantity),
+      ),
+    );
+  }
+
   Widget _buildModifierGroups() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -576,6 +589,7 @@ class _DetailsState extends State<Details> {
                 delegate: SliverChildListDelegate([
                   _buildHeader(),
                   _buildDescription(),
+                  _buildCrystalReward(),
                   // Modifier Groups Section
                   if (_configuration.hasModifiers) _buildModifierGroups(),
                 ]),

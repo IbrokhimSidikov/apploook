@@ -13,7 +13,7 @@ import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/services/app_location_service.dart';
-import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/app_shell.dart';
 import 'package:apploook/widgets/location_permission_dialog.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -488,7 +488,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const HomeNew(),
+        builder: (context) => const AppShell(),
       ),
     );
   }

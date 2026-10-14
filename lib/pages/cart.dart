@@ -1,7 +1,6 @@
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/category-model.dart';
-import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,10 +9,30 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/crystal_reward.dart';
+import '../widgets/crystal_reward_card.dart';
 import '../widgets/recommended_items_section.dart';
 
 class Cart extends StatefulWidget {
-  const Cart({Key? key}) : super(key: key);
+  /// [embedded] is true when the cart lives inside the bottom tab bar, where
+  /// there is nothing to go back to, so the back arrow is hidden.
+  const Cart({Key? key, this.embedded = false}) : super(key: key);
+
+  final bool embedded;
+
+  /// Adds the mandatory package item when the cart has products. Exposed so
+  /// the tab shell can re-run it each time the cart tab is opened, matching
+  /// the old behaviour where the cart page was rebuilt on every visit.
+  static Future<void> ensureMandatoryPackage(BuildContext context) async {
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    try {
+      final menuService = MenuService();
+      await menuService.initialize();
+      cartProvider.ensureMandatoryPackage(menuService.allProducts);
+    } catch (e) {
+      print('Error ensuring mandatory package: $e');
+    }
+  }
 
   @override
   State<Cart> createState() => _CartState();
@@ -36,21 +55,7 @@ class _CartState extends State<Cart> {
     });
   }
 
-  void _ensureMandatoryPackage() async {
-    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-
-    // Get all products from MenuService
-    try {
-      final menuService = MenuService();
-      await menuService.initialize();
-      final allProducts = menuService.allProducts;
-
-      // Ensure mandatory package is added if cart has items
-      cartProvider.ensureMandatoryPackage(allProducts);
-    } catch (e) {
-      print('Error ensuring mandatory package: $e');
-    }
-  }
+  void _ensureMandatoryPackage() => Cart.ensureMandatoryPackage(context);
 
   Future<bool> _isUserSignedIn() async {
     final prefs = await SharedPreferences.getInstance();
@@ -96,18 +101,23 @@ class _CartState extends State<Cart> {
         ),
         elevation: 0.0,
         centerTitle: true,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeNew()),
-            );
-          },
-          child: Container(
-            margin: EdgeInsets.only(left: 10.w),
-            child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
-          ),
-        ),
+        automaticallyImplyLeading: false,
+        leading: widget.embedded
+            ? null
+            : GestureDetector(
+                onTap: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, '/homeNew', (route) => false);
+                  }
+                },
+                child: Container(
+                  margin: EdgeInsets.only(left: 10.w),
+                  child: SvgPicture.asset('images/keyboard_arrow_left.svg'),
+                ),
+              ),
         actions: [
           Container(
             margin: EdgeInsets.only(right: 10.w),
@@ -320,6 +330,17 @@ class _CartState extends State<Cart> {
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
+                                    // The bag earns nothing; every real
+                                    // product shows what this line earns.
+                                    if (!isMandatoryPackage) ...[
+                                      SizedBox(height: 6.h),
+                                      CrystalRewardChip(
+                                        crystals: CrystalReward.forQuantity(
+                                          cartItem.product,
+                                          cartItem.quantity,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

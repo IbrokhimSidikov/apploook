@@ -24,6 +24,9 @@ class LoyaltyService {
   static const String _staticToken =
       'd22fc27d96a51b45f2b44adc1ad482331a55783c9dd4e89bb919bfba0c2bb24c';
 
+  /// Exposed for sibling v3 clients (crystal shop) that share the token.
+  static const String staticToken = _staticToken;
+
   static const String _tokenKey = 'loyalty_token';
   static const String _tokenExpiryKey = 'loyalty_token_expiry';
   static const String _deviceIdKey = 'loyalty_device_id';
@@ -57,6 +60,10 @@ class LoyaltyService {
   }
 
   Future<bool> hasSession() async => (await _readToken()) != null;
+
+  /// The live session token, or null when there is none. For sibling v3
+  /// clients that authenticate the same way.
+  Future<String?> currentToken() => _readToken();
 
   /// True when the customer is signed in to the app but holds no loyalty
   /// session yet.

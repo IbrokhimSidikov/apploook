@@ -2,18 +2,23 @@ import 'package:apploook/cart_provider.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../constants/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/locale_provider.dart';
-import '../services/auth_service.dart'; // Import AuthService
+import '../services/auth_service.dart';
 import '../services/loyalty_service.dart';
 import '../providers/loyalty_provider.dart';
 import '../widgets/loyalty_profile_card.dart';
 import '../widgets/announcement_story_dialog.dart';
 import '../widgets/confirm_action_sheet.dart';
 
+/// Profile tab. Used to be the home screen's side drawer; it is now a full
+/// page behind the fourth item of the bottom tab bar, so the layout scrolls
+/// instead of relying on fixed offsets.
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -22,7 +27,6 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  final String phoneNumber = '71-207-207-0';
   String clientFirstName = '';
   String clientPhoneNumber = '';
 
@@ -57,6 +61,7 @@ class _ProfileState extends State<Profile> {
 
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       clientPhoneNumber = prefs.getString('phoneNumber') ?? 'No number';
     });
@@ -64,6 +69,7 @@ class _ProfileState extends State<Profile> {
 
   Future<void> _loadCustomerName() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     setState(() {
       clientFirstName = prefs.getString('firstName') ?? 'Anonymous';
     });
@@ -169,271 +175,355 @@ class _ProfileState extends State<Profile> {
       },
     );
   }
+
+  /// Shows a blocking spinner dialog while an account action runs.
+  void _showProgressDialog(String label, {Color? color}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.r),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 30.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    color ?? Theme.of(context).primaryColor,
+                  ),
+                ),
+                20.verticalSpace,
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _logout() async {
+    final l = AppLocalizations.of(context);
+    final cartProvider = context.read<CartProvider>();
+
+    bool? confirmLogout = await showConfirmActionSheet(
+      context,
+      icon: Icons.logout_rounded,
+      title: l.logout,
+      message: l.logoutConfirmation,
+      confirmLabel: l.confirm,
+      cancelLabel: l.cancel,
+    );
+    if (confirmLogout != true || !mounted) return;
+
+    _showProgressDialog(l.loggingOut);
+
+    try {
+      await _clearUserData();
+      cartProvider.clearCart();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/onboard',
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error logging out: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final l = AppLocalizations.of(context);
+    final cartProvider = context.read<CartProvider>();
+
+    bool? confirmDelete = await showConfirmActionSheet(
+      context,
+      icon: Icons.delete_outline_rounded,
+      title: l.confirmDelete,
+      message: l.confirmDialog,
+      confirmLabel: l.delete,
+      cancelLabel: l.cancel,
+      destructive: true,
+    );
+    if (confirmDelete != true || !mounted) return;
+
+    _showProgressDialog('Deleting account...', color: Colors.red);
+
+    try {
+      await _clearUserData();
+      cartProvider.clearCart();
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/onboard',
+        (route) => false,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error deleting account: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    var cartProvider = Provider.of<CartProvider>(context);
+    final l = AppLocalizations.of(context);
+    // Inflated by the tab shell so the list clears the floating tab bar.
+    final double bottomInset = MediaQuery.of(context).padding.bottom;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 85.h,
-            left: 25.w,
-            child: Row(
+      body: SafeArea(
+        bottom: false,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, bottomInset + 24.h),
+          children: [
+            Text(
+              l.profile,
+              style: TextStyle(
+                fontSize: 28.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.cx0B0B0B,
+              ),
+            ),
+            SizedBox(height: 16.h),
+
+            // ── Customer header ───────────────────────────────────────────
+            Row(
               children: [
                 Container(
-                  padding:
-                    EdgeInsets.only(left: 5.w, top: 5.h),
+                  width: 56.w,
+                  height: 56.w,
+                  padding: EdgeInsets.all(4.w),
                   decoration: const BoxDecoration(
+                    color: Color(0xFFF1F2F7),
                     shape: BoxShape.circle,
-                    //color: Color.fromARGB(255, 255, 215, 59),
                   ),
-                  child: Image.asset(
-                    'images/profile_icon.png', // Path to your SVG file
-                    width: 50.w,
-                    height: 50.h,
-                    // Optional: apply color if needed
-                  ),
+                  child: Image.asset('images/profile_icon.png'),
                 ),
-                20.horizontalSpace,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      clientFirstName,
-                      style: TextStyle(
-                          fontSize: 20.sp, fontWeight: FontWeight.w700),
-                    ),
-                    Text(
-                      clientPhoneNumber,
-                      style: TextStyle(
-                          fontSize: 14.sp, fontWeight: FontWeight.w300),
-                    ),
-                  ],
+                16.horizontalSpace,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        clientFirstName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        clientPhoneNumber,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          Positioned(
-            top: 145.h,
-            left: 25.w,
-            right: 25.w,
-            child: const LoyaltyProfileCard(),
-          ),
-          // Pushed down to clear the cashback card. This Stack is fixed
-          // position and does not scroll, so the offsets have to be kept in
-          // step by hand; the menu still ends around 615h of the 844h design.
-          Positioned(
-            top: 265.h,
-            left: 40.w,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(height: 20.h),
+
+            const LoyaltyProfileCard(),
+            SizedBox(height: 20.h),
+
+            // ── Main menu ─────────────────────────────────────────────────
+            _ProfileSection(
               children: [
-                40.verticalSpace,
                 ProfileMenuItem(
-                  icon: Icons.wallet_giftcard_outlined,
-                  title: AppLocalizations.of(context).orderHistory,
+                  icon: Icons.receipt_long_outlined,
+                  title: l.orderHistory,
                   route: '/unifiedOrderTracking',
                 ),
-                40.verticalSpace,
                 ProfileMenuItem(
                   icon: Icons.location_on_outlined,
-                  title: AppLocalizations.of(context).branches,
+                  title: l.branches,
                   route: '/branches',
                 ),
-                40.verticalSpace,
                 const LanguageMenuItem(),
-                if (kDebugMode) ...[
-                  40.verticalSpace,
-                  GestureDetector(
+                if (kDebugMode)
+                  _ProfileTile(
+                    icon: Icons.campaign_outlined,
+                    title: 'Announcement (debug)',
                     onTap: () => _showAnnouncementDebugSheet(context),
-                    child: Row(
-                      children: [
-                        Icon(Icons.campaign_outlined, size: 24.sp),
-                        10.horizontalSpace,
-                        Text(
-                          'Announcement (debug)',
-                          style: TextStyle(fontSize: 18.sp),
-                        ),
-                      ],
-                    ),
                   ),
-                ],
-                40.verticalSpace,
-                GestureDetector(
-                  onTap: () async {
-                    bool? confirmLogout = await showConfirmActionSheet(
-                      context,
-                      icon: Icons.logout_rounded,
-                      title: AppLocalizations.of(context).logout,
-                      message: AppLocalizations.of(context).logoutConfirmation,
-                      confirmLabel: AppLocalizations.of(context).confirm,
-                      cancelLabel: AppLocalizations.of(context).cancel,
-                    );
+              ],
+            ),
+            SizedBox(height: 16.h),
 
-                    if (confirmLogout == true) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.r),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: 20.h,
-                                horizontal: 30.w,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).primaryColor,
-                                    ),
-                                  ),
-                                  20.verticalSpace,
-                                  Text(
-                                    AppLocalizations.of(context).loggingOut,
-                                    style: TextStyle(
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-
-                      try {
-                        await _clearUserData();
-                        cartProvider.clearCart();
-                        Navigator.of(context).pop();
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/onboard',
-                          (route) => false,
-                        );
-                      } catch (e) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error logging out: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, size: 24.sp),
-                      10.horizontalSpace,
-                      Text(
-                        AppLocalizations.of(context).logout,
-                        style: TextStyle(fontSize: 18.sp),
-                      ),
-                    ],
-                  ),
+            // ── Account actions ───────────────────────────────────────────
+            _ProfileSection(
+              children: [
+                _ProfileTile(
+                  icon: Icons.logout_rounded,
+                  title: l.logout,
+                  onTap: _logout,
                 ),
-                40.verticalSpace,
-                GestureDetector(
-                  onTap: () async {
-                    bool? confirmDelete = await showConfirmActionSheet(
-                      context,
-                      icon: Icons.delete_outline_rounded,
-                      title: AppLocalizations.of(context).confirmDelete,
-                      message: AppLocalizations.of(context).confirmDialog,
-                      confirmLabel: AppLocalizations.of(context).delete,
-                      cancelLabel: AppLocalizations.of(context).cancel,
-                      destructive: true,
-                    );
-
-                    if (confirmDelete == true) {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext context) {
-                          return Dialog(
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 20,
-                                horizontal: 30,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.red,
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Text(
-                                    'Deleting account...',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-
-                      try {
-                        await _clearUserData();
-                        cartProvider.clearCart();
-                        Navigator.of(context).pop();
-                        Navigator.pushNamedAndRemoveUntil(
-                          context,
-                          '/onboard',
-                          (route) => false,
-                        );
-                      } catch (e) {
-                        Navigator.of(context).pop();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error deleting account: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete, size: 24.sp),
-                      10.horizontalSpace,
-                      Text(
-                        AppLocalizations.of(context).deleteAccount,
-                        style: TextStyle(fontSize: 18.sp),
-                      ),
-                    ],
-                  ),
+                _ProfileTile(
+                  icon: Icons.delete_outline_rounded,
+                  title: l.deleteAccount,
+                  color: const Color(0xFFD32F2F),
+                  onTap: _deleteAccount,
                 ),
               ],
             ),
-          )
-        ],
-      ),
-      bottomNavigationBar: const BottomAppBar(
-        color: Colors.white,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [Text('Version 3.3.0')],
+            SizedBox(height: 24.h),
+
+            const _VersionFooter(),
+          ],
         ),
       ),
+    );
+  }
+}
+
+/// Rounded card that groups a run of [_ProfileTile]s with thin dividers.
+class _ProfileSection extends StatelessWidget {
+  const _ProfileSection({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: const Color(0xFFEAEAEA)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0)
+              Divider(
+                height: 1,
+                thickness: 1,
+                indent: 60.w,
+                color: const Color(0xFFF0F0F0),
+              ),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A single row in a [_ProfileSection]: leading icon chip, title, and either
+/// a custom [trailing] widget or a chevron.
+class _ProfileTile extends StatelessWidget {
+  const _ProfileTile({
+    required this.icon,
+    required this.title,
+    this.onTap,
+    this.trailing,
+    this.color,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback? onTap;
+  final Widget? trailing;
+
+  /// Tints icon and title; used for the destructive delete row.
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color foreground = color ?? AppColors.cx0B0B0B;
+
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        child: Row(
+          children: [
+            Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: color != null
+                    ? color!.withOpacity(0.08)
+                    : const Color(0xFFF1F2F7),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(icon, size: 20.sp, color: foreground),
+            ),
+            12.horizontalSpace,
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: foreground,
+                ),
+              ),
+            ),
+            trailing ??
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22.sp,
+                  color: Colors.grey[400],
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _VersionFooter extends StatelessWidget {
+  const _VersionFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final info = snapshot.data;
+        final label = info == null
+            ? ''
+            : 'Version ${info.version} (${info.buildNumber})';
+        return Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey[500]),
+        );
+      },
     );
   }
 }
@@ -449,13 +539,12 @@ class _LanguageOption {
 const List<_LanguageOption> _kLanguages = [
   _LanguageOption('uz', '\u{1F1FA}\u{1F1FF}', "O'zbekcha"),
   _LanguageOption('en', '\u{1F1EC}\u{1F1E7}', 'English'),
-  _LanguageOption('ru', '\u{1F1F7}\u{1F1FA}', '\u0420\u0443\u0441\u0441\u043A\u0438\u0439'),
+  _LanguageOption('ru', '\u{1F1F7}\u{1F1FA}', 'Русский'),
 ];
 
-/// Language picker, styled to sit in the profile menu alongside
-/// [ProfileMenuItem]. Moved here from the home app bar, which had run out of
-/// room for it. The selection is persisted under `selected_language` so it
-/// survives a restart, same key the app has always used.
+/// Language picker row for the profile menu. The selection is persisted
+/// under `selected_language` so it survives a restart, same key the app has
+/// always used.
 class LanguageMenuItem extends StatelessWidget {
   const LanguageMenuItem({super.key});
 
@@ -464,7 +553,7 @@ class LanguageMenuItem extends StatelessWidget {
     final currentCode = context.watch<LocaleProvider>().locale.languageCode;
 
     return PopupMenuButton<String>(
-      offset: Offset(0, 30.h),
+      offset: Offset(0, 48.h),
       color: Colors.white,
       tooltip: AppLocalizations.of(context).chooseLanguage,
       shape: RoundedRectangleBorder(
@@ -493,43 +582,36 @@ class LanguageMenuItem extends StatelessWidget {
             ),
           ),
       ],
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.language_outlined, size: 24.sp),
-          10.horizontalSpace,
-          Text(
-            AppLocalizations.of(context).language,
-            style: TextStyle(fontSize: 18.sp),
+      child: _ProfileTile(
+        icon: Icons.language_outlined,
+        title: AppLocalizations.of(context).language,
+        trailing: Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: AppColors.cxFEC700,
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          12.horizontalSpace,
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFEC700),
-              borderRadius: BorderRadius.circular(6.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  currentCode.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                currentCode.toUpperCase(),
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.sp,
                 ),
-                const Icon(Icons.arrow_drop_down, color: Colors.black),
-              ],
-            ),
+              ),
+              const Icon(Icons.arrow_drop_down, color: Colors.black, size: 20),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
+/// Menu row that pushes a named route when tapped.
 class ProfileMenuItem extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -544,18 +626,10 @@ class ProfileMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return _ProfileTile(
+      icon: icon,
+      title: title,
       onTap: () => Navigator.pushNamed(context, route),
-      child: Row(
-        children: [
-          Icon(icon, size: 24.sp),
-          10.horizontalSpace,
-          Text(
-            title,
-            style: TextStyle(fontSize: 18.sp),
-          ),
-        ],
-      ),
     );
   }
 }

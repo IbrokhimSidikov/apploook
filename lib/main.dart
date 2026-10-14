@@ -8,7 +8,8 @@ import 'package:apploook/pages/wallet.dart';
 import 'package:apploook/pages/cart.dart';
 import 'package:apploook/pages/checkout.dart';
 import 'package:apploook/splash_screen.dart';
-import 'package:apploook/pages/homenew.dart';
+import 'package:apploook/pages/app_shell.dart';
+import 'package:apploook/features/crystal_shop/application/crystal_shop_controller.dart';
 import 'package:apploook/pages/notification.dart';
 import 'package:apploook/pages/onboard.dart';
 import 'package:apploook/pages/order_tracking_page.dart';
@@ -127,6 +128,7 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: notificationProvider),
         ChangeNotifierProvider(create: (_) => ReorderController()),
+        ChangeNotifierProvider(create: (_) => CrystalShopController()),
       ],
       // Show elegant branded splash screen while initializing
       child: _isLoading 
@@ -255,7 +257,7 @@ class _MyAppState extends State<MyApp> {
           ],
           initialRoute: _initialRoute,
           routes: {
-            '/homeNew': (context) => const HomeNew(),
+            '/homeNew': (context) => const AppShell(),
             '/signin': (context) => const SignIn(),
             '/cart': (context) => const Cart(),
             '/checkout': (context) => Checkout(),
