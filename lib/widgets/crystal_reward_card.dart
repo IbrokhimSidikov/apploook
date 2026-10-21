@@ -131,3 +131,40 @@ class CrystalRewardChip extends StatelessWidget {
     );
   }
 }
+
+/// Small "+N" crystal badge shown beside the price tag on a menu card.
+/// Same height as the price pill so the two read as one row.
+class CrystalPointsBadge extends StatelessWidget {
+  const CrystalPointsBadge({super.key, required this.crystals});
+
+  final int crystals;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(7.w, 5.h, 9.w, 5.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3C4),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: const Color(0xFFFFE08A)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(_kCrystalAsset, width: 13.w, height: 13.w),
+          SizedBox(width: 3.w),
+          Text(
+            '+$crystals',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+              color: _kAmber,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -804,8 +804,8 @@ class MenuService {
         hasPosMapping: item.containsKey('sieves_id'),
         posOrderable:
             item['pos_orderable'] is bool ? item['pos_orderable'] as bool : null,
-        crystalReward: Product.parseSievesId(
-            item['crystal_reward'] ?? item['crystalReward'] ?? item['crystals']),
+        crystalPoints: Product.parseSievesId(item['crystal_points']),
+        isCrystalOnly: item['is_crystal_only'] == true,
       );
 
       // print(
@@ -939,7 +939,12 @@ class MenuService {
               serviceCodesUz: product.serviceCodesUz,
               images: product.images,
               isPinned: true,
-              crystalReward: product.crystalReward,
+              outOfStock: product.outOfStock,
+              sievesId: product.sievesId,
+              hasPosMapping: product.hasPosMapping,
+              posOrderable: product.posOrderable,
+              crystalPoints: product.crystalPoints,
+              isCrystalOnly: product.isCrystalOnly,
             );
             
             // Replace the product in the list

@@ -374,11 +374,12 @@ class _DetailsState extends State<Details> {
   /// Crystal promo under the description. Scales with the quantity stepper
   /// so the figure is always what this order would actually earn.
   Widget _buildCrystalReward() {
+    final crystals =
+        CrystalReward.forQuantity(_product, _configuration.quantity);
+    if (crystals <= 0) return const SizedBox.shrink();
     return Padding(
       padding: EdgeInsets.only(top: 18.h),
-      child: CrystalRewardCard(
-        crystals: CrystalReward.forQuantity(_product, _configuration.quantity),
-      ),
+      child: CrystalRewardCard(crystals: crystals),
     );
   }
 

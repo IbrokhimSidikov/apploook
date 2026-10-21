@@ -4,20 +4,16 @@ import '../pages/homenew.dart' show Product;
 
 /// How many crystals a product earns when ordered.
 ///
-/// The backend can set the figure per product (`crystal_reward`). When it
-/// does not, the fallback is price-based: one crystal per
-/// [uzsPerCrystal] UZS of the product's base price, never below [minimum].
-/// The rule lives here, in one place, so the details page and the cart row
-/// always agree.
+/// The figure comes from the backend (`crystal_points` on each v3 branch
+/// menu item). Products without one earn nothing, and callers hide the
+/// promo when the result is zero. The rule lives here, in one place, so the
+/// menu card, the details page and the cart row always agree.
 abstract class CrystalReward {
-  static const int uzsPerCrystal = 5000;
-  static const int minimum = 1;
-
   /// Crystals for one unit of [product].
   static int perUnit(Product product) {
-    final backend = product.crystalReward;
-    if (backend != null && backend >= 0) return backend;
-    return math.max(minimum, product.price ~/ uzsPerCrystal);
+    final points = product.crystalPoints;
+    if (points == null || points < 0) return 0;
+    return points;
   }
 
   /// Crystals for [quantity] units of [product].

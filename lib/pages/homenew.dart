@@ -27,6 +27,8 @@ import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../widgets/announcement_story_dialog.dart';
 import '../widgets/cashback_badge.dart';
+import '../models/crystal_reward.dart';
+import '../widgets/crystal_reward_card.dart';
 import '../features/reorder/application/reorder_controller.dart';
 import '../features/reorder/presentation/reorder_list_sheet.dart';
 import '../features/reorder/presentation/reorder_fab.dart';
@@ -70,9 +72,13 @@ class Product {
   /// carhop, in-restaurant)? Null when the backend did not say.
   final bool? posOrderable;
 
-  /// Crystals earned per unit, when the backend sets it. Null means "use the
-  /// price-based fallback" (see `CrystalReward`).
-  final int? crystalReward;
+  /// Crystals earned per unit (`crystal_points` from the v3 branch menu).
+  /// Null when the backend did not set a figure; treated as zero.
+  final int? crystalPoints;
+
+  /// True when the product can only be bought with crystals
+  /// (`is_crystal_only` from the v3 branch menu).
+  final bool isCrystalOnly;
 
   Product({
     required this.name,
@@ -94,7 +100,8 @@ class Product {
     this.sievesId,
     this.hasPosMapping = false,
     this.posOrderable,
-    this.crystalReward,
+    this.crystalPoints,
+    this.isCrystalOnly = false,
   });
 
   /// True when a self-pickup / carhop / in-restaurant order of this product
@@ -178,8 +185,9 @@ class Product {
       posOrderable: json['pos_orderable'] is bool
           ? json['pos_orderable'] as bool
           : (json['posOrderable'] is bool ? json['posOrderable'] as bool : null),
-      crystalReward: parseSievesId(
-          json['crystal_reward'] ?? json['crystalReward'] ?? json['crystals']),
+      crystalPoints: parseSievesId(json['crystal_points'] ?? json['crystalPoints']),
+      isCrystalOnly:
+          json['is_crystal_only'] == true || json['isCrystalOnly'] == true,
     );
   }
 
@@ -1265,23 +1273,34 @@ class _HomeNewState extends State<HomeNew>
                         },
                       ),
                       SizedBox(height: 5.h),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 35.w,
-                          vertical: 5.h,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.r),
-                          color: const Color(0xFFFEC700),
-                        ),
-                        child: Text(
-                          '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(255, 11, 11, 11),
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 35.w,
+                              vertical: 5.h,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.r),
+                              color: const Color(0xFFFEC700),
+                            ),
+                            child: Text(
+                              '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color.fromARGB(255, 11, 11, 11),
+                              ),
+                            ),
                           ),
-                        ),
+                          // Crystals earned when this product is bought
+                          if (CrystalReward.perUnit(product) > 0) ...[
+                            SizedBox(width: 6.w),
+                            CrystalPointsBadge(
+                              crystals: CrystalReward.perUnit(product),
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),

@@ -332,7 +332,10 @@ class _CartState extends State<Cart> {
                                     ),
                                     // The bag earns nothing; every real
                                     // product shows what this line earns.
-                                    if (!isMandatoryPackage) ...[
+                                    if (!isMandatoryPackage &&
+                                        CrystalReward.perUnit(
+                                                cartItem.product) >
+                                            0) ...[
                                       SizedBox(height: 6.h),
                                       CrystalRewardChip(
                                         crystals: CrystalReward.forQuantity(
