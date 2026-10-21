@@ -16,6 +16,15 @@ class Modifier {
   /// treat "no info" as "not mapped".
   final bool hasPosMapping;
 
+  /// Crystal figures of the linked inventory row, same meaning as on
+  /// [Product]: crystals earned per unit, crystal-only flag, and the crystal
+  /// price per customer tier (null = not sold for crystals at that tier).
+  final int? crystalPoints;
+  final bool isCrystalOnly;
+  final int? crystalPriceA;
+  final int? crystalPriceB;
+  final int? crystalPriceC;
+
   Modifier({
     required this.id,
     required this.name,
@@ -25,6 +34,11 @@ class Modifier {
     this.serviceCodesUz,
     this.sievesId,
     this.hasPosMapping = false,
+    this.crystalPoints,
+    this.isCrystalOnly = false,
+    this.crystalPriceA,
+    this.crystalPriceB,
+    this.crystalPriceC,
   });
 
   /// Smallest quantity a selected modifier can have. `minAmount` of 0 means
@@ -49,6 +63,12 @@ class Modifier {
       sievesId: _asInt(json['sieves_id'] ?? json['sievesId']),
       hasPosMapping:
           json.containsKey('sieves_id') || json.containsKey('sievesId'),
+      crystalPoints: _asInt(json['crystal_points'] ?? json['crystalPoints']),
+      isCrystalOnly:
+          json['is_crystal_only'] == true || json['isCrystalOnly'] == true,
+      crystalPriceA: _asInt(json['crystal_price_a'] ?? json['crystalPriceA']),
+      crystalPriceB: _asInt(json['crystal_price_b'] ?? json['crystalPriceB']),
+      crystalPriceC: _asInt(json['crystal_price_c'] ?? json['crystalPriceC']),
     );
   }
 
@@ -68,6 +88,11 @@ class Modifier {
       'maxAmount': maxAmount,
       'serviceCodesUz': serviceCodesUz,
       'sieves_id': sievesId,
+      'crystal_points': crystalPoints,
+      'is_crystal_only': isCrystalOnly,
+      'crystal_price_a': crystalPriceA,
+      'crystal_price_b': crystalPriceB,
+      'crystal_price_c': crystalPriceC,
     };
   }
 }

@@ -74,6 +74,16 @@ class CrystalRankingsView extends StatelessWidget {
       case CrystalLoadState.idle:
       case CrystalLoadState.loading:
         return [const _ShimmerList()];
+      case CrystalLoadState.signedOut:
+        return [
+          SliverToBoxAdapter(
+            child: _Empty(
+              message: l.walletSignInRequired,
+              action: l.signIn,
+              onAction: () => Navigator.pushNamed(context, '/signin'),
+            ),
+          ),
+        ];
       case CrystalLoadState.error:
         return [
           SliverToBoxAdapter(

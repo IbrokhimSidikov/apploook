@@ -283,6 +283,16 @@ class LoyaltyService {
       throw Exception(payload['message']?.toString() ?? 'Conflict');
     }
 
+    if (response.statusCode == 400 && decoded is Map) {
+      final payload = decoded.cast<String, dynamic>();
+      if (payload['code'] == 'LOYALTY_LINE_PROBLEM') {
+        final quoteJson = (payload['quote'] as Map?)?.cast<String, dynamic>();
+        throw LoyaltyQuoteStaleException(
+          quoteJson == null ? null : LoyaltyQuote.fromJson(quoteJson),
+        );
+      }
+    }
+
     if (response.statusCode < 200 || response.statusCode >= 300) {
       final message = decoded is Map
           ? (decoded['message']?.toString() ?? response.body)
@@ -316,29 +326,37 @@ class LoyaltyService {
         .toList();
   }
 
-  /// Prices a basket. Stateless and cheap - safe to call as the slider moves.
+  /// Prices a basket. Stateless and cheap - safe to call on every toggle.
+  ///
+  /// [lines] is the basket as `LoyaltyProvider.linesFor` builds it: one
+  /// entry per cart line with its inventory components and whether the
+  /// customer wants to pay it with crystals. The server prices every line
+  /// from the inventory at the customer's tier.
   Future<LoyaltyQuote> quote({
     required int subtotal,
     required int orderTypeId,
     int deliveryFee = 0,
     int requestedPoints = 0,
+    List<Map<String, dynamic>> lines = const [],
   }) async {
     final data = await _request('POST', '/loyalty/quote', body: {
       'subtotal': subtotal,
       'order_type_id': orderTypeId,
       'delivery_fee': deliveryFee,
       'requested_points': requestedPoints,
+      if (lines.isNotEmpty) 'lines': lines,
     });
     return LoyaltyQuote.fromJson(data);
   }
 
-  /// Reserves the points. Must run BEFORE the order is sent, so the returned
-  /// [LoyaltyHold.orderNoteRef] can be written into the order comment.
+  /// Reserves the crystals. Must run BEFORE the order is sent, so the
+  /// returned [LoyaltyHold.orderNoteRef] can be written into the order comment.
   Future<LoyaltyHold> createHold({
     required int subtotal,
     required int orderTypeId,
     int deliveryFee = 0,
     int requestedPoints = 0,
+    List<Map<String, dynamic>> lines = const [],
     String? externalOrderId,
     String? idempotencyKey,
   }) async {
@@ -347,11 +365,17 @@ class LoyaltyService {
       'order_type_id': orderTypeId,
       'delivery_fee': deliveryFee,
       'requested_points': requestedPoints,
+      if (lines.isNotEmpty) 'lines': lines,
       if (externalOrderId != null) 'external_order_id': externalOrderId,
       if (idempotencyKey != null) 'idempotency_key': idempotencyKey,
     });
     return LoyaltyHold.fromJson(data);
   }
+
+  /// Top crystal collectors and where this customer stands. Raw map on
+  /// purpose: the crystal shop turns it into its own leaderboard model.
+  Future<Map<String, dynamic>> fetchLeaderboard({int limit = 50}) =>
+      _request('GET', '/loyalty/leaderboard?limit=$limit');
 
   Future<void> commitHold(
     int holdId, {

@@ -37,6 +37,24 @@ class _CrystalShopState extends State<CrystalShop> {
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The tab is rebuilt when the shell switches to it; pick up any menu or
+    // session change that happened meanwhile without flashing the shimmer.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final controller = context.read<CrystalShopController>();
+      if (controller.shopState == CrystalLoadState.error) {
+        controller.loadShop(silent: true);
+      }
+      if (controller.rankingsState == CrystalLoadState.signedOut &&
+          controller.hasSession) {
+        controller.loadRankings(silent: true);
+      }
+    });
+  }
+
   void _select(int index) {
     if (index == _segment) return;
     HapticFeedback.selectionClick();
@@ -216,11 +234,13 @@ class _BalanceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    // Both come from LoyaltyProvider through the controller, so the chip
+    // follows the wallet: shimmer while the summary is on its way, a dash
+    // without a session.
     final balance = context.select<CrystalShopController, int?>(
         (c) => c.balance);
-    final state = context.select<CrystalShopController, CrystalLoadState>(
-        (c) => c.shopState);
-    final loading = balance == null && state != CrystalLoadState.error;
+    final loading = context.select<CrystalShopController, bool>(
+        (c) => c.balanceLoading);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(22.r),

@@ -9,7 +9,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/crystal_reward.dart';
+import '../features/crystal_shop/presentation/crystal_theme.dart';
+import '../models/cart_item.dart';
+import '../models/crystal_pricing.dart';
+import '../providers/loyalty_provider.dart';
+import '../widgets/crystal_pay_toggle.dart';
 import '../widgets/crystal_reward_card.dart';
 import '../widgets/recommended_items_section.dart';
 
@@ -72,6 +76,8 @@ class _CartState extends State<Cart> {
     _getCategories();
 
     var cartProvider = Provider.of<CartProvider>(context);
+    final loyalty = context.watch<LoyaltyProvider>();
+    final l10n = AppLocalizations.of(context);
 
     int getTotalQuantity(CartProvider cartProvider) {
       int totalQuantity = 0;
@@ -81,16 +87,38 @@ class _CartState extends State<Cart> {
       return totalQuantity;
     }
 
+    // Lines paid with crystals contribute nothing to the money total; they
+    // are summed separately so the customer sees both sides of the bill.
     double getTotalPrice(CartProvider cartProvider) {
       double totalPrice = 0;
       for (var cartItem in cartProvider.cartItems) {
-        totalPrice += cartItem.totalPrice;
+        totalPrice += cartItem.moneyTotal;
       }
       return totalPrice;
     }
 
+    int getTotalCrystals(CartProvider cartProvider) {
+      int total = 0;
+      for (var cartItem in cartProvider.cartItems) {
+        if (!cartItem.payWithCrystals) continue;
+        total += CrystalPricing.linePrice(cartItem, loyalty.tier) ?? 0;
+      }
+      return total;
+    }
+
     int price = getTotalPrice(cartProvider).toInt();
+    int crystals = getTotalCrystals(cartProvider);
     int item = getTotalQuantity(cartProvider).toInt();
+
+    // The quote is only live at checkout; outside it this is a no-op, so it
+    // is safe to call after every cart change.
+    void requote() => context.read<LoyaltyProvider>().requote();
+
+    final checkoutLabel = [
+      if (price > 0 || crystals == 0)
+        '${NumberFormat('#,##0').format(price)} UZS',
+      if (crystals > 0) l10n.crystalsAmount(crystals),
+    ].join(' + ');
 
     return Scaffold(
       appBar: AppBar(
@@ -124,6 +152,7 @@ class _CartState extends State<Cart> {
             child: IconButton(
               onPressed: () {
                 cartProvider.clearCart();
+                requote();
               },
               icon: const Icon(Icons.delete),
               tooltip: 'Clear Cart',
@@ -133,7 +162,9 @@ class _CartState extends State<Cart> {
       ),
       backgroundColor: Colors.white,
       // ── Sticky checkout bar ────────────────────────────────────────────────
-      bottomNavigationBar: price > 0
+      // A basket paid entirely with crystals has a zero money total but
+      // still has to reach checkout, so the bar keys off the item count.
+      bottomNavigationBar: item > 0
           ? SafeArea(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
@@ -191,7 +222,7 @@ class _CartState extends State<Cart> {
                       ),
                     ),
                     child: Text(
-                      '${AppLocalizations.of(context).proceedToCheckout} — ${NumberFormat('#,##0').format(price)} UZS',
+                      '${l10n.proceedToCheckout} — $checkoutLabel',
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 16.sp,
@@ -223,12 +254,36 @@ class _CartState extends State<Cart> {
                           color: Colors.grey[600],
                         ),
                       ),
-                      Text(
-                        '${NumberFormat('#,##0').format(price)} UZS',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            '${NumberFormat('#,##0').format(price)} UZS',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (crystals > 0) ...[
+                            SizedBox(height: 2.h),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SvgPicture.asset(CrystalTheme.asset,
+                                    width: 14.w, height: 14.w),
+                                SizedBox(width: 4.w),
+                                Text(
+                                  l10n.spendCrystals(crystals),
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: CrystalTheme.lilacText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
                       ),
                     ],
                   ),
@@ -322,28 +377,11 @@ class _CartState extends State<Cart> {
                                       ],
                                     ),
                                     SizedBox(height: 4.h),
-                                    Text(
-                                      '${NumberFormat('#,##0').format(cartItem.totalPrice.toInt())} UZS',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: Colors.grey[700],
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                    _LinePricing(
+                                      line: cartItem,
+                                      loyalty: loyalty,
+                                      isMandatoryPackage: isMandatoryPackage,
                                     ),
-                                    // The bag earns nothing; every real
-                                    // product shows what this line earns.
-                                    if (!isMandatoryPackage &&
-                                        CrystalReward.perUnit(
-                                                cartItem.product) >
-                                            0) ...[
-                                      SizedBox(height: 6.h),
-                                      CrystalRewardChip(
-                                        crystals: CrystalReward.forQuantity(
-                                          cartItem.product,
-                                          cartItem.quantity,
-                                        ),
-                                      ),
-                                    ],
                                   ],
                                 ),
                               ),
@@ -377,6 +415,7 @@ class _CartState extends State<Cart> {
                                             cartProvider
                                                 .removeFromCart(cartItem);
                                           }
+                                          requote();
                                         },
                                       ),
                                       SizedBox(
@@ -393,8 +432,11 @@ class _CartState extends State<Cart> {
                                       ),
                                       _QtyButton(
                                         icon: Icons.add,
-                                        onTap: () => cartProvider.updateQuantity(
-                                            cartItem, cartItem.quantity + 1),
+                                        onTap: () {
+                                          cartProvider.updateQuantity(
+                                              cartItem, cartItem.quantity + 1);
+                                          requote();
+                                        },
                                       ),
                                     ],
                                   ),
@@ -437,6 +479,107 @@ class _CartState extends State<Cart> {
       ),
     );
   }
+}
+
+// ── Price, earn chip and crystal toggle of one cart line ─────────────────────
+class _LinePricing extends StatelessWidget {
+  const _LinePricing({
+    required this.line,
+    required this.loyalty,
+    required this.isMandatoryPackage,
+  });
+
+  final CartItem line;
+  final LoyaltyProvider loyalty;
+  final bool isMandatoryPackage;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final money = '${NumberFormat('#,##0').format(line.totalPrice.toInt())} UZS';
+
+    // The bag is never offered for crystals and earns nothing.
+    if (isMandatoryPackage) return _moneyText(money);
+
+    final crystalOnly = CrystalPricing.lineIsCrystalOnly(line);
+    final crystalPrice = CrystalPricing.linePrice(line, loyalty.tier);
+    // A crystal-only line stays marked as paying with crystals even when it
+    // cannot be bought right now (signed out, no tier price): showing a soum
+    // price for it would promise something the server will refuse.
+    final payingWithCrystals = line.payWithCrystals || crystalOnly;
+    final points = CrystalPricing.linePoints(line);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (payingWithCrystals && crystalPrice != null)
+          Row(
+            children: [
+              CrystalPriceText(crystals: crystalPrice),
+              SizedBox(width: 8.w),
+              Text(
+                money,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.grey[500],
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+            ],
+          )
+        else
+          _moneyText(money),
+        if (!payingWithCrystals && points > 0) ...[
+          SizedBox(height: 6.h),
+          CrystalRewardChip(crystals: points),
+        ],
+        // The toggle needs a session and a tier price; otherwise a
+        // crystal-only line still explains why it cannot be bought.
+        if (crystalPrice != null && loyalty.hasSession) ...[
+          SizedBox(height: 6.h),
+          CrystalPayToggle(
+            crystalPrice: crystalPrice,
+            value: line.payWithCrystals,
+            crystalOnly: crystalOnly,
+            onChanged: crystalOnly
+                ? null
+                : (value) => context
+                    .read<LoyaltyProvider>()
+                    .setLinePayWithCrystals(line, value),
+          ),
+        ] else if (crystalOnly) ...[
+          SizedBox(height: 6.h),
+          if (!loyalty.hasSession)
+            const CrystalOnlySignInHint()
+          else
+            // Signed in but the tier has no crystal price for it.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CrystalOnlyBadge(),
+                SizedBox(height: 4.h),
+                Text(
+                  l10n.crystalNotSoldAtTier,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: CrystalTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _moneyText(String money) => Text(
+        money,
+        style: TextStyle(
+          fontSize: 13.sp,
+          color: Colors.grey[700],
+          fontWeight: FontWeight.w500,
+        ),
+      );
 }
 
 // ── Small helper widget for quantity +/- buttons ──────────────────────────────

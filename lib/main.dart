@@ -128,7 +128,11 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: notificationProvider),
         ChangeNotifierProvider(create: (_) => ReorderController()),
-        ChangeNotifierProvider(create: (_) => CrystalShopController()),
+        ChangeNotifierProxyProvider<LoyaltyProvider, CrystalShopController>(
+          create: (_) => CrystalShopController(),
+          update: (_, loyalty, controller) =>
+              (controller ?? CrystalShopController())..attachLoyalty(loyalty),
+        ),
       ],
       // Show elegant branded splash screen while initializing
       child: _isLoading 

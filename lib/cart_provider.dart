@@ -35,10 +35,15 @@ class CartProvider extends ChangeNotifier {
   }
 
   /// The cart line with exactly the same product configuration, if any.
+  /// A line paid with crystals and one paid with money never merge, even
+  /// for the same configuration: they are priced and settled differently.
   CartItem? findByConfiguration(CartItem cartItem) {
     final key = cartItem.configurationKey;
     for (final item in _cartItems) {
-      if (item.configurationKey == key) return item;
+      if (item.configurationKey == key &&
+          item.payWithCrystals == cartItem.payWithCrystals) {
+        return item;
+      }
     }
     return null;
   }

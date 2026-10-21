@@ -153,37 +153,50 @@ class AppLocalizations {
       'totalAmount': 'Total Amount',
       'currency': 'UZS',
 
-      // Loyalty / cashback
-      'walletTitle': 'Cashback',
+      // Loyalty / crystals
+      'walletEarnHint': 'Earn crystals with every product you buy and spend them on anything in the menu.',
+      'walletEntryConverted': 'Converted from cashback',
+      'checkoutCrystalsToSpend': 'Crystals to spend',
+      'checkoutToPay': 'To pay',
+      'checkoutNotEnoughCrystals': 'Not enough crystals — {n} more needed. Switch some items back to money.',
+      'checkoutCrystalLineProblem': 'Some items cannot be paid the way they are set. Check the crystal options in your cart.',
+      'payWithCrystals': 'Pay with crystals',
+      'crystalOnly': 'Crystals only',
+      'crystalOnlyNotOnDelivery': 'Crystal-only products are not available for delivery.',
+      'crystalOnlyNeedsSignIn': 'Sign in to buy crystal-only products.',
+      'crystalNotSoldAtTier': 'Not available for crystals',
+      'loyaltyInfoEarn': 'Every product shows how many crystals it earns. Products paid with crystals earn nothing.',
+      'tierLevel': 'Level {t}',
+      'walletTitle': 'Crystals',
       'walletAvailable': 'Available',
       'walletPending': 'Pending',
       'walletPendingHint': 'Available tomorrow from 00:00',
       'walletHistory': 'History',
-      'walletNoHistory': 'No cashback activity yet.\nYour first order will start it off.',
-      'walletSignInRequired': 'Sign in to see your cashback balance.',
+      'walletNoHistory': 'No crystal activity yet.\\nYour first order will start it off.',
+      'walletSignInRequired': 'Sign in to see your crystals.',
       'walletEarnRateLead': 'You get',
       'walletEarnRateTrail': 'cashback on every order you pay for.',
-      'walletEntryEarned': 'Cashback earned',
-      'walletEntrySpent': 'Cashback spent',
-      'walletEntryCancelled': 'Cashback cancelled',
-      'walletEntryReturned': 'Cashback returned',
-      'walletEntryExpired': 'Cashback expired',
+      'walletEntryEarned': 'Crystals earned',
+      'walletEntrySpent': 'Crystals spent',
+      'walletEntryCancelled': 'Crystals cancelled',
+      'walletEntryReturned': 'Crystals returned',
+      'walletEntryExpired': 'Crystals expired',
       'walletEntryAdjusted': 'Balance adjusted',
-      'checkoutUseCashback': 'Use cashback',
-      'checkoutCashbackApplied': 'Cashback applied',
+      'checkoutUseCashback': 'Use crystals',
+      'checkoutCashbackApplied': 'Crystals applied',
       'checkoutYouWillEarn': 'You will earn',
       'checkoutCashbackAll': 'All',
-      'checkoutCashbackChanged': 'Your cashback balance changed. Please check the total and try again.',
+      'checkoutCashbackChanged': 'Your crystal balance changed. Please check the total and try again.',
       'checkoutCashbackAvailable': 'available',
-      'checkoutCashbackSyncing': 'Cashback is syncing — your balance will update shortly.',
-      'loyaltyInfoTitle': 'How cashback works',
+      'checkoutCashbackSyncing': 'Crystals are syncing — your balance will update shortly.',
+      'loyaltyInfoTitle': 'How crystals work',
       'loyaltyInfoAppliesTo': 'Earned on these order types:',
       'loyaltyInfoNotOnDelivery': 'Not available on delivery orders.',
-      'loyaltyInfoSpend': 'Pay with your cashback at checkout — use as much as you like.',
-      'loyaltyInfoPending': 'Cashback becomes available once your order is completed.',
-      'loyaltyCardHint': 'Tap to see your cashback history',
+      'loyaltyInfoSpend': 'Pay with crystals at checkout — any product with a crystal price, or products sold only for crystals.',
+      'loyaltyInfoPending': 'Crystals become available once your order is completed.',
+      'loyaltyCardHint': 'Tap to see your crystal history',
       'qrPayTitle': 'Pay in store',
-      'qrPayHint': 'Show this code to the cashier to pay with your cashback.',
+      'qrPayHint': 'Show this code to the cashier to pay with your crystals.',
       'qrPayUpdatesIn': 'Code updates in',
       'qrPayError': 'Could not get a code. Check your connection and try again.',
       'qrPayRetry': 'Try again',
@@ -457,37 +470,50 @@ class AppLocalizations {
       'totalAmount': 'Umumiy summa',
       'currency': 'UZS',
 
-      // Loyalty / cashback
-      'walletTitle': 'Keshbek',
+      // Loyalty / crystals
+      'walletEarnHint': 'Har bir xarid qilgan mahsulotingiz uchun kristall oling va ularni menyudagi istalgan taomga sarflang.',
+      'walletEntryConverted': 'Keshbekdan aylantirildi',
+      'checkoutCrystalsToSpend': 'Sarflanadigan kristallar',
+      'checkoutToPay': 'Toʻlash uchun',
+      'checkoutNotEnoughCrystals': 'Kristallar yetarli emas — yana {n} ta kerak. Baʼzi mahsulotlarni pulga qaytaring.',
+      'checkoutCrystalLineProblem': 'Baʼzi mahsulotlarni tanlangan usulda toʻlab boʻlmaydi. Savatdagi kristall sozlamalarini tekshiring.',
+      'payWithCrystals': 'Kristallar bilan toʻlash',
+      'crystalOnly': 'Faqat kristallarga',
+      'crystalOnlyNotOnDelivery': 'Faqat kristallarga sotiladigan mahsulotlar yetkazib berishda mavjud emas.',
+      'crystalOnlyNeedsSignIn': 'Faqat kristallarga sotiladigan mahsulotlarni olish uchun tizimga kiring.',
+      'crystalNotSoldAtTier': 'Kristallarga sotilmaydi',
+      'loyaltyInfoEarn': 'Har bir mahsulot qancha kristall berishini koʻrsatadi. Kristallar bilan toʻlangan mahsulotlar kristall bermaydi.',
+      'tierLevel': '{t} daraja',
+      'walletTitle': 'Kristallar',
       'walletAvailable': 'Mavjud',
       'walletPending': 'Kutilmoqda',
       'walletPendingHint': 'Ertaga 00:00 dan mavjud boʻladi',
       'walletHistory': 'Tarix',
-      'walletNoHistory': 'Hozircha keshbek harakati yoʻq.\nBirinchi buyurtmangiz uni boshlaydi.',
-      'walletSignInRequired': 'Keshbek balansini koʻrish uchun tizimga kiring.',
+      'walletNoHistory': 'Hozircha kristall harakati yoʻq.\\nBirinchi buyurtmangiz uni boshlaydi.',
+      'walletSignInRequired': 'Kristallaringizni koʻrish uchun tizimga kiring.',
       'walletEarnRateLead': 'Siz toʻlagan har bir buyurtma uchun',
       'walletEarnRateTrail': 'keshbek olasiz.',
-      'walletEntryEarned': 'Keshbek olindi',
-      'walletEntrySpent': 'Keshbek ishlatildi',
-      'walletEntryCancelled': 'Keshbek bekor qilindi',
-      'walletEntryReturned': 'Keshbek qaytarildi',
-      'walletEntryExpired': 'Keshbek muddati tugadi',
+      'walletEntryEarned': 'Kristallar olindi',
+      'walletEntrySpent': 'Kristallar sarflandi',
+      'walletEntryCancelled': 'Kristallar bekor qilindi',
+      'walletEntryReturned': 'Kristallar qaytarildi',
+      'walletEntryExpired': 'Kristallar muddati tugadi',
       'walletEntryAdjusted': 'Balans oʻzgartirildi',
-      'checkoutUseCashback': 'Keshbekni ishlatish',
-      'checkoutCashbackApplied': 'Keshbek qoʻllanildi',
+      'checkoutUseCashback': 'Kristallarni ishlatish',
+      'checkoutCashbackApplied': 'Kristallar qoʻllanildi',
       'checkoutYouWillEarn': 'Siz olasiz',
       'checkoutCashbackAll': 'Hammasi',
-      'checkoutCashbackChanged': 'Keshbek balansingiz oʻzgardi. Iltimos, summani tekshirib, qayta urinib koʻring.',
+      'checkoutCashbackChanged': 'Kristall balansingiz oʻzgardi. Iltimos, summani tekshirib, qayta urinib koʻring.',
       'checkoutCashbackAvailable': 'mavjud',
-      'checkoutCashbackSyncing': 'Keshbek sinxronlanmoqda — balansingiz tez orada yangilanadi.',
-      'loyaltyInfoTitle': 'Keshbek qanday ishlaydi',
+      'checkoutCashbackSyncing': 'Kristallar sinxronlanmoqda — balansingiz tez orada yangilanadi.',
+      'loyaltyInfoTitle': 'Kristallar qanday ishlaydi',
       'loyaltyInfoAppliesTo': 'Quyidagi buyurtma turlarida beriladi:',
       'loyaltyInfoNotOnDelivery': 'Yetkazib berish buyurtmalarida ishlamaydi.',
-      'loyaltyInfoSpend': 'Buyurtma rasmiylashtirishda keshbek bilan toʻlang — xohlagancha ishlating.',
-      'loyaltyInfoPending': 'Keshbek buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
-      'loyaltyCardHint': 'Keshbek tarixini koʻrish uchun bosing',
+      'loyaltyInfoSpend': 'Buyurtma rasmiylashtirishda kristallar bilan toʻlang — kristall narxi bor har qanday mahsulot yoki faqat kristallarga sotiladigan mahsulotlar.',
+      'loyaltyInfoPending': 'Kristallar buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
+      'loyaltyCardHint': 'Kristall tarixini koʻrish uchun bosing',
       'qrPayTitle': 'Restoranda toʻlash',
-      'qrPayHint': 'Keshbek bilan toʻlash uchun bu kodni kassirga koʻrsating.',
+      'qrPayHint': 'Kristallar bilan toʻlash uchun bu kodni kassirga koʻrsating.',
       'qrPayUpdatesIn': 'Kod yangilanadi',
       'qrPayError': 'Kod olinmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
       'qrPayRetry': 'Qayta urinish',
@@ -761,37 +787,50 @@ class AppLocalizations {
       'totalAmount': 'Общая сумма',
       'currency': 'UZS',
 
-      // Loyalty / cashback
-      'walletTitle': 'Кэшбэк',
+      // Loyalty / crystals
+      'walletEarnHint': 'Получайте кристаллы за каждый купленный товар и тратьте их на любое блюдо из меню.',
+      'walletEntryConverted': 'Конвертировано из кэшбэка',
+      'checkoutCrystalsToSpend': 'Кристаллы к списанию',
+      'checkoutToPay': 'К оплате',
+      'checkoutNotEnoughCrystals': 'Недостаточно кристаллов — нужно ещё {n}. Переключите часть товаров на оплату деньгами.',
+      'checkoutCrystalLineProblem': 'Некоторые товары нельзя оплатить выбранным способом. Проверьте настройки кристаллов в корзине.',
+      'payWithCrystals': 'Оплатить кристаллами',
+      'crystalOnly': 'Только за кристаллы',
+      'crystalOnlyNotOnDelivery': 'Товары только за кристаллы недоступны для доставки.',
+      'crystalOnlyNeedsSignIn': 'Войдите, чтобы купить товары за кристаллы.',
+      'crystalNotSoldAtTier': 'Недоступно за кристаллы',
+      'loyaltyInfoEarn': 'У каждого товара указано, сколько кристаллов он даёт. Товары, оплаченные кристаллами, кристаллов не дают.',
+      'tierLevel': 'Уровень {t}',
+      'walletTitle': 'Кристаллы',
       'walletAvailable': 'Доступно',
       'walletPending': 'Ожидается',
       'walletPendingHint': 'Будут доступны завтра с 00:00',
       'walletHistory': 'История',
-      'walletNoHistory': 'Пока нет операций с кэшбэком.\nПервый заказ всё начнёт.',
-      'walletSignInRequired': 'Войдите, чтобы увидеть баланс кэшбэка.',
+      'walletNoHistory': 'Пока нет операций с кристаллами.\\nПервый заказ всё начнёт.',
+      'walletSignInRequired': 'Войдите, чтобы увидеть свои кристаллы.',
       'walletEarnRateLead': 'Вы получаете',
       'walletEarnRateTrail': 'кэшбэка с каждого оплаченного заказа.',
-      'walletEntryEarned': 'Кэшбэк начислен',
-      'walletEntrySpent': 'Кэшбэк списан',
-      'walletEntryCancelled': 'Кэшбэк отменён',
-      'walletEntryReturned': 'Кэшбэк возвращён',
-      'walletEntryExpired': 'Срок кэшбэка истёк',
+      'walletEntryEarned': 'Кристаллы начислены',
+      'walletEntrySpent': 'Кристаллы списаны',
+      'walletEntryCancelled': 'Кристаллы отменены',
+      'walletEntryReturned': 'Кристаллы возвращены',
+      'walletEntryExpired': 'Срок кристаллов истёк',
       'walletEntryAdjusted': 'Баланс скорректирован',
-      'checkoutUseCashback': 'Использовать кэшбэк',
-      'checkoutCashbackApplied': 'Кэшбэк применён',
+      'checkoutUseCashback': 'Использовать кристаллы',
+      'checkoutCashbackApplied': 'Кристаллы применены',
       'checkoutYouWillEarn': 'Вы получите',
       'checkoutCashbackAll': 'Всё',
-      'checkoutCashbackChanged': 'Ваш баланс кэшбэка изменился. Проверьте сумму и попробуйте снова.',
+      'checkoutCashbackChanged': 'Ваш баланс кристаллов изменился. Проверьте сумму и попробуйте снова.',
       'checkoutCashbackAvailable': 'доступно',
-      'checkoutCashbackSyncing': 'Кэшбэк синхронизируется — баланс скоро обновится.',
-      'loyaltyInfoTitle': 'Как работает кэшбэк',
+      'checkoutCashbackSyncing': 'Кристаллы синхронизируются — баланс скоро обновится.',
+      'loyaltyInfoTitle': 'Как работают кристаллы',
       'loyaltyInfoAppliesTo': 'Начисляется на эти типы заказов:',
       'loyaltyInfoNotOnDelivery': 'Не действует на заказы с доставкой.',
-      'loyaltyInfoSpend': 'Оплачивайте кэшбэком при оформлении — используйте сколько хотите.',
-      'loyaltyInfoPending': 'Кэшбэк станет доступен после завершения заказа.',
-      'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кэшбэка',
+      'loyaltyInfoSpend': 'Оплачивайте кристаллами при оформлении — любой товар с ценой в кристаллах или товары только за кристаллы.',
+      'loyaltyInfoPending': 'Кристаллы станут доступны после завершения заказа.',
+      'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кристаллов',
       'qrPayTitle': 'Оплата в ресторане',
-      'qrPayHint': 'Покажите этот код кассиру, чтобы оплатить кэшбэком.',
+      'qrPayHint': 'Покажите этот код кассиру, чтобы оплатить кристаллами.',
       'qrPayUpdatesIn': 'Код обновится через',
       'qrPayError': 'Не удалось получить код. Проверьте соединение и попробуйте снова.',
       'qrPayRetry': 'Повторить',
@@ -1197,6 +1236,49 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['walletNoHistory']!;
   String get walletSignInRequired =>
       _localizedValues[locale.languageCode]!['walletSignInRequired']!;
+  // Loyalty / crystals
+  String get walletEarnHint =>
+      _localizedValues[locale.languageCode]!['walletEarnHint']!;
+  String get walletEntryConverted =>
+      _localizedValues[locale.languageCode]!['walletEntryConverted']!;
+  String get checkoutCrystalsToSpend =>
+      _localizedValues[locale.languageCode]!['checkoutCrystalsToSpend']!;
+  String get checkoutToPay =>
+      _localizedValues[locale.languageCode]!['checkoutToPay']!;
+  String checkoutNotEnoughCrystals(int n) =>
+      _localizedValues[locale.languageCode]!['checkoutNotEnoughCrystals']!
+          .replaceAll('{n}', '$n');
+  String get checkoutCrystalLineProblem =>
+      _localizedValues[locale.languageCode]!['checkoutCrystalLineProblem']!;
+  String get payWithCrystals =>
+      _localizedValues[locale.languageCode]!['payWithCrystals']!;
+  String get crystalOnly =>
+      _localizedValues[locale.languageCode]!['crystalOnly']!;
+  String get crystalOnlyNotOnDelivery =>
+      _localizedValues[locale.languageCode]!['crystalOnlyNotOnDelivery']!;
+  String get crystalOnlyNeedsSignIn =>
+      _localizedValues[locale.languageCode]!['crystalOnlyNeedsSignIn']!;
+  String get crystalNotSoldAtTier =>
+      _localizedValues[locale.languageCode]!['crystalNotSoldAtTier']!;
+  String get loyaltyInfoEarn =>
+      _localizedValues[locale.languageCode]!['loyaltyInfoEarn']!;
+  String tierLevel(String tier) =>
+      _localizedValues[locale.languageCode]!['tierLevel']!
+          .replaceAll('{t}', tier.toUpperCase());
+
+  /// "1 250 crystals" with the word declined for the language.
+  String crystalsAmount(int n) => '${_groupThousands(n)} ${crystalWord(n)}';
+
+  static String _groupThousands(int n) {
+    final digits = n.abs().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(' ');
+      buffer.write(digits[i]);
+    }
+    return n < 0 ? '-$buffer' : buffer.toString();
+  }
+
   String get walletEarnRateLead =>
       _localizedValues[locale.languageCode]!['walletEarnRateLead']!;
   String get walletEarnRateTrail =>

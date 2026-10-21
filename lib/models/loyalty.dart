@@ -1,8 +1,37 @@
-/// Loyalty (cashback) models mirroring the sieves-api-v3 `/loyalty` responses.
+/// Loyalty (crystals) models mirroring the sieves-api-v3 `/loyalty` responses.
 ///
-/// Every amount is an integer number of soum. The backend deliberately never
-/// sends fractional money, so nothing here parses a double.
+/// The ledger is counted in whole crystals; money figures (payable, soum
+/// equivalents) are integer soum. The backend deliberately never sends
+/// fractional amounts, so nothing here parses a double.
 library;
+
+/// Which crystal price list a customer buys from. A is the regular price.
+enum LoyaltyTier {
+  a,
+  b,
+  c;
+
+  static LoyaltyTier parse(dynamic v) {
+    switch (v?.toString().toLowerCase()) {
+      case 'b':
+        return LoyaltyTier.b;
+      case 'c':
+        return LoyaltyTier.c;
+      default:
+        return LoyaltyTier.a;
+    }
+  }
+
+  String get code => name;
+}
+
+/// How a cart line is settled, as the server names it.
+enum LoyaltyPayWith {
+  money,
+  crystal;
+
+  String get code => name;
+}
 
 int _asInt(dynamic v) {
   if (v == null) return 0;
@@ -21,6 +50,9 @@ class LoyaltyCard {
   final String number;
   final String status;
 
+  /// The crystal price list this customer buys from.
+  final LoyaltyTier tier;
+
   /// Posted balance. Points reserved by an open checkout are still counted
   /// here, so use [spendable] anywhere the customer is about to spend.
   final int balance;
@@ -36,6 +68,7 @@ class LoyaltyCard {
   const LoyaltyCard({
     required this.number,
     required this.status,
+    this.tier = LoyaltyTier.a,
     required this.balance,
     required this.pendingBalance,
     required this.heldBalance,
@@ -49,6 +82,7 @@ class LoyaltyCard {
   factory LoyaltyCard.fromJson(Map<String, dynamic> json) => LoyaltyCard(
         number: json['number']?.toString() ?? '',
         status: json['status']?.toString() ?? 'active',
+        tier: LoyaltyTier.parse(json['tier']),
         balance: _asInt(json['balance']),
         pendingBalance: _asInt(json['pending_balance']),
         heldBalance: _asInt(json['held_balance']),
@@ -73,6 +107,14 @@ class LoyaltyCard {
 /// reaches the app without a release.
 class LoyaltyProgram {
   final String name;
+
+  /// 'crystal' for every program since the migration; 'soum' only on a
+  /// backend that has not been converted yet.
+  final String unit;
+
+  /// Soum one crystal is worth on the POS payment line.
+  final int crystalRateSoum;
+
   final double earnRatePercent;
   final int minRedeemBalance;
   final int redeemRounding;
@@ -92,6 +134,8 @@ class LoyaltyProgram {
 
   const LoyaltyProgram({
     required this.name,
+    this.unit = 'crystal',
+    this.crystalRateSoum = 500,
     required this.earnRatePercent,
     required this.minRedeemBalance,
     required this.redeemRounding,
@@ -105,9 +149,13 @@ class LoyaltyProgram {
   });
 
   factory LoyaltyProgram.fromJson(Map<String, dynamic> json) => LoyaltyProgram(
-        name: json['name']?.toString() ?? 'Cashback',
+        name: json['name']?.toString() ?? 'Crystals',
+        unit: json['unit']?.toString() ?? 'crystal',
+        crystalRateSoum: _asInt(json['crystal_rate_soum']) > 0
+            ? _asInt(json['crystal_rate_soum'])
+            : 500,
         earnRatePercent:
-            double.tryParse(json['earn_rate_percent']?.toString() ?? '') ?? 5,
+            double.tryParse(json['earn_rate_percent']?.toString() ?? '') ?? 0,
         minRedeemBalance: _asInt(json['min_redeem_balance']),
         redeemRounding: _asInt(json['redeem_rounding']) == 0
             ? 1
@@ -132,11 +180,15 @@ class LoyaltyProgram {
             : LoyaltyPos.defaultPaymentTypeId,
       );
 
+  bool get isCrystal => unit != 'soum';
+
   static const fallback = LoyaltyProgram(
-    name: 'Cashback',
-    earnRatePercent: 5,
-    minRedeemBalance: 5000,
-    redeemRounding: 1000,
+    name: 'Crystals',
+    unit: 'crystal',
+    crystalRateSoum: 500,
+    earnRatePercent: 0,
+    minRedeemBalance: 0,
+    redeemRounding: 1,
     maxRedeemPercent: 100,
     redeemCoversDeliveryFee: false,
     earnOnDeliveryFee: false,
@@ -164,16 +216,77 @@ class LoyaltySummary {
       LoyaltySummary(card: LoyaltyCard.empty, program: LoyaltyProgram.fallback);
 }
 
+/// One cart line as the server priced it.
+class LoyaltyQuoteLine {
+  /// The [CartItem.id] the client sent, echoed back.
+  final String lineId;
+  final LoyaltyPayWith payWith;
+  final int quantity;
+
+  /// Crystals the whole line costs at the customer's tier, or null when it
+  /// is not sold for crystals.
+  final int? crystalPrice;
+  final bool crystalOnly;
+
+  /// Crystals the whole line earns when paid with money.
+  final int crystalPoints;
+  final int moneyTotal;
+
+  /// `not_sold_for_crystals`, `crystal_only`, `unknown_product`, or null.
+  final String? problem;
+
+  const LoyaltyQuoteLine({
+    required this.lineId,
+    required this.payWith,
+    required this.quantity,
+    required this.crystalPrice,
+    required this.crystalOnly,
+    required this.crystalPoints,
+    required this.moneyTotal,
+    required this.problem,
+  });
+
+  factory LoyaltyQuoteLine.fromJson(Map<String, dynamic> json) =>
+      LoyaltyQuoteLine(
+        lineId: json['line_id']?.toString() ?? '',
+        payWith: json['pay_with']?.toString() == 'crystal'
+            ? LoyaltyPayWith.crystal
+            : LoyaltyPayWith.money,
+        quantity: _asInt(json['quantity']),
+        crystalPrice: json['crystal_price'] == null
+            ? null
+            : _asInt(json['crystal_price']),
+        crystalOnly: json['crystal_only'] == true,
+        crystalPoints: _asInt(json['crystal_points']),
+        moneyTotal: _asInt(json['money_total']),
+        problem: json['problem']?.toString(),
+      );
+}
+
 /// Server-computed pricing for one basket. Never compute these numbers on the
-/// client: the server is the only place that knows the live balance and the
-/// program rules, and it recomputes them again when the hold is created.
+/// client: the server is the only place that knows the live balance, the
+/// customer's tier and the inventory prices, and it recomputes them again
+/// when the hold is created.
 class LoyaltyQuote {
+  /// 'crystal' or 'soum'.
+  final String unit;
+  final LoyaltyTier tier;
+  final int crystalRateSoum;
   final int subtotal;
   final int deliveryFee;
   final int maxRedeemable;
+
+  /// Crystals leaving the card for this order.
   final int appliedPoints;
+
+  /// [appliedPoints] in soum, for the POS payment line.
+  final int appliedSoum;
+
+  /// Soum still to pay with money.
   final int payable;
   final int earnBase;
+
+  /// Crystals this order will earn.
   final int projectedEarn;
   final int balance;
   final int spendable;
@@ -182,15 +295,24 @@ class LoyaltyQuote {
   /// False for order types the programme excludes (delivery): no earn, no spend.
   final bool orderTypeEligible;
 
-  /// `order_type_not_eligible`, `below_minimum_balance`, `order_too_small`,
-  /// `card_blocked`, or null.
+  final List<LoyaltyQuoteLine> lines;
+
+  /// Crystals missing to settle every crystal line; 0 when affordable.
+  final int shortfall;
+
+  /// `order_type_not_eligible`, `card_blocked`, `insufficient_crystals`,
+  /// `line_problems`, `below_minimum_balance`, `order_too_small`, or null.
   final String? blockedReason;
 
   const LoyaltyQuote({
+    this.unit = 'crystal',
+    this.tier = LoyaltyTier.a,
+    this.crystalRateSoum = 500,
     required this.subtotal,
     required this.deliveryFee,
     required this.maxRedeemable,
     required this.appliedPoints,
+    required this.appliedSoum,
     required this.payable,
     required this.earnBase,
     required this.projectedEarn,
@@ -198,17 +320,42 @@ class LoyaltyQuote {
     required this.spendable,
     required this.pendingBalance,
     required this.orderTypeEligible,
+    this.lines = const [],
+    this.shortfall = 0,
     required this.blockedReason,
   });
 
+  /// Legacy soum notion: there is a balance worth offering on this basket.
   bool get canRedeem =>
       orderTypeEligible && maxRedeemable > 0 && blockedReason == null;
 
+  /// True when the server refused to settle the basket as configured, so the
+  /// customer must change something before the order can go out.
+  bool get isBlocked =>
+      blockedReason == 'insufficient_crystals' ||
+      blockedReason == 'line_problems' ||
+      (blockedReason == 'card_blocked' && appliedPoints > 0);
+
+  LoyaltyQuoteLine? line(String lineId) {
+    for (final l in lines) {
+      if (l.lineId == lineId) return l;
+    }
+    return null;
+  }
+
   factory LoyaltyQuote.fromJson(Map<String, dynamic> json) => LoyaltyQuote(
+        unit: json['unit']?.toString() ?? 'crystal',
+        tier: LoyaltyTier.parse(json['tier']),
+        crystalRateSoum: _asInt(json['crystal_rate_soum']) > 0
+            ? _asInt(json['crystal_rate_soum'])
+            : 500,
         subtotal: _asInt(json['subtotal']),
         deliveryFee: _asInt(json['delivery_fee']),
         maxRedeemable: _asInt(json['max_redeemable']),
         appliedPoints: _asInt(json['applied_points']),
+        appliedSoum: json['applied_soum'] == null
+            ? _asInt(json['applied_points'])
+            : _asInt(json['applied_soum']),
         payable: _asInt(json['payable']),
         earnBase: _asInt(json['earn_base']),
         projectedEarn: _asInt(json['projected_earn']),
@@ -216,6 +363,11 @@ class LoyaltyQuote {
         spendable: _asInt(json['spendable']),
         pendingBalance: _asInt(json['pending_balance']),
         orderTypeEligible: json['order_type_eligible'] != false,
+        lines: ((json['lines'] as List?) ?? const [])
+            .whereType<Map>()
+            .map((l) => LoyaltyQuoteLine.fromJson(l.cast<String, dynamic>()))
+            .toList(),
+        shortfall: _asInt(json['shortfall']),
         blockedReason: json['redemption_blocked_reason']?.toString(),
       );
 }
@@ -224,7 +376,12 @@ class LoyaltyQuote {
 class LoyaltyHold {
   final int id;
   final String status;
+
+  /// Crystals reserved.
   final int appliedPoints;
+
+  /// [appliedPoints] in soum: the amount the POS payment line carries.
+  final int appliedSoum;
   final int payable;
   final int projectedEarn;
   final DateTime? expiresAt;
@@ -237,6 +394,7 @@ class LoyaltyHold {
     required this.id,
     required this.status,
     required this.appliedPoints,
+    required this.appliedSoum,
     required this.payable,
     required this.projectedEarn,
     required this.expiresAt,
@@ -247,6 +405,9 @@ class LoyaltyHold {
         id: _asInt(json['hold_id']),
         status: json['status']?.toString() ?? 'open',
         appliedPoints: _asInt(json['applied_points']),
+        appliedSoum: json['applied_soum'] == null
+            ? _asInt(json['applied_points'])
+            : _asInt(json['applied_soum']),
         payable: _asInt(json['payable']),
         projectedEarn: _asInt(json['projected_earn']),
         expiresAt: _asDate(json['expires_at']),
@@ -254,7 +415,15 @@ class LoyaltyHold {
       );
 }
 
-enum LoyaltyEntryKind { earn, redeem, reversal, refund, expiry, adjustment }
+enum LoyaltyEntryKind {
+  earn,
+  redeem,
+  reversal,
+  refund,
+  expiry,
+  conversion,
+  adjustment
+}
 
 /// One row of the wallet history feed.
 class LoyaltyTransaction {
@@ -296,6 +465,8 @@ class LoyaltyTransaction {
         return LoyaltyEntryKind.refund;
       case 'expire':
         return LoyaltyEntryKind.expiry;
+      case 'conversion':
+        return LoyaltyEntryKind.conversion;
       default:
         return LoyaltyEntryKind.adjustment;
     }
@@ -339,9 +510,11 @@ class LoyaltyPos {
 
   /// Builds the `transactions` array for a Sieves order.
   ///
-  /// The order keeps its full [value]; what changes is how that value was
-  /// settled. Cash first, then the points line, so a receipt reads the way a
-  /// cashier expects:
+  /// [cashbackAmount] is the crystal payment in soum (crystals x rate, the
+  /// hold's `applied_soum`). The order value is cash plus that line; crystal
+  /// lines reach the POS priced at their soum equivalent so the two agree.
+  /// Cash first, then the crystal line, so a receipt reads the way a cashier
+  /// expects:
   ///
   ///   cash only     -> [cash: total]
   ///   points only   -> [points: total]

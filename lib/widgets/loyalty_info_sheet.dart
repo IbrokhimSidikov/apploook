@@ -5,7 +5,7 @@ import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 
-/// The "how cashback works" bottom sheet, shared by the profile card and the
+/// The "how crystals work" bottom sheet, shared by the profile card and the
 /// wallet screen so the two never drift apart.
 ///
 /// Driven by the order types the server actually has configured rather than a
@@ -13,9 +13,6 @@ import 'package:apploook/providers/loyalty_provider.dart';
 void showLoyaltyInfoSheet(BuildContext context, LoyaltyProvider loyalty) {
   final l10n = AppLocalizations.of(context);
   final program = loyalty.program;
-  final rate = program.earnRatePercent;
-  final rateLabel =
-      rate == rate.roundToDouble() ? rate.toStringAsFixed(0) : '$rate';
 
   String nameFor(int id) {
     switch (id) {
@@ -65,9 +62,8 @@ void showLoyaltyInfoSheet(BuildContext context, LoyaltyProvider loyalty) {
             ),
             SizedBox(height: 14.h),
             _InfoRow(
-              icon: Icons.percent_rounded,
-              text: '${l10n.walletEarnRateLead} $rateLabel% '
-                  '${l10n.walletEarnRateTrail}',
+              icon: Icons.auto_awesome_rounded,
+              text: l10n.loyaltyInfoEarn,
             ),
             SizedBox(height: 14.h),
             Text(

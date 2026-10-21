@@ -806,6 +806,9 @@ class MenuService {
             item['pos_orderable'] is bool ? item['pos_orderable'] as bool : null,
         crystalPoints: Product.parseSievesId(item['crystal_points']),
         isCrystalOnly: item['is_crystal_only'] == true,
+        crystalPriceA: Product.parseSievesId(item['crystal_price_a']),
+        crystalPriceB: Product.parseSievesId(item['crystal_price_b']),
+        crystalPriceC: Product.parseSievesId(item['crystal_price_c']),
       );
 
       // print(
@@ -945,6 +948,9 @@ class MenuService {
               posOrderable: product.posOrderable,
               crystalPoints: product.crystalPoints,
               isCrystalOnly: product.isCrystalOnly,
+              crystalPriceA: product.crystalPriceA,
+              crystalPriceB: product.crystalPriceB,
+              crystalPriceC: product.crystalPriceC,
             );
             
             // Replace the product in the list

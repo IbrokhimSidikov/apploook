@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/widgets/loyalty_info_sheet.dart';
 
-/// The cashback wallet: card, balance, and the ledger behind it.
+/// The crystal wallet: card, balance, and the ledger behind it.
 ///
 /// Every figure shown here comes from the server. The screen deliberately
-/// shows pending cashback as its own line rather than folding it into the
-/// balance, because pending points cannot be spent yet and a single blended
-/// number is the fastest way to generate support tickets.
+/// shows pending crystals as their own line rather than folding them into
+/// the balance, because pending crystals cannot be spent yet and a single
+/// blended number is the fastest way to generate support tickets.
 class Wallet extends StatefulWidget {
   const Wallet({super.key});
 
@@ -25,8 +27,6 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
-  static final _money = NumberFormat('#,##0', 'en_US');
-
   late Future<List<LoyaltyTransaction>> _history;
 
   @override
@@ -50,7 +50,9 @@ class _WalletState extends State<Wallet> {
     });
   }
 
-  String _soum(int value) => '${_money.format(value)} ${_l10n.currency}';
+  /// Whole crystals with the unit word declined per language; the ledger
+  /// never carries fractions, so there is nothing to format beyond that.
+  String _crystals(int value) => _l10n.crystalsAmount(value);
 
   AppLocalizations get _l10n => AppLocalizations.of(context);
 
@@ -91,8 +93,8 @@ class _WalletState extends State<Wallet> {
                 children: [
                   _CardTile(
                     card: provider.card,
-                    program: provider.program,
-                    money: _soum,
+                    amount: _crystals,
+                    tierLabel: _l10n.tierLevel(provider.card.tier.code),
                     availableLabel: _l10n.walletAvailable,
                     pendingLabel: _l10n.walletPending,
                     pendingHint: _l10n.walletPendingHint,
@@ -103,17 +105,13 @@ class _WalletState extends State<Wallet> {
                     label: _l10n.qrPayTitle,
                     onPressed: () async {
                       await Navigator.pushNamed(context, '/qr-pay');
-                      // Points may have been redeemed at the till while the
+                      // Crystals may have been spent at the till while the
                       // QR page was up - come back showing the real balance.
                       if (mounted) _load();
                     },
                   ),
                   SizedBox(height: 16.h),
-                  _RateStrip(
-                    text: _l10n.walletEarnRateLead,
-                    rate: provider.program.earnRatePercent,
-                    suffix: _l10n.walletEarnRateTrail,
-                  ),
+                  _HintTile(text: _l10n.walletEarnHint),
                   SizedBox(height: 24.h),
                   Text(
                     _l10n.walletHistory,
@@ -139,7 +137,7 @@ class _WalletState extends State<Wallet> {
                           for (final t in rows)
                             _HistoryRow(
                               entry: t,
-                              money: _soum,
+                              amount: _crystals,
                               label: _labelFor(t),
                               pendingLabel: _l10n.walletPending,
                             ),
@@ -165,6 +163,8 @@ class _WalletState extends State<Wallet> {
         return _l10n.walletEntryReturned;
       case LoyaltyEntryKind.expiry:
         return _l10n.walletEntryExpired;
+      case LoyaltyEntryKind.conversion:
+        return _l10n.walletEntryConverted;
       case LoyaltyEntryKind.adjustment:
         return _l10n.walletEntryAdjusted;
     }
@@ -173,8 +173,11 @@ class _WalletState extends State<Wallet> {
 
 class _CardTile extends StatelessWidget {
   final LoyaltyCard card;
-  final LoyaltyProgram program;
-  final String Function(int) money;
+  final String Function(int) amount;
+
+  /// Which crystal price list the customer buys from. Shown on the card so a
+  /// customer on a better level can see why their prices differ.
+  final String tierLabel;
   final String availableLabel;
   final String pendingLabel;
 
@@ -185,8 +188,8 @@ class _CardTile extends StatelessWidget {
 
   const _CardTile({
     required this.card,
-    required this.program,
-    required this.money,
+    required this.amount,
+    required this.tierLabel,
     required this.availableLabel,
     required this.pendingLabel,
     required this.pendingHint,
@@ -216,7 +219,6 @@ class _CardTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 availableLabel.toUpperCase(),
@@ -227,8 +229,10 @@ class _CardTile extends StatelessWidget {
                   color: Colors.white.withOpacity(0.55),
                 ),
               ),
-              Icon(Icons.card_giftcard_rounded,
-                  size: 20.sp, color: AppColors.cxFEC700),
+              SizedBox(width: 8.w),
+              if (!isLoading) _TierPill(label: tierLabel),
+              const Spacer(),
+              SvgPicture.asset(CrystalTheme.asset, width: 22.w, height: 22.w),
             ],
           ),
           SizedBox(height: 6.h),
@@ -239,7 +243,7 @@ class _CardTile extends StatelessWidget {
             )
           else
             Text(
-              money(card.spendable),
+              amount(card.spendable),
               style: TextStyle(
                 fontSize: 30.sp,
                 fontWeight: FontWeight.w800,
@@ -255,7 +259,7 @@ class _CardTile extends StatelessWidget {
                     size: 14.sp, color: Colors.white.withOpacity(0.6)),
                 SizedBox(width: 6.w),
                 Text(
-                  '$pendingLabel: ${money(card.pendingBalance)}',
+                  '$pendingLabel: ${amount(card.pendingBalance)}',
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: Colors.white.withOpacity(0.7),
@@ -322,21 +326,42 @@ class _PayInStoreButton extends StatelessWidget {
   }
 }
 
-class _RateStrip extends StatelessWidget {
-  final String text;
-  final double rate;
-  final String suffix;
-
-  const _RateStrip({
-    required this.text,
-    required this.rate,
-    required this.suffix,
-  });
+/// The customer's price level, as a small chip in the card's header row.
+class _TierPill extends StatelessWidget {
+  final String label;
+  const _TierPill({required this.label});
 
   @override
   Widget build(BuildContext context) {
-    final formatted =
-        rate == rate.roundToDouble() ? rate.toStringAsFixed(0) : rate.toString();
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        color: CrystalTheme.violetBright.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border.all(color: CrystalTheme.violetBright.withValues(alpha: 0.7)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 10.sp,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+/// One-line reminder of how crystals are earned. There is no rate to quote
+/// any more - every product carries its own crystal figure - so this is a
+/// plain sentence rather than a number.
+class _HintTile extends StatelessWidget {
+  final String text;
+  const _HintTile({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
@@ -345,11 +370,11 @@ class _RateStrip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.percent_rounded, size: 18.sp, color: AppColors.cx1B8A4C),
+          SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(
-              '$text $formatted% $suffix',
+              text,
               style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade800),
             ),
           ),
@@ -361,13 +386,13 @@ class _RateStrip extends StatelessWidget {
 
 class _HistoryRow extends StatelessWidget {
   final LoyaltyTransaction entry;
-  final String Function(int) money;
+  final String Function(int) amount;
   final String label;
   final String pendingLabel;
 
   const _HistoryRow({
     required this.entry,
-    required this.money,
+    required this.amount,
     required this.label,
     required this.pendingLabel,
   });
@@ -435,7 +460,7 @@ class _HistoryRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '${isCredit ? '+' : '−'}${money(entry.amount.abs())}',
+                '${isCredit ? '+' : '−'}${amount(entry.amount.abs())}',
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w700,
@@ -474,6 +499,8 @@ class _HistoryRow extends StatelessWidget {
         return Icons.replay_rounded;
       case LoyaltyEntryKind.expiry:
         return Icons.hourglass_disabled_rounded;
+      case LoyaltyEntryKind.conversion:
+        return Icons.swap_horiz_rounded;
       case LoyaltyEntryKind.adjustment:
         return Icons.tune_rounded;
     }

@@ -2,13 +2,17 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/l10n/app_localizations.dart';
-import 'package:apploook/models/crystal_reward.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
+import 'package:apploook/models/crystal_pricing.dart';
+import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/pages/homenew.dart';
 import 'package:apploook/providers/locale_provider.dart';
+import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/providers/product_configuration_controller.dart';
 import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/widget/modifier_group_widget.dart';
+import 'package:apploook/widgets/crystal_pay_toggle.dart';
 import 'package:apploook/widgets/crystal_reward_card.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -39,7 +43,12 @@ const double _kHeroAspectRatio = 600 / 400;
 class Details extends StatefulWidget {
   final dynamic product;
 
-  const Details({super.key, this.product});
+  /// Opens the page with "pay with crystals" already on, for entry points
+  /// that are about spending crystals (the crystal shop). The customer can
+  /// still switch back to money unless the product is crystal-only.
+  final bool payWithCrystals;
+
+  const Details({super.key, this.product, this.payWithCrystals = false});
 
   @override
   State<Details> createState() => _DetailsState();
@@ -58,6 +67,35 @@ class _DetailsState extends State<Details> {
   final ValueNotifier<double> _appBarReveal = ValueNotifier<double>(0);
 
   Product get _product => widget.product as Product;
+
+  /// The customer's choice. Only a request: whether the line really goes
+  /// out as a crystal line is decided in [_payingWithCrystals], which also
+  /// needs a session and a tier price for the current configuration.
+  late bool _payWithCrystals;
+
+  bool get _crystalOnly =>
+      CrystalPricing.isCrystalOnly(_product, _configuration.selectedModifiers);
+
+  int? _crystalUnitPrice(LoyaltyTier tier) =>
+      CrystalPricing.unitPrice(_product, _configuration.selectedModifiers, tier);
+
+  /// Whether the "pay with crystals" toggle is offered at all: the customer
+  /// is signed in and this configuration has a crystal price at their tier.
+  bool _crystalOffered(LoyaltyProvider loyalty) =>
+      loyalty.hasSession && _crystalUnitPrice(loyalty.tier) != null;
+
+  /// A crystal-only product is always a crystal line, even when it cannot
+  /// be bought right now; a money-priced product only while the toggle is
+  /// on and the offer stands, so changing modifiers to an unpriced
+  /// combination silently falls back to money.
+  bool _payingWithCrystals(LoyaltyProvider loyalty) =>
+      _crystalOnly || (_payWithCrystals && _crystalOffered(loyalty));
+
+  /// Crystal-only products cannot go into the cart without a session or
+  /// without a price at the customer's tier: the server would refuse the
+  /// order, so the page refuses first.
+  bool _canAddToCart(LoyaltyProvider loyalty) =>
+      !_crystalOnly || _crystalOffered(loyalty);
 
   String? getDescriptionInLanguage(String languageCode) {
     if (widget.product.description == null) {
@@ -98,6 +136,8 @@ class _DetailsState extends State<Details> {
   void initState() {
     super.initState();
     _configuration = ProductConfigurationController(product: _product);
+    _payWithCrystals = widget.payWithCrystals ||
+        CrystalPricing.isCrystalOnly(_product, const []);
     for (final group in _configuration.groups) {
       _groupKeys[group.id] = GlobalKey();
     }
@@ -195,8 +235,13 @@ class _DetailsState extends State<Details> {
       return;
     }
 
+    final loyalty = context.read<LoyaltyProvider>();
+    if (!_canAddToCart(loyalty)) return;
+
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    cartProvider.addToCartWithModifiers(_configuration.buildCartItem());
+    cartProvider.addToCartWithModifiers(_configuration.buildCartItem(
+      payWithCrystals: _payingWithCrystals(loyalty),
+    ));
     cartProvider.logItems();
     Navigator.pop(context);
   }
@@ -303,7 +348,8 @@ class _DetailsState extends State<Details> {
 
   // ── Product header ────────────────────────────────────────────────────────
 
-  Widget _buildHeader() {
+  Widget _buildHeader(LoyaltyProvider loyalty) {
+    final payingWithCrystals = _payingWithCrystals(loyalty);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -331,18 +377,72 @@ class _DetailsState extends State<Details> {
           ),
         ),
         SizedBox(height: 10.h),
+        // The soum price steps back, struck through, while the line is
+        // going out for crystals; the crystal figure takes its place.
         Text(
           '${_priceFormat.format(_configuration.basePrice)} UZS',
           style: TextStyle(
             fontFamily: _kFont,
-            fontSize: 19.sp,
+            fontSize: payingWithCrystals ? 15.sp : 19.sp,
             fontWeight: FontWeight.w700,
             height: 1.2,
-            color: Colors.black,
+            color: payingWithCrystals ? _kTextSecondary : Colors.black,
+            decoration:
+                payingWithCrystals ? TextDecoration.lineThrough : null,
           ),
         ),
+        _buildCrystalChoice(loyalty),
       ],
     );
+  }
+
+  /// Crystal price and the "pay with crystals" choice under the money
+  /// price. Nothing for a product that is not sold for crystals; a
+  /// crystal-only product always says so, even to a signed-out customer.
+  Widget _buildCrystalChoice(LoyaltyProvider loyalty) {
+    final crystalOnly = _crystalOnly;
+    final unitPrice = _crystalUnitPrice(loyalty.tier);
+    final offered = _crystalOffered(loyalty);
+    if (!offered && !crystalOnly) return const SizedBox.shrink();
+
+    final Widget body;
+    if (offered) {
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CrystalPriceText(crystals: unitPrice!, fontSize: 19.sp),
+          SizedBox(height: 10.h),
+          CrystalPayToggle(
+            crystalPrice: unitPrice,
+            value: _payWithCrystals,
+            crystalOnly: crystalOnly,
+            onChanged: crystalOnly
+                ? null
+                : (value) => setState(() => _payWithCrystals = value),
+          ),
+        ],
+      );
+    } else if (!loyalty.hasSession) {
+      body = const CrystalOnlySignInHint();
+    } else {
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CrystalOnlyBadge(),
+          SizedBox(height: 4.h),
+          Text(
+            AppLocalizations.of(context).crystalNotSoldAtTier,
+            style: TextStyle(
+              fontFamily: _kFont,
+              fontSize: 12.sp,
+              height: 1.3,
+              color: CrystalTheme.textSecondary,
+            ),
+          ),
+        ],
+      );
+    }
+    return Padding(padding: EdgeInsets.only(top: 10.h), child: body);
   }
 
   Widget _buildDescription() {
@@ -372,10 +472,13 @@ class _DetailsState extends State<Details> {
   }
 
   /// Crystal promo under the description. Scales with the quantity stepper
-  /// so the figure is always what this order would actually earn.
-  Widget _buildCrystalReward() {
+  /// and the chosen modifiers so the figure is always what this order would
+  /// actually earn - and a line paid with crystals earns nothing.
+  Widget _buildCrystalReward(LoyaltyProvider loyalty) {
+    if (_payingWithCrystals(loyalty)) return const SizedBox.shrink();
     final crystals =
-        CrystalReward.forQuantity(_product, _configuration.quantity);
+        CrystalPricing.unitPoints(_product, _configuration.selectedModifiers) *
+            _configuration.quantity;
     if (crystals <= 0) return const SizedBox.shrink();
     return Padding(
       padding: EdgeInsets.only(top: 18.h),
@@ -442,11 +545,20 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  Widget _buildAddToCartButton(bool canOrder) {
+  Widget _buildAddToCartButton(bool canOrder, LoyaltyProvider loyalty) {
+    final payingWithCrystals = _payingWithCrystals(loyalty);
+    final crystalTotal = payingWithCrystals
+        ? (_crystalUnitPrice(loyalty.tier) ?? 0) * _configuration.quantity
+        : 0;
+    final priceLabel = payingWithCrystals
+        ? AppLocalizations.of(context).crystalsAmount(crystalTotal)
+        : '${_priceFormat.format(_configuration.totalPrice)} UZS';
     // The label wraps to a second line rather than being truncated — some
     // locales are far longer than "Add to cart", and the button grows with it.
     return ElevatedButton(
-      onPressed: canOrder ? _addToCart : null, // Disabled after cutoff time
+      // Disabled after cutoff time, and for a crystal-only product the
+      // customer cannot buy (signed out or no price at their tier).
+      onPressed: canOrder && _canAddToCart(loyalty) ? _addToCart : null,
       style: ElevatedButton.styleFrom(
         backgroundColor: _kPrimary,
         foregroundColor: Colors.black,
@@ -479,7 +591,7 @@ class _DetailsState extends State<Details> {
           ),
           SizedBox(width: 12.w),
           Text(
-            '${_priceFormat.format(_configuration.totalPrice)} UZS',
+            priceLabel,
             style: TextStyle(
               fontFamily: _kFont,
               fontSize: 15.sp,
@@ -531,7 +643,7 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  Widget _buildBottomBar() {
+  Widget _buildBottomBar(LoyaltyProvider loyalty) {
     final canOrder = _isOrderingTimeAllowed();
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -558,7 +670,7 @@ class _DetailsState extends State<Details> {
                 children: [
                   _buildQuantitySelector(),
                   SizedBox(width: 12.w),
-                  Expanded(child: _buildAddToCartButton(canOrder)),
+                  Expanded(child: _buildAddToCartButton(canOrder, loyalty)),
                 ],
               ),
             ],
@@ -572,6 +684,9 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
+    // Watched here, outside the configuration listeners, so a tier or
+    // session change re-prices the page just like a modifier change does.
+    final loyalty = context.watch<LoyaltyProvider>();
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListenableBuilder(
@@ -588,9 +703,9 @@ class _DetailsState extends State<Details> {
               padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  _buildHeader(),
+                  _buildHeader(loyalty),
                   _buildDescription(),
-                  _buildCrystalReward(),
+                  _buildCrystalReward(loyalty),
                   // Modifier Groups Section
                   if (_configuration.hasModifiers) _buildModifierGroups(),
                 ]),
@@ -601,7 +716,7 @@ class _DetailsState extends State<Details> {
       ),
       bottomNavigationBar: ListenableBuilder(
         listenable: _configuration,
-        builder: (context, _) => _buildBottomBar(),
+        builder: (context, _) => _buildBottomBar(loyalty),
       ),
     );
   }

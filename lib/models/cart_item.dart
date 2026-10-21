@@ -11,11 +11,38 @@ class CartItem {
   int quantity;
   final List<SelectedModifier> selectedModifiers;
 
+  /// Whether the customer chose to settle this line with crystals rather
+  /// than money. Crystal-only products start true; everything else starts
+  /// false and is toggled in the cart. The server re-prices on every change,
+  /// so this is a request, not a price.
+  bool payWithCrystals;
+
+  /// What the server last quoted for this line while [payWithCrystals] was
+  /// on: the crystal price of the whole line and its soum equivalent, which
+  /// is what the POS order carries for it. Null until a quote has answered
+  /// or when the line is paid with money.
+  int? quotedCrystalPrice;
+  int? quotedCrystalSoum;
+
   CartItem({
     required this.product,
     this.quantity = 1,
     this.selectedModifiers = const [],
-  }) : id = ++_nextId;
+    bool? payWithCrystals,
+  })  : id = ++_nextId,
+        payWithCrystals = payWithCrystals ?? _crystalOnly(product);
+
+  static bool _crystalOnly(dynamic product) {
+    try {
+      return product.isCrystalOnly == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Soum this line contributes to the cash part of the order. Zero while
+  /// it is being paid with crystals.
+  double get moneyTotal => payWithCrystals ? 0 : totalPrice;
 
   /// Identity of the product regardless of configuration.
   String get productKey {

@@ -1,42 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:apploook/constants/app_colors.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 
-/// The "spend your cashback" block on the checkout screen.
+/// The crystal summary block on the checkout screen.
 ///
-/// It renders nothing at all unless the customer has a session, a usable
-/// balance and a basket the points can apply to - an always-visible but
-/// permanently disabled control is worse than no control.
+/// There is nothing to dial in here: which lines are paid with crystals was
+/// decided in the cart. This block tells the customer what that decision
+/// means for this order - crystals leaving the card, soum still to pay, and
+/// crystals coming back - and, when the server refused the basket as
+/// configured, why and what to change.
 ///
 /// Every number shown comes from `/loyalty/quote`. The widget does no
-/// arithmetic of its own, so what the customer sees is exactly what the server
-/// will reserve.
+/// arithmetic of its own, so what the customer sees is exactly what the
+/// server will reserve.
 class LoyaltyCheckoutSection extends StatelessWidget {
-  /// Food subtotal in soum, excluding delivery.
-  final int subtotal;
-
-  /// Delivery fee in soum.
-  final int deliveryFee;
-
-  /// Whether points may be spent on this order.
-  ///
-  /// False for card payments: the RahmatPay invoice carries fiscal (OFD) line
-  /// items that must sum to the charged amount, so discounting the charge
-  /// without a matching OFD line would produce an invalid receipt. Earning is
-  /// unaffected and stays on for every payment method.
-  final bool allowRedeem;
-
-  const LoyaltyCheckoutSection({
-    super.key,
-    required this.subtotal,
-    this.deliveryFee = 0,
-    this.allowRedeem = true,
-  });
+  const LoyaltyCheckoutSection({super.key});
 
   static final _money = NumberFormat('#,##0', 'en_US');
 
@@ -51,135 +36,115 @@ class LoyaltyCheckoutSection extends StatelessWidget {
     if (!loyalty.hasSession) return const SizedBox.shrink();
 
     final quote = loyalty.quote;
-    final earn = loyalty.projectedEarn;
-
-    // Nothing to spend, but there is still cashback coming - tell them that
-    // much, since it is the whole reason the programme exists.
-    if (quote != null && (!allowRedeem || !loyalty.canOfferCashback)) {
-      if (earn <= 0) return const SizedBox.shrink();
-      return _EarnOnlyNote(
-        text: '${l10n.checkoutYouWillEarn} '
-            '${_money.format(earn)} ${l10n.currency}',
-      );
-    }
-
     if (quote == null) return const SizedBox.shrink();
 
-    final step = loyalty.program.redeemRounding.clamp(1, 1000000);
-    final maxPoints = loyalty.maxRedeemable;
-    final divisions = (maxPoints / step).floor().clamp(1, 1000);
+    final spend = loyalty.appliedCrystals;
+    final earn = loyalty.projectedEarn;
+    final blocked = loyalty.orderBlocked;
+
+    // Nothing in play: no crystal lines, nothing earned. Stay out of the way.
+    if (spend <= 0 && earn <= 0 && !blocked) return const SizedBox.shrink();
+
+    String? warning;
+    if (quote.blockedReason == 'insufficient_crystals') {
+      warning = l10n.checkoutNotEnoughCrystals(loyalty.shortfall);
+    } else if (quote.blockedReason == 'line_problems') {
+      warning = l10n.checkoutCrystalLineProblem;
+    } else if (blocked) {
+      warning = l10n.checkoutCashbackChanged;
+    }
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(
+          color: blocked ? const Color(0xFFE57373) : Colors.grey.shade200,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.card_giftcard_rounded,
-                  size: 18.sp, color: AppColors.cxFEC700),
+              SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
               SizedBox(width: 8.w),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.checkoutUseCashback,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      '${_money.format(quote.spendable)} ${l10n.currency} '
-                      '${l10n.checkoutCashbackAvailable}',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  l10n.walletTitle,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-              Switch(
-                value: loyalty.useCashback,
-                activeThumbColor: AppColors.cx1B8A4C,
-                onChanged: (v) => loyalty.setUseCashback(v),
+              Text(
+                '${_money.format(quote.spendable)} ${l10n.crystalWord(quote.spendable)} '
+                '${l10n.checkoutCashbackAvailable}',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Colors.grey.shade600,
+                ),
               ),
+              if (loyalty.isQuoting) ...[
+                SizedBox(width: 8.w),
+                SizedBox(
+                  height: 12.h,
+                  width: 12.h,
+                  child: const CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
             ],
           ),
-          if (loyalty.useCashback) ...[
-            Row(
-              children: [
-                Expanded(
-                  child: Slider(
-                    value: loyalty.requestedPoints
-                        .toDouble()
-                        .clamp(0, maxPoints.toDouble()),
-                    min: 0,
-                    max: maxPoints.toDouble(),
-                    divisions: divisions,
-                    activeColor: AppColors.cx1B8A4C,
-                    label: _money.format(loyalty.requestedPoints),
-                    onChanged: (v) => loyalty.requestPoints(v.round()),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () => loyalty.requestPoints(maxPoints),
-                  child: Text(
-                    l10n.checkoutCashbackAll,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.cx1B8A4C,
-                    ),
-                  ),
-                ),
-              ],
+          if (spend > 0) ...[
+            SizedBox(height: 8.h),
+            _Line(
+              label: l10n.checkoutCrystalsToSpend,
+              value: '− ${l10n.crystalsAmount(spend)}',
+              valueColor: CrystalTheme.violetDeep,
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.checkoutCashbackApplied,
-                  style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700),
-                ),
-                loyalty.isQuoting
-                    ? SizedBox(
-                        height: 14.h,
-                        width: 14.h,
-                        child: const CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(
-                        '− ${_money.format(loyalty.appliedPoints)} ${l10n.currency}',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.cx1B8A4C,
-                        ),
-                      ),
-              ],
+            SizedBox(height: 4.h),
+            _Line(
+              label: l10n.checkoutToPay,
+              value: '${_money.format(quote.payable)} ${l10n.currency}',
+              valueColor: AppColors.cx0B0B0B,
             ),
           ],
           if (earn > 0) ...[
-            SizedBox(height: 4.h),
+            SizedBox(height: 6.h),
             Row(
               children: [
-                Icon(Icons.savings_rounded,
+                Icon(Icons.auto_awesome_rounded,
                     size: 13.sp, color: Colors.grey.shade500),
                 SizedBox(width: 6.w),
                 Text(
-                  '${l10n.checkoutYouWillEarn} '
-                  '${_money.format(earn)} ${l10n.currency}',
+                  '${l10n.checkoutYouWillEarn} ${l10n.crystalsAmount(earn)}',
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (warning != null) ...[
+            SizedBox(height: 8.h),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.error_outline_rounded,
+                    size: 15.sp, color: const Color(0xFFC62828)),
+                SizedBox(width: 6.w),
+                Expanded(
+                  child: Text(
+                    warning,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: const Color(0xFFC62828),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -191,32 +156,35 @@ class LoyaltyCheckoutSection extends StatelessWidget {
   }
 }
 
-class _EarnOnlyNote extends StatelessWidget {
-  final String text;
-  const _EarnOnlyNote({required this.text});
+class _Line extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  const _Line({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 8.h),
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.savings_rounded, size: 16.sp, color: AppColors.cx1B8A4C),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade800),
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

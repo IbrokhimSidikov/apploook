@@ -6,6 +6,33 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:apploook/config/branch_config.dart';
 
 class RahmatPayService {
+  /// True when the cart line is settled with crystals rather than money.
+  static bool _paidWithCrystals(dynamic item) {
+    try {
+      return item.payWithCrystals == true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Soum the POS books for a cart line.
+  ///
+  /// A line paid with crystals goes out at its crystal price in soum - the
+  /// quote's `crystal_price` times the programme rate, copied onto the line
+  /// by LoyaltyProvider - so the order value equals the cash line plus the
+  /// crystal payment line exactly. A crystal line the server never priced
+  /// (no quote yet) falls back to its money price; the checkout refuses to
+  /// place such an order, so this only matters for logging.
+  static double posLineTotal(dynamic item) {
+    if (_paidWithCrystals(item)) {
+      try {
+        final int? soum = item.quotedCrystalSoum as int?;
+        if (soum != null) return soum.toDouble();
+      } catch (_) {}
+    }
+    return (item.totalPrice as num).toDouble();
+  }
+
   static const String _baseUrl = 'https://api.v3.sievesapp.com';
   static const String _createInvoiceEndpoint = '$_baseUrl/rahmat-pay/create-invoice';
   
@@ -52,10 +79,10 @@ class RahmatPayService {
     String? additionalPhone,
     String? restaurantId,
     double? deliveryFee,
-    // Cashback points applied to this order, in UZS. [amount] is what the
-    // card is actually charged (already net of the points, in tiyin); the POS
-    // order keeps its full value and the payment splits into a card line and
-    // a loyalty line so accounting sees both.
+    // The crystal payment on this order, in UZS (crystals x rate). [amount]
+    // is what the card is actually charged (the money lines, in tiyin); the
+    // POS order value is the two together and the payment splits into a card
+    // line and a crystal line so accounting sees both.
     int cashbackAmount = 0,
     int loyaltyAccountId = LoyaltyPos.defaultAccountId,
     int loyaltyPaymentTypeId = LoyaltyPos.defaultPaymentTypeId,
@@ -81,12 +108,14 @@ class RahmatPayService {
         final String? productUuid = item.product.uuid;
         final String productIdentifier = productUuid ?? item.product.id.toString();
         
+        final double lineTotal = posLineTotal(item);
         return {
           "product_id": productIdentifier,
           "product_name": item.product.name,
-          "total_price": item.totalPrice,
+          "total_price": lineTotal,
           "quantity": item.quantity,
-          "actual_price": (item.totalPrice / item.quantity).toString(),
+          "actual_price": (lineTotal / item.quantity).toString(),
+          "paid_with_crystals": _paidWithCrystals(item),
           "selectedModifiers": item.selectedModifiers
               .map((modifier) => {
                     "modifierId": modifier.modifier.id,
@@ -102,8 +131,12 @@ class RahmatPayService {
         };
       }).toList();
 
-      // Build Rahmat OFD items with static mxik, package_code, and name
-      final List<Map<String, dynamic>> rahmatOfdItems = cartItems.map((item) {
+      // Build Rahmat OFD items with static mxik, package_code, and name.
+      // Lines paid with crystals are not charged to the card, so they are
+      // not fiscal items of this payment and stay out of the receipt.
+      final List<Map<String, dynamic>> rahmatOfdItems = cartItems
+          .where((item) => !_paidWithCrystals(item))
+          .map((item) {
         // Calculate total price including modifiers in tiyin
         final basePrice = (item.product.price * 100).toInt();
         final quantity = item.quantity;
@@ -129,15 +162,15 @@ class RahmatPayService {
         };
       }).toList();
 
-      // The OFD lines above sum to the full basket value, but the card is
-      // charged [amount] - the value net of cashback. The fiscal lines have
-      // to sum to the amount actually charged, so spread the discount across
-      // them pro-rata; the last line absorbs the rounding remainder so the
-      // sum matches exactly.
-      final int discountTiyin = cashbackAmount * 100;
+      // The fiscal lines have to sum to the amount actually charged. They
+      // normally do already (crystal lines are excluded above), but if the
+      // basket and [amount] disagree by any rounding, spread the difference
+      // across the lines pro-rata; the last line absorbs the remainder so
+      // the sum matches exactly.
+      final int grossTotal = rahmatOfdItems.fold<int>(
+          0, (sum, line) => sum + (line['total'] as int));
+      final int discountTiyin = (grossTotal - amount).clamp(0, grossTotal);
       if (discountTiyin > 0 && rahmatOfdItems.isNotEmpty) {
-        final int grossTotal = rahmatOfdItems.fold<int>(
-            0, (sum, line) => sum + (line['total'] as int));
         int remaining = discountTiyin;
         for (var i = 0; i < rahmatOfdItems.length; i++) {
           final line = rahmatOfdItems[i];
@@ -528,9 +561,10 @@ class RahmatPayService {
     required double amount,
     required List<dynamic> cartItems,
     Map<String, String>? additionalHeaders,
-    // Points applied to this order. [amount] is the cash still due; the POS
-    // order's value is the sum of the two, and the payment splits into a
-    // cash line and a loyalty line so accounting sees both.
+    // The crystal payment on this order, in UZS (crystals x rate). [amount]
+    // is the cash still due; the POS order's value is the sum of the two,
+    // and the payment splits into a cash line and a crystal line so
+    // accounting sees both.
     int cashbackAmount = 0,
     int loyaltyAccountId = LoyaltyPos.defaultAccountId,
     int loyaltyPaymentTypeId = LoyaltyPos.defaultPaymentTypeId,
@@ -555,12 +589,14 @@ class RahmatPayService {
         final String? productUuid = item.product.uuid;
         final String productIdentifier = productUuid ?? item.product.id.toString();
         
+        final double lineTotal = posLineTotal(item);
         return {
           "product_id": productIdentifier,
           "product_name": item.product.name,
-          "total_price": item.totalPrice,
+          "total_price": lineTotal,
           "quantity": item.quantity,
-          "actual_price": (item.totalPrice / item.quantity).toString(),
+          "actual_price": (lineTotal / item.quantity).toString(),
+          "paid_with_crystals": _paidWithCrystals(item),
           "selectedModifiers": item.selectedModifiers
               .map((modifier) => {
                     "modifierId": modifier.modifier.id,

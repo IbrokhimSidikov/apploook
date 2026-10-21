@@ -26,6 +26,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/models/crystal_pricing.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/widgets/loyalty_checkout_section.dart';
@@ -67,10 +69,9 @@ class _CheckoutState extends State<Checkout> {
       _selectedIndex == 0 ? orderPrice : orderPrice - _packagePrice;
 
   // Last basket the loyalty quote was refreshed for, so the post-frame sync
-  // fires on a real change instead of on every rebuild.
-  int _loyaltyQuotedSubtotal = -1;
-  int _loyaltyQuotedFee = -1;
-  int _loyaltyQuotedOrderTypeId = -1;
+  // fires on a real change instead of on every rebuild. The key covers every
+  // line's identity, quantity and payment choice plus the order type and fee.
+  String _loyaltyQuotedKey = '';
 
   /// The POS order type for the currently selected tab.
   ///
@@ -90,72 +91,114 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
-  /// Delivery is excluded from cashback entirely - it neither earns nor spends.
+  /// Delivery is excluded from crystals entirely - it neither earns nor spends.
   bool get _loyaltyEligibleOrderType => _selectedIndex != 0;
 
-  /// Points can be spent on cash and card orders alike.
+  /// Crystals can be spent on cash and card orders alike.
   ///
-  /// A card order is charged through RahmatPay for the amount left after the
-  /// points; the invoice's fiscal (OFD) lines are discounted pro-rata inside
-  /// createInvoice so they still sum to the amount actually charged. Delivery
-  /// stays excluded via [_loyaltyEligibleOrderType]. Earning is unaffected
-  /// and works on every payment method.
-  bool get _canRedeemLoyalty =>
-      _loyaltyEligibleOrderType &&
-      const ['cash', 'card'].contains((selectedOption ?? '').toLowerCase());
+  /// A card order is charged through RahmatPay for the money lines only; the
+  /// crystal lines stay out of the invoice's fiscal (OFD) items, so the
+  /// receipt still sums to the amount actually charged. Delivery stays
+  /// excluded via [_loyaltyEligibleOrderType]. Earning works on every
+  /// payment method.
+  bool get _canRedeemLoyalty => _loyaltyEligibleOrderType;
 
-  void _syncLoyaltyQuote(int subtotal, int fee) {
-    if (subtotal <= 0) return;
+  /// Cart lines that reach the POS for the selected tab: the bag is only
+  /// charged on delivery, so every other tab leaves it out.
+  List<CartItem> _posItems(CartProvider cart) => _selectedIndex == 0
+      ? cart.cartItems
+      : cart.cartItems.where((item) => item.product.name != 'Пакет').toList();
+
+  /// Lines the customer chose to pay with crystals. Empty on delivery, where
+  /// crystals cannot be spent, so every line there is a money line.
+  List<CartItem> _crystalLines(CartProvider cart) => _canRedeemLoyalty
+      ? _posItems(cart).where((item) => item.payWithCrystals).toList()
+      : const [];
+
+  /// Money price of the crystal lines, taken off the cash total shown and
+  /// charged. The POS books those lines at their crystal price in soum
+  /// instead (see RahmatPayService.posLineTotal).
+  double _crystalLinesPrice(CartProvider cart) => _crystalLines(cart)
+      .fold<double>(0, (sum, item) => sum + item.totalPrice);
+
+  /// True when the server refused the basket as configured, or when a
+  /// crystal line cannot be priced at all (no session). The order must not
+  /// go out until the customer changes something.
+  bool _crystalsBlocked(CartProvider cart, LoyaltyProvider loyalty) {
+    final crystalLines = _crystalLines(cart);
+    if (crystalLines.isEmpty) return false;
+    if (!loyalty.hasSession) return true;
+    if (loyalty.orderBlocked) return true;
+    // Every crystal line must carry a server price before it is sent.
+    return crystalLines.any((item) => item.quotedCrystalSoum == null);
+  }
+
+  void _syncLoyaltyQuote(CartProvider cart, int fee) {
+    final items = _posItems(cart);
+    if (items.isEmpty) return;
     final typeId = _posOrderTypeId;
-    if (subtotal == _loyaltyQuotedSubtotal &&
-        fee == _loyaltyQuotedFee &&
-        typeId == _loyaltyQuotedOrderTypeId) {
-      return;
-    }
-    _loyaltyQuotedSubtotal = subtotal;
-    _loyaltyQuotedFee = fee;
-    _loyaltyQuotedOrderTypeId = typeId;
+    final key = [
+      for (final item in items)
+        '${item.id}:${item.quantity}:${item.payWithCrystals}',
+      'type=$typeId',
+      'fee=$fee',
+    ].join(',');
+    if (key == _loyaltyQuotedKey) return;
+    _loyaltyQuotedKey = key;
     context.read<LoyaltyProvider>().beginCheckout(
-          subtotal: subtotal,
+          items: items,
           orderTypeId: typeId,
           deliveryFee: fee,
         );
   }
 
-  /// Reserves points before the order is sent.
+  /// Reserves crystals before the order is sent.
   ///
   /// Reserving first is what makes the flow safe: the order carries the hold's
-  /// reference in its comment, and the points are only actually spent once the
-  /// order comes back accepted. If anything below fails, the hold is released
-  /// (and expires on its own within the TTL even if the app dies here).
+  /// reference in its comment, and the crystals are only actually spent once
+  /// the order comes back accepted. If anything below fails, the hold is
+  /// released (and expires on its own within the TTL even if the app dies
+  /// here).
   Future<({LoyaltyHold? hold, bool aborted})> _reserveLoyalty(
-      LoyaltyProvider loyalty) async {
-    if (!loyalty.hasSession) return (hold: null, aborted: false);
-    if (!_canRedeemLoyalty && loyalty.useCashback) {
-      await loyalty.setUseCashback(false);
+    LoyaltyProvider loyalty, {
+    required bool crystalsInPlay,
+  }) async {
+    if (!loyalty.hasSession) {
+      return (hold: null, aborted: crystalsInPlay);
     }
     try {
-      return (hold: await loyalty.reserve(), aborted: false);
-    } on LoyaltyQuoteStaleException {
-      // The balance moved between the quote and the reservation. This is
-      // recoverable and expected, not an error: show the new figures and let
-      // the customer confirm again rather than placing the order at a price
-      // they did not agree to.
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).checkoutCashbackChanged),
-            backgroundColor: Colors.orange,
-          ),
-        );
+      final hold = await loyalty.reserve();
+      // Crystal lines go to the POS at their crystal price. Without a hold
+      // nothing backs that price, so the order would be underpaid.
+      if (crystalsInPlay && hold == null) {
+        _showLoyaltySnack(AppLocalizations.of(context).checkoutCashbackChanged);
+        return (hold: null, aborted: true);
       }
+      return (hold: hold, aborted: false);
+    } on LoyaltyQuoteStaleException {
+      // The balance or a price moved between the quote and the reservation.
+      // This is recoverable and expected, not an error: show the new figures
+      // and let the customer confirm again rather than placing the order at
+      // a price they did not agree to.
+      _showLoyaltySnack(AppLocalizations.of(context).checkoutCashbackChanged);
       return (hold: null, aborted: true);
     } catch (e) {
-      // Loyalty must never block an order. Fall through and place it at the
-      // undiscounted price.
-      print('Loyalty reserve failed, continuing without cashback: $e');
+      // Earning must never block an order: fall through and place it at the
+      // normal price. Spending must - see above.
+      print('Loyalty reserve failed: $e');
+      if (crystalsInPlay) {
+        _showLoyaltySnack(AppLocalizations.of(context).checkoutCashbackChanged);
+        return (hold: null, aborted: true);
+      }
       return (hold: null, aborted: false);
     }
+  }
+
+  void _showLoyaltySnack(String text) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), backgroundColor: Colors.orange),
+    );
   }
 
   double deliveryFee = 0;
@@ -597,25 +640,34 @@ class _CheckoutState extends State<Checkout> {
       }
       
       print('Filtered cart items count: ${filteredCartItems.length}');
-      print('Order value before cashback: $adjustedTotal UZS');
+      print('Order value before crystals: $adjustedTotal UZS');
 
-      // Reserve cashback before the invoice is created - same contract as the
-      // cash flow: the hold's reference rides in the order note, and the
-      // points are only actually spent once the payment is confirmed.
-      final reservation = await _reserveLoyalty(loyaltyProvider);
-      if (reservation.aborted) return;
+      // Reserve crystals before the invoice is created - same contract as
+      // the cash flow: the hold's reference rides in the order note, and the
+      // crystals are only actually spent once the payment is confirmed.
+      final bool crystalsInPlay = _crystalLines(cartProvider).isNotEmpty;
+      final reservation = await _reserveLoyalty(
+        loyaltyProvider,
+        crystalsInPlay: crystalsInPlay,
+      );
+      if (reservation.aborted) {
+        setState(() => _isProcessing = false);
+        return;
+      }
       loyaltyHold = reservation.hold;
-      final int loyaltyPoints = loyaltyHold?.appliedPoints ?? 0;
+      // The crystal payment in soum, for the POS payment line.
+      final int loyaltyPoints = loyaltyHold?.appliedSoum ?? 0;
       if (loyaltyHold != null) {
         finalNote = finalNote.isEmpty
             ? loyaltyHold.orderNoteRef
             : '$finalNote\n${loyaltyHold.orderNoteRef}';
       }
 
-      // Rahmat is charged only what is left after the points; the POS order
-      // keeps its full value through the split transaction lines.
-      final double chargedTotal = adjustedTotal - loyaltyPoints;
-      print('Charging Rahmat: $chargedTotal UZS (cashback: $loyaltyPoints)');
+      // Rahmat is charged for the money lines only; the crystal lines reach
+      // the POS at their crystal price and are settled by the crystal line.
+      final double chargedTotal =
+          adjustedTotal - _crystalLinesPrice(cartProvider);
+      print('Charging Rahmat: $chargedTotal UZS (crystals: $loyaltyPoints)');
 
       final invoiceResult = await RahmatPayService.createInvoice(
         branchName: branchName,
@@ -1036,19 +1088,20 @@ class _CheckoutState extends State<Checkout> {
         .where((item) => item.product.name == 'Пакет')
         .fold<double>(0, (sum, item) => sum + item.totalPrice);
 
-    // Refresh the server-side quote whenever the basket, the selected tab or
-    // the delivery fee moves. Post-frame so it never fires mid-build. Quoted
-    // on the effective price so the points offered match the real charge.
+    // Refresh the server-side quote whenever the basket, a line's payment
+    // choice, the selected tab or the delivery fee moves. Post-frame so it
+    // never fires mid-build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _syncLoyaltyQuote(_effectiveOrderPrice.round(), deliveryFee.round());
-      }
+      if (mounted) _syncLoyaltyQuote(cartProvider, deliveryFee.round());
     });
 
-    // What the points actually take off this bill. Zero unless redemption is
-    // allowed for the chosen payment method.
-    final int loyaltyDiscount =
-        _canRedeemLoyalty ? context.watch<LoyaltyProvider>().appliedPoints : 0;
+    // Rebuild on every quote so the summary block and the button state
+    // follow the server's answer.
+    context.watch<LoyaltyProvider>();
+
+    // What the crystal lines take off the cash total. Zero on delivery,
+    // where every line is paid with money.
+    final double loyaltyDiscount = _crystalLinesPrice(cartProvider);
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
       var itemTotal = item.totalPrice;
@@ -1956,20 +2009,10 @@ class _CheckoutState extends State<Checkout> {
                   setState(() {
                     selectedOption = value;
                   });
-                  // Drop any dialled-in points when switching to a payment
-                  // method that cannot redeem them (see _canRedeemLoyalty).
-                  if (!_canRedeemLoyalty) {
-                    context.read<LoyaltyProvider>().setUseCashback(false);
-                  }
                 },
               ),
             ),
-            if (_loyaltyEligibleOrderType)
-              LoyaltyCheckoutSection(
-                subtotal: _effectiveOrderPrice.round(),
-                deliveryFee: 0,
-                allowRedeem: _canRedeemLoyalty,
-              ),
+            if (_loyaltyEligibleOrderType) const LoyaltyCheckoutSection(),
             const SizedBox(height: 40),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 15.w),
@@ -2139,6 +2182,33 @@ class _CheckoutState extends State<Checkout> {
                         }
                       }
 
+                      // Crystal lines are priced by the server. Refuse to
+                      // place the order while it says the basket cannot be
+                      // settled as configured (not enough crystals, a line
+                      // that cannot be paid that way) or while no session
+                      // can price them at all.
+                      final l10n = AppLocalizations.of(context);
+                      final loyaltyState = context.read<LoyaltyProvider>();
+                      if (_selectedIndex == 0 &&
+                          cartProvider.cartItems
+                              .any(CrystalPricing.lineIsCrystalOnly)) {
+                        _showLoyaltySnack(l10n.crystalOnlyNotOnDelivery);
+                        return;
+                      }
+                      if (_crystalsBlocked(cartProvider, loyaltyState)) {
+                        _showLoyaltySnack(!loyaltyState.hasSession
+                            ? l10n.crystalOnlyNeedsSignIn
+                            : loyaltyState.blockedReason ==
+                                    'insufficient_crystals'
+                                ? l10n.checkoutNotEnoughCrystals(
+                                    loyaltyState.shortfall)
+                                : loyaltyState.blockedReason ==
+                                        'line_problems'
+                                    ? l10n.checkoutCrystalLineProblem
+                                    : l10n.checkoutCashbackChanged);
+                        return;
+                      }
+
                       setState(() {
                         _isProcessing = true; // Start processing
                       });
@@ -2217,8 +2287,11 @@ class _CheckoutState extends State<Checkout> {
                         // reference rides along in the order comment so the
                         // backend can match the order when it comes back from
                         // the POS; the points are only spent once we commit.
-                        final reservation =
-                            await _reserveLoyalty(loyaltyProvider);
+                        final reservation = await _reserveLoyalty(
+                          loyaltyProvider,
+                          crystalsInPlay:
+                              _crystalLines(cartProvider).isNotEmpty,
+                        );
                         if (reservation.aborted) {
                           setState(() {
                             _isProcessing = false;
@@ -2226,16 +2299,19 @@ class _CheckoutState extends State<Checkout> {
                           return;
                         }
                         final loyaltyHold = reservation.hold;
-                        final int loyaltyPoints = loyaltyHold?.appliedPoints ?? 0;
+                        // The crystal payment in soum, for the POS line.
+                        final int loyaltyPoints =
+                            loyaltyHold?.appliedSoum ?? 0;
                         final String loyaltyComment = loyaltyHold == null
                             ? commented
                             : (commented.isEmpty
                                 ? loyaltyHold.orderNoteRef
                                 : '$commented\n${loyaltyHold.orderNoteRef}');
-                        // Effective price already excludes the package on
-                        // non-delivery tabs, matching what is shown above.
-                        final double loyaltyTotal =
-                            _effectiveOrderPrice - loyaltyPoints;
+                        // Cash due: the effective price (already without
+                        // the package on non-delivery tabs) minus the money
+                        // price of the lines paid with crystals.
+                        final double loyaltyTotal = _effectiveOrderPrice -
+                            _crystalLinesPrice(cartProvider);
 
                         // Handle different order types
                         if (_selectedIndex == 0) {
@@ -2321,9 +2397,9 @@ class _CheckoutState extends State<Checkout> {
                           throw Exception('Order could not be submitted');
                         }
 
-                        // The order was accepted: spend the reserved points and
-                        // book the cashback as pending. It only becomes
-                        // spendable once the order is actually delivered.
+                        // The order was accepted: spend the reserved crystals
+                        // and book the earned ones as pending. They only
+                        // become spendable once the order is completed.
                         if (loyaltyHold != null) {
                           try {
                             await loyaltyProvider.confirm();
@@ -2900,8 +2976,8 @@ class _CheckoutState extends State<Checkout> {
     required CartProvider cartProvider,
     bool isInRestaurant = false,
     bool isCarhop = false,
-    // Points applied to this order. [total] is the cash still due; the POS
-    // order's value is the sum of the two.
+    // The crystal payment in soum (crystals x rate). [total] is the cash
+    // still due; the POS order's value is the sum of the two.
     int cashbackAmount = 0,
   }) async {
     final loyaltyProgram = context.read<LoyaltyProvider>().program;
@@ -2927,7 +3003,7 @@ class _CheckoutState extends State<Checkout> {
       // function is a cash order and returns inside the cash branch - and its
       // realistic-looking dead code cost a debugging round.
       debugPrint(
-          'LOYALTY POS: value=$orderValue cash=$total points=$cashbackAmount');
+          'LOYALTY POS: value=$orderValue cash=$total crystals_soum=$cashbackAmount');
 
       // If payment type is CASH, send to custom API endpoint
       if (paymentType.toLowerCase() == 'cash') {

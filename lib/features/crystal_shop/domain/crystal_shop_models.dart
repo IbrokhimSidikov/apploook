@@ -1,9 +1,14 @@
-/// Models for the Crystal Shop: rewards that are bought with crystals only,
-/// and the global leaderboard of crystal collectors.
+/// Models for the Crystal Shop: menu products that can be bought with
+/// crystals, and the global leaderboard of crystal collectors.
 ///
-/// Mirrors the sieves-api-v3 `/crystals` responses. Crystal amounts are
-/// whole numbers; nothing here parses a double.
+/// The catalog is derived from the branch menu already in [MenuService];
+/// the leaderboard mirrors the sieves-api-v3 `/loyalty/leaderboard`
+/// response. Crystal amounts are whole numbers; nothing here parses a double.
 library;
+
+import 'dart:convert';
+
+import 'package:apploook/pages/homenew.dart' show Product;
 
 int _asInt(dynamic v) {
   if (v == null) return 0;
@@ -12,94 +17,49 @@ int _asInt(dynamic v) {
   return int.tryParse(v.toString()) ?? 0;
 }
 
-/// A reward that can be redeemed for crystals.
+/// A menu product offered for crystals, priced at the customer's tier.
 class CrystalShopItem {
-  final String id;
-  final String name;
-  final String description;
+  final Product product;
 
-  /// Either an http(s) URL or a bundled `images/...` asset path.
-  final String imagePath;
+  /// Crystal price of one unit at the customer's tier. Zero when the
+  /// product is crystal-only but carries no price for that tier; the server
+  /// re-prices the line at checkout either way.
   final int crystalPrice;
 
+  const CrystalShopItem({required this.product, required this.crystalPrice});
+
+  String get id => product.uuid.isNotEmpty ? product.uuid : '${product.id}';
+  String get name => product.name;
+  String get imagePath => product.imagePath ?? '';
+
   /// Short label such as "Drinks" or "Combo", used as a tag on the card.
-  final String category;
-  final bool available;
+  String get category => product.categoryTitle;
 
-  const CrystalShopItem({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.imagePath,
-    required this.crystalPrice,
-    this.category = '',
-    this.available = true,
-  });
+  bool get isCrystalOnly => product.isCrystalOnly;
+  bool get available => !product.outOfStock;
 
-  factory CrystalShopItem.fromJson(Map<String, dynamic> json) =>
-      CrystalShopItem(
-        id: json['id']?.toString() ?? '',
-        name: json['name']?.toString() ?? '',
-        description: json['description']?.toString() ?? '',
-        imagePath:
-            (json['image_url'] ?? json['imageUrl'] ?? json['image'])?.toString() ??
-                '',
-        crystalPrice: _asInt(json['crystal_price'] ?? json['crystalPrice']),
-        category: json['category']?.toString() ?? '',
-        available: json['available'] is bool ? json['available'] as bool : true,
-      );
-}
+  /// Products with modifier groups go through the details page so the
+  /// customer can configure them before the line lands in the cart.
+  bool get needsConfiguration => product.modifierGroups.isNotEmpty;
 
-/// Promotional banner shown in the shop carousel.
-class CrystalShopBanner {
-  final String name;
-  final String imagePath;
-
-  const CrystalShopBanner({required this.name, required this.imagePath});
-
-  factory CrystalShopBanner.fromJson(Map<String, dynamic> json) =>
-      CrystalShopBanner(
-        name: json['name']?.toString() ?? '',
-        imagePath:
-            (json['image_url'] ?? json['imageUrl'] ?? json['imagePath'])
-                    ?.toString() ??
-                '',
-      );
-}
-
-/// Everything the shop tab needs in one fetch.
-class CrystalShopCatalog {
-  final List<CrystalShopBanner> banners;
-  final List<CrystalShopItem> items;
-
-  /// The signed-in customer's crystal balance, or null when the backend did
-  /// not include it (no session).
-  final int? balance;
-
-  const CrystalShopCatalog({
-    required this.banners,
-    required this.items,
-    this.balance,
-  });
-
-  factory CrystalShopCatalog.fromJson(Map<String, dynamic> json) {
-    final banners = (json['banners'] as List? ?? const [])
-        .whereType<Map>()
-        .map((b) => CrystalShopBanner.fromJson(b.cast<String, dynamic>()))
-        .where((b) => b.imagePath.isNotEmpty)
-        .toList();
-    final items = (json['items'] as List? ?? const [])
-        .whereType<Map>()
-        .map((i) => CrystalShopItem.fromJson(i.cast<String, dynamic>()))
-        .toList();
-    return CrystalShopCatalog(
-      banners: banners,
-      items: items,
-      balance: json['balance'] == null ? null : _asInt(json['balance']),
-    );
+  /// The description in [languageCode]. The menu sends it either as a map
+  /// of language codes, as that map encoded in a JSON string, or as plain
+  /// text; same handling as the details page.
+  String descriptionFor(String languageCode) {
+    final raw = product.description;
+    if (raw == null) return '';
+    if (raw is Map) return raw[languageCode]?.toString() ?? '';
+    final text = raw.toString().trim();
+    if (text.startsWith('{')) {
+      try {
+        final decoded = json.decode(text);
+        if (decoded is Map) return decoded[languageCode]?.toString() ?? '';
+      } catch (_) {
+        // Not JSON after all; fall through to the raw text.
+      }
+    }
+    return text;
   }
-
-  static const empty = CrystalShopCatalog(banners: [], items: []);
 }
 
 /// One row of the global leaderboard. Names only: the backend never sends a
@@ -150,19 +110,4 @@ class CrystalLeaderboard {
   }
 
   static const empty = CrystalLeaderboard(entries: []);
-}
-
-/// Result of a successful redemption: the code to show at the counter and
-/// the balance that remains.
-class CrystalRedemption {
-  final String code;
-  final int balance;
-
-  const CrystalRedemption({required this.code, required this.balance});
-
-  factory CrystalRedemption.fromJson(Map<String, dynamic> json) =>
-      CrystalRedemption(
-        code: json['code']?.toString() ?? '',
-        balance: _asInt(json['balance']),
-      );
 }

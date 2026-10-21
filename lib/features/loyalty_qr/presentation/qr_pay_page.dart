@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shimmer/shimmer.dart';
@@ -30,8 +29,6 @@ class QrPayPage extends StatelessWidget {
 
 class _QrPayView extends StatelessWidget {
   const _QrPayView();
-
-  static final _money = NumberFormat('#,##0', 'en_US');
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +121,7 @@ class _QrPayView extends StatelessWidget {
             SizedBox(height: 24.h),
             if (token != null) ...[
               Text(
-                '${_money.format(token.spendable)} ${l10n.currency}',
+                l10n.crystalsAmount(token.spendable),
                 style: TextStyle(
                   fontSize: 26.sp,
                   fontWeight: FontWeight.w800,

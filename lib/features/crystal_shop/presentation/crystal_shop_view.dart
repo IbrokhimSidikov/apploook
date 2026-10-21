@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,7 +8,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
+import 'package:apploook/cart_provider.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/pages/details.dart';
 import 'package:apploook/widget/banner_widget.dart';
 import '../application/crystal_shop_controller.dart';
 import '../domain/crystal_shop_models.dart';
@@ -16,7 +20,7 @@ import 'crystal_theme.dart';
 final _fmt = NumberFormat('#,##0', 'en_US');
 
 /// Shop half of the Crystal Shop: the spinning promo carousel, then a grid
-/// of rewards that can only be bought with crystals.
+/// of menu products sold for crystals at the customer's tier.
 class CrystalShopView extends StatelessWidget {
   const CrystalShopView({super.key});
 
@@ -28,7 +32,7 @@ class CrystalShopView extends StatelessWidget {
 
     return RefreshIndicator(
       color: CrystalTheme.violet,
-      onRefresh: () => controller.loadShop(silent: true),
+      onRefresh: controller.refreshShop,
       child: CustomScrollView(
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
@@ -95,6 +99,7 @@ class CrystalShopView extends StatelessWidget {
       case CrystalLoadState.idle:
       case CrystalLoadState.loading:
         return [const _ShimmerGrid()];
+      case CrystalLoadState.signedOut:
       case CrystalLoadState.error:
         return [
           SliverToBoxAdapter(
@@ -141,6 +146,9 @@ class _ItemCard extends StatelessWidget {
     final controller = context.watch<CrystalShopController>();
     final affordable = controller.canAfford(item);
     final shortfall = controller.shortfall(item);
+    // "Need N more" only means something once the balance is known.
+    final showShortfall =
+        !affordable && controller.balance != null && shortfall > 0;
 
     return GestureDetector(
       onTap: () => RedeemSheet.show(context, item),
@@ -175,23 +183,20 @@ class _ItemCard extends StatelessWidget {
                     Positioned(
                       top: 10.h,
                       left: 10.w,
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 8.w, vertical: 3.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Text(
-                          item.category.toUpperCase(),
-                          style: TextStyle(
-                            fontFamily: CrystalTheme.font,
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: CrystalTheme.lilacText,
-                          ),
-                        ),
+                      child: _Tag(
+                        text: item.category,
+                        background: Colors.white.withValues(alpha: 0.9),
+                        foreground: CrystalTheme.lilacText,
+                      ),
+                    ),
+                  if (item.isCrystalOnly)
+                    Positioned(
+                      bottom: 10.h,
+                      left: 10.w,
+                      child: _Tag(
+                        text: l.crystalOnly,
+                        background: CrystalTheme.violet,
+                        foreground: Colors.white,
                       ),
                     ),
                 ],
@@ -240,7 +245,7 @@ class _ItemCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (!affordable && shortfall > 0) ...[
+                  if (showShortfall) ...[
                     SizedBox(height: 6.h),
                     Text(
                       l.needMoreCrystals(shortfall),
@@ -256,6 +261,42 @@ class _ItemCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small uppercase pill used for the category and crystal-only badges.
+class _Tag extends StatelessWidget {
+  const _Tag({
+    required this.text,
+    required this.background,
+    required this.foreground,
+  });
+
+  final String text;
+  final Color background;
+  final Color foreground;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Text(
+        text.toUpperCase(),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          fontFamily: CrystalTheme.font,
+          fontSize: 9.sp,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+          color: foreground,
         ),
       ),
     );
@@ -414,52 +455,92 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ── Redeem flow ─────────────────────────────────────────────────────────────
+// ── Pay with crystals ──────────────────────────────────────────────────────
 
-/// Bottom sheet confirming a redemption, then the code to show at the counter.
+/// What the sheet asked the card to do after it closed. Navigation and the
+/// snackbar happen from the card's context, which outlives the sheet.
+enum _SheetResult { added, configure, signIn }
+
+/// Bottom sheet showing the product and its crystal price, with a single
+/// "Pay with crystals" button that puts the line in the cart.
 class RedeemSheet extends StatelessWidget {
   const RedeemSheet({super.key, required this.item});
 
   final CrystalShopItem item;
 
-  static Future<void> show(BuildContext context, CrystalShopItem item) {
-    return showModalBottomSheet<void>(
+  static Future<void> show(BuildContext context, CrystalShopItem item) async {
+    final result = await showModalBottomSheet<_SheetResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => RedeemSheet(item: item),
     );
-  }
-
-  Future<void> _confirm(BuildContext context) async {
+    if (result == null || !context.mounted) return;
     final l = AppLocalizations.of(context);
-    final controller = context.read<CrystalShopController>();
-    final result = await controller.redeem(item);
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
-    if (result == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l.redeemFailed),
-          backgroundColor: const Color(0xFFC62828),
-        ),
-      );
-      return;
+
+    switch (result) {
+      case _SheetResult.signIn:
+        Navigator.pushNamed(context, '/signin');
+      case _SheetResult.configure:
+        // Modifiers to choose: the details page adds the line itself.
+        Navigator.push(
+          context,
+          CupertinoPageRoute(
+            builder: (_) => Details(product: item.product, payWithCrystals: true),
+          ),
+        );
+      case _SheetResult.added:
+        context.read<CartProvider>().addToCartWithModifiers(
+              CartItem(product: item.product, payWithCrystals: true),
+            );
+        HapticFeedback.mediumImpact();
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: CrystalTheme.violetDeep,
+              content: Text(
+                '${item.name} · ${l.addedToCart}',
+                style: const TextStyle(fontFamily: CrystalTheme.font),
+              ),
+              action: SnackBarAction(
+                label: l.cart,
+                textColor: CrystalTheme.yellow,
+                onPressed: () => Navigator.pushNamed(context, '/cart'),
+              ),
+            ),
+          );
     }
-    HapticFeedback.mediumImpact();
-    await showDialog<void>(
-      context: context,
-      builder: (_) => _SuccessDialog(item: item, code: result.code),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final controller = context.watch<CrystalShopController>();
-    final balance = controller.balance ?? 0;
+    final balance = controller.balance;
+    final hasSession = controller.hasSession;
     final affordable = controller.canAfford(item);
     final bottom = MediaQuery.of(context).viewPadding.bottom;
+    final description =
+        item.descriptionFor(Localizations.localeOf(context).languageCode);
+
+    final _SheetResult? action;
+    final String label;
+    if (!hasSession) {
+      action = _SheetResult.signIn;
+      label = l.signIn;
+    } else if (affordable) {
+      action = item.needsConfiguration
+          ? _SheetResult.configure
+          : _SheetResult.added;
+      label = l.payWithCrystals;
+    } else {
+      action = null;
+      label = balance == null
+          ? l.payWithCrystals
+          : l.needMoreCrystals(controller.shortfall(item));
+    }
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, bottom + 20.h),
@@ -492,20 +573,40 @@ class RedeemSheet extends StatelessWidget {
             child: _ItemImage(path: item.imagePath),
           ),
           SizedBox(height: 16.h),
-          Text(
-            item.name,
-            style: TextStyle(
-              fontFamily: CrystalTheme.font,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
-              color: CrystalTheme.ink,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  item.name,
+                  style: TextStyle(
+                    fontFamily: CrystalTheme.font,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.3,
+                    color: CrystalTheme.ink,
+                  ),
+                ),
+              ),
+              if (item.isCrystalOnly) ...[
+                SizedBox(width: 10.w),
+                Padding(
+                  padding: EdgeInsets.only(top: 6.h),
+                  child: _Tag(
+                    text: l.crystalOnly,
+                    background: CrystalTheme.violet,
+                    foreground: Colors.white,
+                  ),
+                ),
+              ],
+            ],
           ),
-          if (item.description.isNotEmpty) ...[
+          if (description.isNotEmpty) ...[
             SizedBox(height: 6.h),
             Text(
-              item.description,
+              description,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: CrystalTheme.font,
                 fontSize: 14.sp,
@@ -529,7 +630,7 @@ class RedeemSheet extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      l.balanceAfter,
+                      hasSession ? l.balanceAfter : l.yourCrystals,
                       style: TextStyle(
                         fontFamily: CrystalTheme.font,
                         fontSize: 11.sp,
@@ -537,12 +638,15 @@ class RedeemSheet extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _fmt.format((balance - item.crystalPrice).clamp(0, 1 << 30)),
+                      balance == null
+                          ? '—'
+                          : _fmt.format(
+                              (balance - item.crystalPrice).clamp(0, 1 << 30)),
                       style: TextStyle(
                         fontFamily: CrystalTheme.font,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: affordable
+                        color: affordable || balance == null
                             ? CrystalTheme.ink
                             : const Color(0xFFC62828),
                       ),
@@ -552,13 +656,26 @@ class RedeemSheet extends StatelessWidget {
               ],
             ),
           ),
+          if (!hasSession) ...[
+            SizedBox(height: 12.h),
+            Text(
+              l.crystalOnlyNeedsSignIn,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: CrystalTheme.font,
+                fontSize: 12.5.sp,
+                height: 1.4,
+                color: CrystalTheme.textSecondary,
+              ),
+            ),
+          ],
           SizedBox(height: 16.h),
           SizedBox(
             height: 54.h,
             child: ElevatedButton(
-              onPressed: affordable && !controller.isRedeeming
-                  ? () => _confirm(context)
-                  : null,
+              onPressed: action == null
+                  ? null
+                  : () => Navigator.of(context).pop(action),
               style: ElevatedButton.styleFrom(
                 backgroundColor: CrystalTheme.yellow,
                 foregroundColor: CrystalTheme.ink,
@@ -569,140 +686,32 @@ class RedeemSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(50.r),
                 ),
               ),
-              child: controller.isRedeeming
-                  ? SizedBox(
-                      width: 22.w,
-                      height: 22.w,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: CrystalTheme.ink,
-                      ),
-                    )
-                  : Text(
-                      affordable
-                          ? l.spendCrystals(item.crystalPrice)
-                          : l.needMoreCrystals(controller.shortfall(item)),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (action == _SheetResult.added ||
+                      action == _SheetResult.configure) ...[
+                    SvgPicture.asset(CrystalTheme.asset,
+                        width: 18.w, height: 18.w),
+                    SizedBox(width: 8.w),
+                  ],
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: CrystalTheme.font,
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SuccessDialog extends StatelessWidget {
-  const _SuccessDialog({required this.item, required this.code});
-
-  final CrystalShopItem item;
-  final String code;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24.r),
-      ),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(24.w, 26.h, 24.w, 20.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 84.w,
-              height: 84.w,
-              decoration: const BoxDecoration(
-                gradient: CrystalTheme.header,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: SvgPicture.asset(CrystalTheme.asset, width: 46.w),
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              l.redeemSuccessTitle,
-              style: TextStyle(
-                fontFamily: CrystalTheme.font,
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w700,
-                color: CrystalTheme.ink,
-              ),
-            ),
-            SizedBox(height: 6.h),
-            Text(
-              '${item.name}\n${l.redeemSuccessBody}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: CrystalTheme.font,
-                fontSize: 13.sp,
-                height: 1.5,
-                color: CrystalTheme.textSecondary,
-              ),
-            ),
-            if (code.isNotEmpty) ...[
-              SizedBox(height: 16.h),
-              GestureDetector(
-                onTap: () {
-                  Clipboard.setData(ClipboardData(text: code));
-                  HapticFeedback.lightImpact();
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  decoration: BoxDecoration(
-                    color: CrystalTheme.lilac,
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: CrystalTheme.violetBright.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(
-                    code,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: CrystalTheme.font,
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 3,
-                      color: CrystalTheme.lilacText,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-            SizedBox(height: 18.h),
-            SizedBox(
-              width: double.infinity,
-              height: 48.h,
-              child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CrystalTheme.yellow,
-                  foregroundColor: CrystalTheme.ink,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50.r),
-                  ),
-                ),
-                child: Text(
-                  l.done,
-                  style: TextStyle(
-                    fontFamily: CrystalTheme.font,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

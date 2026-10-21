@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 
-/// Compact cashback pill for the home app bar: coin icon plus the spendable
+/// Compact crystal pill for the home app bar: crystal icon plus the spendable
 /// balance. Tapping opens the wallet.
 ///
 /// Mirrors the visibility rules of [LoyaltyProfileCard]: hidden only once it
@@ -61,11 +63,7 @@ class CashbackBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.monetization_on_rounded,
-                color: AppColors.cx0B0B0B,
-                size: 18.w,
-              ),
+              SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
               SizedBox(width: 6.w),
               if (label == null)
                 Shimmer.fromColors(

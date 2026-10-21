@@ -27,7 +27,11 @@ import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../widgets/announcement_story_dialog.dart';
 import '../widgets/cashback_badge.dart';
+import '../models/crystal_pricing.dart';
 import '../models/crystal_reward.dart';
+import '../models/loyalty.dart' show LoyaltyTier;
+import '../providers/loyalty_provider.dart';
+import '../features/crystal_shop/presentation/crystal_theme.dart';
 import '../widgets/crystal_reward_card.dart';
 import '../features/reorder/application/reorder_controller.dart';
 import '../features/reorder/presentation/reorder_list_sheet.dart';
@@ -80,6 +84,14 @@ class Product {
   /// (`is_crystal_only` from the v3 branch menu).
   final bool isCrystalOnly;
 
+  /// Crystal menu price per customer tier (`crystal_price_a/b/c` from the
+  /// v3 branch menu). Null means the product is not sold for crystals at
+  /// that tier. See [CrystalPricing] for the rule that combines these with
+  /// the selected modifiers.
+  final int? crystalPriceA;
+  final int? crystalPriceB;
+  final int? crystalPriceC;
+
   Product({
     required this.name,
     required this.id,
@@ -102,6 +114,9 @@ class Product {
     this.posOrderable,
     this.crystalPoints,
     this.isCrystalOnly = false,
+    this.crystalPriceA,
+    this.crystalPriceB,
+    this.crystalPriceC,
   });
 
   /// True when a self-pickup / carhop / in-restaurant order of this product
@@ -188,6 +203,9 @@ class Product {
       crystalPoints: parseSievesId(json['crystal_points'] ?? json['crystalPoints']),
       isCrystalOnly:
           json['is_crystal_only'] == true || json['isCrystalOnly'] == true,
+      crystalPriceA: parseSievesId(json['crystal_price_a'] ?? json['crystalPriceA']),
+      crystalPriceB: parseSievesId(json['crystal_price_b'] ?? json['crystalPriceB']),
+      crystalPriceC: parseSievesId(json['crystal_price_c'] ?? json['crystalPriceC']),
     );
   }
 
@@ -1275,26 +1293,61 @@ class _HomeNewState extends State<HomeNew>
                       SizedBox(height: 5.h),
                       Row(
                         children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 35.w,
-                              vertical: 5.h,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.r),
-                              color: const Color(0xFFFEC700),
-                            ),
-                            child: Text(
-                              '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color.fromARGB(255, 11, 11, 11),
+                          // A crystal-only product has no money price to
+                          // show: its chip carries the crystal price at the
+                          // customer's tier instead.
+                          if (product.isCrystalOnly)
+                            Builder(builder: (context) {
+                              final tier = context
+                                  .select<LoyaltyProvider, LoyaltyTier>(
+                                      (p) => p.tier);
+                              final price =
+                                  CrystalPricing.productPrice(product, tier);
+                              final l10n = AppLocalizations.of(context);
+                              return Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 5.h,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  color: CrystalTheme.lilac,
+                                ),
+                                child: Text(
+                                  price == null
+                                      ? l10n.crystalOnly
+                                      : l10n.crystalsAmount(price),
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: CrystalTheme.lilacText,
+                                  ),
+                                ),
+                              );
+                            })
+                          else
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 35.w,
+                                vertical: 5.h,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20.r),
+                                color: const Color(0xFFFEC700),
+                              ),
+                              child: Text(
+                                '${product.price.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} UZS',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color.fromARGB(255, 11, 11, 11),
+                                ),
                               ),
                             ),
-                          ),
-                          // Crystals earned when this product is bought
-                          if (CrystalReward.perUnit(product) > 0) ...[
+                          // Crystals earned when this product is bought with
+                          // money; a crystal-only product never earns.
+                          if (!product.isCrystalOnly &&
+                              CrystalReward.perUnit(product) > 0) ...[
                             SizedBox(width: 6.w),
                             CrystalPointsBadge(
                               crystals: CrystalReward.perUnit(product),

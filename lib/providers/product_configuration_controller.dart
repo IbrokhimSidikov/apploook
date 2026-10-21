@@ -1,4 +1,5 @@
 import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/models/crystal_pricing.dart';
 import 'package:apploook/models/modifier_models.dart';
 import 'package:apploook/models/product_configuration.dart';
 import 'package:apploook/pages/homenew.dart';
@@ -163,11 +164,18 @@ class ProductConfigurationController extends ChangeNotifier {
 
   /// Build the cart line for the current configuration. Callers must run
   /// [validate] first; this does not re-check limits.
-  CartItem buildCartItem() {
+  ///
+  /// [payWithCrystals] is the customer's choice on the details page. A
+  /// crystal-only product or modifier overrides it: such a line can never
+  /// be a money line, whatever the page passed.
+  CartItem buildCartItem({bool payWithCrystals = false}) {
+    final modifiers = selectedModifiers;
     return CartItem(
       product: product,
       quantity: _quantity,
-      selectedModifiers: selectedModifiers,
+      selectedModifiers: modifiers,
+      payWithCrystals:
+          payWithCrystals || CrystalPricing.isCrystalOnly(product, modifiers),
     );
   }
 

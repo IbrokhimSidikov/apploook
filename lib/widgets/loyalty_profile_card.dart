@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/widgets/loyalty_info_sheet.dart';
 
-/// The customer's cashback card on the profile screen.
+/// The customer's crystal card on the profile screen.
 ///
 /// The board itself renders on the first frame, every time - only the figures
 /// wait for the network, behind a shimmer. Painting the frame instantly and
@@ -44,9 +46,6 @@ class LoyaltyProfileCard extends StatelessWidget {
         known && !loyalty.hasSession && !loyalty.isActivating;
 
     final card = loyalty.card;
-    final rate = loyalty.program.earnRatePercent;
-    final rateLabel =
-        rate == rate.roundToDouble() ? rate.toStringAsFixed(0) : '$rate';
 
     return GestureDetector(
       onTap: () {
@@ -80,8 +79,8 @@ class LoyaltyProfileCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.card_giftcard_rounded,
-                    size: 15.sp, color: AppColors.cxFEC700),
+                SvgPicture.asset(CrystalTheme.asset,
+                    width: 15.sp, height: 15.sp),
                 SizedBox(width: 6.w),
                 Text(
                   l10n.walletTitle.toUpperCase(),
@@ -93,22 +92,25 @@ class LoyaltyProfileCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 6.w),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.cxFEC700,
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    '$rateLabel%',
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.cx0B0B0B,
+                // The price level only means something once the card has
+                // loaded; before that it would always read "A".
+                if (!loading && !unavailable)
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.cxFEC700,
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      l10n.tierLevel(card.tier.code),
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.cx0B0B0B,
+                      ),
                     ),
                   ),
-                ),
                 const Spacer(),
                 InkWell(
                   onTap: () => showLoyaltyInfoSheet(context, loyalty),
@@ -143,7 +145,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                   ),
                   SizedBox(width: 5.w),
                   Text(
-                    unavailable ? '' : l10n.currency,
+                    unavailable ? '' : l10n.crystalWord(card.spendable),
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
