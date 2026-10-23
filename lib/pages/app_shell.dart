@@ -134,6 +134,7 @@ class _AppShellState extends State<AppShell> {
                 onTap: _select,
                 centerAction: GlassNavAction(
                   icon: Icons.qr_code_2_rounded,
+                  iconColor: Colors.white,
                   label: l.qrPayTitle,
                   color: CrystalTheme.violet,
                   onTap: _openQr,
