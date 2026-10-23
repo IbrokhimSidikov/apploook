@@ -62,6 +62,20 @@ class CrystalShopItem {
   }
 }
 
+/// One menu category's worth of [CrystalShopItem]s, shown under its own
+/// heading in the shop.
+class CrystalShopSection {
+  final int categoryId;
+  final String title;
+  final List<CrystalShopItem> items;
+
+  const CrystalShopSection({
+    required this.categoryId,
+    required this.title,
+    required this.items,
+  });
+}
+
 /// One row of the global leaderboard. Names only: the backend never sends a
 /// phone number or any other identifier here.
 class CrystalRankingEntry {

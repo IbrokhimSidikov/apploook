@@ -27,6 +27,17 @@ class AppShell extends StatefulWidget {
   static const int cartTab = 2;
   static const int profileTab = 3;
 
+  /// Switches the shell to [tab] from anywhere inside it, so a screen that
+  /// lives in a tab is shown in place rather than pushed as a second copy
+  /// with its own back button. Returns false when [context] is not under a
+  /// shell (a pushed route), in which case the caller navigates instead.
+  static bool select(BuildContext context, int tab) {
+    final shell = context.findAncestorStateOfType<_AppShellState>();
+    if (shell == null) return false;
+    shell._select(tab);
+    return true;
+  }
+
   @override
   State<AppShell> createState() => _AppShellState();
 }

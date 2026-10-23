@@ -3,7 +3,6 @@
 import 'dart:convert';
 
 import 'package:apploook/l10n/app_localizations.dart';
-import 'package:apploook/pages/cart.dart';
 import 'package:apploook/models/view/map_screen.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/order_tracking_service.dart';
@@ -27,6 +26,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/pages/app_shell.dart';
 import 'package:apploook/models/crystal_pricing.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
@@ -2612,8 +2612,22 @@ class _CheckoutState extends State<Checkout> {
       centerTitle: true,
       leading: GestureDetector(
         onTap: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => const Cart()));
+          // Checkout is pushed from the cart tab, so going back is a pop:
+          // pushing a new Cart here stacked a second, standalone cart (with
+          // its own back arrow) on top of the shell. Only when there is
+          // nothing to pop to - a deep link straight into checkout - does
+          // a fresh shell open on the cart tab.
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) =>
+                    const AppShell(initialIndex: AppShell.cartTab),
+              ),
+              (route) => false,
+            );
+          }
         },
         child: SizedBox(
           height: 25.h,

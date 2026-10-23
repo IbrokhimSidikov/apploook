@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart' show CupertinoPageRoute;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/pages/app_shell.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/pages/details.dart';
@@ -19,10 +21,147 @@ import 'crystal_theme.dart';
 
 final _fmt = NumberFormat('#,##0', 'en_US');
 
-/// Shop half of the Crystal Shop: the spinning promo carousel, then a grid
-/// of menu products sold for crystals at the customer's tier.
-class CrystalShopView extends StatelessWidget {
+/// Shop half of the Crystal Shop: the spinning promo carousel, then the
+/// menu products sold for crystals at the customer's tier, one grid per
+/// menu category, with a pinned row of category tabs like the home menu.
+class CrystalShopView extends StatefulWidget {
   const CrystalShopView({super.key});
+
+  @override
+  State<CrystalShopView> createState() => _CrystalShopViewState();
+}
+
+class _CrystalShopViewState extends State<CrystalShopView> {
+  final _scroll = ScrollController();
+  final _tabScroll = ScrollController();
+  final _tabBarKey = GlobalKey();
+
+  /// Section headers and tab labels, keyed by category id.
+  final _sectionKeys = <int, GlobalKey>{};
+  final _tabKeys = <int, GlobalKey>{};
+
+  /// Category id of the highlighted tab; null means the first section.
+  int? _selected;
+
+  /// True while animating to a tapped section, so the scroll listener does
+  /// not flick the highlight through every section on the way.
+  bool _jumping = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_syncSelected);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    _tabScroll.dispose();
+    super.dispose();
+  }
+
+  GlobalKey _sectionKey(int id) => _sectionKeys.putIfAbsent(id, GlobalKey.new);
+  GlobalKey _tabKey(int id) => _tabKeys.putIfAbsent(id, GlobalKey.new);
+
+  /// Screen y of the pinned tab bar's bottom edge: a section counts as the
+  /// current one once its header has scrolled up to that line.
+  double? _tabBarBottom() {
+    final box = _tabBarKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null || !box.attached) return null;
+    return box.localToGlobal(Offset(0, box.size.height)).dy;
+  }
+
+  void _syncSelected() {
+    if (_jumping || !mounted) return;
+    final sections = context.read<CrystalShopController>().sections;
+    final line = _tabBarBottom();
+    if (sections.isEmpty || line == null) return;
+
+    int? index;
+    if (_scroll.position.extentAfter < 1) {
+      // The last section may be too short to ever reach the line.
+      index = sections.length - 1;
+    } else {
+      // Headers far off screen are not built; skip them. The first built
+      // header still below the line means the one before it is current.
+      for (var i = 0; i < sections.length; i++) {
+        final box = _sectionKeys[sections[i].categoryId]
+            ?.currentContext
+            ?.findRenderObject() as RenderBox?;
+        if (box == null || !box.attached) continue;
+        if (box.localToGlobal(Offset.zero).dy <= line + 1) {
+          index = i;
+        } else {
+          index ??= i > 0 ? i - 1 : 0;
+          break;
+        }
+      }
+    }
+    if (index == null) return;
+
+    final id = sections[index].categoryId;
+    if (id != (_selected ?? sections.first.categoryId)) {
+      setState(() => _selected = id);
+      _revealTab(id);
+    }
+  }
+
+  /// Scrolls the tab row so the tab for [id] sits in the middle.
+  void _revealTab(int id) {
+    final box = _tabKeys[id]?.currentContext?.findRenderObject();
+    if (box == null || !_tabScroll.hasClients) return;
+    final offset = RenderAbstractViewport.of(box).getOffsetToReveal(box, 0.5);
+    _tabScroll.animateTo(
+      offset.offset.clamp(0.0, _tabScroll.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Future<void> _jumpToSection(int index) async {
+    final controller = context.read<CrystalShopController>();
+    final sections = controller.sections;
+    final id = sections[index].categoryId;
+    HapticFeedback.selectionClick();
+    setState(() => _selected = id);
+    _revealTab(id);
+    if (!_scroll.hasClients) return;
+
+    _jumping = true;
+    try {
+      // An off-screen section is not built yet, so it has no position to
+      // reveal. Jump roughly there by its share of the items first.
+      if (_sectionKeys[id]?.currentContext == null) {
+        final before = sections
+            .take(index)
+            .fold<int>(0, (sum, section) => sum + section.items.length);
+        final position = _scroll.position;
+        position.jumpTo(
+          position.maxScrollExtent * before / controller.itemCount,
+        );
+        await WidgetsBinding.instance.endOfFrame;
+      }
+
+      final box = _sectionKeys[id]?.currentContext?.findRenderObject();
+      final barHeight = (_tabBarKey.currentContext?.findRenderObject()
+                  as RenderBox?)
+              ?.size
+              .height ??
+          0;
+      if (box == null || !mounted) return;
+      // Reveal at the top, then back off by the pinned bar covering it.
+      final target =
+          RenderAbstractViewport.of(box).getOffsetToReveal(box, 0).offset -
+              barHeight;
+      await _scroll.animateTo(
+        target.clamp(0.0, _scroll.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    } finally {
+      _jumping = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +173,7 @@ class CrystalShopView extends StatelessWidget {
       color: CrystalTheme.violet,
       onRefresh: controller.refreshShop,
       child: CustomScrollView(
+        controller: _scroll,
         physics: const BouncingScrollPhysics(
           parent: AlwaysScrollableScrollPhysics(),
         ),
@@ -47,7 +187,7 @@ class CrystalShopView extends StatelessWidget {
           ),
           SliverToBoxAdapter(
             child: Padding(
-              padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 12.h),
+              padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 4.h),
               child: Row(
                 children: [
                   Expanded(
@@ -62,7 +202,7 @@ class CrystalShopView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (controller.items.isNotEmpty)
+                  if (controller.itemCount > 0)
                     Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
@@ -71,7 +211,7 @@ class CrystalShopView extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
-                        '${controller.items.length}',
+                        '${controller.itemCount}',
                         style: TextStyle(
                           fontFamily: CrystalTheme.font,
                           fontSize: 12.sp,
@@ -98,7 +238,10 @@ class CrystalShopView extends StatelessWidget {
     switch (controller.shopState) {
       case CrystalLoadState.idle:
       case CrystalLoadState.loading:
-        return [const _ShimmerGrid()];
+        return [
+          SliverToBoxAdapter(child: SizedBox(height: 8.h)),
+          const _ShimmerGrid(),
+        ];
       case CrystalLoadState.signedOut:
       case CrystalLoadState.error:
         return [
@@ -111,27 +254,229 @@ class CrystalShopView extends StatelessWidget {
           ),
         ];
       case CrystalLoadState.ready:
-        if (controller.items.isEmpty) {
+        final sections = controller.sections;
+        if (sections.isEmpty) {
           return [SliverToBoxAdapter(child: _EmptyState(message: l.shopEmpty))];
         }
+        // A tier change can drop the highlighted category.
+        final selected = sections.any((s) => s.categoryId == _selected)
+            ? _selected!
+            : sections.first.categoryId;
         return [
-          SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 14.h,
-                crossAxisSpacing: 14.w,
-                childAspectRatio: 0.72,
-              ),
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => _ItemCard(item: controller.items[i]),
-                childCount: controller.items.length,
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: _CategoryTabsDelegate(
+              child: _CategoryTabs(
+                key: _tabBarKey,
+                scrollController: _tabScroll,
+                sections: sections,
+                selected: selected,
+                tabKey: _tabKey,
+                onTap: _jumpToSection,
               ),
             ),
           ),
+          for (final (i, section) in sections.indexed) ...[
+            SliverToBoxAdapter(
+              child: _SectionHeader(
+                key: _sectionKey(section.categoryId),
+                title: section.title,
+                count: section.items.length,
+                first: i == 0,
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              sliver: SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 14.h,
+                  crossAxisSpacing: 14.w,
+                  childAspectRatio: 0.72,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => _ItemCard(item: section.items[i]),
+                  childCount: section.items.length,
+                ),
+              ),
+            ),
+          ],
         ];
     }
+  }
+}
+
+class _CategoryTabsDelegate extends SliverPersistentHeaderDelegate {
+  _CategoryTabsDelegate({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(
+          BuildContext context, double shrinkOffset, bool overlapsContent) =>
+      child;
+
+  @override
+  double get maxExtent => 50.h;
+
+  @override
+  double get minExtent => 50.h;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
+}
+
+/// Horizontal row of category names, the current one dark and bold with a
+/// violet underline, the rest grey; same idea as the home menu's tabs.
+class _CategoryTabs extends StatelessWidget {
+  const _CategoryTabs({
+    super.key,
+    required this.scrollController,
+    required this.sections,
+    required this.selected,
+    required this.tabKey,
+    required this.onTap,
+  });
+
+  final ScrollController scrollController;
+  final List<CrystalShopSection> sections;
+  final int selected;
+  final GlobalKey Function(int categoryId) tabKey;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50.h,
+      color: CrystalTheme.page,
+      // Not a lazy ListView: every tab must be laid out so the selected one
+      // can be scrolled into view.
+      child: SingleChildScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        child: Row(
+          children: [
+            for (final (i, section) in sections.indexed)
+              _CategoryTab(
+                key: tabKey(section.categoryId),
+                title: section.title,
+                active: section.categoryId == selected,
+                onTap: () => onTap(i),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryTab extends StatelessWidget {
+  const _CategoryTab({
+    super.key,
+    required this.title,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String title;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontFamily: CrystalTheme.font,
+                fontSize: 14.sp,
+                fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                color: active ? CrystalTheme.ink : const Color(0xFFB0B0B0),
+              ),
+              child: Text(title),
+            ),
+            SizedBox(height: 4.h),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: 3.h,
+              width: active ? 18.w : 0,
+              decoration: BoxDecoration(
+                color: CrystalTheme.violet,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Category heading above each grid, with how many items it holds.
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({
+    super.key,
+    required this.title,
+    required this.count,
+    required this.first,
+  });
+
+  final String title;
+  final int count;
+
+  /// The first section sits right under the shop title, so it needs less
+  /// space above it than the gap between two grids.
+  final bool first;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, first ? 8.h : 26.h, 20.w, 12.h),
+      child: Row(
+        children: [
+          Container(
+            width: 4.w,
+            height: 16.h,
+            decoration: BoxDecoration(
+              color: CrystalTheme.violet,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: CrystalTheme.font,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: CrystalTheme.ink,
+              ),
+            ),
+          ),
+          Text(
+            '$count',
+            style: TextStyle(
+              fontFamily: CrystalTheme.font,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              color: CrystalTheme.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -169,26 +514,16 @@ class _ItemCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Artwork on a tinted plate with the category tag.
+            // Artwork on white, matching the product photos' own background.
             Expanded(
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    color: const Color(0xFFF4F1FB),
+                    color: Colors.white,
                     padding: EdgeInsets.all(14.r),
                     child: _ItemImage(path: item.imagePath),
                   ),
-                  if (item.category.isNotEmpty)
-                    Positioned(
-                      top: 10.h,
-                      left: 10.w,
-                      child: _Tag(
-                        text: item.category,
-                        background: Colors.white.withValues(alpha: 0.9),
-                        foreground: CrystalTheme.lilacText,
-                      ),
-                    ),
                   if (item.isCrystalOnly)
                     Positioned(
                       bottom: 10.h,
@@ -267,7 +602,7 @@ class _ItemCard extends StatelessWidget {
   }
 }
 
-/// Small uppercase pill used for the category and crystal-only badges.
+/// Small uppercase pill used for the crystal-only badge.
 class _Tag extends StatelessWidget {
   const _Tag({
     required this.text,
@@ -507,7 +842,13 @@ class RedeemSheet extends StatelessWidget {
               action: SnackBarAction(
                 label: l.cart,
                 textColor: CrystalTheme.yellow,
-                onPressed: () => Navigator.pushNamed(context, '/cart'),
+                // The shop is a shell tab, so show the cart tab in place;
+                // only fall back to the standalone route outside the shell.
+                onPressed: () {
+                  if (!AppShell.select(context, AppShell.cartTab)) {
+                    Navigator.pushNamed(context, '/cart');
+                  }
+                },
               ),
             ),
           );
@@ -567,8 +908,9 @@ class RedeemSheet extends StatelessWidget {
             height: 170.h,
             padding: EdgeInsets.all(18.r),
             decoration: BoxDecoration(
-              color: const Color(0xFFF4F1FB),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(22.r),
+              border: Border.all(color: CrystalTheme.border),
             ),
             child: _ItemImage(path: item.imagePath),
           ),

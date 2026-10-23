@@ -40,7 +40,7 @@ class CrystalShopController extends ChangeNotifier {
 
     if (tierChanged) {
       _catalogTier = loyalty.tier;
-      _items = _repository.buildCatalog(_catalogTier);
+      _sections = _repository.buildCatalog(_catalogTier);
     }
     if (sessionChanged && _rankingsState != CrystalLoadState.idle) {
       // Not awaited: it notifies on its own when the fetch answers.
@@ -83,13 +83,16 @@ class CrystalShopController extends ChangeNotifier {
   // Shop ------------------------------------------------------------------
 
   CrystalLoadState _shopState = CrystalLoadState.idle;
-  List<CrystalShopItem> _items = const [];
+  List<CrystalShopSection> _sections = const [];
   List<BannerItem> _banners = const [];
   bool _bannersLoading = true;
   String? _shopError;
 
   CrystalLoadState get shopState => _shopState;
-  List<CrystalShopItem> get items => _items;
+  List<CrystalShopSection> get sections => _sections;
+
+  int get itemCount =>
+      _sections.fold(0, (sum, section) => sum + section.items.length);
   List<BannerItem> get banners => _banners;
   bool get bannersLoading => _bannersLoading;
   String? get shopError => _shopError;
@@ -103,7 +106,7 @@ class CrystalShopController extends ChangeNotifier {
     try {
       await _repository.ensureMenuLoaded();
       _catalogTier = tier;
-      _items = _repository.buildCatalog(_catalogTier);
+      _sections = _repository.buildCatalog(_catalogTier);
       _shopError = null;
       _shopState = CrystalLoadState.ready;
       notifyListeners();
