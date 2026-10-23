@@ -126,12 +126,12 @@ class _Header extends StatelessWidget {
             Positioned(
               top: -40,
               right: -30,
-              child: _Bloom(size: 190.w, color: CrystalTheme.violetBright),
+              child: CrystalBloom(size: 190.w, color: CrystalTheme.violetBright),
             ),
             Positioned(
               bottom: -60,
               left: -40,
-              child: _Bloom(size: 170.w, color: const Color(0xFFFEC700)),
+              child: CrystalBloom(size: 170.w, color: const Color(0xFFFEC700)),
             ),
             // A faint oversized crystal peeking from the edge.
             Positioned(
@@ -193,32 +193,6 @@ class _Header extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Bloom extends StatelessWidget {
-  const _Bloom({required this.size, required this.color});
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: 0.55),
-              color.withValues(alpha: 0.0),
-            ],
-          ),
         ),
       ),
     );

@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
   <defs>
     <linearGradient id="a" x1="20" y1="6" x2="44" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFD166"/>
-      <stop offset="0.55" stop-color="#FF9F1C"/>
-      <stop offset="1" stop-color="#E8590C"/>
+      <stop offset="0" stop-color="#C4B3FF"/>
+      <stop offset="0.55" stop-color="#7B5CF0"/>
+      <stop offset="1" stop-color="#4C2BB3"/>
     </linearGradient>
     <linearGradient id="b" x1="24" y1="10" x2="36" y2="40" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFF3B0"/>
-      <stop offset="1" stop-color="#FFC247"/>
+      <stop offset="0" stop-color="#F3EEFF"/>
+      <stop offset="1" stop-color="#A58BFF"/>
     </linearGradient>
     <linearGradient id="c" x1="8" y1="30" x2="20" y2="58" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFB703"/>
-      <stop offset="1" stop-color="#E8590C"/>
+      <stop offset="0" stop-color="#9A80FF"/>
+      <stop offset="1" stop-color="#4C2BB3"/>
     </linearGradient>
   </defs>
   <!-- main crystal -->
@@ -19,13 +19,13 @@
   <!-- bright left facet -->
   <path d="M32 4 L18 20 L24 58 L30 26 Z" fill="url(#b)" opacity="0.9"/>
   <!-- dark right facet -->
-  <path d="M32 4 L46 20 L40 58 L34 26 Z" fill="#E8590C" opacity="0.45"/>
+  <path d="M32 4 L46 20 L40 58 L34 26 Z" fill="#3B2185" opacity="0.45"/>
   <!-- small side shards -->
   <path d="M14 26 L21 36 L17 56 L10 44 Z" fill="url(#c)"/>
   <path d="M50 30 L55 42 L48 56 L44 40 Z" fill="url(#c)" opacity="0.9"/>
   <!-- highlight -->
   <path d="M30 10 L26 20 L29 30 L31 18 Z" fill="#FFFFFF" opacity="0.55"/>
   <!-- sparkles -->
-  <path d="M52 10 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6 Z" fill="#FFE08A"/>
-  <path d="M10 14 l1.1 2.3 2.3 1.1 -2.3 1.1 -1.1 2.3 -1.1 -2.3 -2.3 -1.1 2.3 -1.1 Z" fill="#FFE08A"/>
+  <path d="M52 10 l1.6 3.4 3.4 1.6 -3.4 1.6 -1.6 3.4 -1.6 -3.4 -3.4 -1.6 3.4 -1.6 Z" fill="#D9CCFF"/>
+  <path d="M10 14 l1.1 2.3 2.3 1.1 -2.3 1.1 -1.1 2.3 -1.1 -2.3 -2.3 -1.1 2.3 -1.1 Z" fill="#D9CCFF"/>
 </svg>

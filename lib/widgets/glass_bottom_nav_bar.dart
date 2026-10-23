@@ -22,6 +22,27 @@ class GlassNavItem {
   final int badgeCount;
 }
 
+/// The round action in the middle of the bar, e.g. the payment QR.
+class GlassNavAction {
+  const GlassNavAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = AppColors.cx0B0B0B,
+    this.iconColor = AppColors.cxFEC700,
+  });
+
+  final IconData icon;
+
+  /// Fill of the disc and colour of the icon on it.
+  final Color color;
+  final Color iconColor;
+
+  /// Read out by screen readers; the button itself shows only the icon.
+  final String label;
+  final VoidCallback onTap;
+}
+
 /// iOS-style floating tab bar: a rounded pill with a frosted-glass surface
 /// that lets the page content blur through underneath it.
 ///
@@ -34,6 +55,7 @@ class GlassBottomNavBar extends StatelessWidget {
     required this.items,
     required this.currentIndex,
     required this.onTap,
+    this.centerAction,
   });
 
   /// Logical height of the pill. Kept a plain constant (not screen-scaled)
@@ -49,8 +71,22 @@ class GlassBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
+  /// Optional round action button drawn in the middle of the bar, between
+  /// the two halves of [items]. It is not a tab: it never takes the
+  /// selection and does not shift the indices passed to [onTap].
+  final GlassNavAction? centerAction;
+
   @override
   Widget build(BuildContext context) {
+    final int split = (items.length / 2).ceil();
+    Widget tab(int i) => Expanded(
+          child: _GlassNavButton(
+            item: items[i],
+            selected: i == currentIndex,
+            onTap: () => onTap(i),
+          ),
+        );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: horizontalMargin),
       child: DecoratedBox(
@@ -95,14 +131,10 @@ class GlassBottomNavBar extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  for (var i = 0; i < items.length; i++)
-                    Expanded(
-                      child: _GlassNavButton(
-                        item: items[i],
-                        selected: i == currentIndex,
-                        onTap: () => onTap(i),
-                      ),
-                    ),
+                  for (var i = 0; i < split; i++) tab(i),
+                  if (centerAction != null)
+                    Expanded(child: _GlassCenterButton(action: centerAction!)),
+                  for (var i = split; i < items.length; i++) tab(i),
                 ],
               ),
             ),
@@ -197,6 +229,44 @@ class _GlassNavButton extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Solid disc with an icon, so it reads as an action rather than one
+/// more tab next to the yellow selected-tab pill.
+class _GlassCenterButton extends StatelessWidget {
+  const _GlassCenterButton({required this.action});
+
+  final GlassNavAction action;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: action.label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: action.onTap,
+        child: Center(
+          child: Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: action.color,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: action.color.withValues(alpha: 0.35),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(action.icon, size: 26, color: action.iconColor),
+          ),
         ),
       ),
     );

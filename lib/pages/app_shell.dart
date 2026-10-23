@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../cart_provider.dart';
+import '../features/crystal_shop/presentation/crystal_theme.dart';
+import '../features/loyalty_qr/presentation/qr_pay_page.dart';
 import '../l10n/app_localizations.dart';
 import '../widgets/glass_bottom_nav_bar.dart';
 import 'cart.dart';
@@ -11,7 +13,7 @@ import 'homenew.dart';
 import 'profile.dart';
 
 /// Root screen after sign-in: the four main tabs behind a floating glass
-/// tab bar. The `/homeNew` route resolves here, so every existing
+/// tab bar, with the payment QR button in its middle. The `/homeNew` route resolves here, so every existing
 /// "go home" navigation lands on the Home tab unchanged.
 ///
 /// Tabs are built lazily on first visit and then kept alive in an
@@ -72,6 +74,19 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  /// Opens the payment QR straight from the bar, sliding up over the
+  /// current tab so closing it lands back where the user was.
+  void _openQr() {
+    HapticFeedback.mediumImpact();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        settings: const RouteSettings(name: '/qr-pay'),
+        builder: (_) => const QrPayPage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -117,6 +132,12 @@ class _AppShellState extends State<AppShell> {
               child: GlassBottomNavBar(
                 currentIndex: _index,
                 onTap: _select,
+                centerAction: GlassNavAction(
+                  icon: Icons.qr_code_2_rounded,
+                  label: l.qrPayTitle,
+                  color: CrystalTheme.violet,
+                  onTap: _openQr,
+                ),
                 items: [
                   GlassNavItem(
                     icon: Icons.home_outlined,

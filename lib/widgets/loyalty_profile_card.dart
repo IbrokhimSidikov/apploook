@@ -56,143 +56,169 @@ class LoyaltyProfileCard extends StatelessWidget {
           Navigator.pushNamed(context, '/wallet');
         }
       },
+      // Same violet board as the Crystal Shop header: gradient, two light
+      // blooms and a faint oversized crystal behind the figures.
       child: Container(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 12.w, 12.h),
+        clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.r),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1A1A1A), Color(0xFF2E2A16)],
-          ),
+          gradient: CrystalTheme.header,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: CrystalTheme.violet.withValues(alpha: 0.25),
               blurRadius: 14,
               offset: const Offset(0, 6),
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            Row(
-              children: [
-                SvgPicture.asset(CrystalTheme.asset,
-                    width: 15.sp, height: 15.sp),
-                SizedBox(width: 6.w),
-                Text(
-                  l10n.walletTitle.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white.withOpacity(0.6),
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                // The price level only means something once the card has
-                // loaded; before that it would always read "A".
-                if (!loading && !unavailable)
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.h),
-                    decoration: BoxDecoration(
-                      color: AppColors.cxFEC700,
-                      borderRadius: BorderRadius.circular(6.r),
-                    ),
-                    child: Text(
-                      l10n.tierLevel(card.tier.code),
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.cx0B0B0B,
-                      ),
-                    ),
-                  ),
-                const Spacer(),
-                InkWell(
-                  onTap: () => showLoyaltyInfoSheet(context, loyalty),
-                  borderRadius: BorderRadius.circular(20.r),
-                  child: Padding(
-                    padding: EdgeInsets.all(6.r),
-                    child: Icon(
-                      Icons.info_outline_rounded,
-                      size: 18.sp,
-                      color: Colors.white.withOpacity(0.7),
-                    ),
-                  ),
-                ),
-              ],
+            Positioned(
+              top: -50,
+              right: -30,
+              child:
+                  CrystalBloom(size: 150.w, color: CrystalTheme.violetBright),
             ),
-            SizedBox(height: 2.h),
-            if (loading)
-              _ShimmerBar(width: 120.w, height: 24.h)
-            else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+            Positioned(
+              bottom: -60,
+              left: -40,
+              child: CrystalBloom(size: 130.w, color: CrystalTheme.yellow),
+            ),
+            Positioned(
+              right: 28.w,
+              bottom: -14.h,
+              child: IgnorePointer(
+                child: Opacity(
+                  opacity: 0.14,
+                  child: SvgPicture.asset(CrystalTheme.asset,
+                      width: 96.w, height: 96.w),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 12.w, 12.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    unavailable ? '—' : _money.format(card.spendable),
-                    style: TextStyle(
-                      fontSize: 26.sp,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
+                  Row(
+                    children: [
+                      SvgPicture.asset(CrystalTheme.asset,
+                          width: 15.sp, height: 15.sp),
+                      SizedBox(width: 6.w),
+                      Text(
+                        l10n.walletTitle.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          letterSpacing: 1.2,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white.withOpacity(0.6),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      // The price level only means something once the card has
+                      // loaded; before that it would always read "A".
+                      if (!loading && !unavailable)
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 6.w, vertical: 1.h),
+                          decoration: BoxDecoration(
+                            color: AppColors.cxFEC700,
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            l10n.tierLevel(card.tier.code),
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.cx0B0B0B,
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      InkWell(
+                        onTap: () => showLoyaltyInfoSheet(context, loyalty),
+                        borderRadius: BorderRadius.circular(20.r),
+                        child: Padding(
+                          padding: EdgeInsets.all(6.r),
+                          child: Icon(
+                            Icons.info_outline_rounded,
+                            size: 18.sp,
+                            color: Colors.white.withOpacity(0.7),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 5.w),
-                  Text(
-                    unavailable ? '' : l10n.crystalWord(card.spendable),
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withOpacity(0.55),
+                  SizedBox(height: 2.h),
+                  if (loading)
+                    _ShimmerBar(width: 120.w, height: 24.h)
+                  else
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          unavailable ? '—' : _money.format(card.spendable),
+                          style: TextStyle(
+                            fontSize: 26.sp,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                        SizedBox(width: 5.w),
+                        Text(
+                          unavailable ? '' : l10n.crystalWord(card.spendable),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.55),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  SizedBox(height: 8.h),
+                  if (loading)
+                    _ShimmerBar(width: 90.w, height: 11.h)
+                  else
+                    Row(
+                      children: [
+                        if (card.pendingBalance > 0) ...[
+                          Icon(Icons.schedule_rounded,
+                              size: 12.sp, color: AppColors.cxFEC700),
+                          SizedBox(width: 4.w),
+                          Text(
+                            '${l10n.walletPending} '
+                            '${_money.format(card.pendingBalance)}',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: AppColors.cxFEC700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ] else
+                          Text(
+                            card.number,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              letterSpacing: 1.4,
+                              color: Colors.white.withOpacity(0.5),
+                            ),
+                          ),
+                        const Spacer(),
+                        Icon(Icons.chevron_right_rounded,
+                            size: 16.sp, color: Colors.white.withOpacity(0.5)),
+                      ],
+                    ),
                 ],
               ),
-            SizedBox(height: 8.h),
-            if (loading)
-              _ShimmerBar(width: 90.w, height: 11.h)
-            else
-              Row(
-                children: [
-                  if (card.pendingBalance > 0) ...[
-                    Icon(Icons.schedule_rounded,
-                        size: 12.sp, color: AppColors.cxFEC700),
-                    SizedBox(width: 4.w),
-                    Text(
-                      '${l10n.walletPending} '
-                      '${_money.format(card.pendingBalance)}',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColors.cxFEC700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ] else
-                    Text(
-                      card.number,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        letterSpacing: 1.4,
-                        color: Colors.white.withOpacity(0.5),
-                      ),
-                    ),
-                  const Spacer(),
-                  Icon(Icons.chevron_right_rounded,
-                      size: 16.sp, color: Colors.white.withOpacity(0.5)),
-                ],
-              ),
+            ),
           ],
         ),
       ),
     );
   }
-
 }
 
 /// A placeholder bar for a figure still on its way, tuned for the dark card.

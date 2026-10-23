@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../features/crystal_shop/presentation/crystal_theme.dart';
 import '../l10n/app_localizations.dart';
 
-const _kCrystalAsset = 'images/crystal.svg';
-const _kAmber = Color(0xFFE8590C);
-const _kInk = Color(0xFF3D2E00);
 
 /// "Buy this and earn +N crystals" promo board for the product details page.
 ///
-/// Soft yellow card with a faceted crystal on the left and a two-line
+/// Soft lilac card with a faceted crystal on the left and a two-line
 /// message on the right; the crystal count line is the loud one.
 class CrystalRewardCard extends StatelessWidget {
   const CrystalRewardCard({super.key, required this.crystals});
@@ -29,12 +27,12 @@ class CrystalRewardCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFFFF6D6), Color(0xFFFFE9A8)],
+          colors: [Color(0xFFF6F2FF), CrystalTheme.lilac],
         ),
-        border: Border.all(color: const Color(0xFFFFD666)),
+        border: Border.all(color: const Color(0xFFDCD0FF)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFFEC700).withValues(alpha: 0.22),
+            color: CrystalTheme.violetBright.withValues(alpha: 0.16),
             blurRadius: 18,
             offset: const Offset(0, 6),
           ),
@@ -56,7 +54,7 @@ class CrystalRewardCard extends StatelessWidget {
                 ],
               ),
             ),
-            child: SvgPicture.asset(_kCrystalAsset, width: 44.w, height: 44.w),
+            child: SvgPicture.asset(CrystalTheme.asset, width: 44.w, height: 44.w),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -70,7 +68,7 @@ class CrystalRewardCard extends StatelessWidget {
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                     height: 1.3,
-                    color: _kInk.withValues(alpha: 0.75),
+                    color: CrystalTheme.ink.withValues(alpha: 0.7),
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -81,7 +79,7 @@ class CrystalRewardCard extends StatelessWidget {
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w700,
                     height: 1.25,
-                    color: _kInk,
+                    color: CrystalTheme.lilacText,
                   ),
                 ),
               ],
@@ -107,14 +105,14 @@ class CrystalRewardChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(6.w, 3.h, 9.w, 3.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3C4),
+        color: CrystalTheme.lilac,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFFFE08A)),
+        border: Border.all(color: const Color(0xFFDCD0FF)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(_kCrystalAsset, width: 14.w, height: 14.w),
+          SvgPicture.asset(CrystalTheme.asset, width: 14.w, height: 14.w),
           SizedBox(width: 5.w),
           Text(
             l.crystalRewardCompact(crystals),
@@ -123,7 +121,7 @@ class CrystalRewardChip extends StatelessWidget {
               fontSize: 11.sp,
               fontWeight: FontWeight.w700,
               height: 1.2,
-              color: _kAmber,
+              color: CrystalTheme.lilacText,
             ),
           ),
         ],
@@ -144,14 +142,14 @@ class CrystalPointsBadge extends StatelessWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(7.w, 5.h, 9.w, 5.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF3C4),
+        color: CrystalTheme.lilac,
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: const Color(0xFFFFE08A)),
+        border: Border.all(color: const Color(0xFFDCD0FF)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(_kCrystalAsset, width: 13.w, height: 13.w),
+          SvgPicture.asset(CrystalTheme.asset, width: 13.w, height: 13.w),
           SizedBox(width: 3.w),
           Text(
             '+$crystals',
@@ -160,7 +158,7 @@ class CrystalPointsBadge extends StatelessWidget {
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               height: 1.2,
-              color: _kAmber,
+              color: CrystalTheme.lilacText,
             ),
           ),
         ],

@@ -26,3 +26,31 @@ abstract class CrystalTheme {
   static const String asset = 'images/crystal.svg';
   static const String font = 'Poppins';
 }
+
+/// Soft radial light used behind the violet [CrystalTheme.header] surfaces
+/// (the shop header, the profile crystal card) for depth.
+class CrystalBloom extends StatelessWidget {
+  const CrystalBloom({super.key, required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            colors: [
+              color.withValues(alpha: 0.55),
+              color.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
