@@ -95,7 +95,37 @@ class _DetailsState extends State<Details> {
   /// without a price at the customer's tier: the server would refuse the
   /// order, so the page refuses first.
   bool _canAddToCart(LoyaltyProvider loyalty) =>
-      !_crystalOnly || _crystalOffered(loyalty);
+      (!_crystalOnly || _crystalOffered(loyalty)) && _crystalShortfall(loyalty) == 0;
+
+  /// Crystals left for this page once the crystal lines already in the cart
+  /// are counted, or null when the balance is unknown or this configuration
+  /// is not going out for crystals.
+  int? _crystalRoom(LoyaltyProvider loyalty) {
+    final budget = loyalty.crystalBudget;
+    if (budget == null || !_payingWithCrystals(loyalty)) return null;
+    final inCart = CrystalPricing.cartCrystals(
+      context.read<CartProvider>().cartItems,
+      loyalty.tier,
+    );
+    return (budget - inCart).clamp(0, budget);
+  }
+
+  /// Crystals missing to add the current quantity; 0 when affordable or
+  /// when it cannot be told.
+  int _crystalShortfall(LoyaltyProvider loyalty) {
+    final room = _crystalRoom(loyalty);
+    final unit = _crystalUnitPrice(loyalty.tier);
+    if (room == null || unit == null) return 0;
+    return (unit * _configuration.quantity - room).clamp(0, 1 << 30);
+  }
+
+  /// Whether one more unit still fits the crystal balance.
+  bool _crystalAllowsMore(LoyaltyProvider loyalty) {
+    final room = _crystalRoom(loyalty);
+    final unit = _crystalUnitPrice(loyalty.tier);
+    if (room == null || unit == null) return true;
+    return unit * (_configuration.quantity + 1) <= room;
+  }
 
   String? getDescriptionInLanguage(String languageCode) {
     if (widget.product.description == null) {
@@ -507,7 +537,7 @@ class _DetailsState extends State<Details> {
 
   // ── Bottom action bar ─────────────────────────────────────────────────────
 
-  Widget _buildQuantitySelector() {
+  Widget _buildQuantitySelector(LoyaltyProvider loyalty) {
     final quantity = _configuration.quantity;
     return Container(
       height: 56.h,
@@ -536,9 +566,13 @@ class _DetailsState extends State<Details> {
               ),
             ),
           ),
+          // Paying with crystals, the stepper stops at what the balance
+          // (minus what the cart already spends) covers.
           _StepperButton(
             icon: Icons.add_rounded,
-            onTap: _configuration.incrementQuantity,
+            onTap: _crystalAllowsMore(loyalty)
+                ? _configuration.incrementQuantity
+                : null,
           ),
         ],
       ),
@@ -597,6 +631,39 @@ class _DetailsState extends State<Details> {
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
               height: 1.2,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shown when the quantity (or switching to crystals) asks for more
+  /// crystals than the balance has left; the add button is disabled.
+  Widget _buildCrystalShortfallNotice(int shortfall) {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: CrystalTheme.lilac,
+        borderRadius: BorderRadius.circular(14.r),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded,
+              size: 18.sp, color: CrystalTheme.lilacText),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).notEnoughCrystalsForQuantity(shortfall),
+              style: TextStyle(
+                fontFamily: _kFont,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+                color: CrystalTheme.lilacText,
+              ),
             ),
           ),
         ],
@@ -666,9 +733,11 @@ class _DetailsState extends State<Details> {
             children: [
               // Show warning message when ordering is not allowed
               if (!canOrder) _buildClosedNotice(),
+              if (_crystalShortfall(loyalty) > 0)
+                _buildCrystalShortfallNotice(_crystalShortfall(loyalty)),
               Row(
                 children: [
-                  _buildQuantitySelector(),
+                  _buildQuantitySelector(loyalty),
                   SizedBox(width: 12.w),
                   Expanded(child: _buildAddToCartButton(canOrder, loyalty)),
                 ],

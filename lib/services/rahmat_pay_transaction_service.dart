@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:apploook/services/rahmat_pay_service.dart';
 import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
+import 'package:apploook/features/order_success/presentation/order_success_page.dart';
 
 /// Service to handle Rahmat Pay transaction status checking
 /// Similar to PaymeTransactionService but for Rahmat Pay
@@ -17,12 +18,16 @@ class RahmatPayTransactionService {
   /// a timeout or when the user closes the status dialog, because the payment
   /// may still complete in the browser; the hold's TTL and the server's
   /// reconciliation settle those cases.
+  ///
+  /// With [successDetails], a confirmed payment opens [OrderSuccessPage]
+  /// instead of the success dialog.
   static void startPaymentStatusCheck(
     BuildContext context,
     String invoiceId,
     String branchName, {
     Future<void> Function()? onPaymentConfirmed,
     Future<void> Function()? onPaymentFailed,
+    OrderSuccessDetails? successDetails,
   }) {
     showDialog(
       context: context,
@@ -33,6 +38,7 @@ class RahmatPayTransactionService {
         parentContext: context,
         onPaymentConfirmed: onPaymentConfirmed,
         onPaymentFailed: onPaymentFailed,
+        successDetails: successDetails,
       ),
     );
   }
@@ -45,6 +51,7 @@ class _PaymentStatusDialog extends StatefulWidget {
   final BuildContext parentContext;
   final Future<void> Function()? onPaymentConfirmed;
   final Future<void> Function()? onPaymentFailed;
+  final OrderSuccessDetails? successDetails;
 
   const _PaymentStatusDialog({
     required this.invoiceId,
@@ -52,6 +59,7 @@ class _PaymentStatusDialog extends StatefulWidget {
     required this.parentContext,
     this.onPaymentConfirmed,
     this.onPaymentFailed,
+    this.successDetails,
   });
 
   @override
@@ -186,6 +194,14 @@ class _PaymentStatusDialogState extends State<_PaymentStatusDialog> {
       Navigator.of(context).pop();
     }
     
+    final details = widget.successDetails;
+    if (details != null) {
+      if (widget.parentContext.mounted) {
+        OrderSuccessPage.show(widget.parentContext, details);
+      }
+      return;
+    }
+
     // Show success dialog
     if (widget.parentContext.mounted) {
       showDialog(

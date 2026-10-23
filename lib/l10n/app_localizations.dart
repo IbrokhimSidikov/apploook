@@ -68,6 +68,15 @@ class AppLocalizations {
       'yourCrystals': 'Your crystals',
       'redeemWithCrystals': 'Redeem with crystals',
       'needMoreCrystals': 'Need {n} more',
+      'notEnoughCrystalsForQuantity': 'Not enough crystals — {n} more needed.',
+      'rankBoardTitle': 'Your level',
+      'rankBronze': 'Bronze',
+      'rankGold': 'Gold',
+      'rankDiamond': 'Diamond',
+      'rankCategory': 'Category {c}',
+      'rankToNext': '{n} more crystals to {rank}',
+      'rankTop': 'You have reached the top level!',
+      'rankSignIn': 'Sign in to see your level',
       'spendCrystals': 'Spend {n} {crystals}',
       'balanceAfter': 'Balance after',
       'redeemSuccessTitle': 'Yours!',
@@ -78,6 +87,15 @@ class AppLocalizations {
       'you': 'You',
       'yourRank': 'Your rank',
       'rankingsEmpty': 'No rankings yet. Be the first to collect crystals!',
+      // Order success page
+      'orderReceivedTitle': 'Order received!',
+      'orderReceivedBody': 'We have your order and are already getting it ready.',
+      'orderTypeLabel': 'Order type',
+      'paidByCard': 'Paid by card',
+      'payInCash': 'To pay in cash',
+      'crystalsSpent': 'Paid with crystals',
+      'crystalsEarnedTitle': 'Added to your crystal balance',
+      'backToHome': 'Back to home',
       'retry': 'Retry',
       'done': 'Done',
       'items': 'items',
@@ -384,6 +402,15 @@ class AppLocalizations {
       'yourCrystals': 'Kristallaringiz',
       'redeemWithCrystals': 'Kristallarga oling',
       'needMoreCrystals': 'Yana {n} ta kerak',
+      'notEnoughCrystalsForQuantity': 'Kristallar yetarli emas — yana {n} ta kerak.',
+      'rankBoardTitle': 'Darajangiz',
+      'rankBronze': 'Bronza',
+      'rankGold': 'Oltin',
+      'rankDiamond': 'Olmos',
+      'rankCategory': '{c} toifa',
+      'rankToNext': '{rank} darajasigacha yana {n} kristall',
+      'rankTop': 'Siz eng yuqori darajadasiz!',
+      'rankSignIn': 'Darajangizni koʻrish uchun kiring',
       'spendCrystals': '{n} {crystals} sarflash',
       'balanceAfter': 'Qoladi',
       'redeemSuccessTitle': 'Sizniki!',
@@ -394,6 +421,15 @@ class AppLocalizations {
       'you': 'Siz',
       'yourRank': 'Sizning o\'rningiz',
       'rankingsEmpty': 'Reyting hali yo\'q. Birinchi bo\'lib kristall to\'plang!',
+      // Order success page
+      'orderReceivedTitle': 'Buyurtma qabul qilindi!',
+      'orderReceivedBody': 'Buyurtmangizni oldik va tayyorlashni boshladik.',
+      'orderTypeLabel': 'Buyurtma turi',
+      'paidByCard': 'Karta orqali toʻlandi',
+      'payInCash': 'Naqd toʻlanadi',
+      'crystalsSpent': 'Kristallar bilan toʻlandi',
+      'crystalsEarnedTitle': 'Kristall balansingizga qoʻshildi',
+      'backToHome': 'Bosh sahifaga',
       'retry': 'Qayta urinish',
       'done': 'Tayyor',
       'items': 'dona',
@@ -701,6 +737,15 @@ class AppLocalizations {
       'yourCrystals': 'Ваши кристаллы',
       'redeemWithCrystals': 'За кристаллы',
       'needMoreCrystals': 'Нужно ещё {n}',
+      'notEnoughCrystalsForQuantity': 'Недостаточно кристаллов — нужно ещё {n}.',
+      'rankBoardTitle': 'Ваш уровень',
+      'rankBronze': 'Бронза',
+      'rankGold': 'Золото',
+      'rankDiamond': 'Бриллиант',
+      'rankCategory': 'Категория {c}',
+      'rankToNext': 'До уровня «{rank}» ещё {n}',
+      'rankTop': 'Вы достигли высшего уровня!',
+      'rankSignIn': 'Войдите, чтобы увидеть свой уровень',
       'spendCrystals': 'Потратить {n} {crystals}',
       'balanceAfter': 'Останется',
       'redeemSuccessTitle': 'Готово!',
@@ -711,6 +756,15 @@ class AppLocalizations {
       'you': 'Вы',
       'yourRank': 'Ваше место',
       'rankingsEmpty': 'Рейтинга пока нет. Станьте первым!',
+      // Order success page
+      'orderReceivedTitle': 'Заказ принят!',
+      'orderReceivedBody': 'Мы получили ваш заказ и уже готовим его.',
+      'orderTypeLabel': 'Тип заказа',
+      'paidByCard': 'Оплачено картой',
+      'payInCash': 'К оплате наличными',
+      'crystalsSpent': 'Оплачено кристаллами',
+      'crystalsEarnedTitle': 'Начислено на ваш баланс кристаллов',
+      'backToHome': 'На главную',
       'retry': 'Повторить',
       'done': 'Готово',
       'items': 'элементы',
@@ -1055,6 +1109,24 @@ class AppLocalizations {
   String needMoreCrystals(int n) =>
       _localizedValues[locale.languageCode]!['needMoreCrystals']!
           .replaceAll('{n}', '$n');
+  String get rankBoardTitle =>
+      _localizedValues[locale.languageCode]!['rankBoardTitle']!;
+  String get rankBronze => _localizedValues[locale.languageCode]!['rankBronze']!;
+  String get rankGold => _localizedValues[locale.languageCode]!['rankGold']!;
+  String get rankDiamond =>
+      _localizedValues[locale.languageCode]!['rankDiamond']!;
+  String rankCategory(String c) =>
+      _localizedValues[locale.languageCode]!['rankCategory']!
+          .replaceAll('{c}', c);
+  String rankToNext(int n, String rank) =>
+      _localizedValues[locale.languageCode]!['rankToNext']!
+          .replaceAll('{n}', _groupThousands(n))
+          .replaceAll('{rank}', rank);
+  String get rankTop => _localizedValues[locale.languageCode]!['rankTop']!;
+  String get rankSignIn => _localizedValues[locale.languageCode]!['rankSignIn']!;
+  String notEnoughCrystalsForQuantity(int n) =>
+      _localizedValues[locale.languageCode]!['notEnoughCrystalsForQuantity']!
+          .replaceAll('{n}', '$n');
   String spendCrystals(int n) => _fillCrystals('spendCrystals', n);
   String get balanceAfter =>
       _localizedValues[locale.languageCode]!['balanceAfter']!;
@@ -1071,6 +1143,23 @@ class AppLocalizations {
   String get yourRank => _localizedValues[locale.languageCode]!['yourRank']!;
   String get rankingsEmpty =>
       _localizedValues[locale.languageCode]!['rankingsEmpty']!;
+
+  // Order success page
+  String get orderReceivedTitle =>
+      _localizedValues[locale.languageCode]!['orderReceivedTitle']!;
+  String get orderReceivedBody =>
+      _localizedValues[locale.languageCode]!['orderReceivedBody']!;
+  String get orderTypeLabel =>
+      _localizedValues[locale.languageCode]!['orderTypeLabel']!;
+  String get paidByCard =>
+      _localizedValues[locale.languageCode]!['paidByCard']!;
+  String get payInCash => _localizedValues[locale.languageCode]!['payInCash']!;
+  String get crystalsSpent =>
+      _localizedValues[locale.languageCode]!['crystalsSpent']!;
+  String get crystalsEarnedTitle =>
+      _localizedValues[locale.languageCode]!['crystalsEarnedTitle']!;
+  String get backToHome =>
+      _localizedValues[locale.languageCode]!['backToHome']!;
   String get retry => _localizedValues[locale.languageCode]!['retry']!;
   String get done => _localizedValues[locale.languageCode]!['done']!;
 

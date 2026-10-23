@@ -27,7 +27,9 @@ import 'package:provider/provider.dart';
 import 'package:apploook/cart_provider.dart';
 import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/pages/app_shell.dart';
+import 'package:apploook/features/order_success/presentation/order_success_page.dart';
 import 'package:apploook/models/crystal_pricing.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/widgets/loyalty_checkout_section.dart';
@@ -734,6 +736,13 @@ class _CheckoutState extends State<Checkout> {
               // left for the TTL / server reconciliation to settle.
               onPaymentConfirmed: () => loyaltyProvider.confirm(),
               onPaymentFailed: () => loyaltyProvider.abandon(),
+              successDetails: OrderSuccessDetails(
+                orderTypeIndex: selectedIndex,
+                moneyTotal: chargedTotal,
+                paidByCard: true,
+                crystalsSpent: loyaltyHold?.appliedPoints ?? 0,
+                crystalsEarned: loyaltyHold?.projectedEarn ?? 0,
+              ),
             );
           }
 
@@ -1102,6 +1111,15 @@ class _CheckoutState extends State<Checkout> {
     // What the crystal lines take off the cash total. Zero on delivery,
     // where every line is paid with money.
     final double loyaltyDiscount = _crystalLinesPrice(cartProvider);
+    // The same lines in crystals, for the totals card: the server's figure
+    // once quoted, else what each line was last quoted at.
+    final bool hasCrystalLines = _crystalLines(cartProvider).isNotEmpty;
+    final int crystalsToSpend = !hasCrystalLines
+        ? 0
+        : (context.read<LoyaltyProvider>().appliedCrystals > 0
+            ? context.read<LoyaltyProvider>().appliedCrystals
+            : _crystalLines(cartProvider).fold<int>(
+                0, (sum, item) => sum + (item.quotedCrystalPrice ?? 0)));
 
     List<String> orderItems = cartProvider.cartItems.map((item) {
       var itemTotal = item.totalPrice;
@@ -1918,6 +1936,49 @@ class _CheckoutState extends State<Checkout> {
                           ],
                         ),
                       ),
+                    // The crystal lines leave the soum total: show them as
+                    // their own row so the total below is clearly money only.
+                    if (hasCrystalLines)
+                      Padding(
+                        padding: EdgeInsets.all(15.r),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${AppLocalizations.of(context).checkoutCrystalsToSpend} :',
+                              style: TextStyle(fontSize: 16.sp),
+                            ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // Crystal-only lines carry no soum price.
+                                if (loyaltyDiscount > 0)
+                                  Text(
+                                    '− ${NumberFormat('#,##0').format(loyaltyDiscount)} UZS',
+                                    style: TextStyle(
+                                      color: CrystalTheme.lilacText,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                if (crystalsToSpend > 0) ...[
+                                  SizedBox(width: 6.w),
+                                  SvgPicture.asset(CrystalTheme.asset,
+                                      width: 14.w, height: 14.w),
+                                  SizedBox(width: 2.w),
+                                  Text(
+                                    NumberFormat('#,##0')
+                                        .format(crystalsToSpend),
+                                    style: TextStyle(
+                                      color: CrystalTheme.lilacText,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     Divider(
                       height: 1,
                       thickness: 1,
@@ -1931,7 +1992,9 @@ class _CheckoutState extends State<Checkout> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${AppLocalizations.of(context).totalPrice} :',
+                            hasCrystalLines
+                                ? '${AppLocalizations.of(context).checkoutToPay} :'
+                                : '${AppLocalizations.of(context).totalPrice} :',
                             style: TextStyle(
                                 fontSize: 16.sp, fontWeight: FontWeight.bold),
                           ),
@@ -2397,6 +2460,17 @@ class _CheckoutState extends State<Checkout> {
                           throw Exception('Order could not be submitted');
                         }
 
+                        // Read before confirm(), which resets the quote.
+                        final successDetails = OrderSuccessDetails(
+                          orderTypeIndex: _selectedIndex,
+                          moneyTotal: _selectedIndex == 0
+                              ? loyaltyTotal + deliveryFee
+                              : loyaltyTotal,
+                          paidByCard: false,
+                          crystalsSpent: loyaltyHold?.appliedPoints ?? 0,
+                          crystalsEarned: loyaltyHold?.projectedEarn ?? 0,
+                        );
+
                         // The order was accepted: spend the reserved crystals
                         // and book the earned ones as pending. They only
                         // become spendable once the order is completed.
@@ -2434,98 +2508,12 @@ class _CheckoutState extends State<Checkout> {
                           });
                         }
 
-                        // Show success message. Not dismissible via the
-                        // barrier: the cart is already cleared, so the only
-                        // way forward is home.
+                        // Full-screen confirmation instead of a dialog. It
+                        // replaces the whole stack: the cart is already
+                        // cleared, so the only way forward is home.
                         if (mounted) {
-                          showDialog(
-                            // ignore: use_build_context_synchronously
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (dialogContext) => Dialog(
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24.r),
-                              ),
-                              child: Padding(
-                                padding:
-                                    EdgeInsets.fromLTRB(24.w, 28.h, 24.w, 20.h),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 64.w,
-                                      height: 64.w,
-                                      decoration: const BoxDecoration(
-                                        color: Color(0xFFE8F5EE),
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.check_rounded,
-                                        color: const Color(0xFF1B8A4C),
-                                        size: 36.sp,
-                                      ),
-                                    ),
-                                    SizedBox(height: 16.h),
-                                    Text(
-                                      AppLocalizations.of(dialogContext)
-                                          .orderSuccess,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 17.sp,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    SizedBox(height: 8.h),
-                                    Text(
-                                      AppLocalizations.of(dialogContext)
-                                          .orderSuccessSubTitle,
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        height: 1.4,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                    SizedBox(height: 24.h),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: TextButton(
-                                        onPressed: () {
-                                          // Clears the dialog and the whole
-                                          // stack in one go so back can't
-                                          // land on a spent checkout.
-                                          Navigator.of(dialogContext)
-                                              .pushNamedAndRemoveUntil(
-                                            '/homeNew',
-                                            (route) => false,
-                                          );
-                                        },
-                                        style: TextButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xFFFEC700),
-                                          foregroundColor: Colors.black,
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 14.h),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(14.r),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          'OK',
-                                          style: TextStyle(
-                                            fontSize: 15.sp,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
+                          // ignore: use_build_context_synchronously
+                          OrderSuccessPage.show(context, successDetails);
                         }
                       } catch (e, stackTrace) {
                         // Reset processing state

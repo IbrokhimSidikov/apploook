@@ -65,6 +65,13 @@ class LoyaltyProvider extends ChangeNotifier {
   /// display a confident-looking 0 that is really "not fetched yet".
   bool get balanceLoaded => _summaryLoaded;
 
+  /// Crystals the customer can spend right now, or null while that is
+  /// unknown (no session, summary not loaded yet). Budget checks in the
+  /// details page and the cart skip when null; the checkout quote still
+  /// refuses an unaffordable basket.
+  int? get crystalBudget =>
+      _hasSession && _summaryLoaded ? _summary.card.spendable : null;
+
   /// Set when the last activation attempt failed, rather than the customer
   /// simply never having tried.
   String? get mintError => _service.lastMintError;

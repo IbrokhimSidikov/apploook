@@ -2,7 +2,6 @@ import 'package:apploook/models/crystal_pricing.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/services/loyalty_service.dart';
 import 'package:apploook/services/menu_service.dart';
-import 'package:apploook/widget/banner_item.dart';
 import '../domain/crystal_shop_models.dart';
 
 /// Data access for the Crystal Shop.
@@ -78,7 +77,4 @@ class CrystalShopRepository {
   /// Throws [LoyaltySessionExpiredException] without a session.
   Future<CrystalLeaderboard> fetchLeaderboard({int limit = 50}) async =>
       CrystalLeaderboard.fromJson(await _loyalty.fetchLeaderboard(limit: limit));
-
-  /// The same promo set the home screen spins.
-  Future<List<BannerItem>> banners() => BannerItem.getBanners();
 }

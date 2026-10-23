@@ -82,6 +82,16 @@ abstract class CrystalPricing {
     return unit == null ? null : unit * line.quantity;
   }
 
+  /// Crystals all lines paid with crystals in [lines] cost at [tier].
+  static int cartCrystals(Iterable<CartItem> lines, LoyaltyTier tier) {
+    var total = 0;
+    for (final line in lines) {
+      if (!line.payWithCrystals) continue;
+      total += linePrice(line, tier) ?? 0;
+    }
+    return total;
+  }
+
   /// Crystals one configured unit earns when paid with money.
   static int unitPoints(Product product, List<SelectedModifier> modifiers) {
     var points = (product.crystalPoints ?? 0).clamp(0, 1 << 30);

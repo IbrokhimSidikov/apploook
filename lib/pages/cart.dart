@@ -61,6 +61,23 @@ class _CartState extends State<Cart> {
 
   void _ensureMandatoryPackage() => Cart.ensureMandatoryPackage(context);
 
+  /// Whether [line] can take [extraUnits] more units within the crystal
+  /// balance, given the basket already spends [cartCrystals]. Always true
+  /// for money lines and while the balance is unknown.
+  bool _fitsCrystalBudget(
+    CartItem line,
+    LoyaltyProvider loyalty,
+    int cartCrystals, {
+    required int extraUnits,
+  }) {
+    final budget = loyalty.crystalBudget;
+    if (budget == null || !line.payWithCrystals) return true;
+    final linePrice = CrystalPricing.linePrice(line, loyalty.tier);
+    if (linePrice == null || line.quantity == 0) return true;
+    final unit = linePrice ~/ line.quantity;
+    return cartCrystals + unit * extraUnits <= budget;
+  }
+
   Future<bool> _isUserSignedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final phoneNumber = prefs.getString('phoneNumber');
@@ -108,6 +125,12 @@ class _CartState extends State<Cart> {
 
     int price = getTotalPrice(cartProvider).toInt();
     int crystals = getTotalCrystals(cartProvider);
+    // Crystals the basket asks for beyond what the customer can spend.
+    // Zero while the balance is unknown; checkout's quote still guards.
+    final int? crystalBudget = loyalty.crystalBudget;
+    final int crystalShortfall = crystalBudget == null
+        ? 0
+        : (crystals - crystalBudget).clamp(0, 1 << 30);
     int item = getTotalQuantity(cartProvider).toInt();
 
     // The quote is only live at checkout; outside it this is a no-op, so it
@@ -168,68 +191,97 @@ class _CartState extends State<Cart> {
           ? SafeArea(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () async {
-                      final cartProvider =
-                          Provider.of<CartProvider>(context, listen: false);
-                      print('\n======== CART → CHECKOUT: Cart Items ========');
-                      print('Total Items: ${cartProvider.cartItems.length}');
-                      print('Total Price: ${cartProvider.getTotalPrice()} UZS');
-                      for (int i = 0; i < cartProvider.cartItems.length; i++) {
-                        final item = cartProvider.cartItems[i];
-                        print('\n--- Item ${i + 1} ---');
-                        print('Product ID: ${item.product.id}');
-                        print('Product UUID: ${item.product.uuid}');
-                        print('Product Name: ${item.product.name}');
-                        print('Display Name: ${item.displayName}');
-                        print('Quantity: ${item.quantity}');
-                        print('Base Price: ${item.product.price} UZS');
-                        print('Total Price (with modifiers): ${item.totalPrice} UZS');
-                        if (item.selectedModifiers.isNotEmpty) {
-                          print('Selected Modifiers (${item.selectedModifiers.length}):');
-                          double modifiersTotal = 0.0;
-                          for (var modifier in item.selectedModifiers) {
-                            final modPrice =
-                                modifier.modifier.price * modifier.quantity;
-                            modifiersTotal += modPrice;
-                            print('  - ${modifier.modifier.name}');
-                            print('    ID: ${modifier.modifier.id}');
-                            print('    Price: ${modifier.modifier.price} UZS');
-                            print('    Quantity: ${modifier.quantity}');
-                            print('    Subtotal: $modPrice UZS');
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (crystalShortfall > 0)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: Row(
+                          children: [
+                            Icon(Icons.info_outline_rounded,
+                                size: 16.sp, color: CrystalTheme.lilacText),
+                            SizedBox(width: 6.w),
+                            Expanded(
+                              child: Text(
+                                l10n.checkoutNotEnoughCrystals(crystalShortfall),
+                                style: TextStyle(
+                                  fontSize: 12.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: CrystalTheme.lilacText,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: TextButton(
+                        onPressed: crystalShortfall > 0
+                            ? null
+                            : () async {
+                          final cartProvider =
+                              Provider.of<CartProvider>(context, listen: false);
+                          print('\n======== CART → CHECKOUT: Cart Items ========');
+                          print('Total Items: ${cartProvider.cartItems.length}');
+                          print('Total Price: ${cartProvider.getTotalPrice()} UZS');
+                          for (int i = 0; i < cartProvider.cartItems.length; i++) {
+                            final item = cartProvider.cartItems[i];
+                            print('\n--- Item ${i + 1} ---');
+                            print('Product ID: ${item.product.id}');
+                            print('Product UUID: ${item.product.uuid}');
+                            print('Product Name: ${item.product.name}');
+                            print('Display Name: ${item.displayName}');
+                            print('Quantity: ${item.quantity}');
+                            print('Base Price: ${item.product.price} UZS');
+                            print('Total Price (with modifiers): ${item.totalPrice} UZS');
+                            if (item.selectedModifiers.isNotEmpty) {
+                              print('Selected Modifiers (${item.selectedModifiers.length}):');
+                              double modifiersTotal = 0.0;
+                              for (var modifier in item.selectedModifiers) {
+                                final modPrice =
+                                    modifier.modifier.price * modifier.quantity;
+                                modifiersTotal += modPrice;
+                                print('  - ${modifier.modifier.name}');
+                                print('    ID: ${modifier.modifier.id}');
+                                print('    Price: ${modifier.modifier.price} UZS');
+                                print('    Quantity: ${modifier.quantity}');
+                                print('    Subtotal: $modPrice UZS');
+                              }
+                              print('Total Modifiers Cost: $modifiersTotal UZS');
+                              print(
+                                  'Item Total (Base + Modifiers) × Quantity: ${(item.product.price + modifiersTotal) * item.quantity} UZS');
+                            } else {
+                              print('No modifiers selected');
+                            }
                           }
-                          print('Total Modifiers Cost: $modifiersTotal UZS');
-                          print(
-                              'Item Total (Base + Modifiers) × Quantity: ${(item.product.price + modifiersTotal) * item.quantity} UZS');
-                        } else {
-                          print('No modifiers selected');
-                        }
-                      }
-                      print('============================================\n');
-                      bool isSignedIn = await _isUserSignedIn();
-                      Navigator.pushNamed(
-                        context,
-                        isSignedIn ? '/checkout' : '/signin',
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFFFEC700),
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50.r),
+                          print('============================================\n');
+                          bool isSignedIn = await _isUserSignedIn();
+                          Navigator.pushNamed(
+                            context,
+                            isSignedIn ? '/checkout' : '/signin',
+                          );
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFFEC700),
+                          disabledBackgroundColor: const Color(0xFFEDEBF4),
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                        ),
+                        child: Text(
+                          '${l10n.proceedToCheckout} — $checkoutLabel',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      '${l10n.proceedToCheckout} — $checkoutLabel',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
               ),
             )
@@ -432,11 +484,23 @@ class _CartState extends State<Cart> {
                                       ),
                                       _QtyButton(
                                         icon: Icons.add,
-                                        onTap: () {
-                                          cartProvider.updateQuantity(
-                                              cartItem, cartItem.quantity + 1);
-                                          requote();
-                                        },
+                                        // A crystal line stops growing once
+                                        // one more unit would overdraw.
+                                        onTap: _fitsCrystalBudget(
+                                                cartItem, loyalty, crystals,
+                                                extraUnits: 1)
+                                            ? () {
+                                                cartProvider.updateQuantity(
+                                                    cartItem,
+                                                    cartItem.quantity + 1);
+                                                requote();
+                                              }
+                                            : null,
+                                        iconColor: _fitsCrystalBudget(
+                                                cartItem, loyalty, crystals,
+                                                extraUnits: 1)
+                                            ? Colors.black
+                                            : Colors.black26,
                                       ),
                                     ],
                                   ),
@@ -543,9 +607,32 @@ class _LinePricing extends StatelessWidget {
             crystalOnly: crystalOnly,
             onChanged: crystalOnly
                 ? null
-                : (value) => context
-                    .read<LoyaltyProvider>()
-                    .setLinePayWithCrystals(line, value),
+                : (value) {
+                    // Switching a line to crystals must fit what is left
+                    // of the balance after the other crystal lines.
+                    final budget = loyalty.crystalBudget;
+                    if (value && budget != null) {
+                      final inCart = CrystalPricing.cartCrystals(
+                        context.read<CartProvider>().cartItems,
+                        loyalty.tier,
+                      );
+                      final missing = inCart + crystalPrice - budget;
+                      if (missing > 0) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(SnackBar(
+                            behavior: SnackBarBehavior.floating,
+                            backgroundColor: CrystalTheme.violetDeep,
+                            content: Text(l10n.notEnoughCrystalsForQuantity(
+                                missing)),
+                          ));
+                        return;
+                      }
+                    }
+                    context
+                        .read<LoyaltyProvider>()
+                        .setLinePayWithCrystals(line, value);
+                  },
           ),
         ] else if (crystalOnly) ...[
           SizedBox(height: 6.h),
@@ -585,12 +672,12 @@ class _LinePricing extends StatelessWidget {
 // ── Small helper widget for quantity +/- buttons ──────────────────────────────
 class _QtyButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final Color iconColor;
 
   const _QtyButton({
     required this.icon,
-    required this.onTap,
+    this.onTap,
     this.iconColor = Colors.black,
   });
 

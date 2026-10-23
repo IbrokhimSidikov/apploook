@@ -13,15 +13,16 @@ import 'package:apploook/cart_provider.dart';
 import 'package:apploook/pages/app_shell.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/cart_item.dart';
+import 'package:apploook/models/crystal_pricing.dart';
 import 'package:apploook/pages/details.dart';
-import 'package:apploook/widget/banner_widget.dart';
 import '../application/crystal_shop_controller.dart';
 import '../domain/crystal_shop_models.dart';
+import 'crystal_rank_board.dart';
 import 'crystal_theme.dart';
 
 final _fmt = NumberFormat('#,##0', 'en_US');
 
-/// Shop half of the Crystal Shop: the spinning promo carousel, then the
+/// Shop half of the Crystal Shop: the customer's level board, then the
 /// menu products sold for crystals at the customer's tier, one grid per
 /// menu category, with a pinned row of category tabs like the home menu.
 class CrystalShopView extends StatefulWidget {
@@ -179,12 +180,7 @@ class _CrystalShopViewState extends State<CrystalShopView> {
         ),
         slivers: [
           SliverToBoxAdapter(child: SizedBox(height: 18.h)),
-          SliverToBoxAdapter(
-            child: BannerCarouselWidget(
-              banners: controller.banners,
-              isLoading: controller.bannersLoading,
-            ),
-          ),
+          const SliverToBoxAdapter(child: CrystalRankBoard()),
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 4.h),
@@ -489,8 +485,10 @@ class _ItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final controller = context.watch<CrystalShopController>();
-    final affordable = controller.canAfford(item);
-    final shortfall = controller.shortfall(item);
+    final inCart = context.select<CartProvider, int>(
+        (cart) => CrystalPricing.cartCrystals(cart.cartItems, controller.tier));
+    final affordable = controller.canAfford(item, inCart: inCart);
+    final shortfall = controller.shortfall(item, inCart: inCart);
     // "Need N more" only means something once the balance is known.
     final showShortfall =
         !affordable && controller.balance != null && shortfall > 0;
@@ -861,7 +859,11 @@ class RedeemSheet extends StatelessWidget {
     final controller = context.watch<CrystalShopController>();
     final balance = controller.balance;
     final hasSession = controller.hasSession;
-    final affordable = controller.canAfford(item);
+    // Crystals already committed in the cart count against the balance, so
+    // adding again cannot overdraw it.
+    final inCart = context.select<CartProvider, int>(
+        (cart) => CrystalPricing.cartCrystals(cart.cartItems, controller.tier));
+    final affordable = controller.canAfford(item, inCart: inCart);
     final bottom = MediaQuery.of(context).viewPadding.bottom;
     final description =
         item.descriptionFor(Localizations.localeOf(context).languageCode);
@@ -880,7 +882,7 @@ class RedeemSheet extends StatelessWidget {
       action = null;
       label = balance == null
           ? l.payWithCrystals
-          : l.needMoreCrystals(controller.shortfall(item));
+          : l.needMoreCrystals(controller.shortfall(item, inCart: inCart));
     }
 
     return Container(
@@ -982,8 +984,8 @@ class RedeemSheet extends StatelessWidget {
                     Text(
                       balance == null
                           ? '—'
-                          : _fmt.format(
-                              (balance - item.crystalPrice).clamp(0, 1 << 30)),
+                          : _fmt.format((balance - inCart - item.crystalPrice)
+                              .clamp(0, 1 << 30)),
                       style: TextStyle(
                         fontFamily: CrystalTheme.font,
                         fontSize: 16.sp,

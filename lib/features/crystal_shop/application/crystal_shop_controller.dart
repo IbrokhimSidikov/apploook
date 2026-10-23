@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
-import 'package:apploook/widget/banner_item.dart';
 import '../data/crystal_shop_repository.dart';
 import '../domain/crystal_shop_models.dart';
 
@@ -72,20 +71,21 @@ class CrystalShopController extends ChangeNotifier {
         loyalty.error == null;
   }
 
-  bool canAfford(CrystalShopItem item) {
+  /// [inCart] is what the crystal lines already in the cart spend: the
+  /// balance has to cover those and this item together.
+  bool canAfford(CrystalShopItem item, {int inCart = 0}) {
     final b = balance;
-    return b != null && b >= item.crystalPrice && item.available;
+    return b != null && b - inCart >= item.crystalPrice && item.available;
   }
 
-  int shortfall(CrystalShopItem item) =>
-      (item.crystalPrice - (balance ?? 0)).clamp(0, item.crystalPrice);
+  int shortfall(CrystalShopItem item, {int inCart = 0}) =>
+      (item.crystalPrice - ((balance ?? 0) - inCart))
+          .clamp(0, item.crystalPrice);
 
   // Shop ------------------------------------------------------------------
 
   CrystalLoadState _shopState = CrystalLoadState.idle;
   List<CrystalShopSection> _sections = const [];
-  List<BannerItem> _banners = const [];
-  bool _bannersLoading = true;
   String? _shopError;
 
   CrystalLoadState get shopState => _shopState;
@@ -93,8 +93,6 @@ class CrystalShopController extends ChangeNotifier {
 
   int get itemCount =>
       _sections.fold(0, (sum, section) => sum + section.items.length);
-  List<BannerItem> get banners => _banners;
-  bool get bannersLoading => _bannersLoading;
   String? get shopError => _shopError;
 
   Future<void> loadShop({bool silent = false}) async {
@@ -109,17 +107,12 @@ class CrystalShopController extends ChangeNotifier {
       _sections = _repository.buildCatalog(_catalogTier);
       _shopError = null;
       _shopState = CrystalLoadState.ready;
-      notifyListeners();
-      // Banners come second so the grid never waits on the promo images.
-      if (_banners.isEmpty) _banners = await _repository.banners();
     } catch (e) {
       debugPrint('CRYSTALS: shop load failed: $e');
       _shopError = e.toString();
       _shopState = CrystalLoadState.error;
-    } finally {
-      _bannersLoading = false;
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   /// Pull-to-refresh: the catalog and, since the balance lives in
