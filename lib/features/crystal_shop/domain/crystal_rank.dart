@@ -7,6 +7,7 @@
 /// holds on the loyalty card (`LoyaltyCard.tier`), which staff set.
 library;
 
+import 'package:apploook/models/loyalty.dart';
 import 'package:flutter/material.dart';
 
 enum CrystalRank {
@@ -40,7 +41,7 @@ enum CrystalRank {
     required this.ink,
   });
 
-  /// "A", "B" or "C".
+  /// "A", "B" or "C". Internal only - customers see the rank name.
   final String category;
 
   /// Crystals needed to reach this level.
@@ -60,6 +61,14 @@ enum CrystalRank {
     }
     return rank;
   }
+
+  /// The rank name for the price tier on the loyalty card, so the tier is
+  /// never shown to customers as a bare letter.
+  static CrystalRank forTier(LoyaltyTier tier) => switch (tier) {
+        LoyaltyTier.a => CrystalRank.bronze,
+        LoyaltyTier.b => CrystalRank.gold,
+        LoyaltyTier.c => CrystalRank.diamond,
+      };
 
   /// The level above, or null at the top.
   CrystalRank? get next =>

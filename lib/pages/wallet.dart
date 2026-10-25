@@ -8,6 +8,8 @@ import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
+import 'package:apploook/features/crystal_shop/domain/crystal_rank.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_rank_board.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
@@ -94,7 +96,7 @@ class _WalletState extends State<Wallet> {
                   _CardTile(
                     card: provider.card,
                     amount: _crystals,
-                    tierLabel: _l10n.tierLevel(provider.card.tier.code),
+                    tierLabel: rankName(_l10n, CrystalRank.forTier(provider.card.tier)),
                     availableLabel: _l10n.walletAvailable,
                     pendingLabel: _l10n.walletPending,
                     pendingHint: _l10n.walletPendingHint,
@@ -198,95 +200,121 @@ class _CardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Same violet board as the profile crystal card: header gradient, two
+    // soft colour blooms and a faint oversized crystal behind the figures.
     return Container(
-      padding: EdgeInsets.all(20.w),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF1A1A1A), Color(0xFF2E2A16)],
-        ),
+        gradient: CrystalTheme.header,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: CrystalTheme.violet.withValues(alpha: 0.25),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            children: [
-              Text(
-                availableLabel.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  letterSpacing: 1.1,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.55),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              if (!isLoading) _TierPill(label: tierLabel),
-              const Spacer(),
-              SvgPicture.asset(CrystalTheme.asset, width: 22.w, height: 22.w),
-            ],
+          Positioned(
+            top: -50,
+            right: -30,
+            child: CrystalBloom(size: 170.w, color: CrystalTheme.violetBright),
           ),
-          SizedBox(height: 6.h),
-          if (isLoading)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 6.h),
-              child: _DarkShimmerBar(width: 140.w, height: 26.h),
-            )
-          else
-            Text(
-              amount(card.spendable),
-              style: TextStyle(
-                fontSize: 30.sp,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-                fontFeatures: const [FontFeature.tabularFigures()],
+          Positioned(
+            bottom: -60,
+            left: -40,
+            child: CrystalBloom(size: 150.w, color: CrystalTheme.yellow),
+          ),
+          Positioned(
+            right: 24.w,
+            bottom: -16.h,
+            child: IgnorePointer(
+              child: Opacity(
+                opacity: 0.14,
+                child: SvgPicture.asset(CrystalTheme.asset,
+                    width: 110.w, height: 110.w),
               ),
             ),
-          if (card.pendingBalance > 0) ...[
-            SizedBox(height: 8.h),
-            Row(
+          ),
+          Padding(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.schedule_rounded,
-                    size: 14.sp, color: Colors.white.withOpacity(0.6)),
-                SizedBox(width: 6.w),
+                Row(
+                  children: [
+                    Text(
+                      availableLabel.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        letterSpacing: 1.1,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.55),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    if (!isLoading) _TierPill(label: tierLabel),
+                    const Spacer(),
+                    SvgPicture.asset(CrystalTheme.asset, width: 22.w, height: 22.w),
+                  ],
+                ),
+                SizedBox(height: 6.h),
+                if (isLoading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 6.h),
+                    child: _DarkShimmerBar(width: 140.w, height: 26.h),
+                  )
+                else
+                  Text(
+                    amount(card.spendable),
+                    style: TextStyle(
+                      fontSize: 30.sp,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                if (card.pendingBalance > 0) ...[
+                  SizedBox(height: 8.h),
+                  Row(
+                    children: [
+                      Icon(Icons.schedule_rounded,
+                          size: 14.sp, color: Colors.white.withOpacity(0.6)),
+                      SizedBox(width: 6.w),
+                      Text(
+                        '$pendingLabel: ${amount(card.pendingBalance)}',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.white.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 2.h),
+                  Padding(
+                    padding: EdgeInsets.only(left: 20.w),
+                    child: Text(
+                      pendingHint,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.white.withOpacity(0.55),
+                      ),
+                    ),
+                  ),
+                ],
+                SizedBox(height: 20.h),
                 Text(
-                  '$pendingLabel: ${amount(card.pendingBalance)}',
+                  card.number.isEmpty ? '—' : card.number,
                   style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 14.sp,
+                    letterSpacing: 2.2,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.85),
                   ),
                 ),
               ],
-            ),
-            SizedBox(height: 2.h),
-            Padding(
-              padding: EdgeInsets.only(left: 20.w),
-              child: Text(
-                pendingHint,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: Colors.white.withOpacity(0.55),
-                ),
-              ),
-            ),
-          ],
-          SizedBox(height: 20.h),
-          Text(
-            card.number.isEmpty ? '—' : card.number,
-            style: TextStyle(
-              fontSize: 14.sp,
-              letterSpacing: 2.2,
-              fontWeight: FontWeight.w600,
-              color: Colors.white.withOpacity(0.85),
             ),
           ),
         ],

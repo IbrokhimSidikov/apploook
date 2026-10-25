@@ -52,6 +52,9 @@ class AppLocalizations {
       'selectRequiredOptions': 'Please select the required options',
       // Cart page
       'cart': 'Cart',
+      'cartEmptyTitle': 'Your cart is empty',
+      'cartEmptySubtitle': 'Looks like you haven\'t added anything yet. Pick something tasty from the menu.',
+      'cartEmptyAction': 'Go to menu',
       // Bottom navigation
       'home': 'Home',
       'shop': 'Shop',
@@ -214,6 +217,7 @@ class AppLocalizations {
       'loyaltyInfoPending': 'Crystals become available once your order is completed.',
       'loyaltyCardHint': 'Tap to see your crystal history',
       'qrPayTitle': 'Pay in store',
+      'qrPayPageTitle': 'Get crystals in store',
       'qrPayHint': 'Show this code to the cashier to pay with your crystals.',
       'qrPayUpdatesIn': 'Code updates in',
       'qrPayError': 'Could not get a code. Check your connection and try again.',
@@ -386,6 +390,9 @@ class AppLocalizations {
       'selectRequiredOptions': 'Iltimos, majburiy variantlarni tanlang',
       // Cart page
       'cart': 'Savatcha',
+      'cartEmptyTitle': 'Savatchangiz boʻsh',
+      'cartEmptySubtitle': 'Hali hech narsa qoʻshmadingiz. Menyudan mazali taom tanlang.',
+      'cartEmptyAction': 'Menyuga oʻtish',
       // Bottom navigation
       'home': 'Asosiy',
       'shop': 'Do\'kon',
@@ -549,6 +556,7 @@ class AppLocalizations {
       'loyaltyInfoPending': 'Kristallar buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
       'loyaltyCardHint': 'Kristall tarixini koʻrish uchun bosing',
       'qrPayTitle': 'Restoranda toʻlash',
+      'qrPayPageTitle': 'Restoranda kristal olish',
       'qrPayHint': 'Kristallar bilan toʻlash uchun bu kodni kassirga koʻrsating.',
       'qrPayUpdatesIn': 'Kod yangilanadi',
       'qrPayError': 'Kod olinmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
@@ -721,6 +729,9 @@ class AppLocalizations {
       'selectRequiredOptions': 'Пожалуйста, выберите обязательные опции',
       // Cart page
       'cart': 'Корзина',
+      'cartEmptyTitle': 'Корзина пуста',
+      'cartEmptySubtitle': 'Вы пока ничего не добавили. Выберите что-нибудь вкусное в меню.',
+      'cartEmptyAction': 'Перейти в меню',
       // Bottom navigation
       'home': 'Главная',
       'shop': 'Магазин',
@@ -884,6 +895,7 @@ class AppLocalizations {
       'loyaltyInfoPending': 'Кристаллы станут доступны после завершения заказа.',
       'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кристаллов',
       'qrPayTitle': 'Оплата в ресторане',
+      'qrPayPageTitle': 'Кристаллы в ресторане',
       'qrPayHint': 'Покажите этот код кассиру, чтобы оплатить кристаллами.',
       'qrPayUpdatesIn': 'Код обновится через',
       'qrPayError': 'Не удалось получить код. Проверьте соединение и попробуйте снова.',
@@ -1081,6 +1093,12 @@ class AppLocalizations {
 
   // Cart page
   String get cart => _localizedValues[locale.languageCode]!['cart']!;
+  String get cartEmptyTitle =>
+      _localizedValues[locale.languageCode]!['cartEmptyTitle']!;
+  String get cartEmptySubtitle =>
+      _localizedValues[locale.languageCode]!['cartEmptySubtitle']!;
+  String get cartEmptyAction =>
+      _localizedValues[locale.languageCode]!['cartEmptyAction']!;
 
   // Bottom navigation
   String get home => _localizedValues[locale.languageCode]!['home']!;
@@ -1412,6 +1430,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['loyaltyCardHint']!;
   String get qrPayTitle =>
       _localizedValues[locale.languageCode]!['qrPayTitle']!;
+  String get qrPayPageTitle =>
+      _localizedValues[locale.languageCode]!['qrPayPageTitle']!;
   String get qrPayHint => _localizedValues[locale.languageCode]!['qrPayHint']!;
   String get qrPayUpdatesIn =>
       _localizedValues[locale.languageCode]!['qrPayUpdatesIn']!;

@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../features/crystal_shop/presentation/crystal_theme.dart';
 import '../models/cart_item.dart';
 import '../models/crystal_pricing.dart';
+import '../pages/app_shell.dart';
 import '../providers/loyalty_provider.dart';
 import '../widgets/crystal_pay_toggle.dart';
 import '../widgets/crystal_reward_card.dart';
@@ -60,6 +61,17 @@ class _CartState extends State<Cart> {
   }
 
   void _ensureMandatoryPackage() => Cart.ensureMandatoryPackage(context);
+
+  /// Back to the menu: the home tab when the cart is a tab, otherwise the
+  /// screen underneath (or a fresh home when there is none).
+  void _goToMenu() {
+    if (AppShell.select(context, AppShell.homeTab)) return;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.pushNamedAndRemoveUntil(context, '/homeNew', (route) => false);
+    }
+  }
 
   /// Whether [line] can take [extraUnits] more units within the crystal
   /// balance, given the basket already spends [cartCrystals]. Always true
@@ -170,17 +182,18 @@ class _CartState extends State<Cart> {
                 ),
               ),
         actions: [
-          Container(
-            margin: EdgeInsets.only(right: 10.w),
-            child: IconButton(
-              onPressed: () {
-                cartProvider.clearCart();
-                requote();
-              },
-              icon: const Icon(Icons.delete),
-              tooltip: 'Clear Cart',
+          if (cartProvider.cartItems.isNotEmpty)
+            Container(
+              margin: EdgeInsets.only(right: 10.w),
+              child: IconButton(
+                onPressed: () {
+                  cartProvider.clearCart();
+                  requote();
+                },
+                icon: const Icon(Icons.delete),
+                tooltip: 'Clear Cart',
+              ),
             ),
-          ),
         ],
       ),
       backgroundColor: Colors.white,
@@ -204,7 +217,8 @@ class _CartState extends State<Cart> {
                             SizedBox(width: 6.w),
                             Expanded(
                               child: Text(
-                                l10n.checkoutNotEnoughCrystals(crystalShortfall),
+                                l10n.checkoutNotEnoughCrystals(
+                                    crystalShortfall),
                                 style: TextStyle(
                                   fontSize: 12.5.sp,
                                   fontWeight: FontWeight.w600,
@@ -221,48 +235,62 @@ class _CartState extends State<Cart> {
                         onPressed: crystalShortfall > 0
                             ? null
                             : () async {
-                          final cartProvider =
-                              Provider.of<CartProvider>(context, listen: false);
-                          print('\n======== CART → CHECKOUT: Cart Items ========');
-                          print('Total Items: ${cartProvider.cartItems.length}');
-                          print('Total Price: ${cartProvider.getTotalPrice()} UZS');
-                          for (int i = 0; i < cartProvider.cartItems.length; i++) {
-                            final item = cartProvider.cartItems[i];
-                            print('\n--- Item ${i + 1} ---');
-                            print('Product ID: ${item.product.id}');
-                            print('Product UUID: ${item.product.uuid}');
-                            print('Product Name: ${item.product.name}');
-                            print('Display Name: ${item.displayName}');
-                            print('Quantity: ${item.quantity}');
-                            print('Base Price: ${item.product.price} UZS');
-                            print('Total Price (with modifiers): ${item.totalPrice} UZS');
-                            if (item.selectedModifiers.isNotEmpty) {
-                              print('Selected Modifiers (${item.selectedModifiers.length}):');
-                              double modifiersTotal = 0.0;
-                              for (var modifier in item.selectedModifiers) {
-                                final modPrice =
-                                    modifier.modifier.price * modifier.quantity;
-                                modifiersTotal += modPrice;
-                                print('  - ${modifier.modifier.name}');
-                                print('    ID: ${modifier.modifier.id}');
-                                print('    Price: ${modifier.modifier.price} UZS');
-                                print('    Quantity: ${modifier.quantity}');
-                                print('    Subtotal: $modPrice UZS');
-                              }
-                              print('Total Modifiers Cost: $modifiersTotal UZS');
-                              print(
-                                  'Item Total (Base + Modifiers) × Quantity: ${(item.product.price + modifiersTotal) * item.quantity} UZS');
-                            } else {
-                              print('No modifiers selected');
-                            }
-                          }
-                          print('============================================\n');
-                          bool isSignedIn = await _isUserSignedIn();
-                          Navigator.pushNamed(
-                            context,
-                            isSignedIn ? '/checkout' : '/signin',
-                          );
-                        },
+                                final cartProvider = Provider.of<CartProvider>(
+                                    context,
+                                    listen: false);
+                                print(
+                                    '\n======== CART → CHECKOUT: Cart Items ========');
+                                print(
+                                    'Total Items: ${cartProvider.cartItems.length}');
+                                print(
+                                    'Total Price: ${cartProvider.getTotalPrice()} UZS');
+                                for (int i = 0;
+                                    i < cartProvider.cartItems.length;
+                                    i++) {
+                                  final item = cartProvider.cartItems[i];
+                                  print('\n--- Item ${i + 1} ---');
+                                  print('Product ID: ${item.product.id}');
+                                  print('Product UUID: ${item.product.uuid}');
+                                  print('Product Name: ${item.product.name}');
+                                  print('Display Name: ${item.displayName}');
+                                  print('Quantity: ${item.quantity}');
+                                  print(
+                                      'Base Price: ${item.product.price} UZS');
+                                  print(
+                                      'Total Price (with modifiers): ${item.totalPrice} UZS');
+                                  if (item.selectedModifiers.isNotEmpty) {
+                                    print(
+                                        'Selected Modifiers (${item.selectedModifiers.length}):');
+                                    double modifiersTotal = 0.0;
+                                    for (var modifier
+                                        in item.selectedModifiers) {
+                                      final modPrice = modifier.modifier.price *
+                                          modifier.quantity;
+                                      modifiersTotal += modPrice;
+                                      print('  - ${modifier.modifier.name}');
+                                      print('    ID: ${modifier.modifier.id}');
+                                      print(
+                                          '    Price: ${modifier.modifier.price} UZS');
+                                      print(
+                                          '    Quantity: ${modifier.quantity}');
+                                      print('    Subtotal: $modPrice UZS');
+                                    }
+                                    print(
+                                        'Total Modifiers Cost: $modifiersTotal UZS');
+                                    print(
+                                        'Item Total (Base + Modifiers) × Quantity: ${(item.product.price + modifiersTotal) * item.quantity} UZS');
+                                  } else {
+                                    print('No modifiers selected');
+                                  }
+                                }
+                                print(
+                                    '============================================\n');
+                                bool isSignedIn = await _isUserSignedIn();
+                                Navigator.pushNamed(
+                                  context,
+                                  isSignedIn ? '/checkout' : '/signin',
+                                );
+                              },
                         style: TextButton.styleFrom(
                           backgroundColor: const Color(0xFFFEC700),
                           disabledBackgroundColor: const Color(0xFFEDEBF4),
@@ -287,258 +315,359 @@ class _CartState extends State<Cart> {
             )
           : null,
       body: SafeArea(
-        child: ColoredBox(
-          color: Colors.white,
-          child: CustomScrollView(
-            slivers: [
-              // ── Summary header ─────────────────────────────────────────
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '$item ${item == 1 ? 'item' : 'items'}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${NumberFormat('#,##0').format(price)} UZS',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+        child: cartProvider.cartItems.isEmpty
+            ? _EmptyCart(onBrowseMenu: _goToMenu)
+            : ColoredBox(
+                color: Colors.white,
+                child: CustomScrollView(
+                  slivers: [
+                    // ── Summary header ─────────────────────────────────────────
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 10.h),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '$item ${item == 1 ? 'item' : 'items'}',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: Colors.grey[600],
+                              ),
                             ),
-                          ),
-                          if (crystals > 0) ...[
-                            SizedBox(height: 2.h),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                SvgPicture.asset(CrystalTheme.asset,
-                                    width: 14.w, height: 14.w),
-                                SizedBox(width: 4.w),
                                 Text(
-                                  l10n.spendCrystals(crystals),
+                                  '${NumberFormat('#,##0').format(price)} UZS',
                                   style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: CrystalTheme.lilacText,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(
-                child: Divider(height: 1, thickness: 1),
-              ),
-
-              // ── Cart items ─────────────────────────────────────────────
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final cartItem = cartProvider.cartItems[index];
-                    final isMandatoryPackage =
-                        cartItem.product.name == 'Пакет';
-
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.w, vertical: 8.h),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Product image
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.r),
-                                child: cartItem.product.imagePath != null
-                                    ? Image.network(
-                                        cartItem.product.imagePath,
-                                        width: 90.w,
-                                        height: 64.w,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (_, __, ___) =>
-                                            Container(
-                                          width: 64.w,
-                                          height: 64.w,
-                                          color: Colors.grey[200],
-                                          child: const Icon(
-                                              Icons.image_not_supported_outlined,
-                                              color: Colors.grey),
-                                        ),
-                                      )
-                                    : Container(
-                                        width: 64.w,
-                                        height: 64.w,
-                                        color: Colors.grey[200],
-                                        child: const Icon(
-                                            Icons.image_not_supported_outlined,
-                                            color: Colors.grey),
-                                      ),
-                              ),
-                              SizedBox(width: 12.w),
-
-                              // Name + price
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            cartItem.displayName,
-                                            style: TextStyle(
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        if (isMandatoryPackage)
-                                          Container(
-                                            margin: EdgeInsets.only(left: 4.w),
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 6.w, vertical: 2.h),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFFFEC700),
-                                              borderRadius:
-                                                  BorderRadius.circular(4.r),
-                                            ),
-                                            child: Text(
-                                              'Required',
-                                              style: TextStyle(
-                                                fontSize: 10.sp,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 4.h),
-                                    _LinePricing(
-                                      line: cartItem,
-                                      loyalty: loyalty,
-                                      isMandatoryPackage: isMandatoryPackage,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-
-                              // Quantity control
-                              if (!isMandatoryPackage)
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(50.r),
-                                    border: Border.all(
-                                        color: Colors.grey.shade300),
-                                  ),
-                                  child: Row(
+                                if (crystals > 0) ...[
+                                  SizedBox(height: 2.h),
+                                  Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _QtyButton(
-                                        icon: cartItem.quantity > 1
-                                            ? Icons.remove
-                                            : Icons.delete_outline,
-                                        iconColor: cartItem.quantity > 1
-                                            ? Colors.black
-                                            : Colors.red,
-                                        onTap: () {
-                                          if (cartItem.quantity > 1) {
-                                            cartProvider.updateQuantity(
-                                                cartItem,
-                                                cartItem.quantity - 1);
-                                          } else {
-                                            cartProvider
-                                                .removeFromCart(cartItem);
-                                          }
-                                          requote();
-                                        },
-                                      ),
-                                      SizedBox(
-                                        width: 28.w,
-                                        child: Center(
-                                          child: Text(
-                                            '${cartItem.quantity}',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 14.sp,
-                                            ),
-                                          ),
+                                      SvgPicture.asset(CrystalTheme.asset,
+                                          width: 14.w, height: 14.w),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        l10n.spendCrystals(crystals),
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: CrystalTheme.lilacText,
                                         ),
-                                      ),
-                                      _QtyButton(
-                                        icon: Icons.add,
-                                        // A crystal line stops growing once
-                                        // one more unit would overdraw.
-                                        onTap: _fitsCrystalBudget(
-                                                cartItem, loyalty, crystals,
-                                                extraUnits: 1)
-                                            ? () {
-                                                cartProvider.updateQuantity(
-                                                    cartItem,
-                                                    cartItem.quantity + 1);
-                                                requote();
-                                              }
-                                            : null,
-                                        iconColor: _fitsCrystalBudget(
-                                                cartItem, loyalty, crystals,
-                                                extraUnits: 1)
-                                            ? Colors.black
-                                            : Colors.black26,
                                       ),
                                     ],
                                   ),
-                                )
-                              else
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[200],
-                                    borderRadius: BorderRadius.circular(50.r),
-                                  ),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 14.w, vertical: 8.h),
-                                  child: Text(
-                                    '${cartItem.quantity}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14.sp,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                                ],
+                              ],
+                            ),
+                          ],
                         ),
-                        const Divider(height: 1, thickness: 1, indent: 88),
-                      ],
-                    );
-                  },
-                  childCount: cartProvider.cartItems.length,
+                      ),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: Divider(height: 1, thickness: 1),
+                    ),
+
+                    // ── Cart items ─────────────────────────────────────────────
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          final cartItem = cartProvider.cartItems[index];
+                          final isMandatoryPackage =
+                              cartItem.product.name == 'Пакет';
+
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w, vertical: 8.h),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    // Product image
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      child: cartItem.product.imagePath != null
+                                          ? Image.network(
+                                              cartItem.product.imagePath,
+                                              width: 90.w,
+                                              height: 64.w,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (_, __, ___) =>
+                                                  Container(
+                                                width: 64.w,
+                                                height: 64.w,
+                                                color: Colors.grey[200],
+                                                child: const Icon(
+                                                    Icons
+                                                        .image_not_supported_outlined,
+                                                    color: Colors.grey),
+                                              ),
+                                            )
+                                          : Container(
+                                              width: 64.w,
+                                              height: 64.w,
+                                              color: Colors.grey[200],
+                                              child: const Icon(
+                                                  Icons
+                                                      .image_not_supported_outlined,
+                                                  color: Colors.grey),
+                                            ),
+                                    ),
+                                    SizedBox(width: 12.w),
+
+                                    // Name + price
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Text(
+                                                  cartItem.displayName,
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (isMandatoryPackage)
+                                                Container(
+                                                  margin: EdgeInsets.only(
+                                                      left: 4.w),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 6.w,
+                                                      vertical: 2.h),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        const Color(0xFFFEC700),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            4.r),
+                                                  ),
+                                                  child: Text(
+                                                    'Required',
+                                                    style: TextStyle(
+                                                      fontSize: 10.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 4.h),
+                                          _LinePricing(
+                                            line: cartItem,
+                                            loyalty: loyalty,
+                                            isMandatoryPackage:
+                                                isMandatoryPackage,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.w),
+
+                                    // Quantity control
+                                    if (!isMandatoryPackage)
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[100],
+                                          borderRadius:
+                                              BorderRadius.circular(50.r),
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            _QtyButton(
+                                              icon: cartItem.quantity > 1
+                                                  ? Icons.remove
+                                                  : Icons.delete_outline,
+                                              iconColor: cartItem.quantity > 1
+                                                  ? Colors.black
+                                                  : Colors.red,
+                                              onTap: () {
+                                                if (cartItem.quantity > 1) {
+                                                  cartProvider.updateQuantity(
+                                                      cartItem,
+                                                      cartItem.quantity - 1);
+                                                } else {
+                                                  cartProvider
+                                                      .removeFromCart(cartItem);
+                                                }
+                                                requote();
+                                              },
+                                            ),
+                                            SizedBox(
+                                              width: 28.w,
+                                              child: Center(
+                                                child: Text(
+                                                  '${cartItem.quantity}',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 14.sp,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            _QtyButton(
+                                              icon: Icons.add,
+                                              // A crystal line stops growing once
+                                              // one more unit would overdraw.
+                                              onTap: _fitsCrystalBudget(
+                                                      cartItem,
+                                                      loyalty,
+                                                      crystals,
+                                                      extraUnits: 1)
+                                                  ? () {
+                                                      cartProvider
+                                                          .updateQuantity(
+                                                              cartItem,
+                                                              cartItem.quantity +
+                                                                  1);
+                                                      requote();
+                                                    }
+                                                  : null,
+                                              iconColor: _fitsCrystalBudget(
+                                                      cartItem,
+                                                      loyalty,
+                                                      crystals,
+                                                      extraUnits: 1)
+                                                  ? Colors.black
+                                                  : Colors.black26,
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    else
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(50.r),
+                                        ),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 14.w, vertical: 8.h),
+                                        child: Text(
+                                          '${cartItem.quantity}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 14.sp,
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const Divider(
+                                  height: 1, thickness: 1, indent: 88),
+                            ],
+                          );
+                        },
+                        childCount: cartProvider.cartItems.length,
+                      ),
+                    ),
+
+                    // ── Recommended items ──────────────────────────────────────
+                    const SliverToBoxAdapter(child: RecommendedItemsSection()),
+
+                    // Bottom padding so content clears the sticky button
+                    SliverToBoxAdapter(child: SizedBox(height: 16.h)),
+                  ],
                 ),
               ),
+      ),
+    );
+  }
+}
 
-              // ── Recommended items ──────────────────────────────────────
-              const SliverToBoxAdapter(child: RecommendedItemsSection()),
+// ── Empty state ──────────────────────────────────────────────────────────────
+/// Shown instead of the cart list when nothing is in the basket. No
+/// suggestions here: the page should read as empty, with one clear way back
+/// to the menu.
+class _EmptyCart extends StatelessWidget {
+  const _EmptyCart({required this.onBrowseMenu});
 
-              // Bottom padding so content clears the sticky button
-              SliverToBoxAdapter(child: SizedBox(height: 16.h)),
-            ],
-          ),
+  final VoidCallback onBrowseMenu;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(32.w, 24.h, 32.w, 48.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 120.w,
+              height: 120.w,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF1F2F7),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                size: 56.sp,
+                color: const Color(0xFFB0B0B0),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Text(
+              l10n.cartEmptyTitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
+                color: Colors.black,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              l10n.cartEmptySubtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                height: 1.45,
+                color: const Color(0xFF8E8E93),
+              ),
+            ),
+            SizedBox(height: 28.h),
+            SizedBox(
+              width: double.infinity,
+              height: 52.h,
+              child: TextButton(
+                onPressed: onBrowseMenu,
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xFFFEC700),
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                ),
+                child: Text(
+                  l10n.cartEmptyAction,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -560,7 +689,8 @@ class _LinePricing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final money = '${NumberFormat('#,##0').format(line.totalPrice.toInt())} UZS';
+    final money =
+        '${NumberFormat('#,##0').format(line.totalPrice.toInt())} UZS';
 
     // The bag is never offered for crystals and earns nothing.
     if (isMandatoryPackage) return _moneyText(money);
@@ -623,8 +753,8 @@ class _LinePricing extends StatelessWidget {
                           ..showSnackBar(SnackBar(
                             behavior: SnackBarBehavior.floating,
                             backgroundColor: CrystalTheme.violetDeep,
-                            content: Text(l10n.notEnoughCrystalsForQuantity(
-                                missing)),
+                            content: Text(
+                                l10n.notEnoughCrystalsForQuantity(missing)),
                           ));
                         return;
                       }

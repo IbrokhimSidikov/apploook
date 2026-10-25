@@ -7,6 +7,8 @@ import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
+import 'package:apploook/features/crystal_shop/domain/crystal_rank.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_rank_board.dart';
 import 'package:apploook/l10n/app_localizations.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 import 'package:apploook/widgets/loyalty_info_sheet.dart';
@@ -117,7 +119,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                       ),
                       SizedBox(width: 6.w),
                       // The price level only means something once the card has
-                      // loaded; before that it would always read "A".
+                      // loaded; before that it would always read "Bronze".
                       if (!loading && !unavailable)
                         Container(
                           padding: EdgeInsets.symmetric(
@@ -127,7 +129,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
-                            l10n.tierLevel(card.tier.code),
+                            rankName(l10n, CrystalRank.forTier(card.tier)),
                             style: TextStyle(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w800,

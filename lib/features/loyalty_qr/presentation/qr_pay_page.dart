@@ -42,9 +42,12 @@ class _QrPayView extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          l10n.qrPayTitle,
+          l10n.qrPayPageTitle,
+          maxLines: 2,
+          textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 17.sp,
+            fontSize: 16.sp,
+            height: 1.25,
             fontWeight: FontWeight.w700,
             color: AppColors.cx0B0B0B,
           ),

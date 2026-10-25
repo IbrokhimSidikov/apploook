@@ -678,42 +678,69 @@ class _HomeNewState extends State<HomeNew>
                   8.horizontalSpace,
                   Consumer<NotificationProvider>(
                     builder: (context, notificationProvider, child) {
-                      return GestureDetector(
-                        onTap: () async {
-                          await notificationProvider.markAllAsRead();
-                          Navigator.pushNamed(context, '/notification');
-                        },
+                      final unread = notificationProvider.unreadCount;
+                      // Same lilac surface as the crystal balance pill, so
+                      // the app bar actions read as one set.
+                      return Center(
                         child: Stack(
+                          clipBehavior: Clip.none,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.all(15.r),
-                              child: Icon(
-                                Icons.notifications_outlined,
-                                size: 24.w,
-                                color: Colors.black,
+                            Material(
+                              color: CrystalTheme.lilac,
+                              shape: const CircleBorder(
+                                side: BorderSide(color: Color(0xFFDCD0FF)),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () async {
+                                  final navigator = Navigator.of(context);
+                                  await notificationProvider.markAllAsRead();
+                                  navigator.pushNamed('/notification');
+                                },
+                                child: SizedBox(
+                                  width: 40.w,
+                                  height: 40.w,
+                                  child: Icon(
+                                    unread > 0
+                                        ? Icons.notifications_rounded
+                                        : Icons.notifications_none_rounded,
+                                    size: 24.w,
+                                    color: CrystalTheme.lilacText,
+                                  ),
+                                ),
                               ),
                             ),
-                            if (notificationProvider.unreadCount > 0)
+                            if (unread > 0)
                               Positioned(
-                                right: 10,
-                                top: 10,
-                                child: Container(
-                                  padding: EdgeInsets.all(4.r),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  constraints: BoxConstraints(
-                                    minWidth: 16.w,
-                                    minHeight: 16.h,
-                                  ),
-                                  child: Text(
-                                    '${notificationProvider.unreadCount}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10.sp,
+                                right: -4.w,
+                                top: -4.w,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 4.w),
+                                    constraints: BoxConstraints(
+                                      minWidth: 18.w,
+                                      minHeight: 18.w,
                                     ),
-                                    textAlign: TextAlign.center,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE53935),
+                                      borderRadius:
+                                          BorderRadius.circular(10.r),
+                                      border: Border.all(
+                                        color: const Color(0xFFF1F2F7),
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      unread > 99 ? '99+' : '$unread',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 9.sp,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.1,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -722,7 +749,7 @@ class _HomeNewState extends State<HomeNew>
                       );
                     },
                   ),
-                  8.horizontalSpace,
+                  16.horizontalSpace,
                 ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Column(
@@ -1080,24 +1107,27 @@ class _HomeNewState extends State<HomeNew>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: Text(
                               productGroup.groupName,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16.sp,
-                              ),
+                              style: _menuCardTitleStyle,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          Icon(
-                            Icons.arrow_forward_ios,
-                            size: 14.w,
-                            color: Colors.grey,
+                          Padding(
+                            padding: EdgeInsets.only(left: 8.w, top: 3.h),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 14.w,
+                              color: Colors.grey,
+                            ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 10.h),
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 35.w,
@@ -1126,6 +1156,17 @@ class _HomeNewState extends State<HomeNew>
       ),
     );
   }
+
+  /// Title style shared by both menu cards: slightly larger and heavier than
+  /// body text so the name is the focal point, in a soft near-black that is
+  /// easier on the eyes than pure black.
+  TextStyle get _menuCardTitleStyle => TextStyle(
+        fontSize: 17.sp,
+        fontWeight: FontWeight.w700,
+        height: 1.25,
+        letterSpacing: -0.2,
+        color: const Color(0xFF1C1C1E),
+      );
 
   /// Build a card for a regular product (no variations)
   Widget _buildProductCard(
@@ -1243,12 +1284,11 @@ class _HomeNewState extends State<HomeNew>
                     children: [
                       Text(
                         product.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.sp,
-                        ),
+                        style: _menuCardTitleStyle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 10.h),
                       Row(
                         children: [
                           // A crystal-only product has no money price to

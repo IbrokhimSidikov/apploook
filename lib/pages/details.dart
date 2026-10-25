@@ -15,6 +15,7 @@ import 'package:apploook/widget/modifier_group_widget.dart';
 import 'package:apploook/widgets/crystal_pay_toggle.dart';
 import 'package:apploook/widgets/crystal_reward_card.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -378,8 +379,9 @@ class _DetailsState extends State<Details> {
 
   // ── Product header ────────────────────────────────────────────────────────
 
+  /// Category, name and the crystal choice. The price itself lives only on
+  /// the add-to-cart button, so the page never states it twice.
   Widget _buildHeader(LoyaltyProvider loyalty) {
-    final payingWithCrystals = _payingWithCrystals(loyalty);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -399,26 +401,11 @@ class _DetailsState extends State<Details> {
           widget.product.name,
           style: TextStyle(
             fontFamily: _kFont,
-            fontSize: 24.sp,
+            fontSize: 28.sp,
             fontWeight: FontWeight.w700,
             height: 1.25,
             letterSpacing: -0.3,
             color: Colors.black,
-          ),
-        ),
-        SizedBox(height: 10.h),
-        // The soum price steps back, struck through, while the line is
-        // going out for crystals; the crystal figure takes its place.
-        Text(
-          '${_priceFormat.format(_configuration.basePrice)} UZS',
-          style: TextStyle(
-            fontFamily: _kFont,
-            fontSize: payingWithCrystals ? 15.sp : 19.sp,
-            fontWeight: FontWeight.w700,
-            height: 1.2,
-            color: payingWithCrystals ? _kTextSecondary : Colors.black,
-            decoration:
-                payingWithCrystals ? TextDecoration.lineThrough : null,
           ),
         ),
         _buildCrystalChoice(loyalty),
@@ -426,9 +413,9 @@ class _DetailsState extends State<Details> {
     );
   }
 
-  /// Crystal price and the "pay with crystals" choice under the money
-  /// price. Nothing for a product that is not sold for crystals; a
-  /// crystal-only product always says so, even to a signed-out customer.
+  /// The "pay with crystals" choice under the name. Nothing for a product
+  /// that is not sold for crystals; a crystal-only product always says so,
+  /// even to a signed-out customer.
   Widget _buildCrystalChoice(LoyaltyProvider loyalty) {
     final crystalOnly = _crystalOnly;
     final unitPrice = _crystalUnitPrice(loyalty.tier);
@@ -437,20 +424,13 @@ class _DetailsState extends State<Details> {
 
     final Widget body;
     if (offered) {
-      body = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CrystalPriceText(crystals: unitPrice!, fontSize: 19.sp),
-          SizedBox(height: 10.h),
-          CrystalPayToggle(
-            crystalPrice: unitPrice,
-            value: _payWithCrystals,
-            crystalOnly: crystalOnly,
-            onChanged: crystalOnly
-                ? null
-                : (value) => setState(() => _payWithCrystals = value),
-          ),
-        ],
+      body = CrystalPayToggle(
+        crystalPrice: unitPrice!,
+        value: _payWithCrystals,
+        crystalOnly: crystalOnly,
+        onChanged: crystalOnly
+            ? null
+            : (value) => setState(() => _payWithCrystals = value),
       );
     } else if (!loyalty.hasSession) {
       body = const CrystalOnlySignInHint();
@@ -472,7 +452,7 @@ class _DetailsState extends State<Details> {
         ],
       );
     }
-    return Padding(padding: EdgeInsets.only(top: 10.h), child: body);
+    return Padding(padding: EdgeInsets.only(top: 12.h), child: body);
   }
 
   Widget _buildDescription() {
@@ -490,7 +470,7 @@ class _DetailsState extends State<Details> {
             description,
             style: TextStyle(
               fontFamily: _kFont,
-              fontSize: 14.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w400,
               height: 1.55,
               color: _kTextBody,
@@ -584,9 +564,6 @@ class _DetailsState extends State<Details> {
     final crystalTotal = payingWithCrystals
         ? (_crystalUnitPrice(loyalty.tier) ?? 0) * _configuration.quantity
         : 0;
-    final priceLabel = payingWithCrystals
-        ? AppLocalizations.of(context).crystalsAmount(crystalTotal)
-        : '${_priceFormat.format(_configuration.totalPrice)} UZS';
     // The label wraps to a second line rather than being truncated — some
     // locales are far longer than "Add to cart", and the button grows with it.
     return ElevatedButton(
@@ -624,16 +601,95 @@ class _DetailsState extends State<Details> {
             ),
           ),
           SizedBox(width: 12.w),
-          Text(
-            priceLabel,
-            style: TextStyle(
-              fontFamily: _kFont,
-              fontSize: 15.sp,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+          _buildButtonPrice(payingWithCrystals, crystalTotal),
+        ],
+      ),
+    );
+  }
+
+  /// Price on the add-to-cart button. Switching to crystals slides the soum
+  /// total up into a struck-through "was" line - what the customer saves -
+  /// and the crystal total rises in under it; switching back reverses it.
+  /// Quantity and modifier changes re-run the same transition on the figure.
+  Widget _buildButtonPrice(bool payingWithCrystals, int crystalTotal) {
+    final moneyTotal = '${_priceFormat.format(_configuration.totalPrice)} UZS';
+    // A crystal-only product has no soum price worth showing as a saving.
+    final showSaving =
+        payingWithCrystals && !_crystalOnly && _configuration.totalPrice > 0;
+    final priceStyle = TextStyle(
+      fontFamily: _kFont,
+      fontSize: 15.sp,
+      fontWeight: FontWeight.w700,
+      height: 1.2,
+    );
+
+    final Widget price = payingWithCrystals
+        ? Row(
+            key: ValueKey('crystals_$crystalTotal'),
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset(CrystalTheme.asset,
+                  width: 15.sp, height: 15.sp),
+              SizedBox(width: 5.w),
+              Text(
+                AppLocalizations.of(context).crystalsAmount(crystalTotal),
+                style: priceStyle,
+              ),
+            ],
+          )
+        : Text(moneyTotal, key: ValueKey(moneyTotal), style: priceStyle);
+
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.centerRight,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: _slideUpTransition,
+            child: showSaving
+                ? Opacity(
+                    key: ValueKey('saving_$moneyTotal'),
+                    opacity: 0.55,
+                    child: Text(
+                      moneyTotal,
+                      style: TextStyle(
+                        fontFamily: _kFont,
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  )
+                : const SizedBox.shrink(key: ValueKey('no_saving')),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 250),
+            transitionBuilder: _slideUpTransition,
+            layoutBuilder: (current, previous) => Stack(
+              alignment: Alignment.centerRight,
+              children: [...previous, if (current != null) current],
             ),
+            child: price,
           ),
         ],
+      ),
+    );
+  }
+
+  static Widget _slideUpTransition(Widget child, Animation<double> animation) {
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.4),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+        child: child,
       ),
     );
   }

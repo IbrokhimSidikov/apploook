@@ -185,39 +185,15 @@ class _CrystalShopViewState extends State<CrystalShopView> {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(20.w, 22.h, 20.w, 4.h),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.redeemWithCrystals,
-                      style: TextStyle(
-                        fontFamily: CrystalTheme.font,
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.2,
-                        color: CrystalTheme.ink,
-                      ),
-                    ),
-                  ),
-                  if (controller.itemCount > 0)
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: CrystalTheme.lilac,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Text(
-                        '${controller.itemCount}',
-                        style: TextStyle(
-                          fontFamily: CrystalTheme.font,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700,
-                          color: CrystalTheme.lilacText,
-                        ),
-                      ),
-                    ),
-                ],
+              child: Text(
+                l.redeemWithCrystals,
+                style: TextStyle(
+                  fontFamily: CrystalTheme.font,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                  color: CrystalTheme.ink,
+                ),
               ),
             ),
           ),
@@ -278,7 +254,6 @@ class _CrystalShopViewState extends State<CrystalShopView> {
               child: _SectionHeader(
                 key: _sectionKey(section.categoryId),
                 title: section.title,
-                count: section.items.length,
                 first: i == 0,
               ),
             ),
@@ -418,17 +393,15 @@ class _CategoryTab extends StatelessWidget {
   }
 }
 
-/// Category heading above each grid, with how many items it holds.
+/// Category heading above each grid.
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({
     super.key,
     required this.title,
-    required this.count,
     required this.first,
   });
 
   final String title;
-  final int count;
 
   /// The first section sits right under the shop title, so it needs less
   /// space above it than the gap between two grids.
@@ -460,15 +433,6 @@ class _SectionHeader extends StatelessWidget {
                 fontWeight: FontWeight.w700,
                 color: CrystalTheme.ink,
               ),
-            ),
-          ),
-          Text(
-            '$count',
-            style: TextStyle(
-              fontFamily: CrystalTheme.font,
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: CrystalTheme.textSecondary,
             ),
           ),
         ],

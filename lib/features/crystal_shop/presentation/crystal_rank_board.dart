@@ -17,8 +17,8 @@ String rankName(AppLocalizations l, CrystalRank rank) => switch (rank) {
       CrystalRank.diamond => l.rankDiamond,
     };
 
-/// Top of the shop tab: the customer's level (A bronze, B gold, C diamond)
-/// from their crystal balance, the three levels on a track, and how far the
+/// Top of the shop tab: the customer's level (bronze, gold, diamond) from
+/// their crystal balance, the three levels on a track, and how far the
 /// next one is.
 class CrystalRankBoard extends StatelessWidget {
   const CrystalRankBoard({super.key});
@@ -80,7 +80,7 @@ class CrystalRankBoard extends StatelessWidget {
                       SizedBox(height: 2.h),
                       if (rank != null)
                         Text(
-                          '${rankName(l, rank)} · ${l.rankCategory(rank.category)}',
+                          rankName(l, rank),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -201,7 +201,7 @@ class _Step extends StatelessWidget {
             ),
           ),
           Text(
-            '${rank.category} · ${_fmt.format(rank.minCrystals)}+',
+            '${_fmt.format(rank.minCrystals)}+',
             maxLines: 1,
             style: TextStyle(
               fontFamily: CrystalTheme.font,
