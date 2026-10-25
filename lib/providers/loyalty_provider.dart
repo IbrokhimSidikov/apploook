@@ -255,13 +255,27 @@ class LoyaltyProvider extends ChangeNotifier {
       } catch (_) {
         productSievesId = null;
       }
+      // Each component says what it is and what it costs in money, so the
+      // server applies the same rule as CrystalPricing and the money price:
+      // the product plus its paid add-ons; an included option (0 UZS) adds
+      // nothing.
       if (productSievesId != null) {
-        components.add({'inventory_id': productSievesId, 'quantity': 1});
+        components.add({
+          'inventory_id': productSievesId,
+          'quantity': 1,
+          'role': 'product',
+          'money_price': (product.price as num).round(),
+        });
       }
       for (final selected in item.selectedModifiers) {
         final id = selected.modifier.sievesId;
         if (id == null) continue;
-        components.add({'inventory_id': id, 'quantity': selected.quantity});
+        components.add({
+          'inventory_id': id,
+          'quantity': selected.quantity,
+          'role': 'modifier',
+          'money_price': selected.modifier.price.round(),
+        });
       }
       lines.add({
         'line_id': '${item.id}',
@@ -414,8 +428,11 @@ class LoyaltyProvider extends ChangeNotifier {
       // The balance or the prices moved under us. Show the customer the
       // fresh numbers and let them confirm again rather than silently
       // changing the price.
+      debugPrint('Loyalty: hold refused ${e.code}: ${e.message} '
+          '(blocked=${e.quote?.blockedReason} spendable=${e.quote?.spendable} '
+          'shortfall=${e.quote?.shortfall})');
       if (e.quote != null) _applyQuote(e.quote!);
-      _error = 'crystals_changed';
+      _error = e.code ?? 'crystals_changed';
       notifyListeners();
       rethrow;
     } on LoyaltySessionExpiredException {

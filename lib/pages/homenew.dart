@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:visibility_detector/visibility_detector.dart';
-import 'package:apploook/providers/locale_provider.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
@@ -647,7 +646,7 @@ class _HomeNewState extends State<HomeNew>
                                     horizontal: 12.w, vertical: 7.h),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFEC700),
-                                  borderRadius: BorderRadius.circular(8.r),
+                                  borderRadius: BorderRadius.circular(20.r),
                                   border: Border.all(color: Colors.white),
                                 ),
                                 child: Row(
@@ -729,17 +728,17 @@ class _HomeNewState extends State<HomeNew>
                   background: Column(
                     children: [
                       SizedBox(height: 110.h),
-                      Padding(
-                        padding: EdgeInsets.only(left: 15.w),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            AppLocalizations.of(context).whatsNew,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18.sp),
-                          ),
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: EdgeInsets.only(left: 15.w),
+                      //   child: Align(
+                      //     alignment: Alignment.centerLeft,
+                      //     child: Text(
+                      //       AppLocalizations.of(context).whatsNew,
+                      //       style: TextStyle(
+                      //           fontWeight: FontWeight.bold, fontSize: 18.sp),
+                      //     ),
+                      //   ),
+                      // ),
                       SizedBox(height: 10.h),
                       // Carousel Slider Banner
                       _isLoadingBanners
@@ -816,10 +815,8 @@ class _HomeNewState extends State<HomeNew>
                                     textStyle: MaterialStateProperty
                                         .resolveWith<TextStyle>(
                                       (states) {
-                                        return TextStyle(
-                                          fontWeight: category.id == value
-                                              ? FontWeight.bold
-                                              : FontWeight.normal,
+                                        return const TextStyle(
+                                          fontWeight: FontWeight.bold,
                                         );
                                       },
                                     ),
@@ -1100,27 +1097,7 @@ class _HomeNewState extends State<HomeNew>
                           ),
                         ],
                       ),
-                      SizedBox(height: 5.h),
-                      Consumer<LocaleProvider>(
-                        builder: (context, localeProvider, _) {
-                          final description = productGroup.primaryVariation
-                              .getDescriptionInLanguage(
-                                  localeProvider.locale.languageCode);
-
-                          return Text(
-                            description != null && description.isNotEmpty
-                                ? description
-                                : 'Multiple variations available',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          );
-                        },
-                      ),
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 8.h),
                       Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: 35.w,
@@ -1271,26 +1248,7 @@ class _HomeNewState extends State<HomeNew>
                           fontSize: 16.sp,
                         ),
                       ),
-                      SizedBox(height: 5.h),
-                      Consumer<LocaleProvider>(
-                        builder: (context, localeProvider, _) {
-                          final description = product.getDescriptionInLanguage(
-                              localeProvider.locale.languageCode);
-
-                          return Text(
-                            description != null && description.isNotEmpty
-                                ? description
-                                : 'No Description',
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          );
-                        },
-                      ),
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 8.h),
                       Row(
                         children: [
                           // A crystal-only product has no money price to

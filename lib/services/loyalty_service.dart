@@ -278,6 +278,8 @@ class LoyaltyService {
         final quoteJson = (payload['quote'] as Map?)?.cast<String, dynamic>();
         throw LoyaltyQuoteStaleException(
           quoteJson == null ? null : LoyaltyQuote.fromJson(quoteJson),
+          code: payload['code']?.toString(),
+          message: payload['message']?.toString(),
         );
       }
       throw Exception(payload['message']?.toString() ?? 'Conflict');
@@ -289,6 +291,8 @@ class LoyaltyService {
         final quoteJson = (payload['quote'] as Map?)?.cast<String, dynamic>();
         throw LoyaltyQuoteStaleException(
           quoteJson == null ? null : LoyaltyQuote.fromJson(quoteJson),
+          code: payload['code']?.toString(),
+          message: payload['message']?.toString(),
         );
       }
     }

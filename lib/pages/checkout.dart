@@ -177,12 +177,25 @@ class _CheckoutState extends State<Checkout> {
         return (hold: null, aborted: true);
       }
       return (hold: hold, aborted: false);
-    } on LoyaltyQuoteStaleException {
+    } on LoyaltyQuoteStaleException catch (e) {
       // The balance or a price moved between the quote and the reservation.
       // This is recoverable and expected, not an error: show the new figures
       // and let the customer confirm again rather than placing the order at
-      // a price they did not agree to.
-      _showLoyaltySnack(AppLocalizations.of(context).checkoutCashbackChanged);
+      // a price they did not agree to. Name the actual reason - "balance
+      // changed" for everything hid real problems behind a shrug.
+      final l10n = AppLocalizations.of(context);
+      final reason = e.quote?.blockedReason;
+      final String text;
+      if (e.isUnbacked) {
+        text = l10n.checkoutCashbackSyncing;
+      } else if (e.isLineProblem || reason == 'line_problems') {
+        text = l10n.checkoutCrystalLineProblem;
+      } else if (reason == 'insufficient_crystals') {
+        text = l10n.checkoutNotEnoughCrystals(e.quote?.shortfall ?? 0);
+      } else {
+        text = l10n.checkoutCashbackChanged;
+      }
+      _showLoyaltySnack(text);
       return (hold: null, aborted: true);
     } catch (e) {
       // Earning must never block an order: fall through and place it at the
@@ -1080,7 +1093,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',

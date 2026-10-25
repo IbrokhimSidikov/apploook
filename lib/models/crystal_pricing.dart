@@ -45,27 +45,37 @@ abstract class CrystalPricing {
     }
   }
 
-  /// Crystal price of one configured unit (product + modifiers), or null
-  /// when the configuration is not sold for crystals at [tier].
+  /// Crystal price of one configured unit, or null when the configuration
+  /// is not sold for crystals at [tier].
+  ///
+  /// Same shape as [ProductPriceCalculator.unitPrice]: the product's own
+  /// price plus what each selected modifier adds. In money an included
+  /// option ("Стрипс 1шт" under "Стрипсы", the drink in a combo) has a
+  /// price of 0 and adds nothing; it adds nothing in crystals either, so one
+  /// strip is 88, not 88 + 88. A paid add-on adds its crystal price exactly
+  /// as it adds its money price, and blocks the line when it has none.
+  ///
+  /// The one case money never has: a product with no crystal price of its
+  /// own (a Delever "main product" whose options carry the prices). There
+  /// the included option prices the line, otherwise nothing could.
   static int? unitPrice(
     Product product,
     List<SelectedModifier> modifiers,
     LoyaltyTier tier,
   ) {
     final base = productPrice(product, tier);
-    // A product with no tier price of its own is still sellable when it is
-    // a Delever "main product" whose variant modifier carries the price -
-    // the same shape the POS mapping uses. Only a priced-in-money product
-    // without a crystal price blocks the line.
     if (base == null && product.price > 0 && product.sievesId != null) {
+      // Priced in money, not in crystals: not sold for crystals.
       return null;
     }
     var total = base ?? 0;
     var priced = base != null;
     for (final selected in modifiers) {
+      final paid = selected.modifier.price > 0;
+      if (!paid && priced) continue; // included, like its 0 UZS
       final price = modifierPrice(selected.modifier, tier);
       if (price == null) {
-        if (selected.modifier.price > 0) return null;
+        if (paid) return null;
         continue;
       }
       priced = true;
@@ -92,10 +102,15 @@ abstract class CrystalPricing {
     return total;
   }
 
-  /// Crystals one configured unit earns when paid with money.
+  /// Crystals one configured unit earns when paid with money. Same shape as
+  /// [unitPrice]: the product's points plus those of paid add-ons; an
+  /// included option earns nothing on top of a product with its own points.
   static int unitPoints(Product product, List<SelectedModifier> modifiers) {
-    var points = (product.crystalPoints ?? 0).clamp(0, 1 << 30);
+    final int? base = product.crystalPoints;
+    var points = (base ?? 0).clamp(0, 1 << 30);
     for (final selected in modifiers) {
+      final paid = selected.modifier.price > 0;
+      if (!paid && base != null) continue;
       points += (selected.modifier.crystalPoints ?? 0).clamp(0, 1 << 30) *
           selected.quantity;
     }

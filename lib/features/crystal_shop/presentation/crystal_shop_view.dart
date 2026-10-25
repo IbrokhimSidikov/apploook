@@ -19,6 +19,7 @@ import '../application/crystal_shop_controller.dart';
 import '../domain/crystal_shop_models.dart';
 import 'crystal_rank_board.dart';
 import 'crystal_theme.dart';
+import 'crystal_toast.dart';
 
 final _fmt = NumberFormat('#,##0', 'en_US');
 
@@ -827,29 +828,18 @@ class RedeemSheet extends StatelessWidget {
               CartItem(product: item.product, payWithCrystals: true),
             );
         HapticFeedback.mediumImpact();
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: CrystalTheme.violetDeep,
-              content: Text(
-                '${item.name} · ${l.addedToCart}',
-                style: const TextStyle(fontFamily: CrystalTheme.font),
-              ),
-              action: SnackBarAction(
-                label: l.cart,
-                textColor: CrystalTheme.yellow,
-                // The shop is a shell tab, so show the cart tab in place;
-                // only fall back to the standalone route outside the shell.
-                onPressed: () {
-                  if (!AppShell.select(context, AppShell.cartTab)) {
-                    Navigator.pushNamed(context, '/cart');
-                  }
-                },
-              ),
-            ),
-          );
+        CrystalToast.show(
+          context,
+          message: '${item.name} · ${l.addedToCart}',
+          actionLabel: l.cart,
+          // The shop is a shell tab, so show the cart tab in place; only
+          // fall back to the standalone route outside the shell.
+          onAction: () {
+            if (!AppShell.select(context, AppShell.cartTab)) {
+              Navigator.pushNamed(context, '/cart');
+            }
+          },
+        );
     }
   }
 

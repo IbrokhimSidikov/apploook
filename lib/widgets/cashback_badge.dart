@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 
@@ -43,7 +42,7 @@ class CashbackBadge extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8.r),
+        borderRadius: BorderRadius.circular(20.r),
         onTap: () {
           if (unavailable) {
             context.read<LoyaltyProvider>().refresh();
@@ -51,14 +50,14 @@ class CashbackBadge extends StatelessWidget {
             Navigator.pushNamed(context, '/wallet');
           }
         },
-        // Same yellow chip as the Reorder button in this app bar, so the two
-        // read as one family of header actions.
+        // Same lilac pill as the crystal badge on the menu product cards, so
+        // the balance and the per-product reward read as one family.
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
           decoration: BoxDecoration(
-            color: AppColors.cxFEC700,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: Colors.white),
+            color: CrystalTheme.lilac,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: const Color(0xFFDCD0FF)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -67,13 +66,13 @@ class CashbackBadge extends StatelessWidget {
               SizedBox(width: 6.w),
               if (label == null)
                 Shimmer.fromColors(
-                  baseColor: AppColors.cx0B0B0B.withValues(alpha: 0.15),
-                  highlightColor: AppColors.cx0B0B0B.withValues(alpha: 0.35),
+                  baseColor: CrystalTheme.lilacText.withValues(alpha: 0.15),
+                  highlightColor: CrystalTheme.lilacText.withValues(alpha: 0.35),
                   child: Container(
                     width: 36.w,
                     height: 12.h,
                     decoration: BoxDecoration(
-                      color: AppColors.cx0B0B0B,
+                      color: CrystalTheme.lilacText,
                       borderRadius: BorderRadius.circular(4.r),
                     ),
                   ),
@@ -82,7 +81,7 @@ class CashbackBadge extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: AppColors.cx0B0B0B,
+                    color: CrystalTheme.lilacText,
                     fontWeight: FontWeight.w700,
                     fontSize: 13.sp,
                     fontFeatures: const [FontFeature.tabularFigures()],

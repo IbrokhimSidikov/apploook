@@ -485,14 +485,24 @@ class LoyaltyTransaction {
       );
 }
 
-/// Raised when the server rejects a hold because the balance moved between
-/// the quote and the reservation. Carries the fresh quote to re-render with.
+/// Raised when the server refuses to settle the basket as quoted: the
+/// balance moved between the quote and the reservation
+/// (`LOYALTY_QUOTE_STALE`), the cached balance is not backed by the ledger
+/// (`LOYALTY_BALANCE_UNBACKED`), or a line cannot be paid the way it is set
+/// (`LOYALTY_LINE_PROBLEM`). Carries the fresh quote to re-render with, and
+/// the server's code and message so the reason is visible in the log.
 class LoyaltyQuoteStaleException implements Exception {
   final LoyaltyQuote? quote;
-  LoyaltyQuoteStaleException(this.quote);
+  final String? code;
+  final String? message;
+  LoyaltyQuoteStaleException(this.quote, {this.code, this.message});
+
+  bool get isUnbacked => code == 'LOYALTY_BALANCE_UNBACKED';
+  bool get isLineProblem => code == 'LOYALTY_LINE_PROBLEM';
 
   @override
-  String toString() => 'LoyaltyQuoteStaleException';
+  String toString() =>
+      'LoyaltyQuoteStaleException(${code ?? 'unknown'}: ${message ?? ''})';
 }
 
 /// Raised when the session token is missing, expired or revoked.
