@@ -148,7 +148,7 @@ class _ToastHostState extends State<_ToastHost>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SvgPicture.asset(CrystalTheme.asset,
-                              width: 16.w, height: 16.w),
+                              width: 21.w, height: 21.w),
                           SizedBox(width: 9.w),
                           Flexible(
                             child: Text(

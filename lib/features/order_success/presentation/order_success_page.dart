@@ -280,7 +280,7 @@ class _SummaryCard extends StatelessWidget {
           if (details.crystalsSpent > 0)
             _Row(
               leading: SvgPicture.asset(CrystalTheme.asset,
-                  width: 18.w, height: 18.w),
+                  width: 24.w, height: 24.w),
               label: l.crystalsSpent,
               value: Text(
                 '− ${l.crystalsAmount(details.crystalsSpent)}',
@@ -397,7 +397,7 @@ class _EarnedCard extends StatelessWidget {
                 builder: (context, t, child) =>
                     Transform.scale(scale: t, child: child),
                 child: SvgPicture.asset(CrystalTheme.asset,
-                    width: 64.w, height: 64.w),
+                    width: 84.w, height: 84.w),
               ),
             ),
           ),

@@ -36,6 +36,7 @@ class LoyaltyProvider extends ChangeNotifier {
 
   LoyaltySummary _summary = LoyaltySummary.empty;
   bool _summaryLoaded = false;
+  LoyaltyTierStatus? _tierStatus;
   bool _isLoadingSummary = false;
   bool _hasSession = false;
   bool _needsActivation = false;
@@ -44,6 +45,14 @@ class LoyaltyProvider extends ChangeNotifier {
   String? _error;
 
   LoyaltySummary get summary => _summary;
+
+  /// Purchase-based level from `/loyalty/tier`, or null until it arrives
+  /// (or when the request failed - the card's tier stands in then).
+  LoyaltyTierStatus? get tierStatus => _tierStatus;
+
+  /// The level shown to the customer as bronze / gold / diamond. Pricing
+  /// keeps using [tier], the price list on the card.
+  LoyaltyTier get levelTier => _tierStatus?.tier ?? card.tier;
   LoyaltyCard get card => _summary.card;
   LoyaltyProgram get program => _summary.program;
   bool get isLoadingSummary => _isLoadingSummary;
@@ -160,6 +169,7 @@ class LoyaltyProvider extends ChangeNotifier {
       debugPrint('Loyalty: no session '
           '(needsActivation=$_needsActivation) - nothing will be requested');
       _summary = LoyaltySummary.empty;
+      _tierStatus = null;
       // `silent` suppresses the loading flicker, not the result: the profile
       // card switches between its activate and balance states off this, so it
       // must always be told.
@@ -174,13 +184,27 @@ class LoyaltyProvider extends ChangeNotifier {
     }
 
     try {
+      // Fetched together so the level and the balance land in the same
+      // frame. A failed level request never blocks the card: the card's own
+      // tier is shown until the next refresh.
+      final tierStatus = _service
+          .fetchTierStatus()
+          .then<LoyaltyTierStatus?>((status) => status)
+          // An expired session surfaces through fetchSummary below, which
+          // shares the token, so this one never needs to throw.
+          .catchError((Object e) {
+        debugPrint('Loyalty: tier status unavailable: $e');
+        return null;
+      });
       _summary = await _service.fetchSummary();
+      _tierStatus = await tierStatus ?? _tierStatus;
       _summaryLoaded = true;
       _error = null;
     } on LoyaltySessionExpiredException {
       _hasSession = false;
       _summary = LoyaltySummary.empty;
       _summaryLoaded = false;
+      _tierStatus = null;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -221,6 +245,7 @@ class LoyaltyProvider extends ChangeNotifier {
     await _service.endSession();
     _hasSession = false;
     _summary = LoyaltySummary.empty;
+    _tierStatus = null;
     resetCheckout();
     notifyListeners();
   }

@@ -2,20 +2,26 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants/app_colors.dart';
 
 /// One entry in the floating tab bar.
 class GlassNavItem {
   const GlassNavItem({
-    required this.icon,
-    required this.activeIcon,
+    this.icon,
+    this.activeIcon,
+    this.svgAsset,
     required this.label,
     this.badgeCount = 0,
-  });
+  }) : assert(svgAsset != null || (icon != null && activeIcon != null));
 
-  final IconData icon;
-  final IconData activeIcon;
+  final IconData? icon;
+  final IconData? activeIcon;
+
+  /// A full-colour SVG drawn in place of [icon]/[activeIcon]. It keeps its
+  /// own colours and is only faded while the tab is not selected.
+  final String? svgAsset;
   final String label;
 
   /// Small red counter drawn over the icon. Hidden when zero.
@@ -196,12 +202,22 @@ class _GlassNavButton extends StatelessWidget {
                       scale: animation,
                       child: FadeTransition(opacity: animation, child: child),
                     ),
-                    child: Icon(
-                      selected ? item.activeIcon : item.icon,
-                      key: ValueKey<bool>(selected),
-                      size: 22,
-                      color: foreground,
-                    ),
+                    child: item.svgAsset != null
+                        ? Opacity(
+                            key: ValueKey<bool>(selected),
+                            opacity: selected ? 1 : 0.6,
+                            child: SvgPicture.asset(
+                              item.svgAsset!,
+                              width: 24,
+                              height: 24,
+                            ),
+                          )
+                        : Icon(
+                            selected ? item.activeIcon : item.icon,
+                            key: ValueKey<bool>(selected),
+                            size: 22,
+                            color: foreground,
+                          ),
                   ),
                   if (item.badgeCount > 0)
                     Positioned(

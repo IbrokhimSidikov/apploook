@@ -54,7 +54,7 @@ class CrystalRewardCard extends StatelessWidget {
                 ],
               ),
             ),
-            child: SvgPicture.asset(CrystalTheme.asset, width: 44.w, height: 44.w),
+            child: SvgPicture.asset(CrystalTheme.asset, width: 54.w, height: 54.w),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -112,7 +112,7 @@ class CrystalRewardChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 14.w, height: 14.w),
+          SvgPicture.asset(CrystalTheme.asset, width: 19.w, height: 19.w),
           SizedBox(width: 5.w),
           Text(
             l.crystalRewardCompact(crystals),
@@ -149,7 +149,7 @@ class CrystalPointsBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 13.w, height: 13.w),
+          SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
           SizedBox(width: 3.w),
           Text(
             '+$crystals',

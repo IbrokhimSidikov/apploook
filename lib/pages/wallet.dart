@@ -96,7 +96,7 @@ class _WalletState extends State<Wallet> {
                   _CardTile(
                     card: provider.card,
                     amount: _crystals,
-                    tierLabel: rankName(_l10n, CrystalRank.forTier(provider.card.tier)),
+                    tierLabel: rankName(_l10n, CrystalRank.forTier(provider.levelTier)),
                     availableLabel: _l10n.walletAvailable,
                     pendingLabel: _l10n.walletPending,
                     pendingHint: _l10n.walletPendingHint,
@@ -177,8 +177,7 @@ class _CardTile extends StatelessWidget {
   final LoyaltyCard card;
   final String Function(int) amount;
 
-  /// Which crystal price list the customer buys from. Shown on the card so a
-  /// customer on a better level can see why their prices differ.
+  /// The customer's level (bronze, gold, diamond) from `/loyalty/tier`.
   final String tierLabel;
   final String availableLabel;
   final String pendingLabel;
@@ -257,7 +256,7 @@ class _CardTile extends StatelessWidget {
                     SizedBox(width: 8.w),
                     if (!isLoading) _TierPill(label: tierLabel),
                     const Spacer(),
-                    SvgPicture.asset(CrystalTheme.asset, width: 22.w, height: 22.w),
+                    SvgPicture.asset(CrystalTheme.asset, width: 30.w, height: 30.w),
                   ],
                 ),
                 SizedBox(height: 6.h),
@@ -398,7 +397,7 @@ class _HintTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
+          SvgPicture.asset(CrystalTheme.asset, width: 24.w, height: 24.w),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(

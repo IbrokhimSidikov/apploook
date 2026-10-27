@@ -629,7 +629,7 @@ class _DetailsState extends State<Details> {
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.asset(CrystalTheme.asset,
-                  width: 15.sp, height: 15.sp),
+                  width: 20.sp, height: 20.sp),
               SizedBox(width: 5.w),
               Text(
                 AppLocalizations.of(context).crystalsAmount(crystalTotal),

@@ -69,7 +69,7 @@ class LoyaltyCheckoutSection extends StatelessWidget {
         children: [
           Row(
             children: [
-              SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
+              SvgPicture.asset(CrystalTheme.asset, width: 24.w, height: 24.w),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(

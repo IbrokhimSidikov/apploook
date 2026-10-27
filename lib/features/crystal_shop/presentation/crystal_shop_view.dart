@@ -610,7 +610,7 @@ class CrystalPrice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = large ? 22.w : 15.w;
+    final iconSize = large ? 29.w : 20.w;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -719,7 +719,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: SvgPicture.asset(CrystalTheme.asset, width: 44.w),
+            child: SvgPicture.asset(CrystalTheme.asset, width: 58.w),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -990,7 +990,7 @@ class RedeemSheet extends StatelessWidget {
                   if (action == _SheetResult.added ||
                       action == _SheetResult.configure) ...[
                     SvgPicture.asset(CrystalTheme.asset,
-                        width: 18.w, height: 18.w),
+                        width: 24.w, height: 24.w),
                     SizedBox(width: 8.w),
                   ],
                   Flexible(

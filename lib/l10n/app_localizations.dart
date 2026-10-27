@@ -76,8 +76,9 @@ class AppLocalizations {
       'rankBronze': 'Bronze',
       'rankGold': 'Gold',
       'rankDiamond': 'Diamond',
-      'rankCategory': 'Category {c}',
-      'rankToNext': '{n} more crystals to {rank}',
+      'rankToNextOrders': '{n} more orders of {amount} UZS or more to reach {rank}',
+      'rankKeepUntil': 'Order before {date} to keep {rank}',
+      'rankWindowHint': 'Based on your orders in the last {days} days',
       'rankTop': 'You have reached the top level!',
       'rankSignIn': 'Sign in to see your level',
       'spendCrystals': 'Spend {n} {crystals}',
@@ -414,8 +415,9 @@ class AppLocalizations {
       'rankBronze': 'Bronza',
       'rankGold': 'Oltin',
       'rankDiamond': 'Olmos',
-      'rankCategory': '{c} toifa',
-      'rankToNext': '{rank} darajasigacha yana {n} kristall',
+      'rankToNextOrders': '{rank} darajasiga yana {n} ta {amount} UZS va undan yuqori buyurtma',
+      'rankKeepUntil': '{rank} darajasini saqlash uchun {date} gacha buyurtma bering',
+      'rankWindowHint': 'Soʻnggi {days} kundagi buyurtmalaringiz asosida',
       'rankTop': 'Siz eng yuqori darajadasiz!',
       'rankSignIn': 'Darajangizni koʻrish uchun kiring',
       'spendCrystals': '{n} {crystals} sarflash',
@@ -753,8 +755,9 @@ class AppLocalizations {
       'rankBronze': 'Бронза',
       'rankGold': 'Золото',
       'rankDiamond': 'Бриллиант',
-      'rankCategory': 'Категория {c}',
-      'rankToNext': 'До уровня «{rank}» ещё {n}',
+      'rankToNextOrders': 'До уровня «{rank}»: ещё {n} заказ(ов) от {amount} UZS',
+      'rankKeepUntil': 'Сделайте заказ до {date}, чтобы сохранить уровень «{rank}»',
+      'rankWindowHint': 'По вашим заказам за последние {days} дней',
       'rankTop': 'Вы достигли высшего уровня!',
       'rankSignIn': 'Войдите, чтобы увидеть свой уровень',
       'spendCrystals': 'Потратить {n} {crystals}',
@@ -1133,13 +1136,18 @@ class AppLocalizations {
   String get rankGold => _localizedValues[locale.languageCode]!['rankGold']!;
   String get rankDiamond =>
       _localizedValues[locale.languageCode]!['rankDiamond']!;
-  String rankCategory(String c) =>
-      _localizedValues[locale.languageCode]!['rankCategory']!
-          .replaceAll('{c}', c);
-  String rankToNext(int n, String rank) =>
-      _localizedValues[locale.languageCode]!['rankToNext']!
-          .replaceAll('{n}', _groupThousands(n))
+  String rankToNextOrders(int n, int amount, String rank) =>
+      _localizedValues[locale.languageCode]!['rankToNextOrders']!
+          .replaceAll('{n}', '$n')
+          .replaceAll('{amount}', _groupThousands(amount))
           .replaceAll('{rank}', rank);
+  String rankKeepUntil(String date, String rank) =>
+      _localizedValues[locale.languageCode]!['rankKeepUntil']!
+          .replaceAll('{date}', date)
+          .replaceAll('{rank}', rank);
+  String rankWindowHint(int days) =>
+      _localizedValues[locale.languageCode]!['rankWindowHint']!
+          .replaceAll('{days}', '$days');
   String get rankTop => _localizedValues[locale.languageCode]!['rankTop']!;
   String get rankSignIn => _localizedValues[locale.languageCode]!['rankSignIn']!;
   String notEnoughCrystalsForQuantity(int n) =>

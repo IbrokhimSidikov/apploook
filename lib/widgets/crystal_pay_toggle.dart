@@ -58,7 +58,7 @@ class CrystalPayToggle extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset(CrystalTheme.asset,
-                      width: 14.w, height: 14.w),
+                      width: 19.w, height: 19.w),
                   SizedBox(width: 6.w),
                   Flexible(
                     child: Text(
@@ -160,7 +160,8 @@ class CrystalPriceText extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(CrystalTheme.asset, width: size, height: size),
+        SvgPicture.asset(CrystalTheme.asset,
+            width: size * 1.35, height: size * 1.35),
         SizedBox(width: 4.w),
         Text(
           AppLocalizations.of(context).crystalsAmount(crystals),

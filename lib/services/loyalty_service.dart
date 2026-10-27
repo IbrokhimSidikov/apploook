@@ -376,6 +376,10 @@ class LoyaltyService {
     return LoyaltyHold.fromJson(data);
   }
 
+  /// The customer's purchase-based level and the progress to the next one.
+  Future<LoyaltyTierStatus> fetchTierStatus() async =>
+      LoyaltyTierStatus.fromJson(await _request('GET', '/loyalty/tier'));
+
   /// Top crystal collectors and where this customer stands. Raw map on
   /// purpose: the crystal shop turns it into its own leaderboard model.
   Future<Map<String, dynamic>> fetchLeaderboard({int limit = 50}) =>

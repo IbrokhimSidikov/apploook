@@ -1976,7 +1976,7 @@ class _CheckoutState extends State<Checkout> {
                                 if (crystalsToSpend > 0) ...[
                                   SizedBox(width: 6.w),
                                   SvgPicture.asset(CrystalTheme.asset,
-                                      width: 14.w, height: 14.w),
+                                      width: 19.w, height: 19.w),
                                   SizedBox(width: 2.w),
                                   Text(
                                     NumberFormat('#,##0')

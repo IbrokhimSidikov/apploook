@@ -508,7 +508,7 @@ class _CrystalCount extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(CrystalTheme.asset, width: size + 2, height: size + 2),
+        SvgPicture.asset(CrystalTheme.asset, width: size * 1.35, height: size * 1.35),
         SizedBox(width: 4.w),
         Text(
           _fmt.format(amount),

@@ -53,7 +53,9 @@ class CashbackBadge extends StatelessWidget {
         // Same lilac pill as the crystal badge on the menu product cards, so
         // the balance and the per-product reward read as one family.
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+          // Tighter vertical padding than the 24 px icon would suggest, so
+          // the bigger crystal fits a pill of the same height as before.
+          padding: EdgeInsets.fromLTRB(8.w, 4.h, 12.w, 4.h),
           decoration: BoxDecoration(
             color: CrystalTheme.lilac,
             borderRadius: BorderRadius.circular(20.r),
@@ -62,8 +64,8 @@ class CashbackBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
-              SizedBox(width: 6.w),
+              SvgPicture.asset(CrystalTheme.asset, width: 24.w, height: 24.w),
+              SizedBox(width: 5.w),
               if (label == null)
                 Shimmer.fromColors(
                   baseColor: CrystalTheme.lilacText.withValues(alpha: 0.15),

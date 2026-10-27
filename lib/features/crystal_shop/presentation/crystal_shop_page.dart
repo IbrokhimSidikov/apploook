@@ -230,7 +230,7 @@ class _BalanceChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(CrystalTheme.asset, width: 26.w, height: 26.w),
+              SvgPicture.asset(CrystalTheme.asset, width: 34.w, height: 34.w),
               SizedBox(width: 8.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

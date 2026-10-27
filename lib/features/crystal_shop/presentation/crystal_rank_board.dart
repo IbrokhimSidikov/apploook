@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:apploook/l10n/app_localizations.dart';
-import '../application/crystal_shop_controller.dart';
+import 'package:apploook/models/loyalty.dart';
+import 'package:apploook/providers/loyalty_provider.dart';
 import '../domain/crystal_rank.dart';
 import 'crystal_theme.dart';
 
-final _fmt = NumberFormat('#,##0', 'en_US');
+final _date = DateFormat('dd.MM.yyyy');
 
 String rankName(AppLocalizations l, CrystalRank rank) => switch (rank) {
       CrystalRank.bronze => l.rankBronze,
@@ -18,17 +19,22 @@ String rankName(AppLocalizations l, CrystalRank rank) => switch (rank) {
     };
 
 /// Top of the shop tab: the customer's level (bronze, gold, diamond) from
-/// their crystal balance, the three levels on a track, and how far the
-/// next one is.
+/// `/loyalty/tier`, the three levels on a track, how many qualifying orders
+/// the next one needs, and when the current one lapses without new orders.
 class CrystalRankBoard extends StatelessWidget {
   const CrystalRankBoard({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final controller = context.watch<CrystalShopController>();
-    final balance = controller.balance;
-    final rank = balance == null ? null : CrystalRank.forCrystals(balance);
+    final loyalty = context.watch<LoyaltyProvider>();
+    final loading = !loyalty.sessionKnown ||
+        (loyalty.hasSession &&
+            !loyalty.balanceLoaded &&
+            loyalty.error == null);
+    final known = loyalty.hasSession && loyalty.balanceLoaded;
+    final rank = known ? CrystalRank.forTier(loyalty.levelTier) : null;
+    final status = known ? loyalty.tierStatus : null;
     final accent = rank ?? CrystalRank.bronze;
 
     return Padding(
@@ -91,7 +97,7 @@ class CrystalRankBoard extends StatelessWidget {
                             color: rank.ink,
                           ),
                         )
-                      else if (controller.balanceLoading)
+                      else if (loading)
                         _ShimmerLine(width: 130.w, height: 20.h)
                       else
                         Text(
@@ -109,10 +115,10 @@ class CrystalRankBoard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 18.h),
-            _RankTrack(balance: balance),
-            if (balance != null) ...[
+            _RankTrack(current: rank, next: status?.next),
+            if (rank != null) ...[
               SizedBox(height: 14.h),
-              _NextHint(balance: balance),
+              _Hints(rank: rank, status: status),
             ],
           ],
         ),
@@ -121,22 +127,24 @@ class CrystalRankBoard extends StatelessWidget {
   }
 }
 
-/// The three medals joined by bars that fill as the balance climbs.
+/// The three medals joined by bars: full behind the current level, and the
+/// bar towards the next level filled by the qualifying orders so far.
 class _RankTrack extends StatelessWidget {
-  const _RankTrack({required this.balance});
+  const _RankTrack({required this.current, required this.next});
 
-  final int? balance;
+  final CrystalRank? current;
+  final LoyaltyTierNext? next;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     const ranks = CrystalRank.values;
-    final current = balance == null ? null : CrystalRank.forCrystals(balance!);
+    final nextRank = next == null ? null : CrystalRank.forTier(next!.tier);
 
     final children = <Widget>[];
     for (var i = 0; i < ranks.length; i++) {
       final rank = ranks[i];
-      final reached = current != null && rank.index <= current.index;
+      final reached = current != null && rank.index <= current!.index;
       children.add(_Step(
         rank: rank,
         label: rankName(l, rank),
@@ -144,17 +152,20 @@ class _RankTrack extends StatelessWidget {
         isCurrent: rank == current,
       ));
       if (i + 1 < ranks.length) {
-        final next = ranks[i + 1];
-        final fill = balance == null
-            ? 0.0
-            : ((balance! - rank.minCrystals) /
-                    (next.minCrystals - rank.minCrystals))
-                .clamp(0.0, 1.0);
+        final upcoming = ranks[i + 1];
+        final double fill;
+        if (current != null && upcoming.index <= current!.index) {
+          fill = 1;
+        } else if (rank == current && upcoming == nextRank) {
+          fill = next!.progress;
+        } else {
+          fill = 0;
+        }
         children.add(Expanded(
           child: Padding(
             // Centred on the 36.w medals, whose tops align with the bar's row.
             padding: EdgeInsets.only(top: 18.w - 3.h),
-            child: _Bar(fill: fill, colors: next.colors),
+            child: _Bar(fill: fill, colors: upcoming.colors),
           ),
         ));
       }
@@ -198,16 +209,6 @@ class _Step extends StatelessWidget {
               fontSize: 11.5.sp,
               fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
               color: reached ? rank.ink : CrystalTheme.textSecondary,
-            ),
-          ),
-          Text(
-            '${_fmt.format(rank.minCrystals)}+',
-            maxLines: 1,
-            style: TextStyle(
-              fontFamily: CrystalTheme.font,
-              fontSize: 10.sp,
-              color: CrystalTheme.textSecondary,
-              fontFeatures: const [FontFeature.tabularFigures()],
             ),
           ),
         ],
@@ -293,33 +294,93 @@ class _Medal extends StatelessWidget {
   }
 }
 
-/// "N more crystals to Gold", or the top-level note.
-class _NextHint extends StatelessWidget {
-  const _NextHint({required this.balance});
+/// What to do next: the orders still needed for the next level (or the
+/// top-level note), when the current level lapses, and the window the
+/// orders are counted over. Without a tier status (request failed) only the
+/// top-level note can be said for sure.
+class _Hints extends StatelessWidget {
+  const _Hints({required this.rank, required this.status});
 
-  final int balance;
+  final CrystalRank rank;
+  final LoyaltyTierStatus? status;
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final next = CrystalRank.forCrystals(balance).next;
-    final text = next == null
-        ? l.rankTop
-        : l.rankToNext(next.minCrystals - balance, rankName(l, next));
+    final next = status?.next;
+    final downgrade = status?.downgrade;
+    final windowDays = status?.windowDays ?? 0;
 
+    final String? headline = next != null
+        ? l.rankToNextOrders(next.remaining, next.minCheckAmount,
+            rankName(l, CrystalRank.forTier(next.tier)))
+        : rank.next == null
+            ? l.rankTop
+            : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (headline != null)
+          _HintRow(
+            icon: next == null
+                ? Icons.auto_awesome_rounded
+                : Icons.trending_up_rounded,
+            text: headline,
+            filled: true,
+          ),
+        if (downgrade != null) ...[
+          if (headline != null) SizedBox(height: 8.h),
+          _HintRow(
+            icon: Icons.schedule_rounded,
+            text: l.rankKeepUntil(_date.format(downgrade.on), rankName(l, rank)),
+          ),
+        ],
+        if (windowDays > 0) ...[
+          SizedBox(height: 10.h),
+          Text(
+            l.rankWindowHint(windowDays),
+            style: TextStyle(
+              fontFamily: CrystalTheme.font,
+              fontSize: 11.sp,
+              color: CrystalTheme.textSecondary,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// One hint line: a lilac pill for the main call to action, a plain row
+/// for secondary notes.
+class _HintRow extends StatelessWidget {
+  const _HintRow({required this.icon, required this.text, this.filled = false});
+
+  final IconData icon;
+  final String text;
+  final bool filled;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = filled ? CrystalTheme.lilacText : CrystalTheme.textSecondary;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
-      decoration: BoxDecoration(
-        color: CrystalTheme.lilac,
-        borderRadius: BorderRadius.circular(14.r),
-      ),
+      padding: filled
+          ? EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h)
+          : EdgeInsets.symmetric(horizontal: 2.w),
+      decoration: filled
+          ? BoxDecoration(
+              color: CrystalTheme.lilac,
+              borderRadius: BorderRadius.circular(14.r),
+            )
+          : null,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            next == null ? Icons.auto_awesome_rounded : Icons.trending_up_rounded,
-            size: 16.sp,
-            color: CrystalTheme.lilacText,
+          Padding(
+            padding: EdgeInsets.only(top: 1.h),
+            child: Icon(icon, size: 16.sp, color: color),
           ),
           SizedBox(width: 8.w),
           Expanded(
@@ -327,9 +388,10 @@ class _NextHint extends StatelessWidget {
               text,
               style: TextStyle(
                 fontFamily: CrystalTheme.font,
-                fontSize: 12.5.sp,
-                fontWeight: FontWeight.w600,
-                color: CrystalTheme.lilacText,
+                fontSize: filled ? 12.5.sp : 12.sp,
+                fontWeight: filled ? FontWeight.w600 : FontWeight.w500,
+                height: 1.3,
+                color: color,
               ),
             ),
           ),

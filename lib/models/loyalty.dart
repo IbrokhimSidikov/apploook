@@ -25,6 +25,105 @@ enum LoyaltyTier {
   String get code => name;
 }
 
+/// The customer's level from `GET /loyalty/tier`: earned from purchases
+/// over a rolling window, with how far the next level is and when the
+/// current one lapses without new orders.
+class LoyaltyTierStatus {
+  /// The level the customer is at now, computed from recent purchases.
+  final LoyaltyTier tier;
+
+  /// The level saved on the card, which can lag [tier].
+  final LoyaltyTier storedTier;
+  final bool isActive;
+  final DateTime? lastPurchaseDate;
+  final int? daysSinceLastPurchase;
+
+  /// Length of the rolling purchase window, in days.
+  final int windowDays;
+
+  /// Null at the top level.
+  final LoyaltyTierNext? next;
+
+  /// Null when nothing is due to lapse.
+  final LoyaltyTierDowngrade? downgrade;
+
+  const LoyaltyTierStatus({
+    required this.tier,
+    required this.storedTier,
+    required this.isActive,
+    this.lastPurchaseDate,
+    this.daysSinceLastPurchase,
+    required this.windowDays,
+    this.next,
+    this.downgrade,
+  });
+
+  factory LoyaltyTierStatus.fromJson(Map<String, dynamic> json) {
+    final window = (json['window'] as Map?)?.cast<String, dynamic>() ?? {};
+    final next = (json['next'] as Map?)?.cast<String, dynamic>();
+    final downgrade = (json['downgrade'] as Map?)?.cast<String, dynamic>();
+    return LoyaltyTierStatus(
+      tier: LoyaltyTier.parse(json['tier']),
+      storedTier: LoyaltyTier.parse(json['stored_tier'] ?? json['tier']),
+      isActive: json['is_active'] == true,
+      lastPurchaseDate:
+          DateTime.tryParse(json['last_purchase_date']?.toString() ?? ''),
+      daysSinceLastPurchase: _int(json['days_since_last_purchase']),
+      windowDays: _int(window['days']) ?? 0,
+      next: next == null ? null : LoyaltyTierNext.fromJson(next),
+      downgrade:
+          downgrade == null ? null : LoyaltyTierDowngrade.fromJson(downgrade),
+    );
+  }
+
+  static int? _int(dynamic v) => v is int ? v : int.tryParse('${v ?? ''}');
+}
+
+/// What it takes to reach the next level: [remaining] more purchases of at
+/// least [minCheckAmount] soum inside the window.
+class LoyaltyTierNext {
+  final LoyaltyTier tier;
+  final int required;
+  final int counted;
+  final int remaining;
+  final int minCheckAmount;
+
+  const LoyaltyTierNext({
+    required this.tier,
+    required this.required,
+    required this.counted,
+    required this.remaining,
+    required this.minCheckAmount,
+  });
+
+  factory LoyaltyTierNext.fromJson(Map<String, dynamic> json) =>
+      LoyaltyTierNext(
+        tier: LoyaltyTier.parse(json['tier']),
+        required: LoyaltyTierStatus._int(json['required']) ?? 0,
+        counted: LoyaltyTierStatus._int(json['counted']) ?? 0,
+        remaining: LoyaltyTierStatus._int(json['remaining']) ?? 0,
+        minCheckAmount: LoyaltyTierStatus._int(json['min_check_amount']) ?? 0,
+      );
+
+  /// Share of the way to [tier], 0..1.
+  double get progress =>
+      required <= 0 ? 1 : (counted / required).clamp(0.0, 1.0);
+}
+
+/// The level the customer drops to [on] that date if they stop ordering.
+class LoyaltyTierDowngrade {
+  final LoyaltyTier tier;
+  final DateTime on;
+
+  const LoyaltyTierDowngrade({required this.tier, required this.on});
+
+  static LoyaltyTierDowngrade? fromJson(Map<String, dynamic> json) {
+    final on = DateTime.tryParse(json['on']?.toString() ?? '');
+    if (on == null) return null;
+    return LoyaltyTierDowngrade(tier: LoyaltyTier.parse(json['tier']), on: on);
+  }
+}
+
 /// How a cart line is settled, as the server names it.
 enum LoyaltyPayWith {
   money,

@@ -106,7 +106,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                   Row(
                     children: [
                       SvgPicture.asset(CrystalTheme.asset,
-                          width: 15.sp, height: 15.sp),
+                          width: 20.sp, height: 20.sp),
                       SizedBox(width: 6.w),
                       Text(
                         l10n.walletTitle.toUpperCase(),
@@ -118,7 +118,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: 6.w),
-                      // The price level only means something once the card has
+                      // The level only means something once the card has
                       // loaded; before that it would always read "Bronze".
                       if (!loading && !unavailable)
                         Container(
@@ -129,7 +129,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(6.r),
                           ),
                           child: Text(
-                            rankName(l10n, CrystalRank.forTier(card.tier)),
+                            rankName(l10n, CrystalRank.forTier(loyalty.levelTier)),
                             style: TextStyle(
                               fontSize: 10.sp,
                               fontWeight: FontWeight.w800,
