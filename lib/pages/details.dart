@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'dart:convert';
@@ -254,15 +255,10 @@ class _DetailsState extends State<Details> {
     final validation = _configuration.validate();
     if (!validation.isValid) {
       _scrollToGroup(validation.firstInvalidGroup!);
+      HapticFeedback.mediumImpact();
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).selectRequiredOptions),
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        ..showSnackBar(_requiredOptionsSnackBar());
       return;
     }
 
@@ -275,6 +271,54 @@ class _DetailsState extends State<Details> {
     ));
     cartProvider.logItems();
     Navigator.pop(context);
+  }
+
+  /// Floating white card above the add-to-cart bar: rounded like the rest
+  /// of the page, with the brand yellow carrying the "needs attention" cue
+  /// instead of a stark black strip.
+  SnackBar _requiredOptionsSnackBar() {
+    return SnackBar(
+      behavior: SnackBarBehavior.floating,
+      duration: const Duration(seconds: 2),
+      backgroundColor: Colors.white,
+      elevation: 8,
+      margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18.r),
+        side: const BorderSide(color: _kDivider),
+      ),
+      content: Row(
+        children: [
+          Container(
+            width: 34.w,
+            height: 34.w,
+            decoration: const BoxDecoration(
+              color: _kPrimary,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.priority_high_rounded,
+              size: 20.sp,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              AppLocalizations.of(context).selectRequiredOptions,
+              style: TextStyle(
+                fontFamily: _kFont,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                height: 1.3,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _scrollToGroup(ModifierGroup group) {

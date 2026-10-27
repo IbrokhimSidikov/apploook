@@ -1093,7 +1093,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    'Test'
+    // 'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1304,12 +1304,13 @@ class _CheckoutState extends State<Checkout> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.car_repair_outlined,
-                                  color: Colors.black,
-                                  size: 28.w,
+                                // 2:1 artwork, so sized by height to sit on
+                                // the same line as the other options' icons.
+                                SvgPicture.asset(
+                                  'images/carhop1.svg',
+                                  height: 24.w,
                                 ),
-                                SizedBox(height: 5.h),
+                                SizedBox(height: 10.h),
                                 Text(
                                   'Carhop',
                                   style: TextStyle(
