@@ -1093,7 +1093,7 @@ class _CheckoutState extends State<Checkout> {
     'Maksim Gorkiy',
     'City Boulevard Loook',
     'Yangiyol Loook',
-    // 'Test'
+    'Test'
   ];
   List<String> city = [
     'Tashkent',
@@ -1312,7 +1312,7 @@ class _CheckoutState extends State<Checkout> {
                                 ),
                                 SizedBox(height: 10.h),
                                 Text(
-                                  'Carhop',
+                                  'Parking Delivery',
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
