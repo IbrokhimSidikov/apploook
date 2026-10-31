@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:apploook/constants/app_colors.dart';
 import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/l10n/app_localizations.dart';
+import 'package:apploook/pages/unified_order_tracking_page.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
 
 final _money = NumberFormat('#,##0', 'en_US');
@@ -65,8 +66,19 @@ class OrderSuccessPage extends StatelessWidget {
   void _trackOrder(BuildContext context) {
     Navigator.of(context)
       ..pushNamedAndRemoveUntil('/homeNew', (_) => false)
-      ..pushNamed('/orderTracking');
+      ..push(MaterialPageRoute(
+        builder: (_) => UnifiedOrderTrackingPage(initialTab: _trackingTab),
+      ));
   }
+
+  /// Tracking tab for the order: the checkout tabs are delivery, self-pickup,
+  /// carhop, in-restaurant; tracking groups them as delivery, carhop, and
+  /// self-pickup with in-restaurant.
+  int get _trackingTab => switch (details.orderTypeIndex) {
+        0 => 0,
+        2 => 1,
+        _ => 2,
+      };
 
   @override
   Widget build(BuildContext context) {

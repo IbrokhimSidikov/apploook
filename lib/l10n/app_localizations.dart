@@ -53,7 +53,8 @@ class AppLocalizations {
       // Cart page
       'cart': 'Cart',
       'cartEmptyTitle': 'Your cart is empty',
-      'cartEmptySubtitle': 'Looks like you haven\'t added anything yet. Pick something tasty from the menu.',
+      'cartEmptySubtitle':
+          'Looks like you haven\'t added anything yet. Pick something tasty from the menu.',
       'cartEmptyAction': 'Go to menu',
       // Bottom navigation
       'home': 'Home',
@@ -76,7 +77,8 @@ class AppLocalizations {
       'rankBronze': 'Bronze',
       'rankGold': 'Gold',
       'rankDiamond': 'Diamond',
-      'rankToNextOrders': '{n} more orders of {amount} UZS or more to reach {rank}',
+      'rankToNextOrders':
+          '{n} more orders of {amount} UZS or more to reach {rank}',
       'rankKeepUntil': 'Order before {date} to keep {rank}',
       'rankWindowHint': 'Based on your orders in the last {days} days',
       'rankTop': 'You have reached the top level!',
@@ -84,7 +86,8 @@ class AppLocalizations {
       'spendCrystals': 'Spend {n} {crystals}',
       'balanceAfter': 'Balance after',
       'redeemSuccessTitle': 'Yours!',
-      'redeemSuccessBody': 'Show this code at the counter to collect your reward.',
+      'redeemSuccessBody':
+          'Show this code at the counter to collect your reward.',
       'redeemFailed': 'Could not redeem. Please try again.',
       'shopEmpty': 'Rewards are on their way. Keep collecting crystals!',
       'topCollectors': 'Top collectors',
@@ -93,7 +96,8 @@ class AppLocalizations {
       'rankingsEmpty': 'No rankings yet. Be the first to collect crystals!',
       // Order success page
       'orderReceivedTitle': 'Order received!',
-      'orderReceivedBody': 'We have your order and are already getting it ready.',
+      'orderReceivedBody':
+          'We have your order and are already getting it ready.',
       'orderTypeLabel': 'Order type',
       'paidByCard': 'Paid by card',
       'payInCash': 'To pay in cash',
@@ -129,6 +133,7 @@ class AppLocalizations {
       'delivery': 'Delivery',
       'selfPickup': 'Self-Pickup',
       'selfPickupTitle': 'Which store would you like to pick from?',
+      'parkingDelivery': 'Parking Delivery',
       'inRestaurant': 'In-Restaurant',
       'inRestaurantTitle': 'Which restaurant would you like to dine in?',
       'yourDeliveryLocation': 'Your Delivery Location!',
@@ -176,25 +181,31 @@ class AppLocalizations {
       'currency': 'UZS',
 
       // Loyalty / crystals
-      'walletEarnHint': 'Earn crystals with every product you buy and spend them on anything in the menu.',
+      'walletEarnHint':
+          'Earn crystals with every product you buy and spend them on anything in the menu.',
       'walletEntryConverted': 'Converted from cashback',
       'checkoutCrystalsToSpend': 'Crystals to spend',
       'checkoutToPay': 'To pay',
-      'checkoutNotEnoughCrystals': 'Not enough crystals — {n} more needed. Switch some items back to money.',
-      'checkoutCrystalLineProblem': 'Some items cannot be paid the way they are set. Check the crystal options in your cart.',
+      'checkoutNotEnoughCrystals':
+          'Not enough crystals — {n} more needed. Switch some items back to money.',
+      'checkoutCrystalLineProblem':
+          'Some items cannot be paid the way they are set. Check the crystal options in your cart.',
       'payWithCrystals': 'Pay with crystals',
       'crystalOnly': 'Crystals only',
-      'crystalOnlyNotOnDelivery': 'Crystal-only products are not available for delivery.',
+      'crystalOnlyNotOnDelivery':
+          'Crystal-only products are not available for delivery.',
       'crystalOnlyNeedsSignIn': 'Sign in to buy crystal-only products.',
       'crystalNotSoldAtTier': 'Not available for crystals',
-      'loyaltyInfoEarn': 'Every product shows how many crystals it earns. Products paid with crystals earn nothing.',
+      'loyaltyInfoEarn':
+          'Every product shows how many crystals it earns. Products paid with crystals earn nothing.',
       'tierLevel': 'Level {t}',
       'walletTitle': 'Crystals',
       'walletAvailable': 'Available',
       'walletPending': 'Pending',
       'walletPendingHint': 'Available tomorrow from 00:00',
       'walletHistory': 'History',
-      'walletNoHistory': 'No crystal activity yet.\\nYour first order will start it off.',
+      'walletNoHistory':
+          'No crystal activity yet.\\nYour first order will start it off.',
       'walletSignInRequired': 'Sign in to see your crystals.',
       'walletEarnRateLead': 'You get',
       'walletEarnRateTrail': 'cashback on every order you pay for.',
@@ -208,20 +219,25 @@ class AppLocalizations {
       'checkoutCashbackApplied': 'Crystals applied',
       'checkoutYouWillEarn': 'You will earn',
       'checkoutCashbackAll': 'All',
-      'checkoutCashbackChanged': 'Your crystal balance changed. Please check the total and try again.',
+      'checkoutCashbackChanged':
+          'Your crystal balance changed. Please check the total and try again.',
       'checkoutCashbackAvailable': 'available',
-      'checkoutCashbackSyncing': 'Crystals are syncing — your balance will update shortly.',
+      'checkoutCashbackSyncing':
+          'Crystals are syncing — your balance will update shortly.',
       'loyaltyInfoTitle': 'How crystals work',
       'loyaltyInfoAppliesTo': 'Earned on these order types:',
       'loyaltyInfoNotOnDelivery': 'Not available on delivery orders.',
-      'loyaltyInfoSpend': 'Pay with crystals at checkout — any product with a crystal price, or products sold only for crystals.',
-      'loyaltyInfoPending': 'Crystals become available once your order is completed.',
+      'loyaltyInfoSpend':
+          'Pay with crystals at checkout — any product with a crystal price, or products sold only for crystals.',
+      'loyaltyInfoPending':
+          'Crystals become available once your order is completed.',
       'loyaltyCardHint': 'Tap to see your crystal history',
       'qrPayTitle': 'Pay in store',
       'qrPayPageTitle': 'Get crystals in store',
       'qrPayHint': 'Show this code to the cashier to pay with your crystals.',
       'qrPayUpdatesIn': 'Code updates in',
-      'qrPayError': 'Could not get a code. Check your connection and try again.',
+      'qrPayError':
+          'Could not get a code. Check your connection and try again.',
       'qrPayRetry': 'Try again',
       'updating': 'Updating',
       'orderHistory': 'Order History',
@@ -275,7 +291,7 @@ class AppLocalizations {
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
       'orderHoursValidation': 'Orders not accepted after 23:30 PM',
-      'orderWillBeTaken':'Orders will be taken from 09:00 to 23:30 ',
+      'orderWillBeTaken': 'Orders will be taken from 09:00 to 23:30 ',
       // Order card
       'orderCardTitle': 'Order from',
       'orderSummaryTitle': 'Order Summary',
@@ -290,40 +306,42 @@ class AppLocalizations {
       'orderCancelled': 'Order Cancelled',
       //Rahmat dialog
       'processingPayment': 'Processing payment...',
-      'waitingForConfirmation':'Waiting for payment confirmation...',
-      'completeBrowserTitle':'Complete payment in browser',
-      'returnToApp':'Return to app after payment',
-      'checkingStatus':'Checking status...',
-      'cancelButton':'Cancel',
+      'waitingForConfirmation': 'Waiting for payment confirmation...',
+      'completeBrowserTitle': 'Complete payment in browser',
+      'returnToApp': 'Return to app after payment',
+      'checkingStatus': 'Checking status...',
+      'cancelButton': 'Cancel',
       // Location permission
       'locationPermissionTitle': 'Location Required',
-      'locationPermissionMessage': 'Location access is required to use this app. We need your location to show you the nearest branch and provide accurate delivery services.',
+      'locationPermissionMessage':
+          'Location access is required to use this app. We need your location to show you the nearest branch and provide accurate delivery services.',
       'allowLocation': 'Enable Location',
       'notNow': 'Not Now',
       'locationSettingsTitle': 'Location Permission Required',
-      'locationSettingsMessage': 'This app requires location access to function. Please enable location permission in your device settings to continue.',
+      'locationSettingsMessage':
+          'This app requires location access to function. Please enable location permission in your device settings to continue.',
       'openSettings': 'Open Settings',
 
       //review sheet
-      'rateOrderTitle':'Rate your order',
-      'writeReview':'Write your review',
-      'addPhoto':'Add photo',
-      'changePhoto':'Change photo',
-      'removePhoto':'Remove photo',
-      'submit':'Submit',
-      'skip':'Skip',
-      'selectRating':'Please select a rating',
-      'reviewSubmitted':'Thank you for your review! 🎉',
-      'reviewFailed':'Failed to submit review. Please try again.',
-      'reviewAlreadySubmitted':'You\'ve already reviewed this order.',
-      'uploadingPhoto':'Uploading photo...',
+      'rateOrderTitle': 'Rate your order',
+      'writeReview': 'Write your review',
+      'addPhoto': 'Add photo',
+      'changePhoto': 'Change photo',
+      'removePhoto': 'Remove photo',
+      'submit': 'Submit',
+      'skip': 'Skip',
+      'selectRating': 'Please select a rating',
+      'reviewSubmitted': 'Thank you for your review! 🎉',
+      'reviewFailed': 'Failed to submit review. Please try again.',
+      'reviewAlreadySubmitted': 'You\'ve already reviewed this order.',
+      'uploadingPhoto': 'Uploading photo...',
       'ratingTerrible': '😞  Terrible',
       'ratingPoor': '😕  Poor',
       'ratingOkay': '😐  Okay',
       'ratingGood': '😊  Good',
       'ratingExcellent': '🤩  Excellent!',
       'addedToCart': 'Added to cart',
-      'recommendedTitle':'You might also like',
+      'recommendedTitle': 'You might also like',
       // Reorder bottom sheet
       'orderAgain': 'Order again',
       'itemSingular': 'item',
@@ -333,8 +351,7 @@ class AppLocalizations {
       'reorderNoItemsAvailable':
           'Sorry, none of these items are available right now.',
       'reorderSelectPrompt': 'Pick an order to repeat',
-      'addressReconfirmAtCheckout':
-          'Address will be re-confirmed at checkout',
+      'addressReconfirmAtCheckout': 'Address will be re-confirmed at checkout',
       // Branches page
       'branchesListTab': 'List',
       'branchesMapTab': 'Map',
@@ -392,7 +409,8 @@ class AppLocalizations {
       // Cart page
       'cart': 'Savatcha',
       'cartEmptyTitle': 'Savatchangiz boʻsh',
-      'cartEmptySubtitle': 'Hali hech narsa qoʻshmadingiz. Menyudan mazali taom tanlang.',
+      'cartEmptySubtitle':
+          'Hali hech narsa qoʻshmadingiz. Menyudan mazali taom tanlang.',
       'cartEmptyAction': 'Menyuga oʻtish',
       // Bottom navigation
       'home': 'Asosiy',
@@ -410,26 +428,31 @@ class AppLocalizations {
       'yourCrystals': 'Kristallaringiz',
       'redeemWithCrystals': 'Kristallarga oling',
       'needMoreCrystals': 'Yana {n} ta kerak',
-      'notEnoughCrystalsForQuantity': 'Kristallar yetarli emas — yana {n} ta kerak.',
+      'notEnoughCrystalsForQuantity':
+          'Kristallar yetarli emas — yana {n} ta kerak.',
       'rankBoardTitle': 'Darajangiz',
       'rankBronze': 'Bronza',
       'rankGold': 'Oltin',
       'rankDiamond': 'Olmos',
-      'rankToNextOrders': '{rank} darajasiga yana {n} ta {amount} UZS va undan yuqori buyurtma',
-      'rankKeepUntil': '{rank} darajasini saqlash uchun {date} gacha buyurtma bering',
+      'rankToNextOrders':
+          '{rank} darajasiga yana {n} ta {amount} UZS va undan yuqori buyurtma',
+      'rankKeepUntil':
+          '{rank} darajasini saqlash uchun {date} gacha buyurtma bering',
       'rankWindowHint': 'Soʻnggi {days} kundagi buyurtmalaringiz asosida',
       'rankTop': 'Siz eng yuqori darajadasiz!',
       'rankSignIn': 'Darajangizni koʻrish uchun kiring',
       'spendCrystals': '{n} {crystals} sarflash',
       'balanceAfter': 'Qoladi',
       'redeemSuccessTitle': 'Sizniki!',
-      'redeemSuccessBody': 'Sovg\'ani olish uchun bu kodni kassada ko\'rsating.',
+      'redeemSuccessBody':
+          'Sovg\'ani olish uchun bu kodni kassada ko\'rsating.',
       'redeemFailed': 'Almashtirib bo\'lmadi. Qayta urinib ko\'ring.',
       'shopEmpty': 'Sovg\'alar yo\'lda. Kristall to\'plashda davom eting!',
       'topCollectors': 'Eng ko\'p to\'plaganlar',
       'you': 'Siz',
       'yourRank': 'Sizning o\'rningiz',
-      'rankingsEmpty': 'Reyting hali yo\'q. Birinchi bo\'lib kristall to\'plang!',
+      'rankingsEmpty':
+          'Reyting hali yo\'q. Birinchi bo\'lib kristall to\'plang!',
       // Order success page
       'orderReceivedTitle': 'Buyurtma qabul qilindi!',
       'orderReceivedBody': 'Buyurtmangizni oldik va tayyorlashni boshladik.',
@@ -468,6 +491,7 @@ class AppLocalizations {
       'delivery': 'Yetkazish',
       'selfPickup': 'Olib ketish',
       'selfPickupTitle': 'Olib ketish uchun filial tanlang',
+      'parkingDelivery': 'Parkovkaga yetkazish',
       'inRestaurant': 'Restoranda',
       'inRestaurantTitle': 'Qaysi restoranda ovqatlanmoqchisiz?',
       'yourDeliveryLocation': 'Yetkazish manzilingiz!',
@@ -516,26 +540,33 @@ class AppLocalizations {
       'currency': 'UZS',
 
       // Loyalty / crystals
-      'walletEarnHint': 'Har bir xarid qilgan mahsulotingiz uchun kristall oling va ularni menyudagi istalgan taomga sarflang.',
+      'walletEarnHint':
+          'Har bir xarid qilgan mahsulotingiz uchun kristall oling va ularni menyudagi istalgan taomga sarflang.',
       'walletEntryConverted': 'Keshbekdan aylantirildi',
       'checkoutCrystalsToSpend': 'Sarflanadigan kristallar',
       'checkoutToPay': 'Toʻlash uchun',
-      'checkoutNotEnoughCrystals': 'Kristallar yetarli emas — yana {n} ta kerak. Baʼzi mahsulotlarni pulga qaytaring.',
-      'checkoutCrystalLineProblem': 'Baʼzi mahsulotlarni tanlangan usulda toʻlab boʻlmaydi. Savatdagi kristall sozlamalarini tekshiring.',
+      'checkoutNotEnoughCrystals':
+          'Kristallar yetarli emas — yana {n} ta kerak. Baʼzi mahsulotlarni pulga qaytaring.',
+      'checkoutCrystalLineProblem':
+          'Baʼzi mahsulotlarni tanlangan usulda toʻlab boʻlmaydi. Savatdagi kristall sozlamalarini tekshiring.',
       'payWithCrystals': 'Kristallar bilan toʻlash',
       'crystalOnly': 'Faqat kristallarga',
-      'crystalOnlyNotOnDelivery': 'Faqat kristallarga sotiladigan mahsulotlar yetkazib berishda mavjud emas.',
-      'crystalOnlyNeedsSignIn': 'Faqat kristallarga sotiladigan mahsulotlarni olish uchun tizimga kiring.',
+      'crystalOnlyNotOnDelivery':
+          'Faqat kristallarga sotiladigan mahsulotlar yetkazib berishda mavjud emas.',
+      'crystalOnlyNeedsSignIn':
+          'Faqat kristallarga sotiladigan mahsulotlarni olish uchun ilovaga kiring.',
       'crystalNotSoldAtTier': 'Kristallarga sotilmaydi',
-      'loyaltyInfoEarn': 'Har bir mahsulot qancha kristall berishini koʻrsatadi. Kristallar bilan toʻlangan mahsulotlar kristall bermaydi.',
+      'loyaltyInfoEarn':
+          'Har bir mahsulot qancha kristall berishini koʻrsatadi. Kristallar bilan toʻlangan mahsulotlar kristall bermaydi.',
       'tierLevel': '{t} daraja',
       'walletTitle': 'Kristallar',
       'walletAvailable': 'Mavjud',
       'walletPending': 'Kutilmoqda',
       'walletPendingHint': 'Ertaga 00:00 dan mavjud boʻladi',
       'walletHistory': 'Tarix',
-      'walletNoHistory': 'Hozircha kristall harakati yoʻq.\\nBirinchi buyurtmangiz uni boshlaydi.',
-      'walletSignInRequired': 'Kristallaringizni koʻrish uchun tizimga kiring.',
+      'walletNoHistory':
+          'Hozircha kristall harakati yoʻq.\\nBirinchi buyurtmangiz uni boshlaydi.',
+      'walletSignInRequired': 'Kristallaringizni koʻrish uchun ilovaga kiring.',
       'walletEarnRateLead': 'Siz toʻlagan har bir buyurtma uchun',
       'walletEarnRateTrail': 'keshbek olasiz.',
       'walletEntryEarned': 'Kristallar olindi',
@@ -548,20 +579,26 @@ class AppLocalizations {
       'checkoutCashbackApplied': 'Kristallar qoʻllanildi',
       'checkoutYouWillEarn': 'Siz olasiz',
       'checkoutCashbackAll': 'Hammasi',
-      'checkoutCashbackChanged': 'Kristall balansingiz oʻzgardi. Iltimos, summani tekshirib, qayta urinib koʻring.',
+      'checkoutCashbackChanged':
+          'Kristall balansingiz oʻzgardi. Iltimos, summani tekshirib, qayta urinib koʻring.',
       'checkoutCashbackAvailable': 'mavjud',
-      'checkoutCashbackSyncing': 'Kristallar sinxronlanmoqda — balansingiz tez orada yangilanadi.',
+      'checkoutCashbackSyncing':
+          'Kristallar sinxronlanmoqda — balansingiz tez orada yangilanadi.',
       'loyaltyInfoTitle': 'Kristallar qanday ishlaydi',
       'loyaltyInfoAppliesTo': 'Quyidagi buyurtma turlarida beriladi:',
       'loyaltyInfoNotOnDelivery': 'Yetkazib berish buyurtmalarida ishlamaydi.',
-      'loyaltyInfoSpend': 'Buyurtma rasmiylashtirishda kristallar bilan toʻlang — kristall narxi bor har qanday mahsulot yoki faqat kristallarga sotiladigan mahsulotlar.',
-      'loyaltyInfoPending': 'Kristallar buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
+      'loyaltyInfoSpend':
+          'Buyurtma rasmiylashtirishda kristallar bilan toʻlang — kristall narxi bor har qanday mahsulot yoki faqat kristallarga sotiladigan mahsulotlar.',
+      'loyaltyInfoPending':
+          'Kristallar buyurtmangiz yakunlangach foydalanish uchun ochiladi.',
       'loyaltyCardHint': 'Kristall tarixini koʻrish uchun bosing',
       'qrPayTitle': 'Restoranda toʻlash',
       'qrPayPageTitle': 'Restoranda kristal olish',
-      'qrPayHint': 'Kristallar bilan toʻlash uchun bu kodni kassirga koʻrsating.',
+      'qrPayHint':
+          'Kristallar bilan toʻlash uchun bu kodni kassirga koʻrsating.',
       'qrPayUpdatesIn': 'Kod yangilanadi',
-      'qrPayError': 'Kod olinmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
+      'qrPayError':
+          'Kod olinmadi. Internet aloqasini tekshirib, qayta urinib koʻring.',
       'qrPayRetry': 'Qayta urinish',
       'updating': 'Yopish',
       'orderHistory': 'Buyurtma tarihi',
@@ -638,11 +675,13 @@ class AppLocalizations {
       'cancelButton': 'Bekor qilish',
       // Location permission
       'locationPermissionTitle': 'Joylashuv talab qilinadi',
-      'locationPermissionMessage': 'Ushbu ilovadan foydalanish uchun joylashuv ruxsati talab qilinadi. Eng yaqin filialni ko\'rsatish va aniq yetkazib berish xizmatlari uchun sizning joylashuvingiz kerak.',
+      'locationPermissionMessage':
+          'Ushbu ilovadan foydalanish uchun joylashuv ruxsati talab qilinadi. Eng yaqin filialni ko\'rsatish va aniq yetkazib berish xizmatlari uchun sizning joylashuvingiz kerak.',
       'allowLocation': 'Joylashuvni yoqish',
       'notNow': 'Hozir emas',
       'locationSettingsTitle': 'Joylashuv ruxsati talab qilinadi',
-      'locationSettingsMessage': 'Bu ilova ishlashi uchun joylashuv ruxsati kerak. Davom etish uchun qurilma sozlamalarida joylashuv ruxsatini yoqing.',
+      'locationSettingsMessage':
+          'Bu ilova ishlashi uchun joylashuv ruxsati kerak. Davom etish uchun qurilma sozlamalarida joylashuv ruxsatini yoqing.',
       'openSettings': 'Sozlamalarni ochish',
 
       //review sheet
@@ -664,18 +703,16 @@ class AppLocalizations {
       'ratingGood': '😊  Yaxshi',
       'ratingExcellent': '🤩  Ajoyib!',
       'addedToCart': 'Savatga qo\'shildi',
-      'recommendedTitle':'Qo\'shimcha tavsiyalar',
+      'recommendedTitle': 'Qo\'shimcha tavsiyalar',
       // Reorder bottom sheet
       'orderAgain': 'Buyurtmani takrorlash',
       'itemSingular': 'dona',
-      'cartWillBeReplaced':
-          'Joriy savatchangiz ({count} dona) almashtiriladi.',
+      'cartWillBeReplaced': 'Joriy savatchangiz ({count} dona) almashtiriladi.',
       'reorder': 'Qayta buyurtma',
       'reorderNoItemsAvailable':
           'Kechirasiz, hozir bu mahsulotlardan birortasi mavjud emas.',
       'reorderSelectPrompt': 'Takrorlash uchun buyurtmani tanlang',
-      'addressReconfirmAtCheckout':
-          'Manzilni to\'lov sahifasida tasdiqlaysiz',
+      'addressReconfirmAtCheckout': 'Manzilni to\'lov sahifasida tasdiqlaysiz',
       // Branches page
       'branchesListTab': 'Ro\'yxat',
       'branchesMapTab': 'Xarita',
@@ -732,15 +769,15 @@ class AppLocalizations {
       // Cart page
       'cart': 'Корзина',
       'cartEmptyTitle': 'Корзина пуста',
-      'cartEmptySubtitle': 'Вы пока ничего не добавили. Выберите что-нибудь вкусное в меню.',
+      'cartEmptySubtitle':
+          'Вы пока ничего не добавили. Выберите что-нибудь вкусное в меню.',
       'cartEmptyAction': 'Перейти в меню',
       // Bottom navigation
       'home': 'Главная',
       'shop': 'Магазин',
       'profile': 'Профиль',
       'comingSoon': 'Скоро',
-      'crystalShopTeaser':
-          'Мы готовим Crystal Shop. Загляните чуть позже.',
+      'crystalShopTeaser': 'Мы готовим Crystal Shop. Загляните чуть позже.',
       'crystalRewardIntro': 'Купите этот товар и получите',
       'crystalRewardAmount': '+{n} {crystals}!',
       'crystalRewardCompact': '+{n} {crystals}',
@@ -750,20 +787,24 @@ class AppLocalizations {
       'yourCrystals': 'Ваши кристаллы',
       'redeemWithCrystals': 'За кристаллы',
       'needMoreCrystals': 'Нужно ещё {n}',
-      'notEnoughCrystalsForQuantity': 'Недостаточно кристаллов — нужно ещё {n}.',
+      'notEnoughCrystalsForQuantity':
+          'Недостаточно кристаллов — нужно ещё {n}.',
       'rankBoardTitle': 'Ваш уровень',
       'rankBronze': 'Бронза',
       'rankGold': 'Золото',
       'rankDiamond': 'Бриллиант',
-      'rankToNextOrders': 'До уровня «{rank}»: ещё {n} заказ(ов) от {amount} UZS',
-      'rankKeepUntil': 'Сделайте заказ до {date}, чтобы сохранить уровень «{rank}»',
+      'rankToNextOrders':
+          'До уровня «{rank}»: ещё {n} заказ(ов) от {amount} UZS',
+      'rankKeepUntil':
+          'Сделайте заказ до {date}, чтобы сохранить уровень «{rank}»',
       'rankWindowHint': 'По вашим заказам за последние {days} дней',
       'rankTop': 'Вы достигли высшего уровня!',
       'rankSignIn': 'Войдите, чтобы увидеть свой уровень',
       'spendCrystals': 'Потратить {n} {crystals}',
       'balanceAfter': 'Останется',
       'redeemSuccessTitle': 'Готово!',
-      'redeemSuccessBody': 'Покажите этот код на кассе, чтобы получить награду.',
+      'redeemSuccessBody':
+          'Покажите этот код на кассе, чтобы получить награду.',
       'redeemFailed': 'Не удалось обменять. Попробуйте ещё раз.',
       'shopEmpty': 'Награды уже в пути. Продолжайте собирать кристаллы!',
       'topCollectors': 'Топ коллекционеров',
@@ -808,6 +849,7 @@ class AppLocalizations {
       'delivery': 'Доставка',
       'selfPickup': 'Самовывоз',
       'selfPickupTitle': 'Какой магазин вы хотите выбрать?',
+      'parkingDelivery': 'Доставка на парковку',
       'inRestaurant': 'В ресторане',
       'inRestaurantTitle': 'В каком ресторане вы хотите поесть?',
       'yourDeliveryLocation': 'Ваш адрес доставки!',
@@ -856,25 +898,31 @@ class AppLocalizations {
       'currency': 'UZS',
 
       // Loyalty / crystals
-      'walletEarnHint': 'Получайте кристаллы за каждый купленный товар и тратьте их на любое блюдо из меню.',
+      'walletEarnHint':
+          'Получайте кристаллы за каждый купленный товар и тратьте их на любое блюдо из меню.',
       'walletEntryConverted': 'Конвертировано из кэшбэка',
       'checkoutCrystalsToSpend': 'Кристаллы к списанию',
       'checkoutToPay': 'К оплате',
-      'checkoutNotEnoughCrystals': 'Недостаточно кристаллов — нужно ещё {n}. Переключите часть товаров на оплату деньгами.',
-      'checkoutCrystalLineProblem': 'Некоторые товары нельзя оплатить выбранным способом. Проверьте настройки кристаллов в корзине.',
+      'checkoutNotEnoughCrystals':
+          'Недостаточно кристаллов — нужно ещё {n}. Переключите часть товаров на оплату деньгами.',
+      'checkoutCrystalLineProblem':
+          'Некоторые товары нельзя оплатить выбранным способом. Проверьте настройки кристаллов в корзине.',
       'payWithCrystals': 'Оплатить кристаллами',
       'crystalOnly': 'Только за кристаллы',
-      'crystalOnlyNotOnDelivery': 'Товары только за кристаллы недоступны для доставки.',
+      'crystalOnlyNotOnDelivery':
+          'Товары только за кристаллы недоступны для доставки.',
       'crystalOnlyNeedsSignIn': 'Войдите, чтобы купить товары за кристаллы.',
       'crystalNotSoldAtTier': 'Недоступно за кристаллы',
-      'loyaltyInfoEarn': 'У каждого товара указано, сколько кристаллов он даёт. Товары, оплаченные кристаллами, кристаллов не дают.',
+      'loyaltyInfoEarn':
+          'У каждого товара указано, сколько кристаллов он даёт. Товары, оплаченные кристаллами, кристаллов не дают.',
       'tierLevel': 'Уровень {t}',
       'walletTitle': 'Кристаллы',
       'walletAvailable': 'Доступно',
       'walletPending': 'Ожидается',
       'walletPendingHint': 'Будут доступны завтра с 00:00',
       'walletHistory': 'История',
-      'walletNoHistory': 'Пока нет операций с кристаллами.\\nПервый заказ всё начнёт.',
+      'walletNoHistory':
+          'Пока нет операций с кристаллами.\\nПервый заказ всё начнёт.',
       'walletSignInRequired': 'Войдите, чтобы увидеть свои кристаллы.',
       'walletEarnRateLead': 'Вы получаете',
       'walletEarnRateTrail': 'кэшбэка с каждого оплаченного заказа.',
@@ -888,20 +936,25 @@ class AppLocalizations {
       'checkoutCashbackApplied': 'Кристаллы применены',
       'checkoutYouWillEarn': 'Вы получите',
       'checkoutCashbackAll': 'Всё',
-      'checkoutCashbackChanged': 'Ваш баланс кристаллов изменился. Проверьте сумму и попробуйте снова.',
+      'checkoutCashbackChanged':
+          'Ваш баланс кристаллов изменился. Проверьте сумму и попробуйте снова.',
       'checkoutCashbackAvailable': 'доступно',
-      'checkoutCashbackSyncing': 'Кристаллы синхронизируются — баланс скоро обновится.',
+      'checkoutCashbackSyncing':
+          'Кристаллы синхронизируются — баланс скоро обновится.',
       'loyaltyInfoTitle': 'Как работают кристаллы',
       'loyaltyInfoAppliesTo': 'Начисляется на эти типы заказов:',
       'loyaltyInfoNotOnDelivery': 'Не действует на заказы с доставкой.',
-      'loyaltyInfoSpend': 'Оплачивайте кристаллами при оформлении — любой товар с ценой в кристаллах или товары только за кристаллы.',
-      'loyaltyInfoPending': 'Кристаллы станут доступны после завершения заказа.',
+      'loyaltyInfoSpend':
+          'Оплачивайте кристаллами при оформлении — любой товар с ценой в кристаллах или товары только за кристаллы.',
+      'loyaltyInfoPending':
+          'Кристаллы станут доступны после завершения заказа.',
       'loyaltyCardHint': 'Нажмите, чтобы посмотреть историю кристаллов',
       'qrPayTitle': 'Оплата в ресторане',
       'qrPayPageTitle': 'Кристаллы в ресторане',
       'qrPayHint': 'Покажите этот код кассиру, чтобы оплатить кристаллами.',
       'qrPayUpdatesIn': 'Код обновится через',
-      'qrPayError': 'Не удалось получить код. Проверьте соединение и попробуйте снова.',
+      'qrPayError':
+          'Не удалось получить код. Проверьте соединение и попробуйте снова.',
       'qrPayRetry': 'Повторить',
       'updating': 'Обновление',
       'orderHistory': 'История заказов',
@@ -975,11 +1028,13 @@ class AppLocalizations {
       'cancelButton': 'Отмена',
       // Location permission
       'locationPermissionTitle': 'Требуется геолокация',
-      'locationPermissionMessage': 'Для использования этого приложения требуется доступ к геолокации. Нам нужна ваша геолокация, чтобы показать ближайший филиал и обеспечить точную доставку.',
+      'locationPermissionMessage':
+          'Для использования этого приложения требуется доступ к геолокации. Нам нужна ваша геолокация, чтобы показать ближайший филиал и обеспечить точную доставку.',
       'allowLocation': 'Включить геолокацию',
       'notNow': 'Не сейчас',
       'locationSettingsTitle': 'Требуется разрешение на геолокацию',
-      'locationSettingsMessage': 'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
+      'locationSettingsMessage':
+          'Это приложение требует доступ к геолокации для работы. Пожалуйста, включите разрешение на геолокацию в настройках устройства, чтобы продолжить.',
       'openSettings': 'Открыть настройки',
       'orderWillBeTaken': 'Заказы принимаются с 09:00 дo 23:30',
 
@@ -1002,15 +1057,13 @@ class AppLocalizations {
       'ratingGood': '😊  Хорошо',
       'ratingExcellent': '🤩  Отлично!',
       'addedToCart': 'Добавлено в корзину',
-      'recommendedTitle':'Вам также может понравиться',
+      'recommendedTitle': 'Вам также может понравиться',
       // Reorder bottom sheet
       'orderAgain': 'Заказать снова',
       'itemSingular': 'товар',
-      'cartWillBeReplaced':
-          'Текущая корзина ({count} товаров) будет заменена.',
+      'cartWillBeReplaced': 'Текущая корзина ({count} товаров) будет заменена.',
       'reorder': 'Повторить заказ',
-      'reorderNoItemsAvailable':
-          'К сожалению, эти товары сейчас недоступны.',
+      'reorderNoItemsAvailable': 'К сожалению, эти товары сейчас недоступны.',
       'reorderSelectPrompt': 'Выберите заказ для повтора',
       'addressReconfirmAtCheckout':
           'Адрес будет подтверждён при оформлении заказа',
@@ -1078,9 +1131,9 @@ class AppLocalizations {
   String get addToCart => _localizedValues[locale.languageCode]!['addToCart']!;
   String get required => _localizedValues[locale.languageCode]!['required']!;
   String get optional => _localizedValues[locale.languageCode]!['optional']!;
-  String chooseExactly(int n) => _localizedValues[locale.languageCode]![
-          'chooseExactly']!
-      .replaceAll('{n}', '$n');
+  String chooseExactly(int n) =>
+      _localizedValues[locale.languageCode]!['chooseExactly']!
+          .replaceAll('{n}', '$n');
   String chooseUpTo(int n) =>
       _localizedValues[locale.languageCode]!['chooseUpTo']!
           .replaceAll('{n}', '$n');
@@ -1132,7 +1185,8 @@ class AppLocalizations {
           .replaceAll('{n}', '$n');
   String get rankBoardTitle =>
       _localizedValues[locale.languageCode]!['rankBoardTitle']!;
-  String get rankBronze => _localizedValues[locale.languageCode]!['rankBronze']!;
+  String get rankBronze =>
+      _localizedValues[locale.languageCode]!['rankBronze']!;
   String get rankGold => _localizedValues[locale.languageCode]!['rankGold']!;
   String get rankDiamond =>
       _localizedValues[locale.languageCode]!['rankDiamond']!;
@@ -1149,7 +1203,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['rankWindowHint']!
           .replaceAll('{days}', '$days');
   String get rankTop => _localizedValues[locale.languageCode]!['rankTop']!;
-  String get rankSignIn => _localizedValues[locale.languageCode]!['rankSignIn']!;
+  String get rankSignIn =>
+      _localizedValues[locale.languageCode]!['rankSignIn']!;
   String notEnoughCrystalsForQuantity(int n) =>
       _localizedValues[locale.languageCode]!['notEnoughCrystalsForQuantity']!
           .replaceAll('{n}', '$n');
@@ -1189,10 +1244,10 @@ class AppLocalizations {
   String get retry => _localizedValues[locale.languageCode]!['retry']!;
   String get done => _localizedValues[locale.languageCode]!['done']!;
 
-  String _fillCrystals(String key, int n) => _localizedValues[
-          locale.languageCode]![key]!
-      .replaceAll('{n}', '$n')
-      .replaceAll('{crystals}', crystalWord(n));
+  String _fillCrystals(String key, int n) =>
+      _localizedValues[locale.languageCode]![key]!
+          .replaceAll('{n}', '$n')
+          .replaceAll('{crystals}', crystalWord(n));
 
   /// The word "crystal" declined for [n], per language.
   String crystalWord(int n) {
@@ -1211,6 +1266,7 @@ class AppLocalizations {
         return n == 1 ? 'crystal' : 'crystals';
     }
   }
+
   String get items => _localizedValues[locale.languageCode]!['items']!;
   String get proceedToCheckout =>
       _localizedValues[locale.languageCode]!['proceedToCheckout']!;
@@ -1255,6 +1311,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['selfPickup']!;
   String get selfPickupTitle =>
       _localizedValues[locale.languageCode]!['selfPickupTitle']!;
+  String get parkingDelivery =>
+      _localizedValues[locale.languageCode]!['parkingDelivery']!;
   String get inRestaurant =>
       _localizedValues[locale.languageCode]!['inRestaurant']!;
   String get inRestaurantTitle =>
@@ -1511,7 +1569,6 @@ class AppLocalizations {
   String get arrivedError =>
       _localizedValues[locale.languageCode]!['arrivedError']!;
 
-
   String get bagPrice => _localizedValues[locale.languageCode]!['bagPrice']!;
 
   String get deliveryFeeSpinner =>
@@ -1605,8 +1662,7 @@ class AppLocalizations {
   String get allowLocation =>
       _localizedValues[locale.languageCode]!['allowLocation']!;
 
-  String get notNow =>
-      _localizedValues[locale.languageCode]!['notNow']!;
+  String get notNow => _localizedValues[locale.languageCode]!['notNow']!;
 
   String get locationSettingsTitle =>
       _localizedValues[locale.languageCode]!['locationSettingsTitle']!;
@@ -1614,28 +1670,46 @@ class AppLocalizations {
   String get locationSettingsMessage =>
       _localizedValues[locale.languageCode]!['locationSettingsMessage']!;
 
-  String get openSettings => _localizedValues[locale.languageCode]!['openSettings']!;
+  String get openSettings =>
+      _localizedValues[locale.languageCode]!['openSettings']!;
 
-  String get orderWillBeTaken => _localizedValues[locale.languageCode]!['orderWillBeTaken']!;
-  String get rateOrderTitle => _localizedValues[locale.languageCode]!['rateOrderTitle']!;
-  String get writeReview => _localizedValues[locale.languageCode]!['writeReview']!;
+  String get orderWillBeTaken =>
+      _localizedValues[locale.languageCode]!['orderWillBeTaken']!;
+  String get rateOrderTitle =>
+      _localizedValues[locale.languageCode]!['rateOrderTitle']!;
+  String get writeReview =>
+      _localizedValues[locale.languageCode]!['writeReview']!;
   String get addPhoto => _localizedValues[locale.languageCode]!['addPhoto']!;
-  String get changePhoto => _localizedValues[locale.languageCode]!['changePhoto']!;
-  String get removePhoto => _localizedValues[locale.languageCode]!['removePhoto']!;
+  String get changePhoto =>
+      _localizedValues[locale.languageCode]!['changePhoto']!;
+  String get removePhoto =>
+      _localizedValues[locale.languageCode]!['removePhoto']!;
   String get submit => _localizedValues[locale.languageCode]!['submit']!;
   String get skip => _localizedValues[locale.languageCode]!['skip']!;
-  String get selectRating => _localizedValues[locale.languageCode]!['selectRating']!;
-  String get reviewSubmitted => _localizedValues[locale.languageCode]!['reviewSubmitted']!;
-  String get reviewFailed => _localizedValues[locale.languageCode]!['reviewFailed']!;
-  String get reviewAlreadySubmitted => _localizedValues[locale.languageCode]!['reviewAlreadySubmitted']!;
-  String get uploadingPhoto => _localizedValues[locale.languageCode]!['uploadingPhoto']!;
-  String get ratingTerrible => _localizedValues[locale.languageCode]!['ratingTerrible']!;
-  String get ratingPoor => _localizedValues[locale.languageCode]!['ratingPoor']!;
-  String get ratingOkay => _localizedValues[locale.languageCode]!['ratingOkay']!;
-  String get ratingGood => _localizedValues[locale.languageCode]!['ratingGood']!;
-  String get ratingExcellent => _localizedValues[locale.languageCode]!['ratingExcellent']!;
-  String get addedToCart => _localizedValues[locale.languageCode]!['addedToCart']!;
-  String get recommendedTitle => _localizedValues[locale.languageCode]!['recommendedTitle']!;
+  String get selectRating =>
+      _localizedValues[locale.languageCode]!['selectRating']!;
+  String get reviewSubmitted =>
+      _localizedValues[locale.languageCode]!['reviewSubmitted']!;
+  String get reviewFailed =>
+      _localizedValues[locale.languageCode]!['reviewFailed']!;
+  String get reviewAlreadySubmitted =>
+      _localizedValues[locale.languageCode]!['reviewAlreadySubmitted']!;
+  String get uploadingPhoto =>
+      _localizedValues[locale.languageCode]!['uploadingPhoto']!;
+  String get ratingTerrible =>
+      _localizedValues[locale.languageCode]!['ratingTerrible']!;
+  String get ratingPoor =>
+      _localizedValues[locale.languageCode]!['ratingPoor']!;
+  String get ratingOkay =>
+      _localizedValues[locale.languageCode]!['ratingOkay']!;
+  String get ratingGood =>
+      _localizedValues[locale.languageCode]!['ratingGood']!;
+  String get ratingExcellent =>
+      _localizedValues[locale.languageCode]!['ratingExcellent']!;
+  String get addedToCart =>
+      _localizedValues[locale.languageCode]!['addedToCart']!;
+  String get recommendedTitle =>
+      _localizedValues[locale.languageCode]!['recommendedTitle']!;
 
   // Reorder bottom sheet
   String get orderAgain =>
@@ -1678,5 +1752,4 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['couldNotOpenMap']!;
   String get couldNotCall =>
       _localizedValues[locale.languageCode]!['couldNotCall']!;
-
 }

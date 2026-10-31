@@ -169,20 +169,15 @@ class _AuthorizationState extends State<Authorization> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
-          child: SingleChildScrollView(
-            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.top -
-                    MediaQuery.of(context).padding.bottom -
-                    kToolbarHeight,
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Top content
-                  Column(
+          // The Scaffold shrinks the body to the space above the keyboard, so
+          // keeping the button out of the scroll view pins it to the keyboard.
+          child: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
                     children: [
                       SizedBox(height: 75.h),
                       Center(
@@ -246,6 +241,16 @@ class _AuthorizationState extends State<Authorization> {
                                     _phoneFormKey.currentState?.validate() ??
                                         false;
                               });
+                              // The number is complete, so reveal the Continue
+                              // step. An invalid number keeps the keyboard up
+                              // so it can be corrected straight away.
+                              if (phoneNumber != null &&
+                                  phoneNumber.isoCode == IsoCode.UZ &&
+                                  phoneNumber.nsn.length == 9 &&
+                                  phoneNumber.isValid(
+                                      type: PhoneNumberType.mobile)) {
+                                FocusScope.of(context).unfocus();
+                              }
                             },
                             onSaved: (PhoneNumber? phoneNumber) {
                               _phoneNumber = phoneNumber;
@@ -255,51 +260,51 @@ class _AuthorizationState extends State<Authorization> {
                       ),
                     ],
                   ),
+                ),
+              ),
 
-                  // Bottom button
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: 20.w,
-                      right: 20.w,
-                      bottom: MediaQuery.of(context).viewInsets.bottom > 0
-                          ? 20.h
-                          : 50.h,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _validateAndContinue,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 255, 215, 56),
-                          padding: EdgeInsets.symmetric(vertical: 15.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                        ),
-                        child: _isLoading
-                            ? SizedBox(
-                                height: 20.h,
-                                width: 20.w,
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.black),
-                                ),
-                              )
-                            : Text(
-                                AppLocalizations.of(context).continueButton,
-                                style: TextStyle(
-                                    fontSize: 16.sp,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.w600),
-                              ),
+              // Bottom button
+              Padding(
+                padding: EdgeInsets.only(
+                  left: 20.w,
+                  right: 20.w,
+                  top: 12.h,
+                  bottom: MediaQuery.of(context).viewInsets.bottom > 0
+                      ? 12.h
+                      : 50.h,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _validateAndContinue,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 255, 215, 56),
+                      padding: EdgeInsets.symmetric(vertical: 15.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.r),
                       ),
                     ),
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.black),
+                            ),
+                          )
+                        : Text(
+                            AppLocalizations.of(context).continueButton,
+                            style: TextStyle(
+                                fontSize: 16.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w600),
+                          ),
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

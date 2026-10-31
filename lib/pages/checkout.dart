@@ -123,6 +123,18 @@ class _CheckoutState extends State<Checkout> {
   double _crystalLinesPrice(CartProvider cart) => _crystalLines(cart)
       .fold<double>(0, (sum, item) => sum + item.totalPrice);
 
+  /// Crystals cover the whole order, so there is no money left to collect.
+  bool _fullyPaidWithCrystals(CartProvider cart) =>
+      _crystalLines(cart).isNotEmpty &&
+      _effectiveOrderPrice - _crystalLinesPrice(cart) <= 0;
+
+  /// The payment method the order goes out with. A fully crystal-paid order
+  /// has no method to choose and must never open a card invoice for 0 UZS, so
+  /// it takes the cash route, which sends only the crystal payment line (see
+  /// LoyaltyPos.transactions).
+  String? _paymentOption(CartProvider cart) =>
+      _fullyPaidWithCrystals(cart) ? 'Cash' : selectedOption;
+
   /// True when the server refused the basket as configured, or when a
   /// crystal line cannot be priced at all (no session). The order must not
   /// go out until the customer changes something.
@@ -211,9 +223,51 @@ class _CheckoutState extends State<Checkout> {
 
   void _showLoyaltySnack(String text) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text), backgroundColor: Colors.orange),
-    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+          backgroundColor: Colors.white,
+          elevation: 8,
+          margin: EdgeInsets.fromLTRB(16.w, 0, 16.w, 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.r),
+            side: BorderSide(color: Colors.grey.withOpacity(0.2)),
+          ),
+          content: Row(
+            children: [
+              Container(
+                width: 34.w,
+                height: 34.w,
+                decoration: const BoxDecoration(
+                  color: Color(0xffFEC700),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20.sp,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    height: 1.3,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
   }
 
   double deliveryFee = 0;
@@ -1124,6 +1178,7 @@ class _CheckoutState extends State<Checkout> {
     // What the crystal lines take off the cash total. Zero on delivery,
     // where every line is paid with money.
     final double loyaltyDiscount = _crystalLinesPrice(cartProvider);
+    final String? paymentOption = _paymentOption(cartProvider);
     // The same lines in crystals, for the totals card: the server's figure
     // once quoted, else what each line was last quoted at.
     final bool hasCrystalLines = _crystalLines(cartProvider).isNotEmpty;
@@ -1312,7 +1367,7 @@ class _CheckoutState extends State<Checkout> {
                                 ),
                                 SizedBox(height: 10.h),
                                 Text(
-                                  'Parking Delivery',
+                                  AppLocalizations.of(context).parkingDelivery,
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.w600,
@@ -2030,65 +2085,66 @@ class _CheckoutState extends State<Checkout> {
               ),
             ),
             const SizedBox(height: 40),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15.w),
-              child: DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).paymentMethod,
-                  labelStyle: const TextStyle(color: Colors.black),
-                  contentPadding: EdgeInsets.symmetric(
-                      horizontal: 14.w, vertical: 12.h),
-                  // Rounded outline to match the phone and comment fields
-                  // below, instead of the bare material underline.
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                    borderSide: const BorderSide(color: Colors.black26),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                    borderSide: const BorderSide(
-                        color: Color(0xFFFEC700), width: 1.5),
-                  ),
-                ),
-                dropdownColor: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                    color: Colors.black54),
-                value: selectedOption,
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem<String>(
-                    value: 'Card',
-                    child: Row(
-                      children: [
-                        const Icon(Icons.credit_card, color: Colors.blue),
-                        SizedBox(width: 10.w),
-                        Text(AppLocalizations.of(context).card),
-                      ],
+            if (!_fullyPaidWithCrystals(cartProvider))
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 15.w),
+                child: DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).paymentMethod,
+                    labelStyle: const TextStyle(color: Colors.black),
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 14.w, vertical: 12.h),
+                    // Rounded outline to match the phone and comment fields
+                    // below, instead of the bare material underline.
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                      borderSide: const BorderSide(color: Colors.black26),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.r),
+                      borderSide: const BorderSide(
+                          color: Color(0xFFFEC700), width: 1.5),
                     ),
                   ),
-                  if (_selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3)
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
+                      color: Colors.black54),
+                  value: selectedOption,
+                  isExpanded: true,
+                  items: [
                     DropdownMenuItem<String>(
-                      value: 'Cash',
+                      value: 'Card',
                       child: Row(
                         children: [
-                          const Icon(Icons.payment, color: Colors.purple),
+                          const Icon(Icons.credit_card, color: Colors.blue),
                           SizedBox(width: 10.w),
-                          Text(AppLocalizations.of(context).cash),
+                          Text(AppLocalizations.of(context).card),
                         ],
                       ),
                     ),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    selectedOption = value;
-                  });
-                },
+                    if (_selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3)
+                      DropdownMenuItem<String>(
+                        value: 'Cash',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.payment, color: Colors.purple),
+                            SizedBox(width: 10.w),
+                            Text(AppLocalizations.of(context).cash),
+                          ],
+                        ),
+                      ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedOption = value;
+                    });
+                  },
+                ),
               ),
-            ),
             if (_loyaltyEligibleOrderType) const LoyaltyCheckoutSection(),
             const SizedBox(height: 40),
             Padding(
@@ -2220,24 +2276,24 @@ class _CheckoutState extends State<Checkout> {
             ElevatedButton(
               onPressed: (_selectedIndex == 0
                       ? selectedAddress != null &&
-                          selectedOption != null &&
+                          paymentOption != null &&
                           !_isProcessing &&
                           deliveryFee > 0 // Ensure delivery fee is calculated
                       : _selectedIndex == 1
                           ? selectedBranch != null &&
-                              selectedOption != null &&
+                              paymentOption != null &&
                               !_isProcessing
                           : _selectedIndex == 2
                               ? selectedCity !=
                                       null && // Add check for selectedCity
                                   selectedBranch != null &&
-                                  selectedOption != null &&
+                                  paymentOption != null &&
                                   carDetails != null &&
                                   carDetails!.trim().isNotEmpty &&
                                   !_isProcessing
                               : _selectedIndex == 3
                                   ? selectedBranch != null &&
-                                      selectedOption != null &&
+                                      paymentOption != null &&
                                       !_isProcessing
                                   : false)
                   ? () async {
@@ -2291,7 +2347,7 @@ class _CheckoutState extends State<Checkout> {
                       });
 
                       // Check if payment type is Card
-                      if (selectedOption == 'Card') {
+                      if (paymentOption == 'Card') {
                         try {
                           // Handle Card payment based on order type
                           String? branchForPayment;
@@ -2398,7 +2454,7 @@ class _CheckoutState extends State<Checkout> {
                               selectedAddress, // address
                               firstName, // name
                               phoneNumber, // phone
-                              selectedOption!, // paymentType
+                              paymentOption!, // paymentType
                               loyaltyComment, // comment + loyalty ref
                               loyaltyTotal, // total
                               cartProvider.showLat(), // latitude
@@ -2420,7 +2476,7 @@ class _CheckoutState extends State<Checkout> {
                             branchName: selectedBranch!,
                             name: firstName,
                             phone: phoneNumber,
-                            paymentType: selectedOption!,
+                            paymentType: paymentOption!,
                             comment: loyaltyComment,
                             total: loyaltyTotal,
                             cashbackAmount: loyaltyPoints,
@@ -2438,7 +2494,7 @@ class _CheckoutState extends State<Checkout> {
                             branchName: selectedBranch!,
                             name: firstName,
                             phone: phoneNumber,
-                            paymentType: selectedOption!,
+                            paymentType: paymentOption!,
                             comment: "$loyaltyComment\nCar Details: $carDetails",
                             total: loyaltyTotal,
                             cashbackAmount: loyaltyPoints,
@@ -2456,7 +2512,7 @@ class _CheckoutState extends State<Checkout> {
                             branchName: selectedBranch!,
                             name: firstName,
                             phone: phoneNumber,
-                            paymentType: selectedOption!,
+                            paymentType: paymentOption!,
                             comment: loyaltyComment,
                             total: loyaltyTotal,
                             cashbackAmount: loyaltyPoints,
@@ -2558,21 +2614,21 @@ class _CheckoutState extends State<Checkout> {
                 backgroundColor: WidgetStateProperty.all<Color>(
                   (_selectedIndex == 0 &&
                               selectedAddress != null &&
-                              selectedOption != null &&
+                              paymentOption != null &&
                               deliveryFee > 0) ||
                           (_selectedIndex == 1 &&
                               selectedBranch != null &&
-                              selectedOption != null) ||
+                              paymentOption != null) ||
                           (_selectedIndex == 2 &&
                               selectedCity !=
                                   null && // Add check for selectedCity
                               selectedBranch != null &&
-                              selectedOption != null &&
+                              paymentOption != null &&
                               carDetails != null &&
                               carDetails!.trim().isNotEmpty) ||
                           (_selectedIndex == 3 &&
                               selectedBranch != null &&
-                              selectedOption != null)
+                              paymentOption != null)
                       ? const Color(0xffFEC700) // Enabled state
                       : const Color(0xFFCCCCCC), // Disabled state
                 ),

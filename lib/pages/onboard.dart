@@ -256,7 +256,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     }
 
     // Check if permission is permanently denied
-    bool isPermanentlyDenied = await _locationService.isPermissionPermanentlyDenied();
+    bool isPermanentlyDenied =
+        await _locationService.isPermissionPermanentlyDenied();
     if (isPermanentlyDenied) {
       return await _showSettingsDialog();
     }
@@ -283,7 +284,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       final granted = await _locationService.requestPermission();
       if (granted) {
         await _findNearestBranch();
-        _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+        _nearestBranchDeliverId =
+            await _nearestBranchService.getSavedNearestBranchDeliverId();
       }
       return granted;
     }
@@ -311,7 +313,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
       final granted = await _locationService.checkPermission();
       if (granted) {
         await _findNearestBranch();
-        _nearestBranchDeliverId = await _nearestBranchService.getSavedNearestBranchDeliverId();
+        _nearestBranchDeliverId =
+            await _nearestBranchService.getSavedNearestBranchDeliverId();
       }
       return granted;
     }
@@ -364,21 +367,21 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     try {
       // Check if we have menu data from the backend (from nearest branch API)
       final menuData = _nearestBranchService.getLatestMenuData();
-      
+
       if (menuData != null) {
         print('Onboard: Using menu data from backend response');
-        
+
         // Set the branch deliver ID
         if (_nearestBranchDeliverId != null &&
             _nearestBranchDeliverId!.isNotEmpty) {
           _menuService.setNearestBranchDeliverId(_nearestBranchDeliverId!);
         }
-        
+
         // Load menu directly from backend data
         await _menuService.loadMenuDataFromBackend(menuData);
       } else {
         print('Onboard: No menu data from backend, using traditional flow');
-        
+
         // Fallback to traditional flow
         if (_nearestBranchDeliverId != null &&
             _nearestBranchDeliverId!.isNotEmpty) {
@@ -412,7 +415,6 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     _animationController.dispose();
     super.dispose();
   }
-
 
   Future<void> _continue() async {
     if (!mounted) return;
@@ -465,7 +467,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
     final selectedLocale = isEnglishSelected ? 'en' : 'uz';
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('selected_language', selectedLocale);
-    
+
     // Mark onboarding as completed
     await prefs.setBool('onboarding_completed', true);
     print('Onboarding completed and saved to SharedPreferences');
@@ -575,7 +577,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           ),
                         ),
                         child: Image.asset(
-                          'images/look-gradient-1.png',
+                          'images/APP.png',
                           fit: BoxFit.fitWidth,
                           width: double.infinity,
                         ),
@@ -669,8 +671,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                             children: [
                               Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 12.w),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -689,7 +691,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                             ? const Color.fromARGB(
                                                 255, 255, 210, 57)
                                             : Colors.white,
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         boxShadow: [
                                           BoxShadow(
                                             color:
@@ -715,8 +718,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                               Expanded(
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 12.w),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -735,7 +738,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                             ? const Color.fromARGB(
                                                 255, 255, 210, 57)
                                             : Colors.white,
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         boxShadow: [
                                           BoxShadow(
                                             color:
@@ -914,12 +918,10 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                               ),
                             ),
                             child: Padding(
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: 12.w),
+                              padding: EdgeInsets.symmetric(horizontal: 12.w),
                               child: Container(
                                 width: double.infinity,
-                                padding:
-                                    EdgeInsets.symmetric(vertical: 18.h),
+                                padding: EdgeInsets.symmetric(vertical: 18.h),
                                 decoration: BoxDecoration(
                                   color: _isLoading
                                       ? const Color(0xFFE0E0E0)
@@ -931,7 +933,8 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                                         child: SizedBox(
                                           width: 24.w,
                                           height: 24.h,
-                                          child: const CircularProgressIndicator(
+                                          child:
+                                              const CircularProgressIndicator(
                                             valueColor:
                                                 AlwaysStoppedAnimation<Color>(
                                                     Colors.black),

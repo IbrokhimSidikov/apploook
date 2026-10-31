@@ -10,7 +10,11 @@ import 'package:apploook/widget/order_tracking_shimmer.dart';
 import 'package:http/http.dart' as http;
 
 class UnifiedOrderTrackingPage extends StatefulWidget {
-  const UnifiedOrderTrackingPage({Key? key}) : super(key: key);
+  const UnifiedOrderTrackingPage({Key? key, this.initialTab = 0})
+      : super(key: key);
+
+  /// Tab to open on: 0 delivery, 1 carhop, 2 self-pickup / in-restaurant.
+  final int initialTab;
 
   @override
   State<UnifiedOrderTrackingPage> createState() =>
@@ -34,7 +38,11 @@ class _UnifiedOrderTrackingPageState extends State<UnifiedOrderTrackingPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: widget.initialTab,
+    );
 
     // Load both types of orders with smart caching
     _loadOrdersWithBackgroundRefresh();

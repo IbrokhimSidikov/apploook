@@ -31,6 +31,11 @@ class _ProfileState extends State<Profile> {
   String clientFirstName = '';
   String clientPhoneNumber = '';
 
+  /// Null until prefs answer, so neither set of account actions flashes on
+  /// the wrong customer. Same test as the launch route in main.dart: a saved
+  /// phone number is what makes someone signed in.
+  bool? _isSignedIn;
+
   @override
   void initState() {
     super.initState();
@@ -63,8 +68,10 @@ class _ProfileState extends State<Profile> {
   Future<void> _loadPhoneNumber() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
+    final phoneNumber = prefs.getString('phoneNumber');
     setState(() {
-      clientPhoneNumber = prefs.getString('phoneNumber') ?? 'No number';
+      _isSignedIn = phoneNumber != null && phoneNumber.isNotEmpty;
+      clientPhoneNumber = phoneNumber ?? 'No number';
     });
   }
 
@@ -342,7 +349,9 @@ class _ProfileState extends State<Profile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          clientFirstName,
+                          _isSignedIn == false
+                              ? l.signInToYourProfile
+                              : clientFirstName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -350,14 +359,15 @@ class _ProfileState extends State<Profile> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
-                          clientPhoneNumber,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey[600],
+                        if (_isSignedIn != false)
+                          Text(
+                            clientPhoneNumber,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.grey[600],
+                            ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -397,32 +407,45 @@ class _ProfileState extends State<Profile> {
             SizedBox(height: 24.h),
 
             // ── Account actions ───────────────────────────────────────────
-            _ProfileSection(
-              children: [
-                _ProfileTile(
-                  icon: Icons.logout_rounded,
-                  tint: const Color(0xFF8E8E93),
-                  title: l.logout,
-                  onTap: _logout,
-                  showChevron: false,
-                ),
-              ],
-            ),
-            SizedBox(height: 12.h),
-            // Kept apart from logout so the destructive action is never a
-            // neighbouring mis-tap away.
-            _ProfileSection(
-              children: [
-                _ProfileTile(
-                  icon: Icons.delete_outline_rounded,
-                  tint: _kDestructive,
-                  title: l.deleteAccount,
-                  destructive: true,
-                  onTap: _deleteAccount,
-                  showChevron: false,
-                ),
-              ],
-            ),
+            if (_isSignedIn == true) ...[
+              _ProfileSection(
+                children: [
+                  _ProfileTile(
+                    icon: Icons.logout_rounded,
+                    tint: const Color(0xFF8E8E93),
+                    title: l.logout,
+                    onTap: _logout,
+                    showChevron: false,
+                  ),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              // Kept apart from logout so the destructive action is never a
+              // neighbouring mis-tap away.
+              _ProfileSection(
+                children: [
+                  _ProfileTile(
+                    icon: Icons.delete_outline_rounded,
+                    tint: _kDestructive,
+                    title: l.deleteAccount,
+                    destructive: true,
+                    onTap: _deleteAccount,
+                    showChevron: false,
+                  ),
+                ],
+              ),
+            ] else if (_isSignedIn == false)
+              _ProfileSection(
+                children: [
+                  _ProfileTile(
+                    icon: Icons.login_rounded,
+                    tint: const Color(0xFF34C759),
+                    title: l.signIn,
+                    onTap: () => Navigator.pushNamed(context, '/signin'),
+                    showChevron: false,
+                  ),
+                ],
+              ),
             SizedBox(height: 28.h),
 
             const _VersionFooter(),
