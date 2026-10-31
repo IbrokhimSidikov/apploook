@@ -29,6 +29,7 @@ import 'package:apploook/models/cart_item.dart';
 import 'package:apploook/pages/app_shell.dart';
 import 'package:apploook/features/order_success/presentation/order_success_page.dart';
 import 'package:apploook/models/crystal_pricing.dart';
+import 'package:apploook/models/delever_crystal_note.dart';
 import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:apploook/models/loyalty.dart';
 import 'package:apploook/providers/loyalty_provider.dart';
@@ -93,16 +94,21 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
-  /// Delivery is excluded from crystals entirely - it neither earns nor spends.
-  bool get _loyaltyEligibleOrderType => _selectedIndex != 0;
+  /// The last quote's answer on whether this order type is in the programme,
+  /// copied here on every build so it can be read after an await.
+  bool _quoteOrderTypeEligible = true;
+
+  /// Delivery follows the server's eligible_order_type_ids, so it can be
+  /// switched on or off without an app release.
+  bool get _loyaltyEligibleOrderType =>
+      _selectedIndex != 0 || _quoteOrderTypeEligible;
 
   /// Crystals can be spent on cash and card orders alike.
   ///
   /// A card order is charged through RahmatPay for the money lines only; the
   /// crystal lines stay out of the invoice's fiscal (OFD) items, so the
-  /// receipt still sums to the amount actually charged. Delivery stays
-  /// excluded via [_loyaltyEligibleOrderType]. Earning works on every
-  /// payment method.
+  /// receipt still sums to the amount actually charged. Earning works on
+  /// every payment method.
   bool get _canRedeemLoyalty => _loyaltyEligibleOrderType;
 
   /// Cart lines that reach the POS for the selected tab: the bag is only
@@ -111,8 +117,8 @@ class _CheckoutState extends State<Checkout> {
       ? cart.cartItems
       : cart.cartItems.where((item) => item.product.name != 'Пакет').toList();
 
-  /// Lines the customer chose to pay with crystals. Empty on delivery, where
-  /// crystals cannot be spent, so every line there is a money line.
+  /// Lines the customer chose to pay with crystals. Empty when the order type
+  /// is outside the programme, so every line there is a money line.
   List<CartItem> _crystalLines(CartProvider cart) => _canRedeemLoyalty
       ? _posItems(cart).where((item) => item.payWithCrystals).toList()
       : const [];
@@ -124,7 +130,9 @@ class _CheckoutState extends State<Checkout> {
       .fold<double>(0, (sum, item) => sum + item.totalPrice);
 
   /// Crystals cover the whole order, so there is no money left to collect.
+  /// Never on delivery: crystals do not pay the delivery fee.
   bool _fullyPaidWithCrystals(CartProvider cart) =>
+      _selectedIndex != 0 &&
       _crystalLines(cart).isNotEmpty &&
       _effectiveOrderPrice - _crystalLinesPrice(cart) <= 0;
 
@@ -726,7 +734,17 @@ class _CheckoutState extends State<Checkout> {
       loyaltyHold = reservation.hold;
       // The crystal payment in soum, for the POS payment line.
       final int loyaltyPoints = loyaltyHold?.appliedSoum ?? 0;
-      if (loyaltyHold != null) {
+      if (selectedIndex == 0) {
+        // This note becomes the Delever comment, which is how the server
+        // learns which lines crystals paid for.
+        finalNote = DeleverCrystalNote.compose(
+          crystalLines: _crystalLines(cartProvider),
+          holdRef: loyaltyHold?.orderNoteRef,
+          comment: finalNote,
+        );
+        filteredCartItems =
+            DeleverCrystalNote.crystalLinesFirst(cartProvider.cartItems);
+      } else if (loyaltyHold != null) {
         finalNote = finalNote.isEmpty
             ? loyaltyHold.orderNoteRef
             : '$finalNote\n${loyaltyHold.orderNoteRef}';
@@ -1173,10 +1191,11 @@ class _CheckoutState extends State<Checkout> {
 
     // Rebuild on every quote so the summary block and the button state
     // follow the server's answer.
-    context.watch<LoyaltyProvider>();
+    _quoteOrderTypeEligible =
+        context.watch<LoyaltyProvider>().orderTypeEligible;
 
-    // What the crystal lines take off the cash total. Zero on delivery,
-    // where every line is paid with money.
+    // What the crystal lines take off the cash total. Zero when the order
+    // type is outside the programme and every line is paid with money.
     final double loyaltyDiscount = _crystalLinesPrice(cartProvider);
     final String? paymentOption = _paymentOption(cartProvider);
     // The same lines in crystals, for the totals card: the server's figure
@@ -2322,7 +2341,7 @@ class _CheckoutState extends State<Checkout> {
                       // can price them at all.
                       final l10n = AppLocalizations.of(context);
                       final loyaltyState = context.read<LoyaltyProvider>();
-                      if (_selectedIndex == 0 &&
+                      if (!_loyaltyEligibleOrderType &&
                           cartProvider.cartItems
                               .any(CrystalPricing.lineIsCrystalOnly)) {
                         _showLoyaltySnack(l10n.crystalOnlyNotOnDelivery);
@@ -2435,11 +2454,17 @@ class _CheckoutState extends State<Checkout> {
                         // The crystal payment in soum, for the POS line.
                         final int loyaltyPoints =
                             loyaltyHold?.appliedSoum ?? 0;
-                        final String loyaltyComment = loyaltyHold == null
-                            ? commented
-                            : (commented.isEmpty
-                                ? loyaltyHold.orderNoteRef
-                                : '$commented\n${loyaltyHold.orderNoteRef}');
+                        final String loyaltyComment = _selectedIndex == 0
+                            ? DeleverCrystalNote.compose(
+                                crystalLines: _crystalLines(cartProvider),
+                                holdRef: loyaltyHold?.orderNoteRef,
+                                comment: commented,
+                              )
+                            : loyaltyHold == null
+                                ? commented
+                                : (commented.isEmpty
+                                    ? loyaltyHold.orderNoteRef
+                                    : '$commented\n${loyaltyHold.orderNoteRef}');
                         // Cash due: the effective price (already without
                         // the package on non-delivery tabs) minus the money
                         // price of the lines paid with crystals.
@@ -2780,7 +2805,8 @@ class _CheckoutState extends State<Checkout> {
 
       // Format cart items for the API
       List<Map<String, dynamic>> formattedItems =
-          cartProvider.cartItems.map((item) {
+          DeleverCrystalNote.crystalLinesFirst(cartProvider.cartItems)
+              .map((item) {
         return {
           "id": item.product.uuid, // Use the UUID from the product model
           "name": item.displayName, // Include modifier names

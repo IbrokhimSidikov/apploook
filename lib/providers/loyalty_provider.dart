@@ -258,7 +258,7 @@ class LoyaltyProvider extends ChangeNotifier {
   int _deliveryFee = 0;
   int _orderTypeId = 0;
 
-  /// True unless the chosen order type is outside the programme (delivery).
+  /// True unless the server says the chosen order type is outside the programme.
   bool get orderTypeEligible => _quote?.orderTypeEligible ?? true;
 
   /// Builds the `lines` payload the quote and hold endpoints take.
@@ -266,8 +266,7 @@ class LoyaltyProvider extends ChangeNotifier {
   /// Each cart line becomes its inventory components - the product itself
   /// when it is linked to Sieves inventory, plus every selected modifier
   /// that is - with the line's quantity and payment choice. The bag
-  /// ("Пакет") is left out: it is only charged on delivery, which is
-  /// outside the programme anyway.
+  /// ("Пакет") is left out: it is never paid with crystals and earns nothing.
   static List<Map<String, dynamic>> linesFor(List<CartItem> items) {
     final lines = <Map<String, dynamic>>[];
     for (final item in items) {
@@ -425,8 +424,8 @@ class LoyaltyProvider extends ChangeNotifier {
           '(session=$_hasSession items=${_items.length} type=$_orderTypeId)');
       return null;
     }
-    // Delivery is outside the programme: no hold, so the order goes out at
-    // the normal price and books no crystals.
+    // An order type outside the programme gets no hold, so the order goes out
+    // at the normal price and books no crystals.
     if (!orderTypeEligible) {
       debugPrint('Loyalty: no hold - order type $_orderTypeId is excluded');
       return null;
