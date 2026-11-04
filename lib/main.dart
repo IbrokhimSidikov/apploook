@@ -20,6 +20,7 @@ import 'package:apploook/services/delivery_review_scheduler.dart';
 import 'package:apploook/services/notification_service.dart';
 import 'package:apploook/services/remote_config_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
+import 'package:apploook/widgets/maintenance_gate.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -134,23 +135,25 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
               (controller ?? CrystalShopController())..attachLoyalty(loyalty),
         ),
       ],
-      // Show elegant branded splash screen while initializing
-      child: _isLoading 
-          ? MaterialApp(
-              debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                fontFamily: 'Poppins',
-                useMaterial3: true,
-              ),
-              home: const SplashScreen(),
-            )
-          : _acceptedPrivacyPolicy == true
-              ? const MyApp()
-              : ConsentScreen(onAccept: () async {
-                  // Persist acceptance; setState inside rebuilds this subtree
-                  // into MyApp under the providers declared above.
-                  await _handlePrivacyPolicyAcceptance();
-                }),
+      child: MaintenanceGate(
+        // Show elegant branded splash screen while initializing
+        child: _isLoading
+            ? MaterialApp(
+                debugShowCheckedModeBanner: false,
+                theme: ThemeData(
+                  fontFamily: 'Poppins',
+                  useMaterial3: true,
+                ),
+                home: const SplashScreen(),
+              )
+            : _acceptedPrivacyPolicy == true
+                ? const MyApp()
+                : ConsentScreen(onAccept: () async {
+                    // Persist acceptance; setState inside rebuilds this subtree
+                    // into MyApp under the providers declared above.
+                    await _handlePrivacyPolicyAcceptance();
+                  }),
+      ),
     );
   }
 }

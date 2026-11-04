@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -20,6 +22,9 @@ class RemoteConfigService {
   static const int _defaultAnnouncementDurationSeconds = 5;
   static const String _defaultAnnouncementLinkUrl = '';
   static const int _defaultAnnouncementMaxShows = 3;
+  static const bool _defaultMaintenanceEnabled = false;
+  static const String _defaultMaintenanceMessage = '';
+  static const Duration _maintenancePollInterval = Duration(minutes: 5);
 
   // Remote config keys
   static const String _keyCutoffHour = 'order_cutoff_hour';
@@ -36,6 +41,15 @@ class RemoteConfigService {
       'announcement_duration_seconds';
   static const String _keyAnnouncementLinkUrl = 'announcement_link_url';
   static const String _keyAnnouncementMaxShows = 'announcement_max_shows';
+  static const String _keyMaintenanceEnabled = 'maintenance_enabled';
+  static const String _keyMaintenanceMessagePrefix = 'maintenance_message_';
+
+  /// Bumped whenever newly activated values may have changed the maintenance
+  /// state, so the UI can re-read [maintenanceEnabled] and the message.
+  final ValueNotifier<int> maintenanceChanges = ValueNotifier<int>(0);
+
+  StreamSubscription<RemoteConfigUpdate>? _configUpdateSubscription;
+  Timer? _maintenancePollTimer;
 
   factory RemoteConfigService() {
     return _instance;
@@ -65,6 +79,10 @@ class RemoteConfigService {
         _keyAnnouncementDurationSeconds: _defaultAnnouncementDurationSeconds,
         _keyAnnouncementLinkUrl: _defaultAnnouncementLinkUrl,
         _keyAnnouncementMaxShows: _defaultAnnouncementMaxShows,
+        _keyMaintenanceEnabled: _defaultMaintenanceEnabled,
+        '${_keyMaintenanceMessagePrefix}en': _defaultMaintenanceMessage,
+        '${_keyMaintenanceMessagePrefix}uz': _defaultMaintenanceMessage,
+        '${_keyMaintenanceMessagePrefix}ru': _defaultMaintenanceMessage,
       });
 
       // Fetch and activate the latest values
@@ -82,6 +100,98 @@ class RemoteConfigService {
       if (kDebugMode) {
         print('Error initializing Remote Config: $e');
       }
+    }
+
+    // Runs even if the fetch failed: the last activated values still apply,
+    // and the realtime listener can pick up changes once the network is back.
+    _listenForConfigUpdates();
+    _onMaintenanceConfigChanged();
+  }
+
+  /// Apply values published in the Firebase console while the app is open.
+  void _listenForConfigUpdates() {
+    try {
+      _configUpdateSubscription ??= _remoteConfig.onConfigUpdated.listen(
+        (_) async {
+          try {
+            await _remoteConfig.activate();
+            _onMaintenanceConfigChanged();
+          } catch (e) {
+            if (kDebugMode) {
+              print('Error activating Remote Config update: $e');
+            }
+          }
+        },
+        onError: (Object e) {
+          if (kDebugMode) {
+            print('Remote Config realtime error: $e');
+          }
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error listening for Remote Config updates: $e');
+      }
+    }
+  }
+
+  void _onMaintenanceConfigChanged() {
+    // While blocked, poll as well so users are released even if the realtime
+    // connection is unavailable on their network.
+    if (maintenanceEnabled) {
+      _maintenancePollTimer ??= Timer.periodic(
+        _maintenancePollInterval,
+        (_) => refreshMaintenanceStatus(),
+      );
+    } else {
+      _maintenancePollTimer?.cancel();
+      _maintenancePollTimer = null;
+    }
+    maintenanceChanges.value++;
+  }
+
+  /// Fetch the latest values and re-evaluate the maintenance state.
+  Future<void> refreshMaintenanceStatus() async {
+    try {
+      // Checkout sets a 1 hour fetch interval on the shared instance, which
+      // would otherwise turn this fetch into a no-op.
+      await _remoteConfig.setConfigSettings(RemoteConfigSettings(
+        fetchTimeout: const Duration(minutes: 1),
+        minimumFetchInterval: const Duration(seconds: 0),
+      ));
+      await _remoteConfig.fetchAndActivate();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error refreshing maintenance status: $e');
+      }
+    }
+    _onMaintenanceConfigChanged();
+  }
+
+  /// Whether the app is blocked by the maintenance dialog.
+  bool get maintenanceEnabled {
+    try {
+      return _remoteConfig.getBool(_keyMaintenanceEnabled);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting maintenance flag: $e');
+      }
+      return _defaultMaintenanceEnabled;
+    }
+  }
+
+  /// Optional message for the given language (en, uz, ru), e.g. with an ETA.
+  /// Empty string means the built-in translated text is used.
+  String maintenanceMessage(String languageCode) {
+    try {
+      return _remoteConfig
+          .getString('$_keyMaintenanceMessagePrefix$languageCode')
+          .trim();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting maintenance message: $e');
+      }
+      return _defaultMaintenanceMessage;
     }
   }
 
@@ -118,7 +228,8 @@ class RemoteConfigService {
       
       // Activate the fetched values
       bool updated = await _remoteConfig.activate();
-      
+      _onMaintenanceConfigChanged();
+
       if (kDebugMode) {
         print('Remote Config force updated. Values updated: $updated');
         print('New cutoff hour: ${orderCutoffHour}');

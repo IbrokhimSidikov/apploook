@@ -174,6 +174,10 @@ class AppLocalizations {
       'currentVersion': 'Current Version',
       'requiredVersion': 'Required Version',
       'updateNow': 'Update Now',
+      // Maintenance Dialog
+      'maintenanceTitle': 'Maintenance in Progress',
+      'maintenanceDescription':
+          'We are carrying out maintenance work and the app is temporarily unavailable. Please try again a little later.',
       // Notifications view
       'orderNumber': 'Order #',
       'arrived': 'Arrived',
@@ -533,6 +537,10 @@ class AppLocalizations {
       'currentVersion': 'Joriy versiya',
       'requiredVersion': 'Talab qilingan versiya',
       'updateNow': 'Hozir yangilash',
+      // Maintenance Dialog
+      'maintenanceTitle': 'Texnik ishlar olib borilmoqda',
+      'maintenanceDescription':
+          'Hozirda texnik ishlar olib borilmoqda va ilova vaqtincha ishlamaydi. Iltimos, birozdan so\'ng qayta urinib ko\'ring.',
       // Notifications view
       'orderNumber': 'Buyurtma #',
       'arrived': 'Yetib keldim',
@@ -891,6 +899,10 @@ class AppLocalizations {
       'currentVersion': 'Текущая версия',
       'requiredVersion': 'Требуемая версия',
       'updateNow': 'Обновить сейчас',
+      // Maintenance Dialog
+      'maintenanceTitle': 'Идут технические работы',
+      'maintenanceDescription':
+          'Сейчас проводятся технические работы, и приложение временно недоступно. Пожалуйста, попробуйте позже.',
       // Notifications view
       'orderNumber': 'Номер заказа #',
       'arrived': 'Прибыл',
@@ -1608,6 +1620,13 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]!['requiredVersion']!;
 
   String get updateNow => _localizedValues[locale.languageCode]!['updateNow']!;
+
+  // Maintenance Dialog getters
+  String get maintenanceTitle =>
+      _localizedValues[locale.languageCode]!['maintenanceTitle']!;
+
+  String get maintenanceDescription =>
+      _localizedValues[locale.languageCode]!['maintenanceDescription']!;
 
   // Order card getters
   String get orderCardTitle =>
