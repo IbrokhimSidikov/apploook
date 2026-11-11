@@ -16,11 +16,23 @@ class LocationService implements AppLocation {
   
   @override
   Future<AppLatLong> getCurrentLocation() async {
-    return Geolocator.getCurrentPosition().then((value) {
-      return AppLatLong(lat: value.latitude, long: value.longitude);
-    }).catchError(
-      (_) => defLocation,
-    );
+    // getCurrentPosition has no deadline of its own and can wait indefinitely
+    // without a GPS fix (indoors, weak signal), which left the menu unloaded.
+    try {
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 8),
+      );
+      return AppLatLong(lat: pos.latitude, long: pos.longitude);
+    } catch (_) {
+      try {
+        final last = await Geolocator.getLastKnownPosition();
+        if (last != null) {
+          return AppLatLong(lat: last.latitude, long: last.longitude);
+        }
+      } catch (_) {}
+      return defLocation;
+    }
   }
 
   @override

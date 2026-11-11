@@ -78,7 +78,44 @@ class BranchConfigs {
     ),
   };
 
+  // Names the v3 backend (`/branch/menu`) sends that differ from the keys
+  // above. Without these, getConfig fell back to 'Test' (empty deleverId) and
+  // the home screen discarded the menu for these branches.
+  static const Map<String, String> _aliases = {
+    'Maxim Gorkiy': 'Maksim Gorkiy',
+    "Yangiyo'l Loook": 'Yangiyol Loook',
+  };
+
+  /// Config key for a Sieves branch id, or null if the app has no config.
+  static String? keyForBranchId(int branchId) {
+    for (final entry in configs.entries) {
+      if (entry.key != 'Test' && entry.value.branchId == branchId) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  /// Resolves a backend or legacy branch name to its config key.
+  static String? resolveKey(String branchName) {
+    if (configs.containsKey(branchName)) return branchName;
+    final alias = _aliases[branchName];
+    if (alias != null) return alias;
+    final normalized = _normalize(branchName);
+    for (final key in configs.keys) {
+      if (_normalize(key) == normalized) return key;
+    }
+    return null;
+  }
+
+  static String _normalize(String s) => s
+      .toLowerCase()
+      .replaceAll(RegExp(r"[\s'`ʻʼ’‘\-]"), '')
+      .replaceAll('loook', '')
+      .replaceAll('maxim', 'maksim');
+
   static BranchConfig getConfig(String branchName) {
-    return configs[branchName] ?? configs.values.first;
+    final key = resolveKey(branchName);
+    return (key != null ? configs[key] : null) ?? configs.values.first;
   }
 }

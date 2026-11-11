@@ -367,7 +367,8 @@ class _HomeNewState extends State<HomeNew>
 
   // Update nearest branch in background (non-blocking)
   // This runs every time the app is relaunched to ensure menu is always for the nearest branch
-  Future<void> _updateNearestBranch() async {
+  Future<void> _updateNearestBranch({int attempt = 1}) async {
+    const maxAttempts = 3;
     try {
       print('HomeNew: Checking for nearest branch on app launch');
 
@@ -375,36 +376,32 @@ class _HomeNewState extends State<HomeNew>
       // Skip permission check since user already granted it during onboarding
       await nearestBranchService.findNearestBranch(skipPermissionCheck: true);
 
+      final menuService = MenuService();
       final nearestBranchDeliverId =
           await nearestBranchService.getSavedNearestBranchDeliverId();
-
       if (nearestBranchDeliverId != null && nearestBranchDeliverId.isNotEmpty) {
-        print(
-            'HomeNew: Updated nearest branch deliver ID: $nearestBranchDeliverId');
-
-        // Update MenuService with new branch
-        final menuService = MenuService();
         menuService.setNearestBranchDeliverId(nearestBranchDeliverId);
+      }
 
-        // Check if we have menu data from backend
-        final menuData = nearestBranchService.getLatestMenuData();
+      // The menu in the response is usable on its own. It used to be loaded
+      // only when a delivery id resolved, so a branch-name mismatch left the
+      // home screen on the shimmer once the 6h cache expired.
+      final menuData = nearestBranchService.getLatestMenuData();
+      if (menuData == null) {
+        throw Exception('Backend returned no menu for nearest branch');
+      }
+      await menuService.loadMenuDataFromBackend(menuData);
 
-        if (menuData != null) {
-          print('HomeNew: Using menu data from backend response');
-          await menuService.loadMenuDataFromBackend(menuData);
-        } else {
-          print('HomeNew: No menu data from backend, refreshing traditionally');
-          await menuService.refreshData();
-        }
-
-        // Reload UI with new menu
-        if (mounted) {
-          await loadData();
-        }
+      if (mounted) {
+        await loadData();
       }
     } catch (e) {
-      print('HomeNew: Error updating nearest branch: $e');
-      // Don't block the app if branch detection fails
+      print('HomeNew: Error updating nearest branch (attempt $attempt): $e');
+      // Only retry while the user is still looking at an empty menu.
+      if (mounted && allProducts.isEmpty && attempt < maxAttempts) {
+        await Future.delayed(Duration(seconds: 2 * attempt));
+        if (mounted) await _updateNearestBranch(attempt: attempt + 1);
+      }
     }
   }
 

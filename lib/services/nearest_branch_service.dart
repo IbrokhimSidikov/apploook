@@ -91,14 +91,22 @@ class NearestBranchService {
         if (data['branch'] != null) {
           final branch = data['branch'];
           final apiName = branch['name'] as String?;
+          final apiId = int.tryParse('${branch['id']}');
           final distance = data['distance'];
           final distanceUnit = data['distanceUnit'];
-          
+
           print('🏪 NearestBranchService: Branch details from API:');
-          print('  • Branch Name: $apiName');
+          print('  • Branch Name: $apiName (id: $apiId)');
           print('  • Distance: $distance $distanceUnit');
-          
-          branchName = apiName;
+
+          // Match by id first: backend names drift (e.g. "Maxim Gorkiy",
+          // "Yangiyo'l Loook") and a name miss used to resolve to the Test
+          // branch. Store the app's canonical key so checkout agrees too.
+          branchName = (apiId != null
+                  ? BranchConfigs.keyForBranchId(apiId)
+                  : null) ??
+              (apiName != null ? BranchConfigs.resolveKey(apiName) : null) ??
+              apiName;
         }
         
         // Extract menu data (nested inside "menu" object)
