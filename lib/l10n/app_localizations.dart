@@ -176,6 +176,7 @@ class AppLocalizations {
       'updateNow': 'Update Now',
       // Maintenance Dialog
       'maintenanceTitle': 'Maintenance in Progress',
+      'maintenanceScheduledBreak': 'The app is on a short break and will be available again at {time}.',
       'maintenanceDescription':
           'We are carrying out maintenance work and the app is temporarily unavailable. Please try again a little later.',
       // Notifications view
@@ -537,6 +538,7 @@ class AppLocalizations {
       'updateNow': 'Hozir yangilash',
       // Maintenance Dialog
       'maintenanceTitle': 'Texnik ishlar olib borilmoqda',
+      'maintenanceScheduledBreak': 'Ilova qisqa tanaffusda. Soat {time} dan yana ishlaydi.',
       'maintenanceDescription':
           'Hozirda texnik ishlar olib borilmoqda va ilova vaqtincha ishlamaydi. Iltimos, birozdan so\'ng qayta urinib ko\'ring.',
       // Notifications view
@@ -896,6 +898,7 @@ class AppLocalizations {
       'updateNow': 'Обновить сейчас',
       // Maintenance Dialog
       'maintenanceTitle': 'Идут технические работы',
+      'maintenanceScheduledBreak': 'В приложении короткий перерыв. Оно снова заработает в {time}.',
       'maintenanceDescription':
           'Сейчас проводятся технические работы, и приложение временно недоступно. Пожалуйста, попробуйте позже.',
       // Notifications view
@@ -1613,6 +1616,8 @@ class AppLocalizations {
   // Maintenance Dialog getters
   String get maintenanceTitle =>
       _localizedValues[locale.languageCode]!['maintenanceTitle']!;
+  String get maintenanceScheduledBreak =>
+      _localizedValues[locale.languageCode]!['maintenanceScheduledBreak']!;
 
   String get maintenanceDescription =>
       _localizedValues[locale.languageCode]!['maintenanceDescription']!;

@@ -2,7 +2,7 @@ name: apploook
 description: "LOOOK Mobile Application"
 publish_to: "none"
 
-version: 3.5.0+69
+version: 3.5.0+70
 
 
 environment:
@@ -62,7 +62,7 @@ flutter:
 
   assets:
     - images/
-    - assets/videos/animation.mp4
+    - assets/videos/
 
   fonts:
     - family: Poppins
@@ -79,5 +79,5 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "images/192x192.png"
+  image_path: "images/applauncher.png"
   remove_alpha_ios: true

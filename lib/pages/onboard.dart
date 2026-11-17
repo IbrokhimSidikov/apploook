@@ -334,7 +334,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
   }
 
   Future<void> _initializeVideo() async {
-    _videoController = VideoPlayerController.asset('assets/videos/animation.mp4');
+    _videoController = VideoPlayerController.asset('assets/videos/animation2.mp4');
     await _videoController?.initialize();
     if (!mounted) return;
 
