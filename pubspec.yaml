@@ -62,7 +62,7 @@ flutter:
 
   assets:
     - images/
-    - assets/videos/loader.mp4
+    - assets/videos/animation.mp4
 
   fonts:
     - family: Poppins
