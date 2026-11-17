@@ -280,7 +280,6 @@ class AppLocalizations {
           'You can track your order status in the order tracking page',
       'closeButton': 'Close',
       'trackOrderButton': 'Track Order',
-      'paymeNotAvailable': 'Payme is not available for self-pickup orders',
       'alreadyArrived': 'Arrived',
       'arrivedSuccessfully': 'Successfully marked as arrived',
       'arrivedError': 'Failed to mark as arrived',
@@ -291,7 +290,6 @@ class AppLocalizations {
       'transactionInProgress': 'Transaction in progress',
       'waitingForPaymentApproval': 'Waiting for payment approval...',
       'orderID': 'Order ID:',
-      'completePayment': 'Please complete the payment in the Payme app',
       'doNotCloseScreen': 'Do not close this screen unless you want to cancel',
       'paymentVerificationCancelled': 'Payment verification cancelled',
       'orderHoursValidation': 'Orders not accepted after 23:30 PM',
@@ -645,8 +643,6 @@ class AppLocalizations {
           'Buyurtma holatini buyurtma kuzatuvi sahifasida kuzatishingiz mumkin',
       'closeButton': 'Yopish',
       'trackOrderButton': 'Buyurtmani kuzatish',
-      'paymeNotAvailable':
-          'O\'zi olib ketish uchun Payme to\'lov usuli mavjud emas',
       'deliveryTakeaway': 'Yetkazib berish / Olib ketish',
       'carhop': 'Carhop',
       'alreadyArrived': 'Yetib Keldim',
@@ -656,7 +652,6 @@ class AppLocalizations {
       'transactionInProgress': 'Transaksiya amalga oshirilmoqda',
       'waitingForPaymentApproval': 'To\'lovni tasdiqlash kutilmoqda...',
       'orderID': 'Buyurtma ID:',
-      'completePayment': 'To\'lovni Payme ilovasi orqali amalga oshiring',
       'doNotCloseScreen':
           'Agar to\'lovni bekor qilmoqchi bo\'lsangiz, ekranni yopishni unutmang',
       'paymentVerificationCancelled': 'To\'lov bekor qilindi',
@@ -1005,7 +1000,6 @@ class AppLocalizations {
           'Вы можете отслеживать статус заказа на странице отслеживания заказа',
       'closeButton': 'Закрыть',
       'trackOrderButton': 'Отслеживание заказа',
-      'paymeNotAvailable': 'Payme недоступен для самовывоза',
       'deliveryTakeaway': 'Доставка / самовывоз',
       'carhop': 'Carhop',
       'alreadyArrived': 'Уже прибыл',
@@ -1015,7 +1009,6 @@ class AppLocalizations {
       'transactionInProgress': 'Транзакция выполняется...',
       'waitingForPaymentApproval': 'Ожидание подтверждения оплаты...',
       'orderID': 'ID заказа:',
-      'completePayment': 'Завершите оплату в приложении Payme',
       'doNotCloseScreen': 'Если вы хотите отменить оплату, не закрывайте экран',
       'paymentVerificationCancelled': 'Подтверждение оплаты отменено',
       'orderHoursValidation': 'Заказы не принимаются после 23:30',
@@ -1569,8 +1562,6 @@ class AppLocalizations {
   String get trackOrderButton =>
       _localizedValues[locale.languageCode]!['trackOrderButton']!;
 
-  String get paymeNotAvailable =>
-      _localizedValues[locale.languageCode]!['paymeNotAvailable']!;
 
   String get alreadyArrived =>
       _localizedValues[locale.languageCode]!['alreadyArrived']!;
@@ -1594,8 +1585,6 @@ class AppLocalizations {
 
   String get orderID => _localizedValues[locale.languageCode]!['orderID']!;
 
-  String get completePayment =>
-      _localizedValues[locale.languageCode]!['completePayment']!;
 
   String get doNotCloseScreen =>
       _localizedValues[locale.languageCode]!['doNotCloseScreen']!;

@@ -11,7 +11,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'package:apploook/providers/notification_provider.dart';
 import 'package:apploook/services/menu_service.dart';
 import 'package:apploook/services/nearest_branch_service.dart';
-import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/order_history_service.dart';
 import 'package:apploook/services/version_checker_service.dart';
 import 'package:apploook/services/location_permission_guard.dart';
@@ -198,13 +197,19 @@ class Product {
           json.containsKey('sieves_id') || json.containsKey('sievesId'),
       posOrderable: json['pos_orderable'] is bool
           ? json['pos_orderable'] as bool
-          : (json['posOrderable'] is bool ? json['posOrderable'] as bool : null),
-      crystalPoints: parseSievesId(json['crystal_points'] ?? json['crystalPoints']),
+          : (json['posOrderable'] is bool
+              ? json['posOrderable'] as bool
+              : null),
+      crystalPoints:
+          parseSievesId(json['crystal_points'] ?? json['crystalPoints']),
       isCrystalOnly:
           json['is_crystal_only'] == true || json['isCrystalOnly'] == true,
-      crystalPriceA: parseSievesId(json['crystal_price_a'] ?? json['crystalPriceA']),
-      crystalPriceB: parseSievesId(json['crystal_price_b'] ?? json['crystalPriceB']),
-      crystalPriceC: parseSievesId(json['crystal_price_c'] ?? json['crystalPriceC']),
+      crystalPriceA:
+          parseSievesId(json['crystal_price_a'] ?? json['crystalPriceA']),
+      crystalPriceB:
+          parseSievesId(json['crystal_price_b'] ?? json['crystalPriceB']),
+      crystalPriceC:
+          parseSievesId(json['crystal_price_c'] ?? json['crystalPriceC']),
     );
   }
 
@@ -250,7 +255,7 @@ class HomeNew extends StatefulWidget {
 }
 
 class _HomeNewState extends State<HomeNew>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+    with TickerProviderStateMixin {
   int selectedTabIndex = 0;
   List<BannerItem> banners = [];
   bool _isLoadingBanners = true;
@@ -287,30 +292,10 @@ class _HomeNewState extends State<HomeNew>
     // Defer initialization to after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeAndLoadData();
-      _checkPendingPaymePayments();
       // Kick off the last-order lookup so the reorder FAB can appear once
       // the menu is loaded. Uses cached data on warm starts.
       context.read<ReorderController>().load();
     });
-
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _checkPendingPaymePayments();
-    }
-  }
-
-  // Check for pending Payme payments and show loading popup if needed
-  Future<void> _checkPendingPaymePayments() async {
-    // Use a small delay to ensure the app is fully resumed
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (mounted) {
-      // Check for pending payments and show loading popup if needed
-      PaymeTransactionService.checkPendingOrders(context);
-    }
   }
 
   Future<void> _initializeAndLoadData() async {
@@ -445,8 +430,6 @@ class _HomeNewState extends State<HomeNew>
 
   @override
   void dispose() {
-    // Unregister observer when disposing
-    WidgetsBinding.instance.removeObserver(this);
     selectedCategoryId.dispose();
     _scrollController.dispose();
     _categoryScrollControllers.forEach((_, controller) => controller.dispose());
@@ -713,8 +696,8 @@ class _HomeNewState extends State<HomeNew>
                                 top: -4.w,
                                 child: IgnorePointer(
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 4.w),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 4.w),
                                     constraints: BoxConstraints(
                                       minWidth: 18.w,
                                       minHeight: 18.w,
@@ -722,8 +705,7 @@ class _HomeNewState extends State<HomeNew>
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
                                       color: const Color(0xFFE53935),
-                                      borderRadius:
-                                          BorderRadius.circular(10.r),
+                                      borderRadius: BorderRadius.circular(10.r),
                                       border: Border.all(
                                         color: const Color(0xFFF1F2F7),
                                         width: 2,
@@ -807,57 +789,61 @@ class _HomeNewState extends State<HomeNew>
                         ),
                         color: Colors.white,
                       ),
-                      child: ValueListenableBuilder<int?>(
-                        valueListenable: selectedCategoryId,
-                        builder: (context, value, child) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (value != null) {
-                              _scrollToCategoryBuy(value);
-                            }
-                          });
-                          return ListView.builder(
-                            controller: _scrollController,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: categories.length,
-                            itemBuilder: (context, index) {
-                              Category category = categories[index];
-                              return Padding(
-                                padding: const EdgeInsets.all(0.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    _scrollToCategory(category.id);
+                      child: categories.isEmpty || allProducts.isEmpty
+                          ? const CategoryTabsShimmer()
+                          : ValueListenableBuilder<int?>(
+                              valueListenable: selectedCategoryId,
+                              builder: (context, value, child) {
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  if (value != null) {
+                                    _scrollToCategoryBuy(value);
+                                  }
+                                });
+                                return ListView.builder(
+                                  controller: _scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: categories.length,
+                                  itemBuilder: (context, index) {
+                                    Category category = categories[index];
+                                    return Padding(
+                                      padding: const EdgeInsets.all(0.0),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          _scrollToCategory(category.id);
+                                        },
+                                        style: ButtonStyle(
+                                          foregroundColor: MaterialStateProperty
+                                              .resolveWith<Color>(
+                                            (states) {
+                                              return category.id == value
+                                                  ? const Color(0xFF000000)
+                                                  : const Color(0xFFB0B0B0);
+                                            },
+                                          ),
+                                          textStyle: MaterialStateProperty
+                                              .resolveWith<TextStyle>(
+                                            (states) {
+                                              return const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              );
+                                            },
+                                          ),
+                                          backgroundColor: MaterialStateProperty
+                                              .resolveWith<Color>(
+                                            (states) => Colors.transparent,
+                                          ),
+                                          elevation:
+                                              MaterialStateProperty.all<double>(
+                                                  0),
+                                        ),
+                                        child: Text(category.name),
+                                      ),
+                                    );
                                   },
-                                  style: ButtonStyle(
-                                    foregroundColor: MaterialStateProperty
-                                        .resolveWith<Color>(
-                                      (states) {
-                                        return category.id == value
-                                            ? const Color(0xFF000000)
-                                            : const Color(0xFFB0B0B0);
-                                      },
-                                    ),
-                                    textStyle: MaterialStateProperty
-                                        .resolveWith<TextStyle>(
-                                      (states) {
-                                        return const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        );
-                                      },
-                                    ),
-                                    backgroundColor: MaterialStateProperty
-                                        .resolveWith<Color>(
-                                      (states) => Colors.transparent,
-                                    ),
-                                    elevation:
-                                        MaterialStateProperty.all<double>(0),
-                                  ),
-                                  child: Text(category.name),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
+                                );
+                              },
+                            ),
                     ),
                   ),
                 ),
@@ -1293,8 +1279,8 @@ class _HomeNewState extends State<HomeNew>
                           // customer's tier instead.
                           if (product.isCrystalOnly)
                             Builder(builder: (context) {
-                              final tier = context
-                                  .select<LoyaltyProvider, LoyaltyTier>(
+                              final tier =
+                                  context.select<LoyaltyProvider, LoyaltyTier>(
                                       (p) => p.tier);
                               final price =
                                   CrystalPricing.productPrice(product, tier);

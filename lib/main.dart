@@ -92,7 +92,12 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
 
     // Initialize notification service with provider
     notificationService.setProvider(notificationProvider);
-    await notificationService.initialize();
+    try {
+      await notificationService.initialize();
+    } catch (e) {
+      // Notifications must never keep the app on the splash screen.
+      print('⚠️ Notification init failed, continuing: $e');
+    }
 
     // Start delivery review scheduler (shows review prompt 5 min after delivery)
     DeliveryReviewScheduler().start(navigatorKey);

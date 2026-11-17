@@ -70,3 +70,36 @@ class MenuShimmer extends StatelessWidget {
     );
   }
 }
+
+/// Placeholder for the horizontal category tabs on the home page while the
+/// menu is loading. Bar widths vary so it reads as category names.
+class CategoryTabsShimmer extends StatelessWidget {
+  const CategoryTabsShimmer({Key? key}) : super(key: key);
+
+  static const List<double> _widths = [64, 88, 52, 96, 72, 60];
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        itemCount: _widths.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 20.0),
+        itemBuilder: (context, index) => Center(
+          child: Container(
+            width: _widths[index],
+            height: 14.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(4.0),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

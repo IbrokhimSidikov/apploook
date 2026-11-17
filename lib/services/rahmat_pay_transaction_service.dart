@@ -7,7 +7,7 @@ import 'package:apploook/cart_provider.dart';
 import 'package:apploook/features/order_success/presentation/order_success_page.dart';
 
 /// Service to handle Rahmat Pay transaction status checking
-/// Similar to PaymeTransactionService but for Rahmat Pay
+/// Polls Rahmat Pay for the outcome of a card payment.
 class RahmatPayTransactionService {
   /// Shows a dialog that polls for payment status
   /// Checks every 3 seconds for up to 5 minutes

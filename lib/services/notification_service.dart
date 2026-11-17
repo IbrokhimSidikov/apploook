@@ -50,16 +50,22 @@ class NotificationService {
       await _localNotifications.initialize(initSettings);
       print('🔔 Local notifications initialized');
 
-      // Get both FCM and APNS tokens
-      String? token = await _fcm.getToken();
-      String? apnsToken = await _fcm.getAPNSToken();
+      // Token and topic calls fail without an APNs token (iOS Simulator,
+      // no network, APNs not yet registered). Push is optional - never let
+      // it abort app startup.
+      try {
+        String? token = await _fcm.getToken();
+        String? apnsToken = await _fcm.getAPNSToken();
 
-      print('🔔 FCM Token for testing: $token'); // Use this token for testing
-      print('🔔 APNS Token: $apnsToken');
+        print('🔔 FCM Token for testing: $token'); // Use this token for testing
+        print('🔔 APNS Token: $apnsToken');
 
-      // Subscribe to a test topic for development
-      await FirebaseMessaging.instance.subscribeToTopic('dev_test');
-      print('🔔 Subscribed to dev_test topic');
+        // Subscribe to a test topic for development
+        await FirebaseMessaging.instance.subscribeToTopic('dev_test');
+        print('🔔 Subscribed to dev_test topic');
+      } catch (e) {
+        print('⚠️ FCM token/topic unavailable, continuing without push: $e');
+      }
 
       _fcm.onTokenRefresh.listen((newToken) {
         print('🔔 New Token for testing: $newToken');

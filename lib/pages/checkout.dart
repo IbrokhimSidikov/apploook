@@ -10,8 +10,6 @@ import 'package:apploook/services/live_activity_service.dart';
 import 'package:apploook/widget/branch_locations.dart';
 import 'package:apploook/services/map_services/open_street_map.dart';
 import 'package:apploook/services/api_service.dart';
-import 'package:apploook/services/payme_service.dart';
-import 'package:apploook/services/payme_transaction_service.dart';
 import 'package:apploook/services/rahmat_pay_service.dart';
 import 'package:apploook/services/rahmat_pay_transaction_service.dart';
 import 'package:apploook/config/branch_config.dart';
@@ -287,7 +285,6 @@ class _CheckoutState extends State<Checkout> {
   String orderType = '';
   String carDetails = '';
   String carDetailsExtraInfo = '';
-  String? paymeOrderId; // To store the Payme order ID
   bool _isProcessing = false;
   double total = 0.0;
 
@@ -313,8 +310,6 @@ class _CheckoutState extends State<Checkout> {
     _loadCarDetails(); // Load cached car details
     _loadAdditionalPhoneNumber(); // Load user's phone number for additional phone field
     _applyReorderPrefill();
-    // Check for pending Payme transactions
-    PaymeTransactionService.checkPendingOrders(context);
     // We'll calculate distance after address selection, not on page load
 
     // Log cart data being passed to checkout
@@ -388,245 +383,6 @@ class _CheckoutState extends State<Checkout> {
       }
     }
     print('============================================\n');
-  }
-
-  // Handle Payme payment for delivery orders
-  Future<void> _handlePaymePayment({
-    required String name,
-    required String phone,
-    required String? address,
-    required String comment,
-    required double total,
-    required double latitude,
-    required double longitude,
-    required CartProvider cartProvider,
-    required double deliveryFee,
-    required String? branchName,
-  }) async {
-    // Don't allow Payme for self-pickup and in-restaurant orders
-    if (_selectedIndex == 1 || _selectedIndex == 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).paymeNotAvailable)),
-      );
-      return;
-    }
-    try {
-      setState(() {
-        _isProcessing = true;
-      });
-
-      // Get API service with client credentials
-      final remoteConfig = FirebaseRemoteConfig.instance;
-      final clientId = remoteConfig.getString('api_client_id');
-      final clientSecret = remoteConfig.getString('api_client_secret');
-
-      // Make sure branch name is not null
-      if (branchName == null) {
-        throw Exception('Branch name is required for Payme payment');
-      }
-
-      // Get merchant ID from selected branch config
-      final branchConfig = await BranchConfigs.getConfig(branchName);
-      final merchantId = branchConfig.merchantId;
-
-      if (merchantId.isEmpty) {
-        throw Exception('Payme merchant ID not configured for this branch');
-      }
-
-      // Generate a unique order ID for Payme
-      final paymeOrderId = PaymeService.generateOrderId();
-
-      // Format cart items for the API
-      List<Map<String, dynamic>> formattedItems =
-          cartProvider.cartItems.map((item) {
-        return {
-          "id": item.product.uuid,
-          "name": item.product.name,
-          "price": item.product.price,
-          "quantity": item.quantity,
-          "totalPrice": item.product.price * item.quantity,
-        };
-      }).toList();
-
-      // Calculate the final total including delivery fee and bag price (2000 UZS for delivery, 0 for pickup)
-      final double finalTotal = total + deliveryFee;
-
-      print(
-          'Payment breakdown: Order total: $total UZS, Delivery fee: $deliveryFee UZS, Final total: $finalTotal UZS');
-
-      // Save the order details for later processing
-      await PaymeTransactionService.savePendingOrder(
-        orderId: paymeOrderId,
-        name: name,
-        phone: phone,
-        address: address,
-        comment: comment,
-        total: finalTotal, // Use the final total that includes all fees
-        latitude: latitude,
-        longitude: longitude,
-        deliveryFee: deliveryFee,
-        items: formattedItems,
-        clientId: clientId,
-        clientSecret: clientSecret,
-      );
-
-      // Show the transaction status dialog first
-      // This will start checking the transaction status every 2 seconds for 5 minutes
-      PaymeTransactionService.startTransactionStatusCheck(
-          context, paymeOrderId);
-
-      // Launch Payme checkout with the final total that includes delivery fee and bag price
-      final launched = await PaymeService.launchPaymeCheckout(
-          context, merchantId, paymeOrderId, finalTotal);
-
-      if (!launched) {
-        // If we couldn't launch Payme, close the dialog and show error
-        if (context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-          throw Exception('Could not launch Payme checkout');
-        }
-      }
-
-      // Note: We don't navigate away - the transaction status check will handle navigation
-      // after successful payment
-    } catch (e) {
-      print('Error handling Payme payment: $e');
-      // Show error message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Payment error: $e')));
-    } finally {
-      setState(() {
-        _isProcessing = false;
-      });
-    }
-  }
-
-  // Handle Payme payment for carhop orders
-  Future<void> _handlePaymeCarhopPayment({
-    required String name,
-    required String phone,
-    required String? branchName,
-    required String comment,
-    required String carDetails,
-    required double total,
-    required double latitude,
-    required double longitude,
-    required CartProvider cartProvider,
-    required String orderType,
-  }) async {
-    try {
-      setState(() {
-        _isProcessing = true;
-      });
-
-      // Make sure branch name is not null
-      if (branchName == null) {
-        throw Exception('Branch name is required for Payme payment');
-      }
-
-      // Get branch config for the selected branch
-      final branchConfig = await BranchConfigs.getConfig(branchName);
-      // Note: BranchConfigs.getConfig always returns a non-null value
-
-      // Get merchant ID from branch config
-      final merchantId = branchConfig.merchantId;
-
-      if (merchantId.isEmpty) {
-        throw Exception('Payme merchant ID not configured for this branch');
-      }
-
-      // Generate a unique order ID for Payme
-      final paymeOrderId = PaymeService.generateOrderId();
-
-      // Format order items for Sieves API
-      final formattedOrderItems = cartProvider.cartItems
-          .map((item) => {
-                "actual_price": item.product.price,
-                "product_id": item.product.id.toString(),
-                "quantity": item.quantity,
-                "note": null,
-                "inventoryPriceList": [] // Required by the API
-              })
-          .toList();
-
-      // Create the full request payload
-      final Map<String, dynamic> requestBody = {
-        "customer_quantity": 1,
-        "customer_id": null,
-        "is_fast": 0,
-        "queue_type": "sync",
-        "start_time": "now",
-        "isSynchronous": "sync",
-        "delivery_employee_id": null,
-        "employee_id": branchConfig.employeeId,
-        "branch_id": branchConfig.branchId,
-        "order_type_id": 8, // for carhop orders
-        "orderItems": formattedOrderItems,
-        "transactions": [
-          {
-            "account_id": 1,
-            "amount": total,
-            "payment_type_id": 4, // 4 for Payme
-            "type": "deposit"
-          }
-        ],
-        "value": total,
-        "note": "$comment\nCar Details: $carDetails\nPayment Method: Payme",
-        "day_session_id": null,
-        "pager_number": phone,
-        "pos_id": null,
-        "pos_session_id": null,
-        "delivery_amount": null
-      };
-
-      // Save the carhop order details for later processing using PaymeTransactionService
-      await PaymeTransactionService.savePendingCarhopOrder({
-        'order_id': paymeOrderId,
-        'request_body': requestBody,
-        'branch_config': {
-          'sievesApiCode': branchConfig.sievesApiCode,
-          'sievesApiToken': branchConfig.sievesApiToken,
-        },
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'cart_items': cartProvider.cartItems
-            .map((item) => {
-                  'name': item.product.name,
-                  'quantity': item.quantity,
-                  'price': item.product.price,
-                  'carDetails': carDetails
-                })
-            .toList(),
-      });
-
-      // Show the transaction status dialog first
-      // This will start checking the transaction status every 2 seconds for 5 minutes
-      PaymeTransactionService.startTransactionStatusCheck(
-          context, paymeOrderId);
-
-      // Launch Payme checkout immediately after showing the dialog
-      final launched = await PaymeService.launchPaymeCheckout(
-          context, merchantId, paymeOrderId, total);
-
-      if (!launched) {
-        // If we couldn't launch Payme, close the dialog and show error
-        if (context.mounted) {
-          Navigator.of(context, rootNavigator: true).pop(); // Close the dialog
-          throw Exception('Could not launch Payme checkout');
-        }
-      }
-
-      // Note: We don't navigate away - the transaction status check will handle navigation
-      // after successful payment
-    } catch (e) {
-      print('Error handling Payme carhop payment: $e');
-      // Show error message
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Payment error: $e')));
-    } finally {
-      setState(() {
-        _isProcessing = false;
-      });
-    }
   }
 
   // Handle Card payment with Rahmat Pay
@@ -874,102 +630,6 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
-  // Check if there's a pending Payme payment (keeping for reference)
-  Future<void> _checkPendingPaymePayment() async {
-    final pendingPayment = await PaymeService.getPendingPayment();
-
-    if (pendingPayment != null) {
-      // If the payment was initiated more than 30 minutes ago, clear it
-      final timestamp = pendingPayment['timestamp'] as int;
-      final now = DateTime.now().millisecondsSinceEpoch;
-
-      if (now - timestamp > 30 * 60 * 1000) {
-        // 30 minutes in milliseconds
-        await PaymeService.clearPendingPayment();
-        return;
-      }
-
-      // Show a dialog to check payment status
-      // ignore: use_build_context_synchronously
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: const Text('Payme Payment'),
-          content: const Text(
-              'You have a pending Payme payment. Did you complete the payment?'),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                await PaymeService.clearPendingPayment();
-                Navigator.pop(context);
-              },
-              child: const Text('No, Cancel Payment'),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                // Show loading dialog
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const AlertDialog(
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: 16),
-                        Text('Processing payment...'),
-                      ],
-                    ),
-                  ),
-                );
-
-                // Simulate payment verification
-                // In a real implementation, you would verify with Payme's server
-                await Future.delayed(const Duration(seconds: 2));
-                await PaymeService.clearPendingPayment();
-
-                // Close loading dialog
-                Navigator.pop(context);
-
-                // Show success message
-                // ignore: use_build_context_synchronously
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(AppLocalizations.of(context).orderSuccess),
-                    content:
-                        Text(AppLocalizations.of(context).orderSuccessSubTitle),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.pushNamed(context, '/homeNew');
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                        ),
-                        child: const Text(
-                          'OK',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: const Text('Yes, Payment Complete'),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
 
   // Function to calculate distance to the nearest branch using backend API
   Future<void> _calculateDistanceToNearestBranch() async {
@@ -988,7 +648,8 @@ class _CheckoutState extends State<Checkout> {
         print('🔍 CHECKOUT: Fetching nearest branch from backend API');
         print('🔍 CHECKOUT: Client coordinates - Lat: $clientLat, Long: $clientLng');
         // Call backend API
-        final url = Uri.parse('https://api.v3.sievesapp.com/branch/nearest?lat=$clientLat&long=$clientLng');
+        // TEMP local v3 for testing branches 27/28 - DO NOT COMMIT
+        final url = Uri.parse('http://localhost:3000/branch/nearest?lat=$clientLat&long=$clientLng');
         final response = await http.get(url).timeout(
           const Duration(seconds: 10),
           onTimeout: () {
@@ -1164,6 +825,8 @@ class _CheckoutState extends State<Checkout> {
     'Chilonzor',
     'Maksim Gorkiy',
     'City Boulevard Loook',
+    'Ganga',
+    'Sergeli',
     'Yangiyol Loook',
     // 'Test'
   ];
@@ -1257,7 +920,6 @@ class _CheckoutState extends State<Checkout> {
                           onTap: () {
                             setState(() {
                               _selectedIndex = 0;
-                              // Keep Payme selection for delivery
                             });
                           },
                           child: Container(
@@ -1304,9 +966,6 @@ class _CheckoutState extends State<Checkout> {
                           onTap: () {
                             setState(() {
                               _selectedIndex = 1;
-                              if (selectedOption == 'Payme') {
-                                selectedOption = null;
-                              }
                             });
                           },
                           child: Container(
@@ -1358,7 +1017,6 @@ class _CheckoutState extends State<Checkout> {
                           onTap: () {
                             setState(() {
                               _selectedIndex = 2;
-                              // Keep Payme selection for carhop
                             });
                           },
                           child: Container(
@@ -1406,10 +1064,6 @@ class _CheckoutState extends State<Checkout> {
                           onTap: () {
                             setState(() {
                               _selectedIndex = 3;
-                              // Reset Payme selection if selected
-                              if (selectedOption == 'Payme') {
-                                selectedOption = null;
-                              }
                             });
                           },
                           child: Container(

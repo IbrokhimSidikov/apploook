@@ -587,7 +587,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           const Spacer(flex: 170),
                           Center(
                             child: SvgPicture.asset(
-                              'images/1.svg',
+                              'images/newLookLogo6.svg',
                               width: 150.w,
                               height: 120.h,
                             ),
@@ -654,7 +654,7 @@ class _OnboardState extends State<Onboard> with SingleTickerProviderStateMixin {
                           Align(
                             alignment: Alignment.centerLeft,
                             child: Padding(
-                              padding: EdgeInsets.only(left: 30.w),
+                              padding: EdgeInsets.only(left: 15.w),
                               child: Text(
                                 AppLocalizations.of(context).chooseLanguage,
                                 style: TextStyle(

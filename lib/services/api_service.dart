@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:apploook/services/payme_service.dart';
 
 class ApiService {
   static const String _baseUrl = 'https://integrator.api.delever.uz/v1';
@@ -364,7 +363,6 @@ class ApiService {
     String? comment,
     int persons = 1,
     double deliveryFee = 0,
-    String? paymeOrderId,
   }) async {
     try {
       print('Creating order with the new API endpoint');
@@ -380,8 +378,7 @@ class ApiService {
           (10000000 + DateTime.now().millisecondsSinceEpoch % 90000000)
               .toString();
       String orderId = '$datePrefix-$randomPart';
-      String finalPaymentType =
-          await _determinePaymentType(paymentType, paymeOrderId);
+      final String finalPaymentType = _determinePaymentType(paymentType);
 
       final Map<String, dynamic> orderPayload = {
         "platform": "YE",
@@ -448,26 +445,11 @@ class ApiService {
 
   //This duplicate getOrderStatus method has been merged with the one above
 
-  Future<String> _determinePaymentType(
-      String originalPaymentType, String? paymeOrderId) async {
-    //If payment was made through Payme and we have an order ID, verify the payment
-    if (originalPaymentType.toLowerCase() == 'payme' && paymeOrderId != null) {
-      //Check if the Payme payment was successful
-      final paymentResult = await PaymeService.verifyPayment(paymeOrderId);
-      final isVerified = paymentResult['success'] == true;
-      if(isVerified){
-        print('Payme payment verified as successful, setting payment type to card');
-        return 'payme';
-      }
-    }
-
+  String _determinePaymentType(String originalPaymentType) {
     switch (originalPaymentType.toLowerCase()) {
       case 'card':
-        return 'cash';
       case 'cash':
         return 'cash';
-      case 'payme':
-        return 'payme';
       default:
         return originalPaymentType;
     }

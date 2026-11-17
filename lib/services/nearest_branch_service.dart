@@ -12,7 +12,9 @@ class NearestBranchService {
   static const String _nearestBranchKey = 'nearest_branch_name';
   static const String _nearestBranchDeliverIdKey = 'nearest_branch_deliver_id';
   // static const String _backendApiUrl = 'http://64.23.216.120:3000';
-  static const String _backendApiUrl = 'https://api.v3.sievesapp.com';
+  // TEMP local v3 for testing branches 27/28 - DO NOT COMMIT
+  static const String _backendApiUrl = 'http://localhost:3000';
+  // static const String _backendApiUrl = 'https://api.v3.sievesapp.com';
 
   final LocationService _locationService = LocationService();
   
@@ -193,7 +195,6 @@ class NearestBranchService {
     print('  • Branch Name: $branchName');
     print('  • Branch ID: ${config.branchId}');
     print('  • Deliver ID: ${config.deleverId}');
-    print('  • Merchant ID: ${config.merchantId}');
     
     return branchName;
   }
