@@ -648,8 +648,7 @@ class _CheckoutState extends State<Checkout> {
         print('🔍 CHECKOUT: Fetching nearest branch from backend API');
         print('🔍 CHECKOUT: Client coordinates - Lat: $clientLat, Long: $clientLng');
         // Call backend API
-        // TEMP local v3 for testing branches 27/28 - DO NOT COMMIT
-        final url = Uri.parse('http://localhost:3000/branch/nearest?lat=$clientLat&long=$clientLng');
+        final url = Uri.parse('https://api.v3.sievesapp.com/branch/nearest?lat=$clientLat&long=$clientLng');
         final response = await http.get(url).timeout(
           const Duration(seconds: 10),
           onTimeout: () {
