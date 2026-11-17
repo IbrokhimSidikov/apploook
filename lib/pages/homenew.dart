@@ -25,6 +25,7 @@ import '../widget/variation_selector_sheet.dart';
 import '../widget/menu_shimmer.dart';
 import '../widgets/announcement_story_dialog.dart';
 import '../widgets/cashback_badge.dart';
+import '../widgets/branch_menu_pill.dart';
 import '../models/crystal_pricing.dart';
 import '../models/crystal_reward.dart';
 import '../models/loyalty.dart' show LoyaltyTier;
@@ -265,6 +266,9 @@ class _HomeNewState extends State<HomeNew>
   Map<int, ScrollController> _categoryScrollControllers = {};
   bool _isLoading = true;
 
+  /// BranchConfigs key of the branch whose menu is shown; null until known.
+  String? _branchName;
+
   ValueNotifier<int?> selectedCategoryId = ValueNotifier<int?>(null);
   ScrollController _scrollController = ScrollController();
   bool _isScrolling = false;
@@ -303,6 +307,10 @@ class _HomeNewState extends State<HomeNew>
       // Ensure location permission is granted (mandatory for app usage)
       final permissionGuard = LocationPermissionGuard();
       await permissionGuard.requireLocationPermission(context);
+
+      // Show the last known branch right away (matches the cached menu);
+      // _updateNearestBranch replaces it once the location lookup returns.
+      _loadSavedBranchName();
 
       // Get banners (non-blocking)
       _getBanners();
@@ -350,6 +358,14 @@ class _HomeNewState extends State<HomeNew>
     }
   }
 
+  Future<void> _loadSavedBranchName() async {
+    final saved = await NearestBranchService().getSavedNearestBranch();
+    // Don't overwrite a fresher name from _updateNearestBranch.
+    if (mounted && _branchName == null && saved != null) {
+      setState(() => _branchName = saved);
+    }
+  }
+
   // Update nearest branch in background (non-blocking)
   // This runs every time the app is relaunched to ensure menu is always for the nearest branch
   Future<void> _updateNearestBranch({int attempt = 1}) async {
@@ -359,7 +375,9 @@ class _HomeNewState extends State<HomeNew>
 
       final nearestBranchService = NearestBranchService();
       // Skip permission check since user already granted it during onboarding
-      await nearestBranchService.findNearestBranch(skipPermissionCheck: true);
+      final branchName = await nearestBranchService.findNearestBranch(
+          skipPermissionCheck: true);
+      if (mounted) setState(() => _branchName = branchName);
 
       final menuService = MenuService();
       final nearestBranchDeliverId =
@@ -562,9 +580,14 @@ class _HomeNewState extends State<HomeNew>
                 automaticallyImplyLeading: false,
                 titleSpacing: 16.w,
                 centerTitle: false,
-                title: const Align(
-                  alignment: Alignment.centerLeft,
-                  child: CashbackBadge(),
+                // Crystal balance, then which branch's menu this is. The
+                // branch pill gives way (ellipsis) on narrow screens.
+                title: Row(
+                  children: [
+                    const CashbackBadge(),
+                    SizedBox(width: 6.w),
+                    Flexible(child: BranchMenuPill(branchName: _branchName)),
+                  ],
                 ),
                 actions: [
                   // ElevatedButton(
@@ -605,48 +628,38 @@ class _HomeNewState extends State<HomeNew>
                       final order = reorderController.lastOrder;
                       if (order == null) return const SizedBox.shrink();
                       final l = AppLocalizations.of(context);
-                      return Padding(
-                        padding: EdgeInsets.only(right: 6.w),
+                      // Icon-only so the app bar has room for the branch
+                      // pill; same 40.w circle as the bell next to it. The
+                      // label stays as tooltip / screen-reader text.
+                      return Center(
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0.8, end: 1.0),
                           duration: const Duration(milliseconds: 500),
                           curve: Curves.elasticOut,
                           builder: (context, value, child) =>
                               Transform.scale(scale: value, child: child),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(50.r),
-                              onTap: () => ReorderListSheet.open(
-                                context,
-                                reorderController.lastOrders,
+                          child: Tooltip(
+                            message: l.reorder,
+                            child: Material(
+                              color: const Color(0xFFFEC700),
+                              shape: const CircleBorder(
+                                side: BorderSide(color: Colors.white),
                               ),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12.w, vertical: 7.h),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFEC700),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  border: Border.all(color: Colors.white),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () => ReorderListSheet.open(
+                                  context,
+                                  reorderController.lastOrders,
                                 ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.replay_rounded,
-                                      color: AppColors.cx0B0B0B,
-                                      size: 18.w,
-                                    ),
-                                    SizedBox(width: 6.w),
-                                    Text(
-                                      l.reorder,
-                                      style: TextStyle(
-                                        color: AppColors.cx0B0B0B,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 13.sp,
-                                      ),
-                                    ),
-                                  ],
+                                child: SizedBox(
+                                  width: 40.w,
+                                  height: 40.w,
+                                  child: Icon(
+                                    Icons.replay_rounded,
+                                    color: AppColors.cx0B0B0B,
+                                    size: 22.w,
+                                    semanticLabel: l.reorder,
+                                  ),
                                 ),
                               ),
                             ),
@@ -859,38 +872,10 @@ class _HomeNewState extends State<HomeNew>
                             // Get MenuService instance
                             final menuService = MenuService();
 
-                            // Get ungrouped products and product groups for this category
-                            List<Product> ungroupedProducts = menuService
-                                .getUngroupedProductsForCategory(category.id);
-                            List<ProductGroup> productGroups = menuService
-                                .getProductGroupsForCategory(category.id);
-
-                            // Debug logging
-                            if (productGroups.isNotEmpty) {
-                              print(
-                                  '🎯 UI: Category "${category.name}" has ${productGroups.length} product groups');
-                              for (var group in productGroups) {
-                                print(
-                                    '  • ${group.groupName} (${group.variations.length} variations)');
-                              }
-                            }
-
-                            // Combine groups and ungrouped products into a single list
-                            // We'll use a list of dynamic items (either Product or ProductGroup)
-                            List<dynamic> displayItems = [];
-
-                            // Separate pinned and non-pinned products
-                            List<Product> pinnedProducts = ungroupedProducts
-                                .where((p) => p.isPinned)
-                                .toList();
-                            List<Product> nonPinnedProducts = ungroupedProducts
-                                .where((p) => !p.isPinned)
-                                .toList();
-
-                            // Add items in priority order: pinned products first, then groups, then other products
-                            displayItems.addAll(pinnedProducts);
-                            displayItems.addAll(productGroups);
-                            displayItems.addAll(nonPinnedProducts);
+                            // Products and variation groups in menu order
+                            // (pinned first, groups in their own slot).
+                            final List<dynamic> displayItems = menuService
+                                .getDisplayItemsForCategory(category.id);
 
                             return Container(
                               key: ValueKey<int>(category.id),

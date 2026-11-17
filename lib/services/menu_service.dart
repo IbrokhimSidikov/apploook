@@ -453,6 +453,11 @@ class MenuService {
     */
   }
 
+  /// "🔥Акция" and "Акция " -> "акция": letters and digits only, lowercased.
+  static String _normalizeCategoryName(String name) => name
+      .replaceAll(RegExp(r'[^\p{L}\p{N}]', unicode: true), '')
+      .toLowerCase();
+
   Future<void> _processNewApiData(List<dynamic> categories,
       List<dynamic> directItems, Map<String, dynamic> apiData) async {
     try {
@@ -465,6 +470,13 @@ class MenuService {
       // Create a map to store category ID strings to int IDs for reference
       Map<String, int> categoryIdMap = {};
 
+      // Delever can hold the same category twice under slightly different
+      // names (e.g. "🔥Акция" and "Акция "). Categories whose names match
+      // ignoring emoji, spaces, punctuation and case are merged into the
+      // first one: it keeps its name and slot, the later one's products move
+      // into it.
+      final Map<String, int> categoryIdByNormalizedName = {};
+
       // Process categories first
       // print('MenuService: Processing categories');
       for (var category in categories) {
@@ -472,6 +484,16 @@ class MenuService {
           // Extract the original category ID (which is now a string UUID)
           String originalCategoryId =
               category['id'] != null ? category['id'].toString() : '';
+
+          final normalizedName = _normalizeCategoryName(
+              (category['name'] ?? '').toString());
+          final existingId = categoryIdByNormalizedName[normalizedName];
+          if (normalizedName.isNotEmpty && existingId != null) {
+            categoryIdMap[originalCategoryId] = existingId;
+            print('MenuService: Merged duplicate category '
+                '"${category['name']}" into id $existingId');
+            continue;
+          }
 
           // Generate a unique integer ID for internal use
           int categoryId =
@@ -481,6 +503,9 @@ class MenuService {
 
           // Store the mapping from string ID to int ID
           categoryIdMap[originalCategoryId] = categoryId;
+          if (normalizedName.isNotEmpty) {
+            categoryIdByNormalizedName[normalizedName] = categoryId;
+          }
 
           final categoryName = category['name'] ?? 'Unknown Category';
           // Capture sortOrder for category sorting
@@ -985,19 +1010,22 @@ class MenuService {
         print('  ${i + 1}. "${product.name}" (ID: ${product.id}, sortOrder: ${product.sortOrder ?? 'null'}, isPinned: ${product.isPinned})');
       }
 
-      // Sort by isPinned first, then by sortOrder from backend
+      // Pinned first, then by backend sortOrder. Delever sends 0 for items
+      // with no position set; those used to sort to the TOP (0 < 1), so
+      // unpositioned products jumped above the whole category. They now go
+      // after every positioned item. Ties keep the backend order (List.sort
+      // is not stable, hence the explicit index).
+      final backendIndex = <Product, int>{
+        for (var i = 0; i < categoryProducts.length; i++)
+          categoryProducts[i]: i,
+      };
+      int position(Product p) =>
+          (p.sortOrder == null || p.sortOrder! <= 0) ? 1 << 30 : p.sortOrder!;
       categoryProducts.sort((a, b) {
-        // First priority: Pinned products always come first
-        if (a.isPinned && !b.isPinned) return -1;
-        if (!a.isPinned && b.isPinned) return 1;
-        
-        // If both are pinned or both are not pinned, sort by sortOrder from backend
-        if (a.sortOrder != null && b.sortOrder != null) {
-          int sortComparison = a.sortOrder!.compareTo(b.sortOrder!);
-          if (sortComparison != 0) return sortComparison;
-        }
-        // If sortOrder is the same or not available, sort alphabetically
-        return a.name.compareTo(b.name);
+        if (a.isPinned != b.isPinned) return a.isPinned ? -1 : 1;
+        final bySortOrder = position(a).compareTo(position(b));
+        if (bySortOrder != 0) return bySortOrder;
+        return backendIndex[a]!.compareTo(backendIndex[b]!);
       });
 
       print('MenuService: Products after sorting:');
@@ -1118,6 +1146,35 @@ class MenuService {
     return _allProducts.where((product) {
       return product.categoryId == categoryId && !isProductGrouped(product.uuid);
     }).toList();
+  }
+
+  /// What the home screen lists for a category: [Product]s and
+  /// [ProductGroup]s in the backend's menu order (Delever sortOrder, already
+  /// applied by v3). A group takes the slot of its first variation in this
+  /// category; pinned products still go first. Previously every group was
+  /// placed before every single product, which ignored the menu order.
+  List<dynamic> getDisplayItemsForCategory(int categoryId) {
+    final groups = getProductGroupsForCategory(categoryId);
+    final pinned = <dynamic>[];
+    final ordered = <dynamic>[];
+    final placedGroups = <ProductGroup>{};
+
+    for (final product in _allProducts) {
+      if (product.categoryId != categoryId) continue;
+      final group = getProductGroup(product.uuid);
+      if (group == null) {
+        (product.isPinned ? pinned : ordered).add(product);
+      } else if (group.categoryId == categoryId && placedGroups.add(group)) {
+        // A group with any pinned variation is pinned as a whole.
+        (group.variations.any((v) => v.isPinned) ? pinned : ordered)
+            .add(group);
+      }
+    }
+    // Groups whose variations sit in another category list still belong here.
+    for (final group in groups) {
+      if (placedGroups.add(group)) ordered.add(group);
+    }
+    return [...pinned, ...ordered];
   }
 
   /// Get all product groups for a category

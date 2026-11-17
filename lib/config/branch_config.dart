@@ -6,13 +6,20 @@ class BranchConfig {
   final int employeeId;
   final String deleverId;
 
+  /// Brand shown to the user above the branch name (home app bar pill).
+  final String brand;
+
   const BranchConfig({
     required this.branchId,
     required this.sievesApiCode,
     required this.sievesApiToken,
     required this.employeeId,
     required this.deleverId,
+    this.brand = brandLoook,
   });
+
+  static const String brandLoook = 'Loook';
+  static const String brandChickenByLoook = 'Chicken by Loook';
 }
 
 class BranchConfigs {
@@ -73,6 +80,7 @@ class BranchConfigs {
       sievesApiToken: '4630f4bf52abc613d43ee3cac51221f9',
       employeeId: 2983,
       deleverId: '195379c9-eb55-47f2-81e6-389675c1ed14',
+      brand: BranchConfig.brandChickenByLoook,
     ),
     "Sergeli": const BranchConfig(
       branchId: 28,
@@ -80,6 +88,7 @@ class BranchConfigs {
       sievesApiToken: '200b9adbd17172dd956cb5fdbc722965',
       employeeId: 2983,
       deleverId: 'c542c82e-7788-4872-bfd5-b204404730a5',
+      brand: BranchConfig.brandChickenByLoook,
     ),
   };
 
