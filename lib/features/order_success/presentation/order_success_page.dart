@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -291,8 +290,7 @@ class _SummaryCard extends StatelessWidget {
           ),
           if (details.crystalsSpent > 0)
             _Row(
-              leading: SvgPicture.asset(CrystalTheme.asset,
-                  width: 24.w, height: 24.w),
+              leading: CrystalIcon(width: 24.w, height: 24.w),
               label: l.crystalsSpent,
               value: Text(
                 '− ${l.crystalsAmount(details.crystalsSpent)}',
@@ -408,8 +406,7 @@ class _EarnedCard extends StatelessWidget {
                 curve: Curves.easeOutBack,
                 builder: (context, t, child) =>
                     Transform.scale(scale: t, child: child),
-                child: SvgPicture.asset(CrystalTheme.asset,
-                    width: 84.w, height: 84.w),
+                child: CrystalIcon(width: 84.w, height: 84.w),
               ),
             ),
           ),

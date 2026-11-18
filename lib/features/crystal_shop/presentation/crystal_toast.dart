@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'crystal_theme.dart';
 
@@ -147,8 +146,7 @@ class _ToastHostState extends State<_ToastHost>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SvgPicture.asset(CrystalTheme.asset,
-                              width: 21.w, height: 21.w),
+                          CrystalIcon(width: 21.w, height: 21.w),
                           SizedBox(width: 9.w),
                           Flexible(
                             child: Text(

@@ -146,7 +146,7 @@ class _AppShellState extends State<AppShell> {
                     label: l.home,
                   ),
                   GlassNavItem(
-                    svgAsset: 'images/blackCrystal.svg',
+                    iconWidget: const CrystalIcon(width: 24, height: 24),
                     label: l.shop,
                   ),
                   GlassNavItem(

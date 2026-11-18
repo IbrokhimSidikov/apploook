@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -92,8 +91,7 @@ class LoyaltyProfileCard extends StatelessWidget {
               child: IgnorePointer(
                 child: Opacity(
                   opacity: 0.14,
-                  child: SvgPicture.asset(CrystalTheme.asset,
-                      width: 96.w, height: 96.w),
+                  child: CrystalIcon(width: 96.w, height: 96.w),
                 ),
               ),
             ),
@@ -105,8 +103,7 @@ class LoyaltyProfileCard extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      SvgPicture.asset(CrystalTheme.asset,
-                          width: 20.sp, height: 20.sp),
+                      CrystalIcon(width: 20.sp, height: 20.sp),
                       SizedBox(width: 6.w),
                       Text(
                         l10n.walletTitle.toUpperCase(),

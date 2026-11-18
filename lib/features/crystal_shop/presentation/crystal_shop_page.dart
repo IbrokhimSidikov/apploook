@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -139,8 +138,7 @@ class _Header extends StatelessWidget {
               top: topInset + 8.h,
               child: Opacity(
                 opacity: 0.12,
-                child: SvgPicture.asset(CrystalTheme.asset,
-                    width: 120.w, height: 120.w),
+                child: CrystalIcon(width: 120.w, height: 120.w),
               ),
             ),
             Padding(
@@ -230,7 +228,7 @@ class _BalanceChip extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(CrystalTheme.asset, width: 34.w, height: 34.w),
+              CrystalIcon(width: 34.w, height: 34.w),
               SizedBox(width: 8.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

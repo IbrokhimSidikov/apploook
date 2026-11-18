@@ -15,7 +15,6 @@ import 'package:apploook/widget/modifier_group_widget.dart';
 import 'package:apploook/widgets/crystal_pay_toggle.dart';
 import 'package:apploook/widgets/crystal_reward_card.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -672,8 +671,7 @@ class _DetailsState extends State<Details> {
             key: ValueKey('crystals_$crystalTotal'),
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(CrystalTheme.asset,
-                  width: 20.sp, height: 20.sp),
+              CrystalIcon(width: 20.sp, height: 20.sp),
               SizedBox(width: 5.w),
               Text(
                 AppLocalizations.of(context).crystalsAmount(crystalTotal),

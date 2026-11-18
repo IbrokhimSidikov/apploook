@@ -69,7 +69,7 @@ class _SignInState extends State<SignIn> {
           SizedBox(height: 10.h),
           Center(
             child: Text(
-              'Version 1.0.0, build 10001',
+              'Version 3.5.0 build 71',
               style: TextStyle(
                   fontWeight: FontWeight.w100,
                   fontSize: 13.sp,

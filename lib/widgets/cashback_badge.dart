@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -64,7 +63,7 @@ class CashbackBadge extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(CrystalTheme.asset, width: 24.w, height: 24.w),
+              CrystalIcon(width: 24.w, height: 24.w),
               SizedBox(width: 5.w),
               if (label == null)
                 Shimmer.fromColors(

@@ -351,8 +351,7 @@ class _CartState extends State<Cart> {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      SvgPicture.asset(CrystalTheme.asset,
-                                          width: 19.w, height: 19.w),
+                                      CrystalIcon(width: 19.w, height: 19.w),
                                       SizedBox(width: 4.w),
                                       Text(
                                         l10n.spendCrystals(crystals),

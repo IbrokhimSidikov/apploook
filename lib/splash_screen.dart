@@ -78,10 +78,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 );
               },
               child: Image.asset(
-                'images/logo-loook.png',
+                'images/newLogo4.png',
                 width: 180,
                 height: 180,
                 fit: BoxFit.contain,
+                // Source is 2742x1041; decode near display size (3x) instead
+                // of ~11 MB of pixels on the launch path.
+                cacheWidth: 540,
               ),
             ),
             const SizedBox(height: 40),

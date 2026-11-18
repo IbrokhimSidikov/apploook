@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -232,8 +231,7 @@ class _CardTile extends StatelessWidget {
             child: IgnorePointer(
               child: Opacity(
                 opacity: 0.14,
-                child: SvgPicture.asset(CrystalTheme.asset,
-                    width: 110.w, height: 110.w),
+                child: CrystalIcon(width: 110.w, height: 110.w),
               ),
             ),
           ),
@@ -256,7 +254,7 @@ class _CardTile extends StatelessWidget {
                     SizedBox(width: 8.w),
                     if (!isLoading) _TierPill(label: tierLabel),
                     const Spacer(),
-                    SvgPicture.asset(CrystalTheme.asset, width: 30.w, height: 30.w),
+                    CrystalIcon(width: 30.w, height: 30.w),
                   ],
                 ),
                 SizedBox(height: 6.h),
@@ -397,7 +395,7 @@ class _HintTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 24.w, height: 24.w),
+          CrystalIcon(width: 24.w, height: 24.w),
           SizedBox(width: 10.w),
           Expanded(
             child: Text(

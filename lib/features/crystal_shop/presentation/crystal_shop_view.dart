@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -614,7 +613,7 @@ class CrystalPrice extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(CrystalTheme.asset, width: iconSize, height: iconSize),
+        CrystalIcon(width: iconSize, height: iconSize),
         SizedBox(width: 5.w),
         Flexible(
           child: Text(
@@ -719,7 +718,7 @@ class _EmptyState extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: SvgPicture.asset(CrystalTheme.asset, width: 58.w),
+            child: CrystalIcon(width: 58.w),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -989,8 +988,7 @@ class RedeemSheet extends StatelessWidget {
                 children: [
                   if (action == _SheetResult.added ||
                       action == _SheetResult.configure) ...[
-                    SvgPicture.asset(CrystalTheme.asset,
-                        width: 24.w, height: 24.w),
+                    CrystalIcon(width: 24.w, height: 24.w),
                     SizedBox(width: 8.w),
                   ],
                   Flexible(

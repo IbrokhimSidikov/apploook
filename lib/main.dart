@@ -24,6 +24,7 @@ import 'package:apploook/widgets/maintenance_gate.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:apploook/features/crystal_shop/presentation/crystal_theme.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,6 +87,10 @@ class _MyLoaderAppState extends State<MyLoaderApp> {
     // each decoded image is small, so 50 MB / 100 entries is ample.
     PaintingBinding.instance.imageCache.maximumSizeBytes = 1024 * 1024 * 50;
     PaintingBinding.instance.imageCache.maximumSize = 100;
+
+    // Render the crystal SVG to its shared bitmap in the background, so
+    // crystals are ready by the time the home screen shows.
+    CrystalIcon.precache();
 
     // Initialize Firebase Remote Config service
     await RemoteConfigService().initialize();

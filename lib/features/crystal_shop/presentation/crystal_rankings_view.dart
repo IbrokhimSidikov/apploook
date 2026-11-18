@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -508,7 +507,7 @@ class _CrystalCount extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(CrystalTheme.asset, width: size * 1.35, height: size * 1.35),
+        CrystalIcon(width: size * 1.35, height: size * 1.35),
         SizedBox(width: 4.w),
         Text(
           _fmt.format(amount),

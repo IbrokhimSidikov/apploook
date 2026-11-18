@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../features/crystal_shop/presentation/crystal_theme.dart';
 import '../l10n/app_localizations.dart';
@@ -54,7 +53,7 @@ class CrystalRewardCard extends StatelessWidget {
                 ],
               ),
             ),
-            child: SvgPicture.asset(CrystalTheme.asset, width: 54.w, height: 54.w),
+            child: CrystalIcon(width: 54.w, height: 54.w),
           ),
           SizedBox(width: 14.w),
           Expanded(
@@ -112,7 +111,7 @@ class CrystalRewardChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 19.w, height: 19.w),
+          CrystalIcon(width: 19.w, height: 19.w),
           SizedBox(width: 5.w),
           Text(
             l.crystalRewardCompact(crystals),
@@ -149,7 +148,7 @@ class CrystalPointsBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SvgPicture.asset(CrystalTheme.asset, width: 18.w, height: 18.w),
+          CrystalIcon(width: 18.w, height: 18.w),
           SizedBox(width: 3.w),
           Text(
             '+$crystals',

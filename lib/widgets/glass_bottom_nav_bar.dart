@@ -12,9 +12,12 @@ class GlassNavItem {
     this.icon,
     this.activeIcon,
     this.svgAsset,
+    this.iconWidget,
     required this.label,
     this.badgeCount = 0,
-  }) : assert(svgAsset != null || (icon != null && activeIcon != null));
+  }) : assert(iconWidget != null ||
+            svgAsset != null ||
+            (icon != null && activeIcon != null));
 
   final IconData? icon;
   final IconData? activeIcon;
@@ -22,6 +25,9 @@ class GlassNavItem {
   /// A full-colour SVG drawn in place of [icon]/[activeIcon]. It keeps its
   /// own colours and is only faded while the tab is not selected.
   final String? svgAsset;
+
+  /// Ready-made icon (e.g. CrystalIcon); takes precedence over [svgAsset].
+  final Widget? iconWidget;
   final String label;
 
   /// Small red counter drawn over the icon. Hidden when zero.
@@ -202,7 +208,17 @@ class _GlassNavButton extends StatelessWidget {
                       scale: animation,
                       child: FadeTransition(opacity: animation, child: child),
                     ),
-                    child: item.svgAsset != null
+                    child: item.iconWidget != null
+                        ? Opacity(
+                            key: ValueKey<bool>(selected),
+                            opacity: selected ? 1 : 0.6,
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: item.iconWidget,
+                            ),
+                          )
+                        : item.svgAsset != null
                         ? Opacity(
                             key: ValueKey<bool>(selected),
                             opacity: selected ? 1 : 0.6,
