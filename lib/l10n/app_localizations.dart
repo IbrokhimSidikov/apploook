@@ -78,7 +78,7 @@ class AppLocalizations {
       'rankGold': 'Gold',
       'rankDiamond': 'Diamond',
       'rankToNextOrders':
-          '{n} more orders of {amount} UZS or more to reach {rank}',
+          '{n} more orders over {amount} UZS to reach {rank}',
       'rankKeepUntil': 'Order before {date} to keep {rank}',
       'rankWindowHint': 'Based on your orders in the last {days} days',
       'rankTop': 'You have reached the top level!',
@@ -438,7 +438,7 @@ class AppLocalizations {
       'rankGold': 'Oltin',
       'rankDiamond': 'Olmos',
       'rankToNextOrders':
-          '{rank} darajasiga yana {n} ta {amount} UZS va undan yuqori buyurtma',
+          '{rank} darajasiga yana {n} ta {amount} UZS dan yuqori buyurtma',
       'rankKeepUntil':
           '{rank} darajasini saqlash uchun {date} gacha buyurtma bering',
       'rankWindowHint': 'Soʻnggi {days} kundagi buyurtmalaringiz asosida',
@@ -799,7 +799,7 @@ class AppLocalizations {
       'rankGold': 'Золото',
       'rankDiamond': 'Бриллиант',
       'rankToNextOrders':
-          'До уровня «{rank}»: ещё {n} заказ(ов) от {amount} UZS',
+          'До уровня «{rank}»: ещё {n} заказ(ов) свыше {amount} UZS',
       'rankKeepUntil':
           'Сделайте заказ до {date}, чтобы сохранить уровень «{rank}»',
       'rankWindowHint': 'По вашим заказам за последние {days} дней',
